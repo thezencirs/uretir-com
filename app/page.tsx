@@ -1,10 +1,17 @@
 import Link from "next/link";
-import { ArrowDownRight, ArrowUpRight, ChevronRight, Search, Sparkles } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, ChevronRight, Layers, Rocket, Search, Sparkles, Zap } from "lucide-react";
 import { HeroArt } from "@/components/hero-art";
 import { NewsletterForm } from "@/components/newsletter-form";
 import { PostCard } from "@/components/post-card";
 import { SectionHeading } from "@/components/section-heading";
 import { categories, posts } from "@/lib/posts";
+
+const ecosystemCards = [
+  { number: "01", icon: Layers, title: "Üretir", description: "Bilgi ve içerik platformu", color: "#769d32" },
+  { number: "02", icon: Zap, title: "PuanAI", description: "Banka kampanyalarını tek yerden takip et", color: "#78a5b6" },
+  { number: "03", icon: Sparkles, title: "Yakında", description: "Yeni AI araçları burada yayınlanacak", color: "#8b80c2" },
+  { number: "04", icon: Rocket, title: "Startup Vizyonu", description: "Türkiye'nin üretim teknolojileri platformu", color: "#d97835" },
+];
 
 export default function HomePage() {
   return <div className="page-reveal">
@@ -18,6 +25,28 @@ export default function HomePage() {
         <div className="mt-14 grid max-w-md grid-cols-3 border-t hairline pt-4 text-[10px] text-muted"><div><span className="font-bold text-[color:var(--foreground)]">01</span><p className="mt-2">Merak</p></div><div><span className="font-bold text-[color:var(--foreground)]">02</span><p className="mt-2">Yöntem</p></div><div><span className="font-bold text-[color:var(--foreground)]">03</span><p className="mt-2">Paylaşım</p></div></div>
       </div>
       <div className="relative"><HeroArt /><span className="absolute -bottom-3 -left-3 border hairline bg-[color:var(--background)] px-4 py-2 text-[10px] font-bold uppercase tracking-[.14em] text-muted md:left-[-18px]">01 — 06 / Sorular</span></div>
+    </section>
+
+    <section className="border-y hairline bg-surface">
+      <div className="section-wrap py-20 md:py-28">
+        <p className="eyebrow">Platform / Ekosistem</p>
+        <h2 className="mt-6 font-display text-4xl leading-[.95] md:text-6xl">Üretir <span className="italic text-[#769d32]">Ekosistemi</span></h2>
+        <p className="mt-6 max-w-xl text-sm leading-7 text-muted">Her biri birbirini besleyen araçlar, içerikler ve yapay zeka servisleri. Tek platform, sınırsız olanak.</p>
+        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {ecosystemCards.map((card, index) => {
+            const Icon = card.icon;
+            return <div key={card.title} className="group relative overflow-hidden border hairline bg-[color:var(--background)] p-6 transition duration-300 hover:border-[color:var(--foreground)] hover:shadow-[0_12px_40px_rgba(0,0,0,.06)] animate-rise md:p-7" style={{ animationDelay: `${index * 100}ms` }}>
+              <div className="flex items-start justify-between">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border hairline transition duration-300 group-hover:border-transparent group-hover:text-white" style={{ backgroundColor: "transparent" }}><Icon size={18} style={{ color: card.color }} className="transition duration-300 group-hover:scale-110" /></span>
+                <span className="font-display text-2xl text-muted/30 transition duration-300 group-hover:text-muted/60">{card.number}</span>
+              </div>
+              <h3 className="mt-8 font-display text-2xl leading-none tracking-tight">{card.title}</h3>
+              <p className="mt-3 text-sm leading-6 text-muted">{card.description}</p>
+              <div className="mt-8 h-[2px] w-8 transition-all duration-500 group-hover:w-full" style={{ backgroundColor: card.color }} />
+            </div>;
+          })}
+        </div>
+      </div>
     </section>
 
     <div className="border-y hairline"><div className="section-wrap flex flex-wrap items-center justify-between gap-4 py-4 text-[10px] font-bold uppercase tracking-[.17em] text-muted"><span>Kim üretir?</span><span className="hidden opacity-40 sm:inline">—</span><span>Ne üretir?</span><span className="hidden opacity-40 sm:inline">—</span><span>Nasıl üretir?</span><span className="hidden opacity-40 sm:inline">—</span><span>Neden üretir?</span></div></div>

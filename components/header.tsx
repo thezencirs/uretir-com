@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
-const navItems = [{ href: "/blog", label: "Keşfet" }, { href: "/hakkimizda", label: "Hakkımızda" }, { href: "/iletisim", label: "İletişim" }];
+const navItems = [{ href: "/", label: "Ana Sayfa" }, { href: "/blog", label: "Makaleler" }, { href: "/araclar", label: "Araçlar" }, { href: "/ekosistem", label: "Ekosistem" }, { href: "/hakkimizda", label: "Hakkımızda" }];
 
 export function Header() {
   const pathname = usePathname();

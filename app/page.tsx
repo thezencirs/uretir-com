@@ -7,10 +7,10 @@ import { SectionHeading } from "@/components/section-heading";
 import { categories, posts } from "@/lib/posts";
 
 const ecosystemCards = [
-  { number: "01", icon: Layers, title: "Üretir", description: "Bilgi ve içerik platformu", color: "#769d32" },
-  { number: "02", icon: Zap, title: "PuanAI", description: "Banka kampanyalarını tek yerden takip et", color: "#78a5b6" },
-  { number: "03", icon: Sparkles, title: "Yakında", description: "Yeni AI araçları burada yayınlanacak", color: "#8b80c2" },
-  { number: "04", icon: Rocket, title: "Startup Vizyonu", description: "Türkiye'nin üretim teknolojileri platformu", color: "#d97835" },
+  { number: "01", icon: Layers, title: "Üretir", description: "Bilgi ve içerik platformu", color: "#769d32", href: "/" },
+  { number: "02", icon: Zap, title: "PuanAI", description: "Banka kampanyalarını tek yerden takip et", color: "#78a5b6", href: "/puan-ai" },
+  { number: "03", icon: Sparkles, title: "Yakında", description: "Yeni AI araçları burada yayınlanacak", color: "#8b80c2", href: "/yakinda" },
+  { number: "04", icon: Rocket, title: "Startup Vizyonu", description: "Türkiye'nin üretim teknolojileri platformu", color: "#d97835", href: "/startup" },
 ];
 
 export default function HomePage() {
@@ -35,7 +35,7 @@ export default function HomePage() {
         <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {ecosystemCards.map((card, index) => {
             const Icon = card.icon;
-            return <div key={card.title} className="group relative overflow-hidden border hairline bg-[color:var(--background)] p-6 transition duration-300 hover:border-[color:var(--foreground)] hover:shadow-[0_12px_40px_rgba(0,0,0,.06)] animate-rise md:p-7" style={{ animationDelay: `${index * 100}ms` }}>
+            return <Link href={card.href} key={card.title} className="group relative overflow-hidden border hairline bg-[color:var(--background)] p-6 transition duration-300 hover:border-[color:var(--foreground)] hover:shadow-[0_12px_40px_rgba(0,0,0,.06)] animate-rise md:p-7" style={{ animationDelay: `${index * 100}ms` }}>
               <div className="flex items-start justify-between">
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border hairline transition duration-300 group-hover:border-transparent group-hover:text-white" style={{ backgroundColor: "transparent" }}><Icon size={18} style={{ color: card.color }} className="transition duration-300 group-hover:scale-110" /></span>
                 <span className="font-display text-2xl text-muted/30 transition duration-300 group-hover:text-muted/60">{card.number}</span>
@@ -43,7 +43,7 @@ export default function HomePage() {
               <h3 className="mt-8 font-display text-2xl leading-none tracking-tight">{card.title}</h3>
               <p className="mt-3 text-sm leading-6 text-muted">{card.description}</p>
               <div className="mt-8 h-[2px] w-8 transition-all duration-500 group-hover:w-full" style={{ backgroundColor: card.color }} />
-            </div>;
+            </Link>;
           })}
         </div>
       </div>

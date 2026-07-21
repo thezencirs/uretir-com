@@ -17,12 +17,23 @@ export default function HomePage() {
   return <div className="page-reveal">
     <section className="section-wrap grid gap-12 py-14 md:min-h-[calc(100vh-78px)] md:grid-cols-[.9fr_1.1fr] md:items-center md:gap-20 md:py-20">
       <div className="max-w-xl">
-        <p className="rule-label">Merak edenler için bir yayın</p>
-        <h1 className="mt-8 display-lg">Fikri<br /><span className="italic text-[#769d32]">gerçeğe</span><br />dönüştür.</h1>
+        <div className="flex items-center gap-4">
+          <p className="rule-label">Merak edenler için bir yayın</p>
+          <span className="hidden h-[1px] flex-1 bg-gradient-to-r from-[color:var(--line)] to-transparent sm:block" />
+        </div>
+        <div className="relative mt-8">
+          <span className="pointer-events-none absolute -right-4 -top-6 select-none font-display text-[10rem] leading-none text-[color:var(--line)] opacity-[.18] md:-right-10 md:-top-8 md:text-[14rem]" aria-hidden="true">&apos;26</span>
+          <h1 className="relative display-lg">Fikri<br /><span className="italic text-[#769d32]">gerçeğe</span><br />dönüştür.</h1>
+        </div>
         <p className="mt-8 max-w-md text-base leading-7 text-muted md:text-lg">Üretim, teknoloji ve yarının dünyasını inşa eden fikirler üzerine sakin bir keşif alanı.</p>
-        <form action="/blog" className="mt-9 flex max-w-md items-center gap-3 border-b hairline py-3.5"><Search size={17} className="shrink-0 text-muted" /><label className="sr-only" htmlFor="home-search">Ne arıyorsun?</label><input id="home-search" name="q" placeholder="Bir konu, fikir veya araç ara" className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted" /><button className="text-[10px] font-bold uppercase tracking-[.16em] text-muted transition hover:text-[color:var(--foreground)]">Ara</button></form>
-        <div className="mt-7 flex flex-wrap gap-3"><Link href="/blog" className="focus-ring inline-flex items-center gap-2 rounded-full bg-[color:var(--foreground)] px-5 py-3 text-xs font-bold text-[color:var(--background)] transition hover:opacity-80">Keşfetmeye başla <ArrowUpRight size={15} /></Link><Link href="#manifesto" className="focus-ring inline-flex items-center gap-2 rounded-full border hairline px-5 py-3 text-xs font-bold transition hover:bg-surface">Biz kimiz? <ArrowDownRight size={15} /></Link></div>
-        <div className="mt-14 grid max-w-md grid-cols-3 border-t hairline pt-4 text-[10px] text-muted"><div><span className="font-bold text-[color:var(--foreground)]">01</span><p className="mt-2">Merak</p></div><div><span className="font-bold text-[color:var(--foreground)]">02</span><p className="mt-2">Yöntem</p></div><div><span className="font-bold text-[color:var(--foreground)]">03</span><p className="mt-2">Paylaşım</p></div></div>
+        <form action="/blog" className="group mt-9 flex max-w-md items-center gap-3 border-b hairline py-3.5 transition-colors focus-within:border-[#769d32]"><Search size={17} className="shrink-0 text-muted transition group-focus-within:text-[#769d32]" /><label className="sr-only" htmlFor="home-search">Ne arıyorsun?</label><input id="home-search" name="q" placeholder="Bir konu, fikir veya araç ara" className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted" /><button className="text-[10px] font-bold uppercase tracking-[.16em] text-muted transition hover:text-[color:var(--foreground)]">Ara</button></form>
+        <div className="mt-7 flex flex-wrap gap-3">
+          <Link href="/blog" className="focus-ring inline-flex items-center gap-2 rounded-full bg-[color:var(--foreground)] px-6 py-3.5 text-xs font-bold text-[color:var(--background)] shadow-[0_4px_20px_rgba(118,157,50,.15)] transition hover:shadow-[0_8px_30px_rgba(118,157,50,.25)] hover:opacity-90">Keşfetmeye başla <ArrowUpRight size={15} /></Link>
+          <Link href="#manifesto" className="focus-ring inline-flex items-center gap-2 rounded-full border hairline px-6 py-3.5 text-xs font-bold transition hover:bg-surface hover:shadow-[0_4px_16px_rgba(0,0,0,.04)]">Biz kimiz? <ArrowDownRight size={15} /></Link>
+        </div>
+        <div className="mt-14 flex items-center gap-6 border-t hairline pt-5">
+          <div className="grid max-w-md flex-1 grid-cols-3 text-[10px] text-muted"><div><span className="font-bold text-[color:var(--foreground)]">01</span><p className="mt-2">Merak</p></div><div><span className="font-bold text-[color:var(--foreground)]">02</span><p className="mt-2">Yöntem</p></div><div><span className="font-bold text-[color:var(--foreground)]">03</span><p className="mt-2">Paylaşım</p></div></div>
+        </div>
       </div>
       <div className="relative"><HeroArt /><span className="absolute -bottom-3 -left-3 border hairline bg-[color:var(--background)] px-4 py-2 text-[10px] font-bold uppercase tracking-[.14em] text-muted md:left-[-18px]">01 — 06 / Sorular</span></div>
     </section>

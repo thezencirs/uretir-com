@@ -26,6 +26,7 @@ export function Header() {
         {navItems.map((item) => { const active = item.href === "/" ? pathname === "/" : pathname === item.href || pathname.startsWith(`${item.href}/`); return <Link key={item.href} href={item.href} data-active={active} aria-current={active ? "page" : undefined} className="nav-link">{item.label}</Link>; })}
       </nav>
       <div className="flex items-center gap-2">
+        <Link href="/uretir-id" className="hidden rounded-full bg-[color:var(--foreground)] px-3.5 py-2 text-[10px] font-bold text-[color:var(--background)] transition hover:opacity-80 sm:inline-flex">Uretir ID</Link>
         <Link href="/blog" aria-label="Yazılarda ara" className="header-search focus-ring"><Search size={15} strokeWidth={1.8} /><span className="hidden sm:inline">Ara</span></Link>
         <ThemeToggle />
         <button onClick={() => setOpen(!open)} aria-label={open ? "Menüyü kapat" : "Menüyü aç"} aria-expanded={open} aria-controls="mobile-navigation" className="focus-ring rounded-full p-2 text-muted transition hover:bg-black/5 dark:hover:bg-white/10 md:hidden">{open ? <X size={19} /> : <Menu size={19} />}</button>

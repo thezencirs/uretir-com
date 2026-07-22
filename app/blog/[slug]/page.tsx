@@ -1,14 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Clock3 } from "lucide-react";
+import { ArrowUpRight, CalendarDays, Clock3 } from "lucide-react";
 import { notFound } from "next/navigation";
+import { AdSlot } from "@/components/ad-slot";
+import { ContentBlockRenderer } from "@/components/content-block-renderer";
+import { TableOfContents } from "@/components/editorial-components";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { JsonLd } from "@/components/json-ld";
-import { PostCard } from "@/components/post-card";
 import { ShareButton } from "@/components/share-button";
-import { categories, getPost, posts } from "@/lib/posts";
-import { articleSchema, breadcrumbSchema } from "@/lib/structured-data";
+import { createArticleDocument } from "@/lib/content-factory";
+import { getTextBlocks, getTocItems } from "@/lib/content-model";
 import { absoluteUrl } from "@/lib/seo";
+import { categories, getPost, posts } from "@/lib/posts";
+import { buildContentIndex, getRelatedArticleSlugs } from "@/lib/content-linking";
+import { articleSchema, breadcrumbSchema, faqPageSchema } from "@/lib/structured-data";
 
 export function generateStaticParams() { return posts.map((post) => ({ slug: post.slug })); }
 
@@ -22,7 +27,26 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const post = getPost((await params).slug);
   if (!post) notFound();
-  const relatedPosts = posts.filter((item) => item.slug !== post.slug).slice(0, 2);
+  const document = createArticleDocument(post);
+  const index = buildContentIndex(posts, []);
+  const relatedPosts = getRelatedArticleSlugs(index, post.slug).map((slug) => posts.find((item) => item.slug === slug)).filter((item): item is (typeof posts)[number] => Boolean(item));
   const categorySlug = categories.find((category) => category.name === post.category)?.slug ?? "blog";
-  return <article className="page-reveal"><JsonLd data={[articleSchema(post), breadcrumbSchema([{ name: "Ana sayfa", path: "/" }, { name: "Blog", path: "/blog" }, { name: post.title, path: `/blog/${post.slug}` }])]} /><div className="section-wrap pt-10 md:pt-16"><Breadcrumbs items={[{ label: "Blog", href: "/blog" }, { label: post.category, href: `/kategori/${categorySlug}` }, { label: post.title }]} /><div className="mt-14 max-w-5xl"><p className="eyebrow flex items-center gap-2"><span className={`category-dot category-${post.accent}`} /> {post.category}</p><h1 className="mt-6 font-display text-5xl leading-[.9] md:text-8xl">{post.title}</h1><p className="mt-8 max-w-2xl text-base leading-7 text-muted md:text-xl md:leading-8">{post.excerpt}</p><div className="mt-9 flex flex-wrap items-center gap-4 text-[11px] text-muted"><span className="font-bold text-[color:var(--foreground)]">{post.author}</span><span className="h-1 w-1 rounded-full bg-current" /><span>{post.date}</span><span className="h-1 w-1 rounded-full bg-current" /><span className="inline-flex items-center gap-1"><Clock3 size={13} /> {post.readTime}</span></div></div></div><div className={`section-wrap article-hero noise art-${post.accent} mt-14 md:mt-20`}><div className="relative z-10 flex h-full min-h-[410px] flex-col justify-between"><div className="flex items-start justify-between text-[10px] font-bold uppercase tracking-[.18em] opacity-70"><span>Üretir / Dosya {post.number}</span><span>2026</span></div><div className="flex items-end justify-between gap-8"><div><div className="article-hero__number">{post.number}</div><p className="article-hero__caption mt-5">Geleceği anlamak için bugün ne üretiyoruz?</p></div><span className="hidden text-[10px] uppercase tracking-[.16em] opacity-60 md:block">Kavram<br />Uygulama<br />Gelecek</span></div></div></div><div className="section-wrap article-layout py-16 md:py-28"><aside className="article-sidebar"><p className="eyebrow">İçindekiler</p><div className="mt-6 grid gap-3 text-xs text-muted"><span>01 — Başlangıç</span><span>02 — Asıl mesele</span><span>03 — Bir sonraki adım</span></div><div className="mt-10 border-t hairline pt-5"><ShareButton /></div></aside><div className="article-copy"><p className="font-display text-3xl leading-[1.1] text-[color:var(--foreground)] md:text-4xl">Üretmek, yalnızca ortaya bir şey koymak değil; dünyayla ilişki kurmanın bir biçimidir.</p><p>Her iyi fikir, önce küçük bir merak olarak başlar. Bir sorunun etrafında dolaşır, farklı ihtimalleri yoklar ve en sonunda ellerimizi kirletmemizi ister. Bu yazıda, <strong>{post.title.toLocaleLowerCase("tr-TR")}</strong> fikrinin etrafında geziniyoruz.</p><p>Teknoloji bize daha hızlı hareket etmenin araçlarını veriyor. Fakat nereye gideceğimize hâlâ biz karar veriyoruz. Bazen en iyi sonuç; doğru soruyu sormak, prototipi erken göstermek ve öğrenmeye açık kalmakla geliyor.</p><blockquote>&quot;Gelecek, onu bekleyenlerin değil; onu her gün yeniden kuranların.&quot;</blockquote><p>Sonuçta mesele kusursuz bir plan yapmak değil. İlk adımı atacak kadar cesur, ikinci adımda fikrini değiştirecek kadar esnek olmak. Üretir&apos;in bütün soruları, bu iki hareketin arasında saklı.</p><div className="mt-12 border-t hairline pt-6"><Link href="/blog" className="link-arrow inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.16em]">Başka yazılara göz at <ArrowUpRight size={14} /></Link></div></div></div><section className="border-t hairline"><div className="section-wrap py-16 md:py-24"><div className="mb-8 flex items-end justify-between"><div><p className="eyebrow">Sıradaki</p><h2 className="mt-3 font-display text-4xl md:text-5xl">Bunlara da bakın.</h2></div><Link href="/blog" className="link-arrow hidden items-center gap-2 text-[10px] font-bold uppercase tracking-[.16em] sm:inline-flex">Arşive dön <ArrowUpRight size={14} /></Link></div><div className="grid gap-8 md:grid-cols-2">{relatedPosts.map((related) => <PostCard key={related.slug} post={related} />)}</div></div></section></article>;
+  const tocItems = [...getTocItems(document), { id: "sss", label: "Sıkça sorulan sorular" }];
+  const articleBody = getTextBlocks(document).join(" ");
+  const schemas = [articleSchema(post, { authorName: document.author.name, authorUrl: "/hakkimizda", wordCount: articleBody.split(/\s+/).length, articleBody, sources: document.sources }), breadcrumbSchema([{ name: "Ana sayfa", path: "/" }, { name: "Blog", path: "/blog" }, { name: post.title, path: `/blog/${post.slug}` }]), faqPageSchema(document.faq)];
+
+  return <article className="page-reveal editorial-page">
+    <JsonLd data={schemas} />
+    <header className="section-wrap editorial-header">
+      <Breadcrumbs items={[{ label: "Blog", href: "/blog" }, { label: post.category, href: `/kategori/${categorySlug}` }, { label: post.title }]} />
+      <div className="editorial-header__content"><p className="eyebrow flex items-center gap-2"><span className={`category-dot category-${post.accent}`} /> {post.category}</p><h1>{post.title}</h1><p className="editorial-header__excerpt">{post.excerpt}</p><div className="editorial-meta"><span className="editorial-meta__author">{post.author}</span><span><CalendarDays size={13} /> {post.date}</span><span><Clock3 size={13} /> {post.readTime}</span><span>Son güncelleme: {formatDate(document.updatedAt)}</span></div></div>
+    </header>
+    <div className="section-wrap editorial-ad-top"><AdSlot format="leaderboard" /></div>
+    <div className={`section-wrap article-hero noise art-${post.accent} editorial-hero`}><div className="relative z-10 flex h-full min-h-[410px] flex-col justify-between"><div className="flex items-start justify-between text-[10px] font-bold uppercase tracking-[.18em] opacity-70"><span>Üretir / Dosya {post.number}</span><span>{post.category}</span></div><div className="flex items-end justify-between gap-8"><div><div className="article-hero__number">{post.number}</div><p className="article-hero__caption mt-5">Geleceği anlamak için bugün ne üretiyoruz?</p></div><span className="hidden text-[10px] uppercase tracking-[.16em] opacity-60 md:block">Kavram<br />Uygulama<br />Gelecek</span></div></div></div>
+    <div className="section-wrap article-layout editorial-layout"><aside className="article-sidebar editorial-sidebar"><TableOfContents items={tocItems} /><div className="editorial-sidebar__share"><ShareButton /></div><AdSlot format="sidebar" /></aside><main className="article-copy editorial-copy"><ContentBlockRenderer blocks={document.blocks} /></main></div>
+    <section className="related-articles"><div className="related-articles__heading"><div><p className="eyebrow">Sıradaki okumalar</p><h2>Bunlara da bakın.</h2></div><Link href="/blog" className="link-arrow">Arşive dön <ArrowUpRight size={15} /></Link></div><div className="related-articles__grid">{relatedPosts.map((related) => <Link href={`/blog/${related.slug}`} key={related.slug} className="border hairline p-6"><p className="eyebrow">{related.category}</p><h3 className="mt-4 font-display text-2xl">{related.title}</h3><p className="mt-3 text-sm text-muted">{related.excerpt}</p></Link>)}</div></section>
+    <div className="section-wrap editorial-footer-link"><Link href="/blog" className="link-arrow inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.16em]">Tüm yazılara dön <ArrowUpRight size={14} /></Link></div>
+  </article>;
 }
+
+function formatDate(value: string) { return new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "long", year: "numeric" }).format(new Date(`${value}T12:00:00`)); }

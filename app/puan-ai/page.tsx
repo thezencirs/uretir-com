@@ -1,49 +1,62 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Zap } from "lucide-react";
+import { Suspense } from "react";
+import { ArrowUpRight, BadgePercent, CreditCard, Sparkles, Zap } from "lucide-react";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { JsonLd } from "@/components/json-ld";
+import { PuanAIBrowser } from "@/components/puan-ai-browser";
+import { PuanAICampaignCard } from "@/components/puan-ai-campaign-card";
+import { collectionPageSchema } from "@/lib/structured-data";
+import { getPuanAIBank, puanAICampaigns, puanAICards, puanAIBanks } from "@/lib/puan-ai";
 
 export const metadata: Metadata = {
-  title: "PuanAI",
-  description: "Banka kampanyalarını, kredi kartı avantajlarını ve puan kazanımlarını tek merkezden takip edin.",
+  title: "PuanAI — Banka kampanyaları ve kart avantajları",
+  description: "Hangi kartla nerede daha avantajlı alışveriş yapacağını saniyeler içinde bul. PuanAI banka kampanyalarını ve kart avantajlarını tek yerde toplar.",
   alternates: { canonical: "/puan-ai" },
-  openGraph: { title: "PuanAI — Üretir", description: "Banka kampanyalarını, kredi kartı avantajlarını ve puan kazanımlarını tek merkezden takip edin.", url: "/puan-ai", type: "website" },
+  openGraph: { title: "PuanAI — Üretir", description: "Banka kampanyalarını ve kart avantajlarını tek merkezden keşfet.", url: "/puan-ai", type: "website" },
+};
+
+const productSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "PuanAI",
+  applicationCategory: "FinanceApplication",
+  operatingSystem: "Web",
+  description: "Banka kampanyalarını ve kredi kartı avantajlarını karşılaştıran akıllı alışveriş asistanı.",
+  url: "https://uretir.com/puan-ai",
+  inLanguage: "tr-TR",
 };
 
 export default function PuanAIPage() {
-  return <div className="page-reveal">
-    <div className="section-wrap py-10 md:py-16">
+  const activeCampaigns = puanAICampaigns.filter((campaign) => campaign.active);
+  const featuredCampaign = puanAICampaigns.find((campaign) => campaign.featured) ?? activeCampaigns[0];
+
+  return <div className="page-reveal puan-page">
+    <JsonLd data={[collectionPageSchema({ name: "PuanAI", description: "Banka kampanyaları ve kart avantajları.", path: "/puan-ai" }), productSchema]} />
+    <section className="section-wrap puan-hero">
       <Breadcrumbs items={[{ label: "Ekosistem", href: "/ekosistem" }, { label: "PuanAI" }]} />
-      <div className="mt-14 max-w-4xl">
-        <div className="flex items-center gap-3">
-          <span className="inline-flex h-12 w-12 items-center justify-center rounded-full border hairline"><Zap size={20} className="text-[#78a5b6]" /></span>
-          <p className="eyebrow">Üretir Ekosistemi</p>
+      <div className="puan-hero__grid">
+        <div className="puan-hero__copy">
+          <div className="flex items-center gap-3"><span className="puan-hero__icon"><Zap size={20} /></span><p className="eyebrow">Üretir Ekosistemi / MVP</p></div>
+          <h1>Hangi kart,<br /><em>nerede kazandırır?</em></h1>
+          <p className="puan-hero__lead">Alışveriş yapmadan önce doğru kartı bul. Banka kampanyalarını, puanları ve taksit avantajlarını tek bir sakin ekranda karşılaştır.</p>
+          <div className="puan-hero__actions"><Link href="#kampanyalar" className="puan-primary-button">Kampanyaları keşfet <ArrowUpRight size={16} /></Link><Link href="#kartlar" className="puan-secondary-button">Kartları karşılaştır <CreditCard size={15} /></Link></div>
         </div>
-        <h1 className="mt-8 font-display text-5xl leading-[.9] md:text-8xl">Puan<span className="italic text-[#78a5b6]">AI</span></h1>
-        <p className="mt-8 max-w-2xl text-base leading-7 text-muted md:text-xl md:leading-8">Banka kampanyalarını, kredi kartı avantajlarını ve puan kazanımlarını tek merkezden takip edin. Yapay zekâ destekli akıllı öneriler ile en avantajlı kartı saniyeler içinde bulun.</p>
+        <div className="puan-dashboard-preview" aria-label="PuanAI özet paneli">
+          <div className="puan-dashboard-preview__bar"><span><i /> PuanAI / canlı özet</span><span>22 Temmuz 2026</span></div>
+          <div className="puan-dashboard-preview__headline"><div><p className="eyebrow">Bugünün fırsatı</p><h2>En çok kazandıran<br /><em>alışverişler.</em></h2></div><span className="puan-dashboard-preview__spark"><Sparkles size={20} /></span></div>
+          {featuredCampaign && <PuanAICampaignCard campaign={featuredCampaign} bank={getPuanAIBank(featuredCampaign.bankId)} compact />}
+          <div className="puan-dashboard-preview__stats"><div><strong>{activeCampaigns.length}</strong><span>aktif kampanya</span></div><div><strong>{puanAIBanks.length}</strong><span>banka</span></div><div><strong>{puanAICards.length}</strong><span>kart</span></div></div>
+        </div>
       </div>
-    </div>
+    </section>
 
-    <div className="section-wrap pb-20 md:pb-32">
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {[
-          { number: "01", title: "Kampanya Takibi", description: "Tüm banka kampanyalarını tek ekranda görüntüleyin ve süreleri takip edin." },
-          { number: "02", title: "Kart Karşılaştırma", description: "Kredi kartlarını yan yana karşılaştırarak size en uygun kartı seçin." },
-          { number: "03", title: "Akıllı Öneriler", description: "Harcama alışkanlıklarınıza göre yapay zekâ destekli kart ve kampanya önerileri alın." },
-        ].map((item) => (
-          <div key={item.number} className="group border hairline p-6 transition duration-300 hover:bg-surface md:p-8">
-            <span className="font-display text-4xl text-muted/20">{item.number}</span>
-            <h2 className="mt-8 text-sm font-bold">{item.title}</h2>
-            <p className="mt-3 text-sm leading-6 text-muted">{item.description}</p>
-          </div>
-        ))}
-      </div>
+    <section id="kampanyalar" className="section-wrap puan-marketplace"><Suspense fallback={<PuanAIBrowserSkeleton />}><PuanAIBrowser campaigns={puanAICampaigns} banks={puanAIBanks} cards={puanAICards} /></Suspense></section>
 
-      <div className="mt-16 border-t hairline pt-10">
-        <p className="eyebrow">Durum</p>
-        <p className="mt-4 max-w-lg text-sm leading-7 text-muted">PuanAI şu anda geliştirme aşamasındadır. Lansman tarihinde haberdar olmak için bültenimize abone olabilirsiniz.</p>
-        <Link href="/blog" className="link-arrow mt-6 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.16em]">Makalelere göz atın <ArrowUpRight size={14} /></Link>
-      </div>
-    </div>
+    <section className="section-wrap puan-trust-row"><div><BadgePercent size={18} /><p><strong>Şeffaf fırsatlar</strong><span>Kampanya koşullarını açıkça gösteriyoruz.</span></p></div><div><CreditCard size={18} /><p><strong>Doğru kartı bul</strong><span>Farklı bankaların avantajlarını kıyasla.</span></p></div><div><Sparkles size={18} /><p><strong>Akıllı alışveriş</strong><span>Yakında kişisel önerilerle büyüyecek.</span></p></div></section>
   </div>;
+}
+
+function PuanAIBrowserSkeleton() {
+  return <div className="puan-browser-skeleton" aria-label="Kampanyalar yükleniyor"><div /><div /><div /></div>;
 }

@@ -125,3 +125,11 @@ export function getPostsByCategory(slug: string) {
   if (!category) return [];
   return posts.filter((post) => post.category === category.name);
 }
+
+export function getRelatedPosts(slug: string, limit = 3) {
+  const current = getPost(slug);
+  if (!current) return [];
+  const sameCategory = posts.filter((post) => post.slug !== slug && post.category === current.category);
+  const otherCategories = posts.filter((post) => post.slug !== slug && post.category !== current.category);
+  return [...sameCategory, ...otherCategories].slice(0, limit);
+}

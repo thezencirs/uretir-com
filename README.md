@@ -1,64 +1,45 @@
-# Üretir.com
+# Uretir.com
 
-Üretim, teknoloji, yapay zekâ, mühendislik, mimarlık ve üretkenlik üzerine modern bir frontend yayın platformu.
+Uretir is a knowledge, community, and AI product ecosystem for people and organizations that make things. The repository contains the public Next.js application and its operating documentation.
 
-## Teknoloji
+## Start here
 
-- Next.js App Router
-- TypeScript
+Read the [Uretir Operating System](./docs/README.md) before making non-trivial product or engineering changes. It documents the vision, architecture, design principles, content and SEO systems, community model, AI product direction, roadmap, deployment posture, and contribution process.
+
+## Stack
+
+- Next.js App Router and React
+- TypeScript with strict checking
 - Tailwind CSS
-- Lucide React ikonları
-- Responsive ve dark/light tema desteği
-- SEO metadata ve statik içerik üretimi
-- JSON-LD structured data: Organization, WebSite, Article, CollectionPage, BreadcrumbList
-- Dinamik canonical URL, OpenGraph, Twitter Card ve OG image üretimi
-- `sitemap.xml`, `robots.txt`, `manifest.webmanifest` ve `icon.svg`
+- Lucide icons
+- Route-level metadata, JSON-LD, sitemap, robots, and Open Graph generation
 
-## Yerelde çalıştırma
-
-Node.js 20+ kurulu bir terminalde proje klasöründe:
-
-```bash
-npm install
-npm run dev
-```
-
-Tarayıcıdan `http://localhost:3000` adresini açın.
-
-Üretim build'i için:
-
-```bash
-npm run lint
-npm run build
-npm run start
-```
-
-Bu çalışma ortamında doğrulama için pnpm de kullanılabilir:
+## Local development
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-## Sayfalar
+Open `http://localhost:3000`.
 
-- `/` — Ana sayfa
-- `/blog` — Yazı arşivi
-- `/blog/[slug]` — Makale detay sayfası
-- `/kategori/[category]` — Kategori arşivi
-- `/hakkimizda` — Hakkımızda
-- `/iletisim` — İletişim formu
-- `/gizlilik-politikasi` — Gizlilik politikası
+## Validation
 
-## İçerik
+```bash
+pnpm lint
+pnpm build
+```
 
-Örnek yazılar `lib/posts.ts` içinde tutuluyor. İlerleyen aşamada bu dosya bir CMS veya API katmanıyla değiştirilebilir.
+## Repository map
 
-Blog araması ve kategori filtreleri URL ile senkron çalışır: `/blog?q=prototip` veya `/blog?category=yapay-zeka` gibi bağlantılar paylaşılabilir.
+| Directory | Purpose |
+| --- | --- |
+| `app/` | Routes, layouts, metadata, and page composition |
+| `components/` | Reusable interface components |
+| `lib/` | Domain models, content, SEO, and product logic |
+| `docs/` | The operating system and contributor source of truth |
+| `public/` | Static public assets |
 
-SEO yüzeyleri:
+## Current product scope
 
-- `/sitemap.xml`
-- `/robots.txt`
-- `/opengraph-image`
-- `/manifest.webmanifest`
+The application currently includes editorial content, category and company surfaces, PuanAI routes, and an interactive Uretir ID product prototype. Persistent identity, community, and AI backend services are planned platform capabilities; see [architecture.md](./docs/architecture.md) and [roadmap.md](./docs/roadmap.md) for their current status and intended boundaries.

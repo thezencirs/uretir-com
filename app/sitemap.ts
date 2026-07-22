@@ -7,6 +7,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: absoluteUrl("/"), lastModified: now, changeFrequency: "weekly", priority: 1 },
     { url: absoluteUrl("/blog"), lastModified: now, changeFrequency: "daily", priority: .9 },
+    { url: absoluteUrl("/araclar"), lastModified: now, changeFrequency: "weekly", priority: .8 },
+    { url: absoluteUrl("/ekosistem"), lastModified: now, changeFrequency: "monthly", priority: .7 },
+    { url: absoluteUrl("/ne-uretir"), lastModified: now, changeFrequency: "weekly", priority: .8 },
+    { url: absoluteUrl("/puan-ai"), lastModified: now, changeFrequency: "monthly", priority: .6 },
+    { url: absoluteUrl("/startup"), lastModified: now, changeFrequency: "monthly", priority: .6 },
+    { url: absoluteUrl("/yakinda"), lastModified: now, changeFrequency: "monthly", priority: .4 },
     { url: absoluteUrl("/hakkimizda"), lastModified: now, changeFrequency: "monthly", priority: .5 },
     { url: absoluteUrl("/iletisim"), lastModified: now, changeFrequency: "monthly", priority: .5 },
     { url: absoluteUrl("/gizlilik-politikasi"), lastModified: now, changeFrequency: "yearly", priority: .2 },

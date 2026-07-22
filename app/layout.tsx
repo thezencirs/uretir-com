@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import "./globals.css";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
@@ -45,6 +46,15 @@ export const metadata: Metadata = {
   icons: { icon: "/icon.svg", shortcut: "/icon.svg", apple: "/icon.svg" },
 };
 
+export const viewport: Viewport = { themeColor: "#c8f560" };
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="tr" suppressHydrationWarning><body><JsonLd data={[organizationSchema, websiteSchema]} /><Header /><main id="main-content">{children}</main><Footer /></body></html>;
+  return <html lang="tr" suppressHydrationWarning><body>
+    <Script id="theme-init" strategy="beforeInteractive">{`(() => { try { const saved = localStorage.getItem("uretir-theme"); const dark = saved ? saved === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; document.documentElement.classList.toggle("dark", dark); } catch {} })()`}</Script>
+    <a href="#main-content" className="skip-link">Ana içeriğe geç</a>
+    <JsonLd data={[organizationSchema, websiteSchema]} />
+    <Header />
+    <main id="main-content" tabIndex={-1}>{children}</main>
+    <Footer />
+  </body></html>;
 }

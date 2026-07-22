@@ -21,5 +21,5 @@ export function ThemeToggle() {
     setDark(next);
   }
 
-  return <button onClick={toggle} aria-label={dark ? "Açık temaya geç" : "Koyu temaya geç"} className="focus-ring rounded-full p-2 text-muted transition hover:bg-black/5 dark:hover:bg-white/10">{dark ? <Sun size={17} strokeWidth={1.7} /> : <Moon size={17} strokeWidth={1.7} />}</button>;
+  return <button onClick={toggle} aria-label={dark ? "Açık temaya geç" : "Koyu temaya geç"} aria-pressed={dark} className="focus-ring rounded-full p-2 text-muted transition hover:bg-black/5 dark:hover:bg-white/10">{dark ? <Sun size={17} strokeWidth={1.7} /> : <Moon size={17} strokeWidth={1.7} />}</button>;
 }

@@ -33,6 +33,8 @@ PuanAI helps users decide which card, campaign, marketplace, installment plan, o
 
 Future live adapters need canonical campaign IDs, provider source URLs, publication and retrieval timestamps, expiry timestamps, eligibility rules, card/product scope, confidence or sync status, and a safe fallback when data is stale. PuanAI should recommend genuinely useful decision and purchase knowledge from Uretir, not attach unrelated links for traffic.
 
+The user-to-recommendation loop and its privacy, safety, and discovery requirements are maintained in [puan-ai.md](./puan-ai.md).
+
 ## TesvikAI: production incentive assistant
 
 TesvikAI helps manufacturers understand support opportunities from KOSGEB, TUBITAK, investment incentive programs, industrial support programs, export support, technoparks, development agencies, and European Union funds.

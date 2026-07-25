@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Startup Vizyonu",
   description: "Üretir'in Türkiye'nin üretim teknolojileri platformu olma vizyonu ve yol haritası.",
   alternates: { canonical: "/startup" },
+  robots: { index: false, follow: true },
   openGraph: { title: "Startup Vizyonu — Üretir", description: "Üretir'in Türkiye'nin üretim teknolojileri platformu olma vizyonu ve yol haritası.", url: "/startup", type: "website" },
 };
 

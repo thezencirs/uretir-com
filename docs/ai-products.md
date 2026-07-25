@@ -1,5 +1,7 @@
 # AI Products
 
+The typed source of truth for portfolio state, inputs, outputs, official-source families, knowledge-graph links, search scopes, and prerequisites is `lib/ai-product-ecosystem.ts`. The generated [ecosystem completion report](../reports/ecosystem-completion-report.md) publishes the current portfolio and Top 25 shared capabilities. Candidate products do not receive public routes or delivery promises.
+
 ## Product thesis
 
 Uretir AI products turn fragmented information into useful, accountable assistance. They are not generic chat wrappers. Each product needs a defined user job, trusted source boundary, transparent uncertainty, and a path to action.
@@ -19,7 +21,9 @@ Uretir ID
   |-- HibeAI
   |-- FiyatAI
   |-- EnerjiAI
-  `-- IhracatAI
+  |-- IhracatAI
+  |-- InsanAI
+  `-- Trend Discovery Center
 ```
 
 ## Product portfolio
@@ -33,6 +37,10 @@ Uretir ID
 | FiyatAI | Research price signals and procurement context | Transparent source dates, regions, uncertainty, and connected raw-material knowledge |
 | EnerjiAI | Understand energy costs, options, and transitions | Scenario guidance with assumptions made visible |
 | IhracatAI | Navigate export markets and requirements | Market research and process guidance, not regulated advice |
+| InsanAI | Explore the people behind science, engineering, invention, and entrepreneurship | Original, source-backed profiles connected to contributions, research, technologies, and organizations |
+| Trend Discovery Center | Identify evidence-backed questions and content opportunities | Multi-source signals create editorial candidates, never automatic pages or fabricated trends |
+
+The PuanAI input, analysis, personalization, and discovery loop is specified in [puan-ai.md](./puan-ai.md).
 
 ## AI behavior standards
 

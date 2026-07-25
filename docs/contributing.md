@@ -54,6 +54,8 @@ A pull request should include:
 
 Reviewers assess correctness, product fit, readability, operational risk, and maintainability. Approval means the reviewer understands the change well enough to support it in production; it is not a rubber stamp.
 
+The repository pull-request template makes authority, trust, release, monitoring, and rollback evidence explicit. Every pull request must pass the `Repository quality` workflow, which installs the lockfile exactly and runs `pnpm quality`. A green workflow does not authorize an editorial record or a production release; those retain separate accountable reviews.
+
 ## Documentation changes
 
 Documentation is reviewed like code. Keep links valid, distinguish current behavior from future state, and remove stale guidance rather than layering exceptions on top of it.

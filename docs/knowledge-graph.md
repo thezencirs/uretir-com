@@ -40,7 +40,7 @@ Each entity must use a stable opaque internal ID and a canonical public slug. Al
 
 ## Topic-cluster model
 
-Clusters are the operational layer above individual entities. Uretir maintains company, industry, product, technology, factory, investment, export, energy, government incentive, AI, machine, and raw-material clusters. Each cluster needs a hub, definitive reference pages, support content, entity coverage targets, relationship targets, a named owner, and refresh cadence.
+Clusters are the operational layer above individual entities. The governed runtime families are company, factory, product, technology, manufacturing, investment, export, standard, artificial intelligence, government program, industrial equipment, and supply chain. Each cluster needs a canonical role, definitive reference pages, support content, entity coverage targets, relationship targets, a named owner, and refresh cadence. [Topic cluster operating model](./topic-clusters.md) defines activation and scale rules.
 
 Build depth before breadth. A cluster earns expansion when its existing hub, entities, source coverage, and internal paths offer a better answer than the competing public result—not when it merely has more URLs.
 
@@ -95,3 +95,15 @@ Every entity page should link to:
 ## Metrics
 
 Measure entity coverage by pillar, high-confidence relationship coverage, orphan-page count, internal link click-through, crawl depth, indexation quality, topic-cluster performance, source freshness, and organic traffic to entity and article templates.
+
+## Implemented runtime contract
+
+`lib/entity-types.ts` is the canonical vocabulary shared by editorial records and `lib/knowledge-graph.ts`. It supports companies, factories, brands, products, categories, machines, manufacturing processes, supply chains, raw materials, technologies, AI models, people, universities, government institutions, standards, industrial zones, cities, industries, investment programs, incentives, articles, guides, AI tools, and AI products.
+
+Relationships carry their own status, update date, and evidence source IDs. A verified relationship other than structural membership cannot exist without evidence. Duplicate directional edges are merged deterministically while preserving all evidence IDs.
+
+The runtime graph contains AI hubs, review guides, institutions derived from guide sources, legacy articles, and legacy companies with their current product, facility, brand, industry, and standard relationships. Legacy article and company nodes remain `in_review`, carry no verified evidence status, and are excluded from public recommendations. Their presence supports migration and gap analysis; it does not validate their claims.
+
+Recommendation code filters review-only entities by default. UretirAI may expose review records in an internal editorial context, but public recommendations must use published or verified nodes.
+
+Runtime validation rejects unstable IDs, duplicate aliases, canonical collisions, self-relations, missing endpoints, duplicate evidence IDs, unsupported relationship endpoints, and orphan entities. Coverage reports expose entity and relationship-kind breadth plus the connected-entity ratio; a large graph is not healthy when its nodes are isolated.

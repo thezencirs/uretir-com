@@ -2,7 +2,7 @@
 
 ## Current state
 
-Uretir.com is a Next.js App Router application written in TypeScript. It uses Tailwind CSS for utility styling, Lucide for icons, and static or file-backed domain data in `lib/`. The current application is an editorial product with PuanAI routes and an interactive Uretir ID prototype. It does not yet have a production authentication provider, database, CMS, queue, or API boundary.
+Uretir.com is a Next.js App Router application written in TypeScript. It uses Tailwind CSS for utility styling, Lucide for icons, and static or file-backed domain data in `lib/`. The current application is an editorial product with PuanAI routes and an interactive Uretir ID prototype. The identity prototype is available for local review but is not promoted by production navigation. The application does not yet have a production authentication provider, database, CMS, queue, analytics provider, or API boundary.
 
 This is intentional documentation of the present state; do not treat prototype client state as persistent product behavior.
 
@@ -15,12 +15,15 @@ This is intentional documentation of the present state; do not treat prototype c
 | `lib/` | Domain models, content data, routing helpers, SEO, structured data, product-specific logic |
 | `public/` | Static assets only |
 | `docs/` | Product and engineering operating system |
+| `.github/` | Pull-request review contract and repository quality automation |
 
 ## Request and rendering model
 
 Use Server Components by default. Introduce a Client Component only when browser state, event handling, or client-only APIs are necessary. Keep interactive islands narrow so content-heavy pages remain fast and indexable.
 
 Each public route should own its metadata and canonical intent. Shared site concerns belong in the root layout and reusable libraries, not duplicated page-by-page.
+
+Product measurement follows the same boundary. Components declare typed, non-personal event intent through `lib/analytics.ts`; a small browser bridge emits local custom events without persistence or network delivery. A future consent-aware provider must be implemented as an adapter to that channel rather than imported throughout product components.
 
 ## Domain boundaries
 
@@ -49,8 +52,11 @@ Routes and components must depend on application interfaces, not database querie
 | Discovery | Search service | indexed public entities, saved searches, ranking signals |
 | Engagement | Notification service | subscriptions, preferences, delivery events |
 | AI products | AI orchestration service | product-scoped conversations, retrieval context, audit metadata |
+| Measurement | Analytics adapter | allowlisted product events, consent state, release context |
 
-The editorial publishing contract in `lib/editorial-engine.ts` is the bridge between the knowledge graph and future CMS or database adapters. It captures evidence, review, media, official documents, and entity relations independently of the current file-backed content source.
+The editorial publishing contract in `lib/editorial-engine.ts` is the bridge between the knowledge graph and future CMS or database adapters. `lib/content-authority.ts` adds the article-anatomy, search-intent, relationship, official-source, discovery, and topic-cluster checks required before publication. `lib/topic-clusters.ts` defines reusable authority families without creating pages. Hub guides use an adapter to enter the same `ContentDocument` contract; route families may no longer define weaker local publication rules.
+
+Growth operations remain outside presentation code. `lib/content-templates.ts` governs reference families, `lib/editorial-workflow.ts` governs revision approvals, and `lib/content-gap.ts` computes repository-only coverage opportunities. Trend demand enters through provider-neutral ingestion batches and a separate evidence gate. None of these modules can create or publish a route automatically.
 
 ## Data and API rules
 
@@ -65,3 +71,5 @@ The editorial publishing contract in `lib/editorial-engine.ts` is the bridge bet
 ## Architectural quality gates
 
 Before introducing a dependency or data store, document: ownership, failure mode, retention, privacy impact, cost model, rollback path, and observability. Record irreversible choices in the decision log.
+
+The current integration boundary and the required CMS, search, migration, release, rollback, logging, and monitoring behavior are governed by [Production operations](./production-operations.md).

@@ -3,6 +3,7 @@ import { ArrowUpRight, ExternalLink, UserRound } from "lucide-react";
 import { PostCard } from "@/components/post-card";
 import type { EditorialAuthor, EditorialFaq, EditorialLink, EditorialSource } from "@/lib/editorial";
 import type { Post } from "@/lib/posts";
+import { toSlug } from "@/lib/routes";
 
 export type TocItem = { id: string; label: string };
 
@@ -21,7 +22,7 @@ export function SourcesSection({ sources }: { sources: EditorialSource[] }) {
 
 export function FaqSection({ items, title = "Sıkça sorulan sorular" }: { items: EditorialFaq[]; title?: string }) {
   if (!items.length) return null;
-  return <section className="faq-section" id="sss"><p className="eyebrow">S.S.S.</p><h2>{title}</h2><div>{items.map((item) => <details key={item.question}><summary>{item.question}<span>+</span></summary><p>{item.answer}</p></details>)}</div></section>;
+  return <section className="faq-section" id="sss"><p className="eyebrow">S.S.S.</p><h2>{title}</h2><div>{items.map((item, index) => <details id={`sss-${toSlug(item.question)}-${index + 1}`} key={item.question}><summary>{item.question}<span>+</span></summary><p>{item.answer}</p></details>)}</div></section>;
 }
 
 export function InternalLinkRail({ links }: { links: EditorialLink[] }) {
@@ -32,4 +33,3 @@ export function RelatedArticles({ posts, title = "Bunlara da bakın." }: { posts
   if (!posts.length) return null;
   return <section className="related-articles"><div className="related-articles__heading"><div><p className="eyebrow">Sıradaki okumalar</p><h2>{title}</h2></div><Link href="/blog" className="link-arrow">Arşive dön <ArrowUpRight size={15} /></Link></div><div className="related-articles__grid">{posts.map((post) => <PostCard key={post.slug} post={post} />)}</div></section>;
 }
-

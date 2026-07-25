@@ -1,0 +1,4140 @@
+{
+  "snapshotAt": "2026-07-25",
+  "executiveSummary": {
+    "immediateAnswer": "Uretir is not missing more public pages first. It is missing production measurement, one authority-ready content cluster, verified source ingestion, and a persistent identity/workspace layer.",
+    "productionReadyGap": "Hosting, observability, consent-aware analytics, rollback ownership, and verified programme ingestion are not connected.",
+    "next90Days": "Prove one complete loop: validated demand → authority-ready cluster → universal discovery → grounded AI retrieval → measured return behavior."
+  },
+  "scores": [
+    {
+      "area": "Content authority",
+      "score": 41,
+      "evidence": "Editorial and topic-cluster contracts exist; no document currently passes the authority gate."
+    },
+    {
+      "area": "Discovery and search",
+      "score": 58,
+      "evidence": "Universal publication-aware search exists; production telemetry and external search provider do not."
+    },
+    {
+      "area": "Knowledge graph",
+      "score": 62,
+      "evidence": "Entity and relationship contracts are validated; verified public entity depth remains limited."
+    },
+    {
+      "area": "AI product readiness",
+      "score": 34,
+      "evidence": "Portfolio, trust contracts, and capability backlog exist; no live grounded answer service is enabled."
+    },
+    {
+      "area": "TeşvikAI readiness",
+      "score": 39,
+      "evidence": "Fail-closed assessment and source model exist; verified programme ingestion is not connected."
+    },
+    {
+      "area": "Community and identity",
+      "score": 14,
+      "evidence": "Architecture is documented, but production identity, persistence, consent, and moderation are absent."
+    },
+    {
+      "area": "Operations",
+      "score": 52,
+      "evidence": "Repository quality and CI exist; hosting, observability, analytics, deployment, and rollback remain unapproved."
+    },
+    {
+      "area": "Persona completion",
+      "score": 29,
+      "evidence": "All personas have discovery entry points, but high-value tasks depend on data, identity, and workflow products."
+    }
+  ],
+  "counts": {
+    "personas": 13,
+    "aiProducts": 17,
+    "aiCapabilities": 25,
+    "officialSources": 50,
+    "incentiveDomains": 13,
+    "searchableRecordsInCurrentEnvironment": 33,
+    "topMissingFeatures": 100
+  },
+  "personaAudits": [
+    {
+      "id": "factory_owner",
+      "name": "Fabrika sahibi",
+      "currentCanDo": [
+        "Üretim ve AI merkezlerinin temel rehberlerini keşfedebilir.",
+        "Fiyat, enerji ve teşvik araştırma yöntemini okuyabilir."
+      ],
+      "cannotDo": [
+        "Tesisini doğrulanmış kıyas grubuyla karşılaştıramaz.",
+        "Enerji ve kapasite senaryosu çalıştıramaz."
+      ],
+      "likelyExitReasons": [
+        "Canlı ve doğrulanmış tesis verisi yok.",
+        "Kaydedilebilir çalışma alanı yok."
+      ],
+      "missingCapabilities": [
+        "Fabrika kabiliyeti profili",
+        "Enerji senaryo hesaplayıcısı",
+        "Kapasite kıyaslama",
+        "Kaydedilmiş tesis çalışma alanı"
+      ]
+    },
+    {
+      "id": "entrepreneur",
+      "name": "Girişimci",
+      "currentCanDo": [
+        "Temel teşvik ve yatırım araştırma yolunu görebilir.",
+        "Üretim sorusunu bilgi merkezlerinde arayabilir."
+      ],
+      "cannotDo": [
+        "Fikri sektör, yatırım ve destek kanıtlarıyla tek dosyada değerlendiremez.",
+        "Sonraki adımları hesabına kaydedemez."
+      ],
+      "likelyExitReasons": [
+        "Kişisel proje bağlamı korunmuyor.",
+        "Pazar ve yatırım kanıtı dağınık."
+      ],
+      "missingCapabilities": [
+        "Girişim araştırma dosyası",
+        "Pazar kanıt matrisi",
+        "Yatırım ön fizibilite akışı",
+        "Kişisel görev ve takip listesi"
+      ]
+    },
+    {
+      "id": "engineer",
+      "name": "Mühendis",
+      "currentCanDo": [
+        "Teknoloji ve üretim rehberlerinde arama yapabilir.",
+        "Kaynak ve belirsizlik kurallarını görebilir."
+      ],
+      "cannotDo": [
+        "Proses gereksinimini makine ve standartlarla eşleyemez.",
+        "Teknik iddiaları sürüm bazında karşılaştıramaz."
+      ],
+      "likelyExitReasons": [
+        "Makine ve teknik veri ontolojisi yok.",
+        "Standart kapsamı araştırması elle kalıyor."
+      ],
+      "missingCapabilities": [
+        "Makine–proses eşleme",
+        "Teknik özellik karşılaştırması",
+        "Standart kapsam haritası",
+        "Mühendislik kaynak paketi"
+      ]
+    },
+    {
+      "id": "architect",
+      "name": "Mimar",
+      "currentCanDo": [
+        "Malzeme ve üretim konularını genel içerikte arayabilir.",
+        "Şirket ve teknoloji ilişkilerine hazırlanmış mimariyi görebilir."
+      ],
+      "cannotDo": [
+        "Malzeme, üretici, standart ve uygulama örneğini birlikte filtreleyemez.",
+        "Proje koleksiyonu oluşturamaz."
+      ],
+      "likelyExitReasons": [
+        "Mimarlık odaklı entity kapsamı zayıf.",
+        "Teknik belge ve standart bağlantıları yetersiz."
+      ],
+      "missingCapabilities": [
+        "Malzeme bilgi merkezi",
+        "Üretici–malzeme eşleme",
+        "Yapı standardı araştırma akışı",
+        "Proje koleksiyonları"
+      ]
+    },
+    {
+      "id": "investor",
+      "name": "Yatırımcı",
+      "currentCanDo": [
+        "Yatırım ve bölgesel destek kaynaklarına giden yolu bulabilir.",
+        "Resmî istatistik kaynak sicilini kullanabilir."
+      ],
+      "cannotDo": [
+        "Sektörleri veri ve risk boyutunda karşılaştıramaz.",
+        "Kaynaklı yatırım senaryosu çalıştıramaz."
+      ],
+      "likelyExitReasons": [
+        "Finansal ve operasyonel veri entegrasyonu yok.",
+        "Karşılaştırma metodolojisi ürünleşmemiş."
+      ],
+      "missingCapabilities": [
+        "Sektör yatırım karşılaştırması",
+        "Bölgesel yatırım haritası",
+        "Risk ve varsayım matrisi",
+        "Yatırım izleme listesi"
+      ]
+    },
+    {
+      "id": "farmer",
+      "name": "Çiftçi",
+      "currentCanDo": [
+        "TKDK ve tarım resmî kaynak rotalarını bulabilir.",
+        "Teşvik araştırmasının güven sınırlarını görebilir."
+      ],
+      "cannotDo": [
+        "Faaliyet ve konuma göre güncel potansiyel destek eşleşmesi alamaz.",
+        "Üretim, sigorta ve fiyat verisini birlikte değerlendiremez."
+      ],
+      "likelyExitReasons": [
+        "Bölgesel ve dönemsel veri yok.",
+        "Tarım dili ve görevleri yeterince temsil edilmiyor."
+      ],
+      "missingCapabilities": [
+        "Tarım faaliyet profili",
+        "Bölgesel destek keşfi",
+        "TARSİM araştırma bağlantısı",
+        "Tarımsal fiyat ve risk görünümü"
+      ]
+    },
+    {
+      "id": "exporter",
+      "name": "İhracatçı",
+      "currentCanDo": [
+        "İhracat hazırlık rehberlerine ve resmî portallara ulaşabilir.",
+        "Hedef pazar araştırma ölçütlerini öğrenebilir."
+      ],
+      "cannotDo": [
+        "Ürün ve ülkeye göre güncel gereklilikleri tek ekranda karşılaştıramaz.",
+        "GTİP veya mevzuat için kesin sınıflandırma desteği alamaz."
+      ],
+      "likelyExitReasons": [
+        "Canlı ticaret adaptörleri yok.",
+        "Belge ve görev takibi kalıcı değil."
+      ],
+      "missingCapabilities": [
+        "Hedef pazar kanıt karşılaştırması",
+        "GTİP araştırma çalışma alanı",
+        "İhracat belge kontrolü",
+        "Pazar ve mevzuat değişiklik uyarıları"
+      ]
+    },
+    {
+      "id": "manufacturer",
+      "name": "Üretici",
+      "currentCanDo": [
+        "Şirket, ürün, rehber ve AI merkezlerini evrensel aramada keşfedebilir.",
+        "Fiyat ve tedarik araştırma yöntemini okuyabilir."
+      ],
+      "cannotDo": [
+        "Doğrulanmış tedarikçi veya fabrika kabiliyeti bulamaz.",
+        "Teklifleri normalleştirip karşılaştıramaz."
+      ],
+      "likelyExitReasons": [
+        "Şirket kayıtları henüz yayın otoritesi kapısından geçmedi.",
+        "Tedarik ağı ürünü yok."
+      ],
+      "missingCapabilities": [
+        "Doğrulanmış üretici dizini",
+        "Tedarikçi kabiliyeti eşleme",
+        "Teklif normalizasyonu",
+        "Tedarik riski haritası"
+      ]
+    },
+    {
+      "id": "student",
+      "name": "Öğrenci",
+      "currentCanDo": [
+        "Üretim sorularını rehber ve AI merkezlerinde arayabilir.",
+        "Kaynak doğrulama yaklaşımını öğrenebilir."
+      ],
+      "cannotDo": [
+        "Öğrenme yolunu seviyesine göre düzenleyemez.",
+        "Not, kaynak ve ilerleme kaydedemez."
+      ],
+      "likelyExitReasons": [
+        "Konu kümeleri öğrenme yoluna dönüşmemiş.",
+        "Hesap ve koleksiyon işlevleri üretimde yok."
+      ],
+      "missingCapabilities": [
+        "Seviyeli öğrenme yolları",
+        "Kavram sözlüğü",
+        "Kaynak koleksiyonu",
+        "Okuma ilerleme takibi"
+      ]
+    },
+    {
+      "id": "researcher",
+      "name": "Araştırmacı",
+      "currentCanDo": [
+        "Resmî kaynak ve bilgi grafiği mimarisini kullanabilir.",
+        "İçerik ve entity boşluk raporlarını inceleyebilir."
+      ],
+      "cannotDo": [
+        "Veri setlerini sorgulayıp dışa aktaramaz.",
+        "İddia ve kaynak sürümlerini zaman içinde izleyemez."
+      ],
+      "likelyExitReasons": [
+        "Kaynak düzeyinde veri erişimi ve alıntı dışa aktarımı yok.",
+        "Araştırma çalışma alanı kalıcı değil."
+      ],
+      "missingCapabilities": [
+        "Kaynaklı veri dışa aktarımı",
+        "İddia sürüm geçmişi",
+        "Araştırma koleksiyonları",
+        "Atıf biçimi üretimi"
+      ]
+    },
+    {
+      "id": "support_applicant",
+      "name": "Devlet desteği başvuru sahibi",
+      "currentCanDo": [
+        "Teşvik araştırmasının resmî kaynaklarını ve hazırlık rehberlerini bulabilir.",
+        "Uygunluk ön kontrolünün sınırlarını anlayabilir."
+      ],
+      "cannotDo": [
+        "Güncel program kayıtlarıyla profil eşleşmesi alamaz.",
+        "Belge, son tarih ve değişiklikleri takip edemez."
+      ],
+      "likelyExitReasons": [
+        "Program veri alımı henüz bağlı değil.",
+        "Kişisel başvuru dosyası yok."
+      ],
+      "missingCapabilities": [
+        "Doğrulanmış program araması",
+        "Potansiyel eşleşme ön kontrolü",
+        "Başvuru belge çalışma alanı",
+        "Çağrı değişiklik uyarıları"
+      ]
+    },
+    {
+      "id": "sme_owner",
+      "name": "KOBİ sahibi",
+      "currentCanDo": [
+        "Teşvik, ihracat, fiyat ve alışveriş karar merkezlerini keşfedebilir.",
+        "Temel karar rehberlerini okuyabilir."
+      ],
+      "cannotDo": [
+        "İşletme profilini ürünler arasında taşıyamaz.",
+        "Destek, maliyet ve tedarik görevlerini tek yerde yönetemez."
+      ],
+      "likelyExitReasons": [
+        "Ortak kimlik sistemi üretimde yok.",
+        "Ürünler arası bağlam aktarımı yok."
+      ],
+      "missingCapabilities": [
+        "KOBİ işletme profili",
+        "Ürünler arası güvenli bağlam aktarımı",
+        "Karar çalışma alanı",
+        "İşletme odaklı güncelleme akışı"
+      ]
+    },
+    {
+      "id": "ai_enthusiast",
+      "name": "AI meraklısı",
+      "currentCanDo": [
+        "AI ürün merkezlerini ve İnsanAI yaklaşımını keşfedebilir.",
+        "Ürünlerin bugünkü ve gelecek durumlarını ayırt edebilir."
+      ],
+      "cannotDo": [
+        "Kaynaklı AI yanıtını canlı deneyemez.",
+        "Değerlendirme ve hata örneklerini inceleyemez."
+      ],
+      "likelyExitReasons": [
+        "Canlı model yerine ürün temeli var.",
+        "Şeffaf değerlendirme panosu yok."
+      ],
+      "missingCapabilities": [
+        "Kaynaklı UretirAI önizlemesi",
+        "AI değerlendirme panosu",
+        "Yanıt geri bildirim akışı",
+        "Kamuya açık güven ve sınırlılık kaydı"
+      ]
+    }
+  ],
+  "aiProducts": [
+    {
+      "id": "uretir-ai",
+      "name": "UretirAI",
+      "status": "available_foundation",
+      "route": "/uretir-ai",
+      "purpose": "Üretim sorularını Uretir bilgi grafiği ve kaynaklı içeriklerle araştırmak.",
+      "personas": [
+        "engineer",
+        "student",
+        "researcher",
+        "entrepreneur",
+        "manufacturer"
+      ],
+      "inputs": [
+        "natural-language question",
+        "entity filters",
+        "research intent"
+      ],
+      "outputs": [
+        "source-grounded answer",
+        "uncertainty note",
+        "related entities",
+        "next reading paths"
+      ],
+      "officialSourceIds": [
+        "tuik",
+        "tse",
+        "turkpatent",
+        "kalkinma-kutuphanesi"
+      ],
+      "knowledgeEntities": [
+        "company",
+        "product",
+        "factory",
+        "industry",
+        "technology",
+        "machine",
+        "raw_material",
+        "article"
+      ],
+      "searchScopes": [
+        "all public knowledge",
+        "guides",
+        "companies",
+        "AI products"
+      ],
+      "relatedContent": [
+        "five-pillar guides",
+        "company profiles",
+        "technology guides"
+      ],
+      "roadmap": [
+        "Kaynak sözleşmesini ve değerlendirme veri setini onayla.",
+        "Salt okunur sağlayıcı adaptörünü önizlemede doğrula.",
+        "İnsan incelemesi, tazelik ve geri alma kapıları tamamlanınca sınırlı erişim aç."
+      ],
+      "prerequisites": [
+        "authority-ready knowledge corpus",
+        "citation renderer",
+        "answer evaluation set"
+      ]
+    },
+    {
+      "id": "puan-ai",
+      "name": "PuanAI",
+      "status": "sample_only",
+      "route": "/puan-ai",
+      "purpose": "Alışveriş kararlarını koşul, toplam maliyet ve doğrulanmış kampanya kanıtıyla karşılaştırmak.",
+      "personas": [
+        "sme_owner",
+        "entrepreneur",
+        "manufacturer"
+      ],
+      "inputs": [
+        "purchase category",
+        "amount",
+        "payment preference",
+        "verified provider records"
+      ],
+      "outputs": [
+        "explainable comparison",
+        "assumptions",
+        "verification checklist",
+        "related shopping guides"
+      ],
+      "officialSourceIds": [],
+      "knowledgeEntities": [
+        "product",
+        "company",
+        "article"
+      ],
+      "searchScopes": [
+        "shopping guides",
+        "campaign records",
+        "card guides"
+      ],
+      "relatedContent": [
+        "installment guides",
+        "reward guides",
+        "cashback guides"
+      ],
+      "roadmap": [
+        "Kaynak sözleşmesini ve değerlendirme veri setini onayla.",
+        "Salt okunur sağlayıcı adaptörünü önizlemede doğrula.",
+        "İnsan incelemesi, tazelik ve geri alma kapıları tamamlanınca sınırlı erişim aç."
+      ],
+      "prerequisites": [
+        "contracted campaign providers",
+        "freshness SLA",
+        "revocation workflow"
+      ]
+    },
+    {
+      "id": "tesvik-ai",
+      "name": "TeşvikAI",
+      "status": "available_foundation",
+      "route": "/tesvik-ai",
+      "purpose": "İşletme ve yatırım profilini güncel resmî destek kaynaklarına bağlayan ön araştırma akışı sunmak.",
+      "personas": [
+        "support_applicant",
+        "sme_owner",
+        "entrepreneur",
+        "farmer",
+        "exporter",
+        "investor"
+      ],
+      "inputs": [
+        "applicant profile",
+        "project",
+        "location",
+        "budget bands",
+        "verified programme records"
+      ],
+      "outputs": [
+        "potential-match list",
+        "missing information",
+        "official source links",
+        "application checklist"
+      ],
+      "officialSourceIds": [
+        "kosgeb",
+        "tubitak",
+        "sanayi-destek",
+        "yatirima-destek",
+        "ticaret-destek",
+        "tkdk",
+        "iskur",
+        "eu-funding-tenders"
+      ],
+      "knowledgeEntities": [
+        "investment_program",
+        "government_institution",
+        "industry",
+        "company",
+        "city",
+        "article"
+      ],
+      "searchScopes": [
+        "support guides",
+        "official programmes",
+        "industries",
+        "institutions"
+      ],
+      "relatedContent": [
+        "eligibility guides",
+        "application guides",
+        "document checklists"
+      ],
+      "roadmap": [
+        "Kaynak sözleşmesini ve değerlendirme veri setini onayla.",
+        "Salt okunur sağlayıcı adaptörünü önizlemede doğrula.",
+        "İnsan incelemesi, tazelik ve geri alma kapıları tamamlanınca sınırlı erişim aç."
+      ],
+      "prerequisites": [
+        "programme ingestion",
+        "rule provenance",
+        "daily expiry and amendment checks"
+      ]
+    },
+    {
+      "id": "fiyat-ai",
+      "name": "FiyatAI",
+      "status": "future_integration",
+      "route": "/fiyat-ai",
+      "purpose": "Hammadde, enerji ve üretim girdilerini karşılaştırılabilir birim ve kaynaklarla analiz etmek.",
+      "personas": [
+        "factory_owner",
+        "manufacturer",
+        "investor",
+        "sme_owner"
+      ],
+      "inputs": [
+        "material",
+        "unit",
+        "quality",
+        "location",
+        "time range"
+      ],
+      "outputs": [
+        "normalised series",
+        "cost drivers",
+        "source notes",
+        "scenario comparison"
+      ],
+      "officialSourceIds": [
+        "tuik",
+        "tcmb-evds",
+        "epdk",
+        "epias"
+      ],
+      "knowledgeEntities": [
+        "raw_material",
+        "product",
+        "industry",
+        "technology"
+      ],
+      "searchScopes": [
+        "raw materials",
+        "price literacy guides",
+        "energy"
+      ],
+      "relatedContent": [
+        "price methodology",
+        "procurement guides",
+        "raw-material articles"
+      ],
+      "roadmap": [
+        "Kaynak sözleşmesini ve değerlendirme veri setini onayla.",
+        "Salt okunur sağlayıcı adaptörünü önizlemede doğrula.",
+        "İnsan incelemesi, tazelik ve geri alma kapıları tamamlanınca sınırlı erişim aç."
+      ],
+      "prerequisites": [
+        "licensed price feeds",
+        "unit ontology",
+        "revision-aware time series"
+      ]
+    },
+    {
+      "id": "ihracat-ai",
+      "name": "İhracatAI",
+      "status": "available_foundation",
+      "route": "/ihracat-ai",
+      "purpose": "Üreticinin hedef pazar, sınıflandırma, belge, destek ve lojistik araştırmasını kaynaklandırmak.",
+      "personas": [
+        "exporter",
+        "manufacturer",
+        "sme_owner",
+        "investor"
+      ],
+      "inputs": [
+        "product",
+        "origin",
+        "target market",
+        "capacity",
+        "compliance status"
+      ],
+      "outputs": [
+        "research plan",
+        "market evidence",
+        "document checklist",
+        "official verification routes"
+      ],
+      "officialSourceIds": [
+        "ticaret-destek",
+        "kolay-ihracat",
+        "turk-eximbank",
+        "access2markets",
+        "un-comtrade",
+        "wto-data",
+        "wits"
+      ],
+      "knowledgeEntities": [
+        "product",
+        "company",
+        "country",
+        "standard",
+        "investment_program",
+        "article"
+      ],
+      "searchScopes": [
+        "export guides",
+        "markets",
+        "supports",
+        "standards"
+      ],
+      "relatedContent": [
+        "GTIP research",
+        "market selection",
+        "export documentation"
+      ],
+      "roadmap": [
+        "Kaynak sözleşmesini ve değerlendirme veri setini onayla.",
+        "Salt okunur sağlayıcı adaptörünü önizlemede doğrula.",
+        "İnsan incelemesi, tazelik ve geri alma kapıları tamamlanınca sınırlı erişim aç."
+      ],
+      "prerequisites": [
+        "classification review workflow",
+        "trade dataset adapters",
+        "market evaluation set"
+      ]
+    },
+    {
+      "id": "insan-ai",
+      "name": "İnsanAI",
+      "status": "available_foundation",
+      "route": "/insan-ai",
+      "purpose": "İnsan ve yapay zekâ iş bölümünü görev, risk ve doğrulama üzerinden tasarlamak.",
+      "personas": [
+        "ai_enthusiast",
+        "engineer",
+        "student",
+        "researcher"
+      ],
+      "inputs": [
+        "task",
+        "risk level",
+        "available evidence"
+      ],
+      "outputs": [
+        "human-AI workflow",
+        "review points",
+        "responsibility map"
+      ],
+      "officialSourceIds": [],
+      "knowledgeEntities": [
+        "technology",
+        "article",
+        "ai_product"
+      ],
+      "searchScopes": [
+        "AI guides",
+        "workflows"
+      ],
+      "relatedContent": [
+        "AI governance",
+        "verification guides"
+      ],
+      "roadmap": [
+        "Kaynak sözleşmesini ve değerlendirme veri setini onayla.",
+        "Salt okunur sağlayıcı adaptörünü önizlemede doğrula.",
+        "İnsan incelemesi, tazelik ve geri alma kapıları tamamlanınca sınırlı erişim aç."
+      ],
+      "prerequisites": [
+        "workflow evaluation examples",
+        "human-review ownership"
+      ]
+    },
+    {
+      "id": "trend-ai",
+      "name": "TrendAI",
+      "status": "available_foundation",
+      "route": "/trendler",
+      "purpose": "Birinci taraf ve resmî sinyallerden editoryal araştırma adayları üretmek.",
+      "personas": [
+        "researcher",
+        "investor",
+        "entrepreneur",
+        "ai_enthusiast"
+      ],
+      "inputs": [
+        "Search Console signals",
+        "internal search gaps",
+        "official announcements",
+        "graph gaps"
+      ],
+      "outputs": [
+        "validated research candidates",
+        "evidence trail",
+        "editorial handoff"
+      ],
+      "officialSourceIds": [
+        "tuik",
+        "cordis",
+        "eurostat",
+        "kalkinma-kutuphanesi"
+      ],
+      "knowledgeEntities": [
+        "article",
+        "industry",
+        "technology",
+        "investment_program"
+      ],
+      "searchScopes": [
+        "trend signals",
+        "content gaps",
+        "topic clusters"
+      ],
+      "relatedContent": [
+        "trend methodology",
+        "content gap report"
+      ],
+      "roadmap": [
+        "Kaynak sözleşmesini ve değerlendirme veri setini onayla.",
+        "Salt okunur sağlayıcı adaptörünü önizlemede doğrula.",
+        "İnsan incelemesi, tazelik ve geri alma kapıları tamamlanınca sınırlı erişim aç."
+      ],
+      "prerequisites": [
+        "Search Console connection",
+        "internal-search telemetry",
+        "signal retention policy"
+      ]
+    },
+    {
+      "id": "factory-ai",
+      "name": "FactoryAI",
+      "status": "candidate",
+      "purpose": "Fabrika kabiliyeti, kapasite, süreç ve konum araştırmasını doğrulanmış tesis kayıtlarıyla desteklemek.",
+      "personas": [
+        "factory_owner",
+        "manufacturer",
+        "investor",
+        "engineer"
+      ],
+      "inputs": [
+        "product need",
+        "process",
+        "capacity",
+        "location"
+      ],
+      "outputs": [
+        "factory capability shortlist",
+        "evidence gaps",
+        "due-diligence checklist"
+      ],
+      "officialSourceIds": [
+        "tobb",
+        "osbuk",
+        "sanayi-destek"
+      ],
+      "knowledgeEntities": [
+        "factory",
+        "company",
+        "product",
+        "machine",
+        "city"
+      ],
+      "searchScopes": [
+        "factories",
+        "companies",
+        "capabilities"
+      ],
+      "relatedContent": [
+        "factory profiles",
+        "capacity guides"
+      ],
+      "roadmap": [
+        "Kaynak sözleşmesini ve değerlendirme veri setini onayla.",
+        "Salt okunur sağlayıcı adaptörünü önizlemede doğrula.",
+        "İnsan incelemesi, tazelik ve geri alma kapıları tamamlanınca sınırlı erişim aç."
+      ],
+      "prerequisites": [
+        "verified factory registry",
+        "capability ontology",
+        "company claim workflow"
+      ]
+    },
+    {
+      "id": "machine-ai",
+      "name": "MachineAI",
+      "status": "candidate",
+      "purpose": "Üretim ihtiyacını makine sınıfları, proses gereksinimleri ve güvenlik kaynaklarıyla eşlemek.",
+      "personas": [
+        "engineer",
+        "manufacturer",
+        "factory_owner"
+      ],
+      "inputs": [
+        "process",
+        "material",
+        "throughput",
+        "constraints"
+      ],
+      "outputs": [
+        "machine category comparison",
+        "requirements",
+        "supplier research path"
+      ],
+      "officialSourceIds": [
+        "tse",
+        "turkak",
+        "tubitak"
+      ],
+      "knowledgeEntities": [
+        "machine",
+        "technology",
+        "raw_material",
+        "standard",
+        "product"
+      ],
+      "searchScopes": [
+        "machines",
+        "technologies",
+        "standards"
+      ],
+      "relatedContent": [
+        "machine guides",
+        "process guides",
+        "safety standards"
+      ],
+      "roadmap": [
+        "Kaynak sözleşmesini ve değerlendirme veri setini onayla.",
+        "Salt okunur sağlayıcı adaptörünü önizlemede doğrula.",
+        "İnsan incelemesi, tazelik ve geri alma kapıları tamamlanınca sınırlı erişim aç."
+      ],
+      "prerequisites": [
+        "machine taxonomy",
+        "performance-claim evidence model",
+        "expert review panel"
+      ]
+    },
+    {
+      "id": "standards-ai",
+      "name": "StandardsAI",
+      "status": "candidate",
+      "purpose": "Ürün ve süreçleri ilgili standart, akreditasyon ve uygunluk araştırma yollarına bağlamak.",
+      "personas": [
+        "engineer",
+        "exporter",
+        "architect",
+        "manufacturer"
+      ],
+      "inputs": [
+        "product",
+        "market",
+        "use case",
+        "process"
+      ],
+      "outputs": [
+        "standards research map",
+        "scope warnings",
+        "accredited-body lookup path"
+      ],
+      "officialSourceIds": [
+        "tse",
+        "turkak",
+        "echa",
+        "access2markets"
+      ],
+      "knowledgeEntities": [
+        "standard",
+        "product",
+        "technology",
+        "country"
+      ],
+      "searchScopes": [
+        "standards",
+        "compliance guides",
+        "products"
+      ],
+      "relatedContent": [
+        "certification guides",
+        "market requirements"
+      ],
+      "roadmap": [
+        "Kaynak sözleşmesini ve değerlendirme veri setini onayla.",
+        "Salt okunur sağlayıcı adaptörünü önizlemede doğrula.",
+        "İnsan incelemesi, tazelik ve geri alma kapıları tamamlanınca sınırlı erişim aç."
+      ],
+      "prerequisites": [
+        "standards metadata licence",
+        "scope mapping",
+        "legal review"
+      ]
+    },
+    {
+      "id": "energy-ai",
+      "name": "EnergyAI",
+      "status": "candidate",
+      "purpose": "Üretim tesislerinin enerji maliyeti, verimlilik ve dönüşüm senaryolarını resmî verilerle modellemek.",
+      "personas": [
+        "factory_owner",
+        "manufacturer",
+        "investor",
+        "engineer"
+      ],
+      "inputs": [
+        "load profile",
+        "tariff context",
+        "location",
+        "technology options"
+      ],
+      "outputs": [
+        "scenario comparison",
+        "assumptions",
+        "data freshness",
+        "support links"
+      ],
+      "officialSourceIds": [
+        "epdk",
+        "epias",
+        "teias",
+        "botas"
+      ],
+      "knowledgeEntities": [
+        "factory",
+        "technology",
+        "investment_program",
+        "raw_material"
+      ],
+      "searchScopes": [
+        "energy",
+        "factories",
+        "supports"
+      ],
+      "relatedContent": [
+        "energy efficiency",
+        "tariff literacy",
+        "investment guides"
+      ],
+      "roadmap": [
+        "Kaynak sözleşmesini ve değerlendirme veri setini onayla.",
+        "Salt okunur sağlayıcı adaptörünü önizlemede doğrula.",
+        "İnsan incelemesi, tazelik ve geri alma kapıları tamamlanınca sınırlı erişim aç."
+      ],
+      "prerequisites": [
+        "authorised tariff data",
+        "calculation audit",
+        "engineering disclaimers"
+      ]
+    },
+    {
+      "id": "agriculture-ai",
+      "name": "AgricultureAI",
+      "status": "candidate",
+      "purpose": "Tarım ve hayvancılık üretim kararlarını resmî destek, istatistik ve risk kaynaklarıyla araştırmak.",
+      "personas": [
+        "farmer",
+        "investor",
+        "support_applicant"
+      ],
+      "inputs": [
+        "activity",
+        "location",
+        "scale",
+        "investment plan"
+      ],
+      "outputs": [
+        "research map",
+        "support discovery",
+        "risk and insurance links"
+      ],
+      "officialSourceIds": [
+        "tarim-orman",
+        "tkdk",
+        "tarsim",
+        "faostat"
+      ],
+      "knowledgeEntities": [
+        "product",
+        "raw_material",
+        "city",
+        "investment_program",
+        "technology"
+      ],
+      "searchScopes": [
+        "agriculture",
+        "supports",
+        "regions"
+      ],
+      "relatedContent": [
+        "production guides",
+        "IPARD guides",
+        "insurance guides"
+      ],
+      "roadmap": [
+        "Kaynak sözleşmesini ve değerlendirme veri setini onayla.",
+        "Salt okunur sağlayıcı adaptörünü önizlemede doğrula.",
+        "İnsan incelemesi, tazelik ve geri alma kapıları tamamlanınca sınırlı erişim aç."
+      ],
+      "prerequisites": [
+        "agriculture ontology",
+        "regional eligibility records",
+        "seasonality model"
+      ]
+    },
+    {
+      "id": "investment-ai",
+      "name": "InvestmentAI",
+      "status": "candidate",
+      "purpose": "Sanayi yatırımını bölge, sektör, maliyet, destek ve risk kanıtlarıyla değerlendirmek.",
+      "personas": [
+        "investor",
+        "entrepreneur",
+        "factory_owner"
+      ],
+      "inputs": [
+        "sector",
+        "location",
+        "budget",
+        "capacity",
+        "time horizon"
+      ],
+      "outputs": [
+        "evidence matrix",
+        "scenario risks",
+        "official support routes"
+      ],
+      "officialSourceIds": [
+        "sanayi-destek",
+        "yatirima-destek",
+        "tuik",
+        "tcmb-evds"
+      ],
+      "knowledgeEntities": [
+        "industry",
+        "city",
+        "factory",
+        "investment_program",
+        "technology"
+      ],
+      "searchScopes": [
+        "investments",
+        "regions",
+        "industries",
+        "supports"
+      ],
+      "relatedContent": [
+        "feasibility guides",
+        "regional reports"
+      ],
+      "roadmap": [
+        "Kaynak sözleşmesini ve değerlendirme veri setini onayla.",
+        "Salt okunur sağlayıcı adaptörünü önizlemede doğrula.",
+        "İnsan incelemesi, tazelik ve geri alma kapıları tamamlanınca sınırlı erişim aç."
+      ],
+      "prerequisites": [
+        "regional data model",
+        "scenario methodology",
+        "financial-risk review"
+      ]
+    },
+    {
+      "id": "supply-chain-ai",
+      "name": "SupplyChainAI",
+      "status": "candidate",
+      "purpose": "Tedarik seçeneklerini ürün, malzeme, kapasite, lojistik ve risk ilişkileriyle araştırmak.",
+      "personas": [
+        "manufacturer",
+        "factory_owner",
+        "exporter",
+        "sme_owner"
+      ],
+      "inputs": [
+        "required input",
+        "specification",
+        "volume",
+        "delivery context"
+      ],
+      "outputs": [
+        "supplier research map",
+        "risk signals",
+        "verification checklist"
+      ],
+      "officialSourceIds": [
+        "tobb",
+        "kap",
+        "ticaret-destek",
+        "un-comtrade"
+      ],
+      "knowledgeEntities": [
+        "company",
+        "product",
+        "raw_material",
+        "factory",
+        "country"
+      ],
+      "searchScopes": [
+        "suppliers",
+        "products",
+        "factories",
+        "trade"
+      ],
+      "relatedContent": [
+        "procurement guides",
+        "supplier verification"
+      ],
+      "roadmap": [
+        "Kaynak sözleşmesini ve değerlendirme veri setini onayla.",
+        "Salt okunur sağlayıcı adaptörünü önizlemede doğrula.",
+        "İnsan incelemesi, tazelik ve geri alma kapıları tamamlanınca sınırlı erişim aç."
+      ],
+      "prerequisites": [
+        "verified supplier claims",
+        "specification ontology",
+        "commercial-data policy"
+      ]
+    },
+    {
+      "id": "compliance-ai",
+      "name": "ComplianceAI",
+      "status": "candidate",
+      "purpose": "Ürün, tesis ve pazar için uygulanabilir resmî yükümlülükleri araştırma planına dönüştürmek.",
+      "personas": [
+        "manufacturer",
+        "exporter",
+        "engineer",
+        "architect"
+      ],
+      "inputs": [
+        "product",
+        "activity",
+        "jurisdiction",
+        "facility context"
+      ],
+      "outputs": [
+        "obligation research map",
+        "effective-date warnings",
+        "expert escalation"
+      ],
+      "officialSourceIds": [
+        "resmi-gazete",
+        "mevzuat",
+        "tse",
+        "echa",
+        "gib"
+      ],
+      "knowledgeEntities": [
+        "standard",
+        "product",
+        "factory",
+        "country",
+        "government_institution"
+      ],
+      "searchScopes": [
+        "laws",
+        "standards",
+        "products",
+        "markets"
+      ],
+      "relatedContent": [
+        "compliance guides",
+        "standards guides"
+      ],
+      "roadmap": [
+        "Kaynak sözleşmesini ve değerlendirme veri setini onayla.",
+        "Salt okunur sağlayıcı adaptörünü önizlemede doğrula.",
+        "İnsan incelemesi, tazelik ve geri alma kapıları tamamlanınca sınırlı erişim aç."
+      ],
+      "prerequisites": [
+        "legal source versioning",
+        "jurisdiction model",
+        "qualified expert workflow"
+      ]
+    },
+    {
+      "id": "document-ai",
+      "name": "DocumentAI",
+      "status": "candidate",
+      "purpose": "Resmî ve kurumsal belgelerden izlenebilir yapılandırılmış kayıtlar çıkarmak.",
+      "personas": [
+        "support_applicant",
+        "researcher",
+        "exporter",
+        "sme_owner"
+      ],
+      "inputs": [
+        "authorised document",
+        "document type",
+        "extraction schema"
+      ],
+      "outputs": [
+        "field extraction",
+        "page-level citations",
+        "confidence and review queue"
+      ],
+      "officialSourceIds": [
+        "resmi-gazete",
+        "mevzuat",
+        "eu-funding-tenders"
+      ],
+      "knowledgeEntities": [
+        "article",
+        "investment_program",
+        "government_institution",
+        "standard"
+      ],
+      "searchScopes": [
+        "documents",
+        "programmes",
+        "laws"
+      ],
+      "relatedContent": [
+        "document checklists",
+        "application guides"
+      ],
+      "roadmap": [
+        "Kaynak sözleşmesini ve değerlendirme veri setini onayla.",
+        "Salt okunur sağlayıcı adaptörünü önizlemede doğrula.",
+        "İnsan incelemesi, tazelik ve geri alma kapıları tamamlanınca sınırlı erişim aç."
+      ],
+      "prerequisites": [
+        "document rights policy",
+        "OCR evaluation set",
+        "human verification queue"
+      ]
+    },
+    {
+      "id": "hibe-ai",
+      "name": "HibeAI",
+      "status": "consolidate",
+      "purpose": "Hibe keşfi fikrini TeşvikAI içinde tek kaynak, tek uygunluk ve tek güncellik sözleşmesine taşımak.",
+      "personas": [
+        "support_applicant",
+        "sme_owner",
+        "farmer"
+      ],
+      "inputs": [
+        "TeşvikAI applicant profile"
+      ],
+      "outputs": [
+        "TeşvikAI grant-filtered view"
+      ],
+      "officialSourceIds": [
+        "kosgeb",
+        "tkdk",
+        "eu-funding-tenders"
+      ],
+      "knowledgeEntities": [
+        "investment_program",
+        "government_institution"
+      ],
+      "searchScopes": [
+        "supports"
+      ],
+      "relatedContent": [
+        "grant guides"
+      ],
+      "roadmap": [
+        "Ayrı ürün ve rota oluşturma.",
+        "Hibe filtresini TeşvikAI keşif modeline ekle.",
+        "Tüm kaynak ve güncellik kontrollerini TeşvikAI ile paylaş."
+      ],
+      "prerequisites": [
+        "TeşvikAI verified programme registry"
+      ]
+    }
+  ],
+  "top25AICapabilities": [
+    {
+      "id": "source-grounded-retrieval",
+      "name": "Kaynak temelli erişim",
+      "priority": 1,
+      "state": "foundation",
+      "outcome": "Yanıtı yalnızca izinli ve izlenebilir kayıtlardan kurar.",
+      "products": [
+        "uretir-ai",
+        "tesvik-ai",
+        "ihracat-ai"
+      ],
+      "prerequisites": [
+        "authority-ready corpus",
+        "retrieval evaluation"
+      ],
+      "principalRisk": "Yanlış veya bağlam dışı kaynağı kanıt gibi sunmak."
+    },
+    {
+      "id": "citation-rendering",
+      "name": "İddia düzeyinde kaynak gösterimi",
+      "priority": 2,
+      "state": "implemented_contract",
+      "outcome": "Kullanıcıya kaynak, tarih ve kapsamı görünür kılar.",
+      "products": [
+        "uretir-ai",
+        "tesvik-ai",
+        "document-ai"
+      ],
+      "prerequisites": [
+        "claim-source mapping"
+      ],
+      "principalRisk": "Genel bir kaynağı özel bir iddiaya bağlamak."
+    },
+    {
+      "id": "freshness-enforcement",
+      "name": "Tazelik ve son kullanım kapısı",
+      "priority": 3,
+      "state": "implemented_contract",
+      "outcome": "Süresi geçmiş kaydı yanıt üretiminden çıkarır.",
+      "products": [
+        "tesvik-ai",
+        "puan-ai",
+        "fiyat-ai"
+      ],
+      "prerequisites": [
+        "review schedule",
+        "expiry policy"
+      ],
+      "principalRisk": "Eski tarih veya koşulla karar verdirmek."
+    },
+    {
+      "id": "uncertainty-labels",
+      "name": "Belirsizlik etiketleme",
+      "priority": 4,
+      "state": "implemented_contract",
+      "outcome": "Eksik ve çelişkili kanıtı kesin sonuçtan ayırır.",
+      "products": [
+        "all"
+      ],
+      "prerequisites": [
+        "shared answer contract"
+      ],
+      "principalRisk": "Aşırı güvenli dil."
+    },
+    {
+      "id": "entity-resolution",
+      "name": "Varlık çözümleme",
+      "priority": 5,
+      "state": "foundation",
+      "outcome": "Benzer şirket, ürün ve kurum adlarını ayırır.",
+      "products": [
+        "uretir-ai",
+        "factory-ai",
+        "supply-chain-ai"
+      ],
+      "prerequisites": [
+        "aliases",
+        "stable IDs",
+        "review queue"
+      ],
+      "principalRisk": "Yanlış varlık birleştirme."
+    },
+    {
+      "id": "cross-product-handoff",
+      "name": "Ürünler arası bağlam aktarımı",
+      "priority": 6,
+      "state": "planned",
+      "outcome": "Kullanıcıyı bağlam kaybetmeden ilgili AI ürününe taşır.",
+      "products": [
+        "all"
+      ],
+      "prerequisites": [
+        "shared identity",
+        "consent model"
+      ],
+      "principalRisk": "Gereksiz veri paylaşımı."
+    },
+    {
+      "id": "universal-search-retrieval",
+      "name": "Evrensel arama erişimi",
+      "priority": 7,
+      "state": "implemented_contract",
+      "outcome": "Kamuya açık içerik ve ürünleri tek sözleşmeyle bulur.",
+      "products": [
+        "uretir-ai",
+        "trend-ai"
+      ],
+      "prerequisites": [
+        "search adapter",
+        "publication filter"
+      ],
+      "principalRisk": "İnceleme kayıtlarını üretimde sızdırmak."
+    },
+    {
+      "id": "follow-up-planning",
+      "name": "Takip sorusu planlama",
+      "priority": 8,
+      "state": "planned",
+      "outcome": "Eksik karar girdilerini en az soruyla tamamlar.",
+      "products": [
+        "puan-ai",
+        "tesvik-ai",
+        "investment-ai"
+      ],
+      "prerequisites": [
+        "question policy",
+        "completion tests"
+      ],
+      "principalRisk": "Gereksiz veya hassas veri istemek."
+    },
+    {
+      "id": "source-conflict-detection",
+      "name": "Kaynak çelişkisi tespiti",
+      "priority": 9,
+      "state": "planned",
+      "outcome": "Farklı resmî kayıtlar arasındaki uyuşmazlığı işaretler.",
+      "products": [
+        "tesvik-ai",
+        "compliance-ai",
+        "ihracat-ai"
+      ],
+      "prerequisites": [
+        "versioned source snapshots"
+      ],
+      "principalRisk": "Sessizce yanlış kaynağı seçmek."
+    },
+    {
+      "id": "update-alerts",
+      "name": "Değişiklik ve son tarih uyarıları",
+      "priority": 10,
+      "state": "blocked_external_data",
+      "outcome": "Kaydedilen konu değiştiğinde kullanıcıyı bilgilendirir.",
+      "products": [
+        "tesvik-ai",
+        "puan-ai",
+        "standards-ai"
+      ],
+      "prerequisites": [
+        "identity",
+        "notification consent",
+        "change feeds"
+      ],
+      "principalRisk": "Yanlış veya gecikmiş bildirim."
+    },
+    {
+      "id": "research-workspace",
+      "name": "Kaydedilebilir araştırma çalışma alanı",
+      "priority": 11,
+      "state": "planned",
+      "outcome": "Kaynak, not ve karşılaştırmaları kullanıcı hesabında toplar.",
+      "products": [
+        "all"
+      ],
+      "prerequisites": [
+        "identity",
+        "data retention",
+        "export/delete"
+      ],
+      "principalRisk": "Kullanıcı verisini amaç dışı saklamak."
+    },
+    {
+      "id": "multilingual-retrieval",
+      "name": "Çok dilli erişim",
+      "priority": 12,
+      "state": "planned",
+      "outcome": "Türkçe soruyu yabancı resmî kaynaklarla güvenli eşler.",
+      "products": [
+        "ihracat-ai",
+        "standards-ai",
+        "uretir-ai"
+      ],
+      "prerequisites": [
+        "terminology map",
+        "translation evaluation"
+      ],
+      "principalRisk": "Hukuki veya teknik anlamı bozmak."
+    },
+    {
+      "id": "document-extraction",
+      "name": "Belge alanı çıkarımı",
+      "priority": 13,
+      "state": "planned",
+      "outcome": "Belgeyi sayfa referanslı yapılandırılmış kayda dönüştürür.",
+      "products": [
+        "document-ai",
+        "tesvik-ai"
+      ],
+      "prerequisites": [
+        "OCR benchmark",
+        "document rights"
+      ],
+      "principalRisk": "Yanlış alanı kesin veri gibi kaydetmek."
+    },
+    {
+      "id": "eligibility-precheck",
+      "name": "Yapılandırılmış uygunluk ön kontrolü",
+      "priority": 14,
+      "state": "implemented_contract",
+      "outcome": "Yalnızca potansiyel eşleşme ve eksik bilgi üretir.",
+      "products": [
+        "tesvik-ai"
+      ],
+      "prerequisites": [
+        "verified programme rules"
+      ],
+      "principalRisk": "Nihai uygunluk kararı izlenimi vermek."
+    },
+    {
+      "id": "programme-matching",
+      "name": "Resmî program eşleştirme",
+      "priority": 15,
+      "state": "blocked_external_data",
+      "outcome": "Profili güncel program kayıtlarıyla karşılaştırır.",
+      "products": [
+        "tesvik-ai"
+      ],
+      "prerequisites": [
+        "programme ingestion",
+        "amendment checks"
+      ],
+      "principalRisk": "Kapanmış çağrıyı açık göstermek."
+    },
+    {
+      "id": "application-checklist",
+      "name": "Başvuru kontrol listesi",
+      "priority": 16,
+      "state": "foundation",
+      "outcome": "Belge ve hazırlık eksiklerini kaynağa bağlı açıklar.",
+      "products": [
+        "tesvik-ai",
+        "ihracat-ai"
+      ],
+      "prerequisites": [
+        "document requirement model"
+      ],
+      "principalRisk": "Her başvuru için aynı listeyi kullanmak."
+    },
+    {
+      "id": "factory-matching",
+      "name": "Fabrika kabiliyeti eşleme",
+      "priority": 17,
+      "state": "blocked_external_data",
+      "outcome": "Üretim ihtiyacını doğrulanmış tesis kabiliyetiyle eşler.",
+      "products": [
+        "factory-ai"
+      ],
+      "prerequisites": [
+        "verified factory registry"
+      ],
+      "principalRisk": "Doğrulanmamış kapasite iddiası."
+    },
+    {
+      "id": "machine-process-matching",
+      "name": "Makine–proses eşleme",
+      "priority": 18,
+      "state": "planned",
+      "outcome": "Süreç gereksiniminden makine sınıfı araştırması çıkarır.",
+      "products": [
+        "machine-ai"
+      ],
+      "prerequisites": [
+        "machine taxonomy",
+        "expert review"
+      ],
+      "principalRisk": "Marka veya performans uydurmak."
+    },
+    {
+      "id": "standards-mapping",
+      "name": "Standart kapsamı eşleme",
+      "priority": 19,
+      "state": "blocked_external_data",
+      "outcome": "Ürün ve pazarı standart araştırma yollarına bağlar.",
+      "products": [
+        "standards-ai",
+        "compliance-ai"
+      ],
+      "prerequisites": [
+        "licensed metadata",
+        "scope review"
+      ],
+      "principalRisk": "Uygulanabilirlik konusunda hukuki kesinlik."
+    },
+    {
+      "id": "energy-scenarios",
+      "name": "Enerji senaryo modelleme",
+      "priority": 20,
+      "state": "blocked_external_data",
+      "outcome": "Tesis seçeneklerini veri, varsayım ve hassasiyetle karşılaştırır.",
+      "products": [
+        "energy-ai",
+        "investment-ai"
+      ],
+      "prerequisites": [
+        "tariff feeds",
+        "audited calculator"
+      ],
+      "principalRisk": "Yanlış birim veya tarife."
+    },
+    {
+      "id": "export-market-comparison",
+      "name": "İhracat pazarı kanıt karşılaştırması",
+      "priority": 21,
+      "state": "foundation",
+      "outcome": "Pazarları tek skor yerine kanıt matrisiyle karşılaştırır.",
+      "products": [
+        "ihracat-ai"
+      ],
+      "prerequisites": [
+        "trade adapters",
+        "market methodology"
+      ],
+      "principalRisk": "Korelasyonu talep kanıtı sanmak."
+    },
+    {
+      "id": "supply-risk-map",
+      "name": "Tedarik riski haritalama",
+      "priority": 22,
+      "state": "planned",
+      "outcome": "Tedarik bağımlılığı ve alternatif araştırma yollarını gösterir.",
+      "products": [
+        "supply-chain-ai"
+      ],
+      "prerequisites": [
+        "supplier registry",
+        "trade data"
+      ],
+      "principalRisk": "Şirket riski hakkında temelsiz çıkarım."
+    },
+    {
+      "id": "unit-normalisation",
+      "name": "Fiyat ve birim normalizasyonu",
+      "priority": 23,
+      "state": "planned",
+      "outcome": "Birim, kur, kalite ve teslim kapsamını karşılaştırılabilir kılar.",
+      "products": [
+        "fiyat-ai",
+        "energy-ai"
+      ],
+      "prerequisites": [
+        "unit ontology",
+        "FX provenance"
+      ],
+      "principalRisk": "Karşılaştırılamaz teklifleri eşitlemek."
+    },
+    {
+      "id": "human-escalation",
+      "name": "İnsan incelemesine yönlendirme",
+      "priority": 24,
+      "state": "implemented_contract",
+      "outcome": "Yüksek riskli veya belirsiz sonucu uzman kuyruğuna taşır.",
+      "products": [
+        "all"
+      ],
+      "prerequisites": [
+        "risk taxonomy",
+        "named owners"
+      ],
+      "principalRisk": "Uzman desteği varmış gibi vaat etmek."
+    },
+    {
+      "id": "answer-audit",
+      "name": "Yanıt değerlendirme ve denetim",
+      "priority": 25,
+      "state": "planned",
+      "outcome": "Doğruluk, kaynak, tazelik ve faydayı sürüm bazında ölçer.",
+      "products": [
+        "all"
+      ],
+      "prerequisites": [
+        "golden datasets",
+        "red-team cases",
+        "audit log"
+      ],
+      "principalRisk": "Yalnızca akıcılığı kalite sanmak."
+    }
+  ],
+  "top50OfficialSources": [
+    {
+      "id": "kosgeb",
+      "name": "KOSGEB",
+      "authority": "Küçük ve Orta Ölçekli İşletmeleri Geliştirme ve Destekleme İdaresi",
+      "scope": "TR",
+      "url": "https://www.kosgeb.gov.tr/",
+      "domains": [
+        "incentives"
+      ],
+      "dataTypes": [
+        "support programmes",
+        "calls",
+        "application guidance"
+      ],
+      "integrationMode": "feed_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Primary source for KOSGEB programmes; programme pages must be captured individually."
+    },
+    {
+      "id": "tubitak",
+      "name": "TÜBİTAK Destekleri",
+      "authority": "Türkiye Bilimsel ve Teknolojik Araştırma Kurumu",
+      "scope": "TR",
+      "url": "https://tubitak.gov.tr/tr/destekler",
+      "domains": [
+        "incentives",
+        "research"
+      ],
+      "dataTypes": [
+        "research programmes",
+        "industry programmes",
+        "calls"
+      ],
+      "integrationMode": "feed_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Use the programme and call page as claim-level evidence."
+    },
+    {
+      "id": "sanayi-destek",
+      "name": "Sanayi ve Teknoloji Bakanlığı Destek ve Teşvikleri",
+      "authority": "T.C. Sanayi ve Teknoloji Bakanlığı",
+      "scope": "TR",
+      "url": "https://www.sanayi.gov.tr/destek-ve-tesvikler",
+      "domains": [
+        "incentives",
+        "statistics"
+      ],
+      "dataTypes": [
+        "investment incentives",
+        "industrial supports"
+      ],
+      "integrationMode": "feed_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Primary policy and programme entry point."
+    },
+    {
+      "id": "yatirima-destek",
+      "name": "Yatırıma Destek Platformu",
+      "authority": "T.C. Sanayi ve Teknoloji Bakanlığı",
+      "scope": "TR",
+      "url": "https://www.yatirimadestek.gov.tr/",
+      "domains": [
+        "incentives"
+      ],
+      "dataTypes": [
+        "regional supports",
+        "investment guidance",
+        "development agency calls"
+      ],
+      "integrationMode": "feed_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Regional records still require issuer and call-page verification."
+    },
+    {
+      "id": "ticaret-destek",
+      "name": "Ticaret Bakanlığı Destekleri",
+      "authority": "T.C. Ticaret Bakanlığı",
+      "scope": "TR",
+      "url": "https://www.ticaret.gov.tr/destekler",
+      "domains": [
+        "incentives",
+        "trade"
+      ],
+      "dataTypes": [
+        "export supports",
+        "service supports",
+        "e-export supports"
+      ],
+      "integrationMode": "feed_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Use the current decision, circular, and application page together."
+    },
+    {
+      "id": "kolay-ihracat",
+      "name": "Kolay İhracat Platformu",
+      "authority": "T.C. Ticaret Bakanlığı",
+      "scope": "TR",
+      "url": "https://www.kolayihracat.gov.tr/",
+      "domains": [
+        "trade"
+      ],
+      "dataTypes": [
+        "market guidance",
+        "export guides",
+        "country information"
+      ],
+      "integrationMode": "manual_reference",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Guidance source; legal requirements must be checked against current official rules."
+    },
+    {
+      "id": "turk-eximbank",
+      "name": "Türk Eximbank",
+      "authority": "Türkiye İhracat Kredi Bankası",
+      "scope": "TR",
+      "url": "https://www.eximbank.gov.tr/",
+      "domains": [
+        "trade",
+        "incentives"
+      ],
+      "dataTypes": [
+        "export credits",
+        "insurance",
+        "guarantees"
+      ],
+      "integrationMode": "feed_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Product terms are time-sensitive and must never be cached without a review date."
+    },
+    {
+      "id": "tkdk",
+      "name": "TKDK",
+      "authority": "Tarım ve Kırsal Kalkınmayı Destekleme Kurumu",
+      "scope": "TR",
+      "url": "https://www.tkdk.gov.tr/",
+      "domains": [
+        "agriculture",
+        "incentives"
+      ],
+      "dataTypes": [
+        "IPARD calls",
+        "guides",
+        "announcements"
+      ],
+      "integrationMode": "feed_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Call versions, amendments, deadlines, and eligible provinces require record-level verification."
+    },
+    {
+      "id": "tarim-orman",
+      "name": "Tarım ve Orman Bakanlığı",
+      "authority": "T.C. Tarım ve Orman Bakanlığı",
+      "scope": "TR",
+      "url": "https://www.tarimorman.gov.tr/",
+      "domains": [
+        "agriculture",
+        "incentives",
+        "statistics"
+      ],
+      "dataTypes": [
+        "agricultural supports",
+        "regulations",
+        "announcements"
+      ],
+      "integrationMode": "feed_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Use the responsible general directorate and current communiqué where available."
+    },
+    {
+      "id": "tarsim",
+      "name": "TARSİM",
+      "authority": "Tarım Sigortaları Havuzu",
+      "scope": "TR",
+      "url": "https://www.tarsim.gov.tr/",
+      "domains": [
+        "agriculture"
+      ],
+      "dataTypes": [
+        "insurance products",
+        "tariffs",
+        "application guidance"
+      ],
+      "integrationMode": "manual_reference",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Insurance scope and tariffs are period-specific."
+    },
+    {
+      "id": "iskur",
+      "name": "İŞKUR",
+      "authority": "Türkiye İş Kurumu",
+      "scope": "TR",
+      "url": "https://www.iskur.gov.tr/",
+      "domains": [
+        "employment",
+        "incentives"
+      ],
+      "dataTypes": [
+        "employment programmes",
+        "employer services",
+        "training"
+      ],
+      "integrationMode": "feed_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Eligibility conclusions belong to the competent institution."
+    },
+    {
+      "id": "sgk",
+      "name": "SGK",
+      "authority": "Sosyal Güvenlik Kurumu",
+      "scope": "TR",
+      "url": "https://www.sgk.gov.tr/",
+      "domains": [
+        "employment",
+        "law"
+      ],
+      "dataTypes": [
+        "employer incentives",
+        "circulars",
+        "social security guidance"
+      ],
+      "integrationMode": "feed_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Pair guidance with current legislation and circulars."
+    },
+    {
+      "id": "resmi-gazete",
+      "name": "Resmî Gazete",
+      "authority": "T.C. Cumhurbaşkanlığı İdari İşler Başkanlığı",
+      "scope": "TR",
+      "url": "https://www.resmigazete.gov.tr/",
+      "domains": [
+        "law"
+      ],
+      "dataTypes": [
+        "laws",
+        "decrees",
+        "regulations",
+        "communiqués"
+      ],
+      "integrationMode": "feed_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Canonical publication source for enacted rules."
+    },
+    {
+      "id": "mevzuat",
+      "name": "Mevzuat Bilgi Sistemi",
+      "authority": "T.C. Cumhurbaşkanlığı",
+      "scope": "TR",
+      "url": "https://www.mevzuat.gov.tr/",
+      "domains": [
+        "law"
+      ],
+      "dataTypes": [
+        "consolidated legislation"
+      ],
+      "integrationMode": "manual_reference",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Record the legislation number and access date."
+    },
+    {
+      "id": "tuik",
+      "name": "TÜİK Veri Portalı",
+      "authority": "Türkiye İstatistik Kurumu",
+      "scope": "TR",
+      "url": "https://data.tuik.gov.tr/",
+      "domains": [
+        "statistics"
+      ],
+      "dataTypes": [
+        "industrial production",
+        "trade",
+        "prices",
+        "business statistics"
+      ],
+      "integrationMode": "api_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Store dataset code, period, unit, revision status, and retrieval time."
+    },
+    {
+      "id": "tcmb-evds",
+      "name": "TCMB EVDS",
+      "authority": "Türkiye Cumhuriyet Merkez Bankası",
+      "scope": "TR",
+      "url": "https://evds3.tcmb.gov.tr/",
+      "domains": [
+        "statistics",
+        "trade"
+      ],
+      "dataTypes": [
+        "exchange rates",
+        "financial and economic series"
+      ],
+      "integrationMode": "api_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Series metadata and revision behavior are part of provenance."
+    },
+    {
+      "id": "epdk",
+      "name": "EPDK",
+      "authority": "Enerji Piyasası Düzenleme Kurumu",
+      "scope": "TR",
+      "url": "https://www.epdk.gov.tr/",
+      "domains": [
+        "energy",
+        "statistics",
+        "law"
+      ],
+      "dataTypes": [
+        "market reports",
+        "licenses",
+        "tariffs",
+        "official statistics"
+      ],
+      "integrationMode": "feed_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Monthly and annual reports may be revised; retain revision metadata."
+    },
+    {
+      "id": "epias",
+      "name": "EPİAŞ Şeffaflık Platformu",
+      "authority": "Enerji Piyasaları İşletme A.Ş.",
+      "scope": "TR",
+      "url": "https://seffaflik.epias.com.tr/",
+      "domains": [
+        "energy",
+        "statistics"
+      ],
+      "dataTypes": [
+        "electricity and gas market data"
+      ],
+      "integrationMode": "api_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Units, market, interval, and data publication time are mandatory."
+    },
+    {
+      "id": "teias",
+      "name": "TEİAŞ",
+      "authority": "Türkiye Elektrik İletim A.Ş.",
+      "scope": "TR",
+      "url": "https://www.teias.gov.tr/",
+      "domains": [
+        "energy",
+        "statistics"
+      ],
+      "dataTypes": [
+        "installed capacity",
+        "generation",
+        "transmission statistics"
+      ],
+      "integrationMode": "feed_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Use published report or dataset version."
+    },
+    {
+      "id": "botas",
+      "name": "BOTAŞ",
+      "authority": "Boru Hatları ile Petrol Taşıma A.Ş.",
+      "scope": "TR",
+      "url": "https://www.botas.gov.tr/",
+      "domains": [
+        "energy"
+      ],
+      "dataTypes": [
+        "tariffs",
+        "natural gas announcements",
+        "reports"
+      ],
+      "integrationMode": "feed_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Tariffs and notices are effective-date sensitive."
+    },
+    {
+      "id": "mta",
+      "name": "MTA",
+      "authority": "Maden Tetkik ve Arama Genel Müdürlüğü",
+      "scope": "TR",
+      "url": "https://www.mta.gov.tr/",
+      "domains": [
+        "statistics",
+        "research"
+      ],
+      "dataTypes": [
+        "geology",
+        "mineral resources",
+        "maps",
+        "reports"
+      ],
+      "integrationMode": "manual_reference",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Respect map and report licensing terms."
+    },
+    {
+      "id": "tse",
+      "name": "Türk Standardları Enstitüsü",
+      "authority": "Türk Standardları Enstitüsü",
+      "scope": "TR",
+      "url": "https://www.tse.org.tr/",
+      "domains": [
+        "standards"
+      ],
+      "dataTypes": [
+        "standards catalogue",
+        "certification services"
+      ],
+      "integrationMode": "manual_reference",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Do not reproduce copyrighted standard text; link catalogue metadata."
+    },
+    {
+      "id": "turkak",
+      "name": "TÜRKAK",
+      "authority": "Türk Akreditasyon Kurumu",
+      "scope": "TR",
+      "url": "https://www.turkak.org.tr/",
+      "domains": [
+        "standards"
+      ],
+      "dataTypes": [
+        "accredited bodies",
+        "accreditation guidance"
+      ],
+      "integrationMode": "manual_reference",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Accreditation scope and validity must be checked at query time."
+    },
+    {
+      "id": "turkpatent",
+      "name": "TÜRKPATENT",
+      "authority": "Türk Patent ve Marka Kurumu",
+      "scope": "TR",
+      "url": "https://www.turkpatent.gov.tr/",
+      "domains": [
+        "patents"
+      ],
+      "dataTypes": [
+        "patents",
+        "trademarks",
+        "designs",
+        "geographical indications"
+      ],
+      "integrationMode": "api_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Search results are discovery signals, not freedom-to-operate advice."
+    },
+    {
+      "id": "kap",
+      "name": "Kamuyu Aydınlatma Platformu",
+      "authority": "Merkezi Kayıt Kuruluşu",
+      "scope": "TR",
+      "url": "https://www.kap.org.tr/",
+      "domains": [
+        "companies"
+      ],
+      "dataTypes": [
+        "company disclosures",
+        "financial statements",
+        "material events"
+      ],
+      "integrationMode": "feed_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Issuer disclosure and period are mandatory provenance."
+    },
+    {
+      "id": "rekabet",
+      "name": "Rekabet Kurumu",
+      "authority": "Rekabet Kurumu",
+      "scope": "TR",
+      "url": "https://www.rekabet.gov.tr/",
+      "domains": [
+        "law",
+        "companies"
+      ],
+      "dataTypes": [
+        "decisions",
+        "sector inquiries",
+        "announcements"
+      ],
+      "integrationMode": "feed_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Decisions should be linked by number and date."
+    },
+    {
+      "id": "kik",
+      "name": "Kamu İhale Kurumu",
+      "authority": "Kamu İhale Kurumu",
+      "scope": "TR",
+      "url": "https://www.ihale.gov.tr/",
+      "domains": [
+        "procurement",
+        "law"
+      ],
+      "dataTypes": [
+        "procurement legislation",
+        "decisions",
+        "statistics"
+      ],
+      "integrationMode": "feed_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Use EKAP for individual notices where permitted."
+    },
+    {
+      "id": "ekap",
+      "name": "EKAP",
+      "authority": "Kamu İhale Kurumu",
+      "scope": "TR",
+      "url": "https://ekap.kik.gov.tr/",
+      "domains": [
+        "procurement"
+      ],
+      "dataTypes": [
+        "procurement notices",
+        "tender information"
+      ],
+      "integrationMode": "manual_reference",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Access and reuse constraints must be reviewed before automation."
+    },
+    {
+      "id": "gib",
+      "name": "Gelir İdaresi Başkanlığı",
+      "authority": "T.C. Hazine ve Maliye Bakanlığı",
+      "scope": "TR",
+      "url": "https://www.gib.gov.tr/",
+      "domains": [
+        "tax",
+        "law"
+      ],
+      "dataTypes": [
+        "tax guidance",
+        "communiqués",
+        "forms"
+      ],
+      "integrationMode": "feed_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "General information is not case-specific tax advice."
+    },
+    {
+      "id": "e-devlet",
+      "name": "e-Devlet Kapısı",
+      "authority": "T.C. Cumhurbaşkanlığı Dijital Dönüşüm Ofisi",
+      "scope": "TR",
+      "url": "https://www.turkiye.gov.tr/",
+      "domains": [
+        "law",
+        "companies"
+      ],
+      "dataTypes": [
+        "public service entry points",
+        "registries"
+      ],
+      "integrationMode": "manual_reference",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Never automate authenticated personal services without explicit authority."
+    },
+    {
+      "id": "cevre",
+      "name": "Çevre, Şehircilik ve İklim Değişikliği Bakanlığı",
+      "authority": "T.C. Çevre, Şehircilik ve İklim Değişikliği Bakanlığı",
+      "scope": "TR",
+      "url": "https://www.csb.gov.tr/",
+      "domains": [
+        "environment",
+        "law",
+        "incentives"
+      ],
+      "dataTypes": [
+        "environmental rules",
+        "permits",
+        "announcements"
+      ],
+      "integrationMode": "feed_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Use the competent directorate and current legal instrument."
+    },
+    {
+      "id": "btk",
+      "name": "BTK",
+      "authority": "Bilgi Teknolojileri ve İletişim Kurumu",
+      "scope": "TR",
+      "url": "https://www.btk.gov.tr/",
+      "domains": [
+        "law",
+        "statistics"
+      ],
+      "dataTypes": [
+        "sector data",
+        "authorisations",
+        "regulations"
+      ],
+      "integrationMode": "feed_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Sector reports may have separate publication calendars."
+    },
+    {
+      "id": "uab",
+      "name": "Ulaştırma ve Altyapı Bakanlığı",
+      "authority": "T.C. Ulaştırma ve Altyapı Bakanlığı",
+      "scope": "TR",
+      "url": "https://www.uab.gov.tr/",
+      "domains": [
+        "trade",
+        "statistics",
+        "law"
+      ],
+      "dataTypes": [
+        "transport policy",
+        "logistics statistics",
+        "regulations"
+      ],
+      "integrationMode": "feed_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Use modal directorate sources for operational requirements."
+    },
+    {
+      "id": "yok",
+      "name": "YÖK",
+      "authority": "Yükseköğretim Kurulu",
+      "scope": "TR",
+      "url": "https://www.yok.gov.tr/",
+      "domains": [
+        "education",
+        "statistics"
+      ],
+      "dataTypes": [
+        "higher education statistics",
+        "announcements"
+      ],
+      "integrationMode": "feed_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Use dataset year and definition."
+    },
+    {
+      "id": "yok-tez",
+      "name": "YÖK Ulusal Tez Merkezi",
+      "authority": "Yükseköğretim Kurulu",
+      "scope": "TR",
+      "url": "https://tez.yok.gov.tr/UlusalTezMerkezi/",
+      "domains": [
+        "education",
+        "research"
+      ],
+      "dataTypes": [
+        "thesis metadata"
+      ],
+      "integrationMode": "manual_reference",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Respect author permissions and full-text access conditions."
+    },
+    {
+      "id": "tobb",
+      "name": "TOBB",
+      "authority": "Türkiye Odalar ve Borsalar Birliği",
+      "scope": "TR",
+      "url": "https://www.tobb.org.tr/",
+      "domains": [
+        "companies",
+        "statistics",
+        "trade"
+      ],
+      "dataTypes": [
+        "company statistics",
+        "sector reports",
+        "capacity reports"
+      ],
+      "integrationMode": "feed_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Clarify public-body status and dataset reuse terms per source."
+    },
+    {
+      "id": "osbuk",
+      "name": "OSBÜK",
+      "authority": "Organize Sanayi Bölgeleri Üst Kuruluşu",
+      "scope": "TR",
+      "url": "https://osbuk.org/",
+      "domains": [
+        "companies",
+        "statistics"
+      ],
+      "dataTypes": [
+        "organised industrial zone information",
+        "announcements"
+      ],
+      "integrationMode": "feed_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Zone records need responsible OSB confirmation."
+    },
+    {
+      "id": "kalkinma-kutuphanesi",
+      "name": "Kalkınma Kütüphanesi",
+      "authority": "T.C. Sanayi ve Teknoloji Bakanlığı",
+      "scope": "TR",
+      "url": "https://www.kalkinmakutuphanesi.gov.tr/",
+      "domains": [
+        "research",
+        "statistics",
+        "incentives"
+      ],
+      "dataTypes": [
+        "regional plans",
+        "agency reports",
+        "analyses"
+      ],
+      "integrationMode": "manual_reference",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Use report publisher, year, and document URL."
+    },
+    {
+      "id": "eu-funding-tenders",
+      "name": "EU Funding & Tenders Portal",
+      "authority": "European Commission",
+      "scope": "EU",
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/home",
+      "domains": [
+        "incentives",
+        "procurement",
+        "research"
+      ],
+      "dataTypes": [
+        "calls",
+        "programmes",
+        "projects",
+        "tenders"
+      ],
+      "integrationMode": "api_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Call status, topic identifier, deadline, and version must be verified."
+    },
+    {
+      "id": "cordis",
+      "name": "CORDIS",
+      "authority": "European Commission",
+      "scope": "EU",
+      "url": "https://cordis.europa.eu/",
+      "domains": [
+        "research",
+        "incentives"
+      ],
+      "dataTypes": [
+        "EU-funded projects",
+        "results",
+        "publications"
+      ],
+      "integrationMode": "api_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Useful for project evidence; not a source of programme eligibility decisions."
+    },
+    {
+      "id": "eurostat",
+      "name": "Eurostat",
+      "authority": "European Commission",
+      "scope": "EU",
+      "url": "https://ec.europa.eu/eurostat/data",
+      "domains": [
+        "statistics",
+        "trade",
+        "energy"
+      ],
+      "dataTypes": [
+        "official European statistics",
+        "PRODCOM",
+        "Comext"
+      ],
+      "integrationMode": "api_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Store dataset code, dimensions, unit, flags, and retrieval time."
+    },
+    {
+      "id": "access2markets",
+      "name": "Access2Markets",
+      "authority": "European Commission",
+      "scope": "EU",
+      "url": "https://trade.ec.europa.eu/access-to-markets/",
+      "domains": [
+        "trade",
+        "law"
+      ],
+      "dataTypes": [
+        "tariffs",
+        "taxes",
+        "procedures",
+        "rules of origin"
+      ],
+      "integrationMode": "manual_reference",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Product classification and destination context are mandatory."
+    },
+    {
+      "id": "ted",
+      "name": "Tenders Electronic Daily",
+      "authority": "European Union",
+      "scope": "EU",
+      "url": "https://ted.europa.eu/",
+      "domains": [
+        "procurement"
+      ],
+      "dataTypes": [
+        "EU public procurement notices"
+      ],
+      "integrationMode": "api_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Use notice identifier, version, status, and publication date."
+    },
+    {
+      "id": "echa",
+      "name": "ECHA",
+      "authority": "European Chemicals Agency",
+      "scope": "EU",
+      "url": "https://echa.europa.eu/",
+      "domains": [
+        "law",
+        "standards",
+        "environment"
+      ],
+      "dataTypes": [
+        "chemical regulations",
+        "substance information",
+        "guidance"
+      ],
+      "integrationMode": "api_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Regulatory duties require substance, use, role, and current legal context."
+    },
+    {
+      "id": "un-comtrade",
+      "name": "UN Comtrade",
+      "authority": "United Nations Statistics Division",
+      "scope": "GLOBAL",
+      "url": "https://comtrade.un.org/",
+      "domains": [
+        "trade",
+        "statistics"
+      ],
+      "dataTypes": [
+        "international merchandise trade"
+      ],
+      "integrationMode": "api_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Store reporter, partner, flow, classification, code, period, and revision."
+    },
+    {
+      "id": "wto-data",
+      "name": "WTO Data",
+      "authority": "World Trade Organization",
+      "scope": "GLOBAL",
+      "url": "https://data.wto.org/",
+      "domains": [
+        "trade",
+        "statistics"
+      ],
+      "dataTypes": [
+        "trade indicators",
+        "tariffs",
+        "services trade"
+      ],
+      "integrationMode": "api_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Indicator definitions and reporting periods must travel with values."
+    },
+    {
+      "id": "world-bank-data",
+      "name": "World Bank Open Data",
+      "authority": "World Bank",
+      "scope": "GLOBAL",
+      "url": "https://data.worldbank.org/",
+      "domains": [
+        "statistics"
+      ],
+      "dataTypes": [
+        "development indicators",
+        "country data"
+      ],
+      "integrationMode": "api_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Use indicator code, year, source, and methodology."
+    },
+    {
+      "id": "wits",
+      "name": "World Integrated Trade Solution",
+      "authority": "World Bank",
+      "scope": "GLOBAL",
+      "url": "https://wits.worldbank.org/",
+      "domains": [
+        "trade",
+        "statistics"
+      ],
+      "dataTypes": [
+        "trade",
+        "tariffs",
+        "non-tariff measures"
+      ],
+      "integrationMode": "api_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Respect underlying provider definitions and licensing."
+    },
+    {
+      "id": "faostat",
+      "name": "FAOSTAT",
+      "authority": "Food and Agriculture Organization of the United Nations",
+      "scope": "GLOBAL",
+      "url": "https://www.fao.org/faostat/",
+      "domains": [
+        "agriculture",
+        "statistics"
+      ],
+      "dataTypes": [
+        "agriculture",
+        "food",
+        "land",
+        "emissions",
+        "trade"
+      ],
+      "integrationMode": "api_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Use domain, item, element, unit, area, year, and flags."
+    },
+    {
+      "id": "oecd-data-explorer",
+      "name": "OECD Data Explorer",
+      "authority": "Organisation for Economic Co-operation and Development",
+      "scope": "GLOBAL",
+      "url": "https://data-explorer.oecd.org/",
+      "domains": [
+        "statistics",
+        "trade",
+        "research"
+      ],
+      "dataTypes": [
+        "economic",
+        "industry",
+        "productivity",
+        "innovation indicators"
+      ],
+      "integrationMode": "api_candidate",
+      "verificationStatus": "verified_portal",
+      "reviewedAt": "2026-07-25",
+      "notes": "Store dataset and series identifiers plus revision metadata."
+    }
+  ],
+  "top100MissingFeatures": [
+    {
+      "id": "operations:content-pilot",
+      "title": "Bir dar üretim konu kümesini otorite kapısından geçir",
+      "source": "operations",
+      "owner": "editorial",
+      "priorityScore": 97,
+      "horizon": "30_days",
+      "dependency": "Expert and primary sources",
+      "outcomeMetric": "Authority-ready documents"
+    },
+    {
+      "id": "operations:production-hosting",
+      "title": "Üretim hosting ve bölge kararını onayla",
+      "source": "operations",
+      "owner": "platform",
+      "priorityScore": 96,
+      "horizon": "7_days",
+      "dependency": "Named infrastructure owner",
+      "outcomeMetric": "Release readiness"
+    },
+    {
+      "id": "ai:source-grounded-retrieval",
+      "title": "Kaynak temelli erişim",
+      "source": "ai_capability",
+      "owner": "uretir-ai, tesvik-ai, ihracat-ai",
+      "priorityScore": 95,
+      "horizon": "30_days",
+      "dependency": "authority-ready corpus; retrieval evaluation",
+      "outcomeMetric": "Yanıtı yalnızca izinli ve izlenebilir kayıtlardan kurar."
+    },
+    {
+      "id": "operations:programme-pilot",
+      "title": "Bir TeşvikAI program ailesini uçtan uca doğrula",
+      "source": "operations",
+      "owner": "tesvik-ai",
+      "priorityScore": 95,
+      "horizon": "30_days",
+      "dependency": "Source monitor and editorial owner",
+      "outcomeMetric": "Verified programme coverage"
+    },
+    {
+      "id": "operations:observability",
+      "title": "Hata, uptime ve Core Web Vitals gözlemlenebilirliğini bağla",
+      "source": "operations",
+      "owner": "platform",
+      "priorityScore": 94,
+      "horizon": "7_days",
+      "dependency": "Hosting decision",
+      "outcomeMetric": "Detected incidents"
+    },
+    {
+      "id": "operations:analytics-adapter",
+      "title": "Onay yönetimli analiz adaptörünü bağla",
+      "source": "operations",
+      "owner": "growth",
+      "priorityScore": 93,
+      "horizon": "7_days",
+      "dependency": "Privacy and consent approval",
+      "outcomeMetric": "Measured search and session depth"
+    },
+    {
+      "id": "operations:search-console",
+      "title": "Search Console salt-okunur veri hattını kur",
+      "source": "operations",
+      "owner": "seo",
+      "priorityScore": 92,
+      "horizon": "7_days",
+      "dependency": "Verified site property",
+      "outcomeMetric": "Validated demand signals"
+    },
+    {
+      "id": "ai:entity-resolution",
+      "title": "Varlık çözümleme",
+      "source": "ai_capability",
+      "owner": "uretir-ai, factory-ai, supply-chain-ai",
+      "priorityScore": 91,
+      "horizon": "30_days",
+      "dependency": "aliases; stable IDs; review queue",
+      "outcomeMetric": "Benzer şirket, ürün ve kurum adlarını ayırır."
+    },
+    {
+      "id": "operations:source-monitor",
+      "title": "Resmî kaynak değişiklik izleyicisini kur",
+      "source": "operations",
+      "owner": "data",
+      "priorityScore": 91,
+      "horizon": "30_days",
+      "dependency": "Connector policy",
+      "outcomeMetric": "Stale records blocked"
+    },
+    {
+      "id": "ai:cross-product-handoff",
+      "title": "Ürünler arası bağlam aktarımı",
+      "source": "ai_capability",
+      "owner": "all",
+      "priorityScore": 90,
+      "horizon": "30_days",
+      "dependency": "shared identity; consent model",
+      "outcomeMetric": "Kullanıcıyı bağlam kaybetmeden ilgili AI ürününe taşır."
+    },
+    {
+      "id": "operations:search-telemetry",
+      "title": "Sıfır sonuç ve arama terk sinyallerini ölç",
+      "source": "operations",
+      "owner": "search",
+      "priorityScore": 90,
+      "horizon": "30_days",
+      "dependency": "Consent-aware analytics",
+      "outcomeMetric": "Zero-result rate"
+    },
+    {
+      "id": "persona:factory_owner:fabrika-kabiliyeti-profili",
+      "title": "Fabrika kabiliyeti profili",
+      "source": "persona",
+      "owner": "factory_owner",
+      "priorityScore": 89,
+      "horizon": "30_days",
+      "dependency": "Tesisini doğrulanmış kıyas grubuyla karşılaştıramaz.",
+      "outcomeMetric": "Successful knowledge journey"
+    },
+    {
+      "id": "ai:follow-up-planning",
+      "title": "Takip sorusu planlama",
+      "source": "ai_capability",
+      "owner": "puan-ai, tesvik-ai, investment-ai",
+      "priorityScore": 88,
+      "horizon": "30_days",
+      "dependency": "question policy; completion tests",
+      "outcomeMetric": "Eksik karar girdilerini en az soruyla tamamlar."
+    },
+    {
+      "id": "operations:cms-selection",
+      "title": "Editoryal CMS ve önizleme yetki modelini seç",
+      "source": "operations",
+      "owner": "editorial",
+      "priorityScore": 88,
+      "horizon": "30_days",
+      "dependency": "Identity and content migration plan",
+      "outcomeMetric": "Review cycle time"
+    },
+    {
+      "id": "persona:entrepreneur:girisim-arastirma-dosyasi",
+      "title": "Girişim araştırma dosyası",
+      "source": "persona",
+      "owner": "entrepreneur",
+      "priorityScore": 88,
+      "horizon": "30_days",
+      "dependency": "Fikri sektör, yatırım ve destek kanıtlarıyla tek dosyada değerlendiremez.",
+      "outcomeMetric": "Successful knowledge journey"
+    },
+    {
+      "id": "ai:source-conflict-detection",
+      "title": "Kaynak çelişkisi tespiti",
+      "source": "ai_capability",
+      "owner": "tesvik-ai, compliance-ai, ihracat-ai",
+      "priorityScore": 87,
+      "horizon": "30_days",
+      "dependency": "versioned source snapshots",
+      "outcomeMetric": "Farklı resmî kayıtlar arasındaki uyuşmazlığı işaretler."
+    },
+    {
+      "id": "operations:identity",
+      "title": "Ortak kimlik, onay ve veri yaşam döngüsünü kur",
+      "source": "operations",
+      "owner": "identity",
+      "priorityScore": 87,
+      "horizon": "30_days",
+      "dependency": "Security and privacy design",
+      "outcomeMetric": "Returning-user activation"
+    },
+    {
+      "id": "persona:engineer:makine-proses-esleme",
+      "title": "Makine–proses eşleme",
+      "source": "persona",
+      "owner": "engineer",
+      "priorityScore": 87,
+      "horizon": "30_days",
+      "dependency": "Proses gereksinimini makine ve standartlarla eşleyemez.",
+      "outcomeMetric": "Successful knowledge journey"
+    },
+    {
+      "id": "ai:update-alerts",
+      "title": "Değişiklik ve son tarih uyarıları",
+      "source": "ai_capability",
+      "owner": "tesvik-ai, puan-ai, standards-ai",
+      "priorityScore": 86,
+      "horizon": "90_days",
+      "dependency": "identity; notification consent; change feeds",
+      "outcomeMetric": "Kaydedilen konu değiştiğinde kullanıcıyı bilgilendirir."
+    },
+    {
+      "id": "persona:architect:malzeme-bilgi-merkezi",
+      "title": "Malzeme bilgi merkezi",
+      "source": "persona",
+      "owner": "architect",
+      "priorityScore": 86,
+      "horizon": "30_days",
+      "dependency": "Malzeme, üretici, standart ve uygulama örneğini birlikte filtreleyemez.",
+      "outcomeMetric": "Successful knowledge journey"
+    },
+    {
+      "id": "persona:factory_owner:enerji-senaryo-hesaplayicisi",
+      "title": "Enerji senaryo hesaplayıcısı",
+      "source": "persona",
+      "owner": "factory_owner",
+      "priorityScore": 86,
+      "horizon": "30_days",
+      "dependency": "Enerji ve kapasite senaryosu çalıştıramaz.",
+      "outcomeMetric": "Returning-user task completion"
+    },
+    {
+      "id": "ai:research-workspace",
+      "title": "Kaydedilebilir araştırma çalışma alanı",
+      "source": "ai_capability",
+      "owner": "all",
+      "priorityScore": 85,
+      "horizon": "90_days",
+      "dependency": "identity; data retention; export/delete",
+      "outcomeMetric": "Kaynak, not ve karşılaştırmaları kullanıcı hesabında toplar."
+    },
+    {
+      "id": "operations:rollback-rehearsal",
+      "title": "Üretim geri alma tatbikatı yap",
+      "source": "operations",
+      "owner": "platform",
+      "priorityScore": 85,
+      "horizon": "30_days",
+      "dependency": "Immutable deployment",
+      "outcomeMetric": "Recovery time"
+    },
+    {
+      "id": "persona:entrepreneur:pazar-kanit-matrisi",
+      "title": "Pazar kanıt matrisi",
+      "source": "persona",
+      "owner": "entrepreneur",
+      "priorityScore": 85,
+      "horizon": "30_days",
+      "dependency": "Sonraki adımları hesabına kaydedemez.",
+      "outcomeMetric": "Returning-user task completion"
+    },
+    {
+      "id": "persona:investor:sektor-yatirim-karsilastirmasi",
+      "title": "Sektör yatırım karşılaştırması",
+      "source": "persona",
+      "owner": "investor",
+      "priorityScore": 85,
+      "horizon": "30_days",
+      "dependency": "Sektörleri veri ve risk boyutunda karşılaştıramaz.",
+      "outcomeMetric": "Successful knowledge journey"
+    },
+    {
+      "id": "ai:multilingual-retrieval",
+      "title": "Çok dilli erişim",
+      "source": "ai_capability",
+      "owner": "ihracat-ai, standards-ai, uretir-ai",
+      "priorityScore": 84,
+      "horizon": "90_days",
+      "dependency": "terminology map; translation evaluation",
+      "outcomeMetric": "Türkçe soruyu yabancı resmî kaynaklarla güvenli eşler."
+    },
+    {
+      "id": "persona:engineer:teknik-ozellik-karsilastirmasi",
+      "title": "Teknik özellik karşılaştırması",
+      "source": "persona",
+      "owner": "engineer",
+      "priorityScore": 84,
+      "horizon": "30_days",
+      "dependency": "Teknik iddiaları sürüm bazında karşılaştıramaz.",
+      "outcomeMetric": "Returning-user task completion"
+    },
+    {
+      "id": "persona:farmer:tarim-faaliyet-profili",
+      "title": "Tarım faaliyet profili",
+      "source": "persona",
+      "owner": "farmer",
+      "priorityScore": 84,
+      "horizon": "30_days",
+      "dependency": "Faaliyet ve konuma göre güncel potansiyel destek eşleşmesi alamaz.",
+      "outcomeMetric": "Successful knowledge journey"
+    },
+    {
+      "id": "ai:document-extraction",
+      "title": "Belge alanı çıkarımı",
+      "source": "ai_capability",
+      "owner": "document-ai, tesvik-ai",
+      "priorityScore": 83,
+      "horizon": "90_days",
+      "dependency": "OCR benchmark; document rights",
+      "outcomeMetric": "Belgeyi sayfa referanslı yapılandırılmış kayda dönüştürür."
+    },
+    {
+      "id": "persona:architect:uretici-malzeme-esleme",
+      "title": "Üretici–malzeme eşleme",
+      "source": "persona",
+      "owner": "architect",
+      "priorityScore": 83,
+      "horizon": "90_days",
+      "dependency": "Proje koleksiyonu oluşturamaz.",
+      "outcomeMetric": "Returning-user task completion"
+    },
+    {
+      "id": "persona:exporter:hedef-pazar-kanit-karsilastirmasi",
+      "title": "Hedef pazar kanıt karşılaştırması",
+      "source": "persona",
+      "owner": "exporter",
+      "priorityScore": 83,
+      "horizon": "90_days",
+      "dependency": "Ürün ve ülkeye göre güncel gereklilikleri tek ekranda karşılaştıramaz.",
+      "outcomeMetric": "Successful knowledge journey"
+    },
+    {
+      "id": "persona:factory_owner:kapasite-kiyaslama",
+      "title": "Kapasite kıyaslama",
+      "source": "persona",
+      "owner": "factory_owner",
+      "priorityScore": 83,
+      "horizon": "90_days",
+      "dependency": "Tesisini doğrulanmış kıyas grubuyla karşılaştıramaz.",
+      "outcomeMetric": "Successful knowledge journey"
+    },
+    {
+      "id": "operations:data-retention",
+      "title": "Kullanıcı ve kaynak verisi saklama politikasını onayla",
+      "source": "operations",
+      "owner": "security",
+      "priorityScore": 82,
+      "horizon": "90_days",
+      "dependency": "Identity architecture",
+      "outcomeMetric": "Audited retention compliance"
+    },
+    {
+      "id": "persona:entrepreneur:yatirim-on-fizibilite-akisi",
+      "title": "Yatırım ön fizibilite akışı",
+      "source": "persona",
+      "owner": "entrepreneur",
+      "priorityScore": 82,
+      "horizon": "90_days",
+      "dependency": "Fikri sektör, yatırım ve destek kanıtlarıyla tek dosyada değerlendiremez.",
+      "outcomeMetric": "Successful knowledge journey"
+    },
+    {
+      "id": "persona:investor:bolgesel-yatirim-haritasi",
+      "title": "Bölgesel yatırım haritası",
+      "source": "persona",
+      "owner": "investor",
+      "priorityScore": 82,
+      "horizon": "90_days",
+      "dependency": "Kaynaklı yatırım senaryosu çalıştıramaz.",
+      "outcomeMetric": "Returning-user task completion"
+    },
+    {
+      "id": "persona:manufacturer:dogrulanmis-uretici-dizini",
+      "title": "Doğrulanmış üretici dizini",
+      "source": "persona",
+      "owner": "manufacturer",
+      "priorityScore": 82,
+      "horizon": "90_days",
+      "dependency": "Doğrulanmış tedarikçi veya fabrika kabiliyeti bulamaz.",
+      "outcomeMetric": "Successful knowledge journey"
+    },
+    {
+      "id": "ai:programme-matching",
+      "title": "Resmî program eşleştirme",
+      "source": "ai_capability",
+      "owner": "tesvik-ai",
+      "priorityScore": 81,
+      "horizon": "90_days",
+      "dependency": "programme ingestion; amendment checks",
+      "outcomeMetric": "Profili güncel program kayıtlarıyla karşılaştırır."
+    },
+    {
+      "id": "persona:engineer:standart-kapsam-haritasi",
+      "title": "Standart kapsam haritası",
+      "source": "persona",
+      "owner": "engineer",
+      "priorityScore": 81,
+      "horizon": "90_days",
+      "dependency": "Proses gereksinimini makine ve standartlarla eşleyemez.",
+      "outcomeMetric": "Successful knowledge journey"
+    },
+    {
+      "id": "persona:farmer:bolgesel-destek-kesfi",
+      "title": "Bölgesel destek keşfi",
+      "source": "persona",
+      "owner": "farmer",
+      "priorityScore": 81,
+      "horizon": "90_days",
+      "dependency": "Üretim, sigorta ve fiyat verisini birlikte değerlendiremez.",
+      "outcomeMetric": "Returning-user task completion"
+    },
+    {
+      "id": "persona:student:seviyeli-ogrenme-yollari",
+      "title": "Seviyeli öğrenme yolları",
+      "source": "persona",
+      "owner": "student",
+      "priorityScore": 81,
+      "horizon": "90_days",
+      "dependency": "Öğrenme yolunu seviyesine göre düzenleyemez.",
+      "outcomeMetric": "Successful knowledge journey"
+    },
+    {
+      "id": "ai:application-checklist",
+      "title": "Başvuru kontrol listesi",
+      "source": "ai_capability",
+      "owner": "tesvik-ai, ihracat-ai",
+      "priorityScore": 80,
+      "horizon": "90_days",
+      "dependency": "document requirement model",
+      "outcomeMetric": "Belge ve hazırlık eksiklerini kaynağa bağlı açıklar."
+    },
+    {
+      "id": "persona:architect:yapi-standardi-arastirma-akisi",
+      "title": "Yapı standardı araştırma akışı",
+      "source": "persona",
+      "owner": "architect",
+      "priorityScore": 80,
+      "horizon": "90_days",
+      "dependency": "Malzeme, üretici, standart ve uygulama örneğini birlikte filtreleyemez.",
+      "outcomeMetric": "Successful knowledge journey"
+    },
+    {
+      "id": "persona:exporter:gtip-arastirma-calisma-alani",
+      "title": "GTİP araştırma çalışma alanı",
+      "source": "persona",
+      "owner": "exporter",
+      "priorityScore": 80,
+      "horizon": "90_days",
+      "dependency": "GTİP veya mevzuat için kesin sınıflandırma desteği alamaz.",
+      "outcomeMetric": "Returning-user task completion"
+    },
+    {
+      "id": "persona:factory_owner:kaydedilmis-tesis-calisma-alani",
+      "title": "Kaydedilmiş tesis çalışma alanı",
+      "source": "persona",
+      "owner": "factory_owner",
+      "priorityScore": 80,
+      "horizon": "90_days",
+      "dependency": "Enerji ve kapasite senaryosu çalıştıramaz.",
+      "outcomeMetric": "Returning-user task completion"
+    },
+    {
+      "id": "persona:researcher:kaynakli-veri-disa-aktarimi",
+      "title": "Kaynaklı veri dışa aktarımı",
+      "source": "persona",
+      "owner": "researcher",
+      "priorityScore": 80,
+      "horizon": "90_days",
+      "dependency": "Veri setlerini sorgulayıp dışa aktaramaz.",
+      "outcomeMetric": "Successful knowledge journey"
+    },
+    {
+      "id": "ai:factory-matching",
+      "title": "Fabrika kabiliyeti eşleme",
+      "source": "ai_capability",
+      "owner": "factory-ai",
+      "priorityScore": 79,
+      "horizon": "90_days",
+      "dependency": "verified factory registry",
+      "outcomeMetric": "Üretim ihtiyacını doğrulanmış tesis kabiliyetiyle eşler."
+    },
+    {
+      "id": "persona:entrepreneur:kisisel-gorev-ve-takip-listesi",
+      "title": "Kişisel görev ve takip listesi",
+      "source": "persona",
+      "owner": "entrepreneur",
+      "priorityScore": 79,
+      "horizon": "90_days",
+      "dependency": "Sonraki adımları hesabına kaydedemez.",
+      "outcomeMetric": "Returning-user task completion"
+    },
+    {
+      "id": "persona:investor:risk-ve-varsayim-matrisi",
+      "title": "Risk ve varsayım matrisi",
+      "source": "persona",
+      "owner": "investor",
+      "priorityScore": 79,
+      "horizon": "90_days",
+      "dependency": "Sektörleri veri ve risk boyutunda karşılaştıramaz.",
+      "outcomeMetric": "Successful knowledge journey"
+    },
+    {
+      "id": "persona:manufacturer:tedarikci-kabiliyeti-esleme",
+      "title": "Tedarikçi kabiliyeti eşleme",
+      "source": "persona",
+      "owner": "manufacturer",
+      "priorityScore": 79,
+      "horizon": "90_days",
+      "dependency": "Teklifleri normalleştirip karşılaştıramaz.",
+      "outcomeMetric": "Returning-user task completion"
+    },
+    {
+      "id": "persona:support_applicant:dogrulanmis-program-aramasi",
+      "title": "Doğrulanmış program araması",
+      "source": "persona",
+      "owner": "support_applicant",
+      "priorityScore": 79,
+      "horizon": "90_days",
+      "dependency": "Güncel program kayıtlarıyla profil eşleşmesi alamaz.",
+      "outcomeMetric": "Successful knowledge journey"
+    },
+    {
+      "id": "ai:machine-process-matching",
+      "title": "Makine–proses eşleme",
+      "source": "ai_capability",
+      "owner": "machine-ai",
+      "priorityScore": 78,
+      "horizon": "90_days",
+      "dependency": "machine taxonomy; expert review",
+      "outcomeMetric": "Süreç gereksiniminden makine sınıfı araştırması çıkarır."
+    },
+    {
+      "id": "persona:engineer:muhendislik-kaynak-paketi",
+      "title": "Mühendislik kaynak paketi",
+      "source": "persona",
+      "owner": "engineer",
+      "priorityScore": 78,
+      "horizon": "90_days",
+      "dependency": "Teknik iddiaları sürüm bazında karşılaştıramaz.",
+      "outcomeMetric": "Returning-user task completion"
+    },
+    {
+      "id": "persona:farmer:tarsim-arastirma-baglantisi",
+      "title": "TARSİM araştırma bağlantısı",
+      "source": "persona",
+      "owner": "farmer",
+      "priorityScore": 78,
+      "horizon": "90_days",
+      "dependency": "Faaliyet ve konuma göre güncel potansiyel destek eşleşmesi alamaz.",
+      "outcomeMetric": "Successful knowledge journey"
+    },
+    {
+      "id": "persona:sme_owner:kobi-isletme-profili",
+      "title": "KOBİ işletme profili",
+      "source": "persona",
+      "owner": "sme_owner",
+      "priorityScore": 78,
+      "horizon": "90_days",
+      "dependency": "İşletme profilini ürünler arasında taşıyamaz.",
+      "outcomeMetric": "Successful knowledge journey"
+    },
+    {
+      "id": "persona:student:kavram-sozlugu",
+      "title": "Kavram sözlüğü",
+      "source": "persona",
+      "owner": "student",
+      "priorityScore": 78,
+      "horizon": "90_days",
+      "dependency": "Not, kaynak ve ilerleme kaydedemez.",
+      "outcomeMetric": "Returning-user task completion"
+    },
+    {
+      "id": "product:fiyat-ai:licensed-price-feeds",
+      "title": "FiyatAI: licensed price feeds",
+      "source": "product_prerequisite",
+      "owner": "fiyat-ai",
+      "priorityScore": 78,
+      "horizon": "90_days",
+      "dependency": "licensed price feeds",
+      "outcomeMetric": "FiyatAI readiness"
+    },
+    {
+      "id": "ai:standards-mapping",
+      "title": "Standart kapsamı eşleme",
+      "source": "ai_capability",
+      "owner": "standards-ai, compliance-ai",
+      "priorityScore": 77,
+      "horizon": "later",
+      "dependency": "licensed metadata; scope review",
+      "outcomeMetric": "Ürün ve pazarı standart araştırma yollarına bağlar."
+    },
+    {
+      "id": "persona:ai_enthusiast:kaynakli-uretirai-onizlemesi",
+      "title": "Kaynaklı UretirAI önizlemesi",
+      "source": "persona",
+      "owner": "ai_enthusiast",
+      "priorityScore": 77,
+      "horizon": "90_days",
+      "dependency": "Kaynaklı AI yanıtını canlı deneyemez.",
+      "outcomeMetric": "Successful knowledge journey"
+    },
+    {
+      "id": "persona:architect:proje-koleksiyonlari",
+      "title": "Proje koleksiyonları",
+      "source": "persona",
+      "owner": "architect",
+      "priorityScore": 77,
+      "horizon": "90_days",
+      "dependency": "Proje koleksiyonu oluşturamaz.",
+      "outcomeMetric": "Returning-user task completion"
+    },
+    {
+      "id": "persona:exporter:ihracat-belge-kontrolu",
+      "title": "İhracat belge kontrolü",
+      "source": "persona",
+      "owner": "exporter",
+      "priorityScore": 77,
+      "horizon": "90_days",
+      "dependency": "Ürün ve ülkeye göre güncel gereklilikleri tek ekranda karşılaştıramaz.",
+      "outcomeMetric": "Successful knowledge journey"
+    },
+    {
+      "id": "persona:researcher:iddia-surum-gecmisi",
+      "title": "İddia sürüm geçmişi",
+      "source": "persona",
+      "owner": "researcher",
+      "priorityScore": 77,
+      "horizon": "90_days",
+      "dependency": "İddia ve kaynak sürümlerini zaman içinde izleyemez.",
+      "outcomeMetric": "Returning-user task completion"
+    },
+    {
+      "id": "ai:energy-scenarios",
+      "title": "Enerji senaryo modelleme",
+      "source": "ai_capability",
+      "owner": "energy-ai, investment-ai",
+      "priorityScore": 76,
+      "horizon": "later",
+      "dependency": "tariff feeds; audited calculator",
+      "outcomeMetric": "Tesis seçeneklerini veri, varsayım ve hassasiyetle karşılaştırır."
+    },
+    {
+      "id": "persona:investor:yatirim-izleme-listesi",
+      "title": "Yatırım izleme listesi",
+      "source": "persona",
+      "owner": "investor",
+      "priorityScore": 76,
+      "horizon": "90_days",
+      "dependency": "Kaynaklı yatırım senaryosu çalıştıramaz.",
+      "outcomeMetric": "Returning-user task completion"
+    },
+    {
+      "id": "persona:manufacturer:teklif-normalizasyonu",
+      "title": "Teklif normalizasyonu",
+      "source": "persona",
+      "owner": "manufacturer",
+      "priorityScore": 76,
+      "horizon": "90_days",
+      "dependency": "Doğrulanmış tedarikçi veya fabrika kabiliyeti bulamaz.",
+      "outcomeMetric": "Successful knowledge journey"
+    },
+    {
+      "id": "persona:support_applicant:potansiyel-eslesme-on-kontrolu",
+      "title": "Potansiyel eşleşme ön kontrolü",
+      "source": "persona",
+      "owner": "support_applicant",
+      "priorityScore": 76,
+      "horizon": "90_days",
+      "dependency": "Belge, son tarih ve değişiklikleri takip edemez.",
+      "outcomeMetric": "Returning-user task completion"
+    },
+    {
+      "id": "ai:export-market-comparison",
+      "title": "İhracat pazarı kanıt karşılaştırması",
+      "source": "ai_capability",
+      "owner": "ihracat-ai",
+      "priorityScore": 75,
+      "horizon": "later",
+      "dependency": "trade adapters; market methodology",
+      "outcomeMetric": "Pazarları tek skor yerine kanıt matrisiyle karşılaştırır."
+    },
+    {
+      "id": "persona:farmer:tarimsal-fiyat-ve-risk-gorunumu",
+      "title": "Tarımsal fiyat ve risk görünümü",
+      "source": "persona",
+      "owner": "farmer",
+      "priorityScore": 75,
+      "horizon": "later",
+      "dependency": "Üretim, sigorta ve fiyat verisini birlikte değerlendiremez.",
+      "outcomeMetric": "Returning-user task completion"
+    },
+    {
+      "id": "persona:sme_owner:urunler-arasi-guvenli-baglam-aktarimi",
+      "title": "Ürünler arası güvenli bağlam aktarımı",
+      "source": "persona",
+      "owner": "sme_owner",
+      "priorityScore": 75,
+      "horizon": "later",
+      "dependency": "Destek, maliyet ve tedarik görevlerini tek yerde yönetemez.",
+      "outcomeMetric": "Returning-user task completion"
+    },
+    {
+      "id": "persona:student:kaynak-koleksiyonu",
+      "title": "Kaynak koleksiyonu",
+      "source": "persona",
+      "owner": "student",
+      "priorityScore": 75,
+      "horizon": "later",
+      "dependency": "Öğrenme yolunu seviyesine göre düzenleyemez.",
+      "outcomeMetric": "Successful knowledge journey"
+    },
+    {
+      "id": "ai:supply-risk-map",
+      "title": "Tedarik riski haritalama",
+      "source": "ai_capability",
+      "owner": "supply-chain-ai",
+      "priorityScore": 74,
+      "horizon": "later",
+      "dependency": "supplier registry; trade data",
+      "outcomeMetric": "Tedarik bağımlılığı ve alternatif araştırma yollarını gösterir."
+    },
+    {
+      "id": "persona:ai_enthusiast:ai-degerlendirme-panosu",
+      "title": "AI değerlendirme panosu",
+      "source": "persona",
+      "owner": "ai_enthusiast",
+      "priorityScore": 74,
+      "horizon": "later",
+      "dependency": "Değerlendirme ve hata örneklerini inceleyemez.",
+      "outcomeMetric": "Returning-user task completion"
+    },
+    {
+      "id": "persona:exporter:pazar-ve-mevzuat-degisiklik-uyarilari",
+      "title": "Pazar ve mevzuat değişiklik uyarıları",
+      "source": "persona",
+      "owner": "exporter",
+      "priorityScore": 74,
+      "horizon": "later",
+      "dependency": "GTİP veya mevzuat için kesin sınıflandırma desteği alamaz.",
+      "outcomeMetric": "Returning-user task completion"
+    },
+    {
+      "id": "persona:researcher:arastirma-koleksiyonlari",
+      "title": "Araştırma koleksiyonları",
+      "source": "persona",
+      "owner": "researcher",
+      "priorityScore": 74,
+      "horizon": "later",
+      "dependency": "Veri setlerini sorgulayıp dışa aktaramaz.",
+      "outcomeMetric": "Successful knowledge journey"
+    },
+    {
+      "id": "product:agriculture-ai:agriculture-ontology",
+      "title": "AgricultureAI: agriculture ontology",
+      "source": "product_prerequisite",
+      "owner": "agriculture-ai",
+      "priorityScore": 74,
+      "horizon": "later",
+      "dependency": "agriculture ontology",
+      "outcomeMetric": "AgricultureAI readiness"
+    },
+    {
+      "id": "product:compliance-ai:legal-source-versioning",
+      "title": "ComplianceAI: legal source versioning",
+      "source": "product_prerequisite",
+      "owner": "compliance-ai",
+      "priorityScore": 74,
+      "horizon": "later",
+      "dependency": "legal source versioning",
+      "outcomeMetric": "ComplianceAI readiness"
+    },
+    {
+      "id": "product:document-ai:document-rights-policy",
+      "title": "DocumentAI: document rights policy",
+      "source": "product_prerequisite",
+      "owner": "document-ai",
+      "priorityScore": 74,
+      "horizon": "later",
+      "dependency": "document rights policy",
+      "outcomeMetric": "DocumentAI readiness"
+    },
+    {
+      "id": "product:energy-ai:authorised-tariff-data",
+      "title": "EnergyAI: authorised tariff data",
+      "source": "product_prerequisite",
+      "owner": "energy-ai",
+      "priorityScore": 74,
+      "horizon": "later",
+      "dependency": "authorised tariff data",
+      "outcomeMetric": "EnergyAI readiness"
+    },
+    {
+      "id": "product:factory-ai:verified-factory-registry",
+      "title": "FactoryAI: verified factory registry",
+      "source": "product_prerequisite",
+      "owner": "factory-ai",
+      "priorityScore": 74,
+      "horizon": "later",
+      "dependency": "verified factory registry",
+      "outcomeMetric": "FactoryAI readiness"
+    },
+    {
+      "id": "product:fiyat-ai:unit-ontology",
+      "title": "FiyatAI: unit ontology",
+      "source": "product_prerequisite",
+      "owner": "fiyat-ai",
+      "priorityScore": 74,
+      "horizon": "90_days",
+      "dependency": "unit ontology",
+      "outcomeMetric": "FiyatAI readiness"
+    },
+    {
+      "id": "product:investment-ai:regional-data-model",
+      "title": "InvestmentAI: regional data model",
+      "source": "product_prerequisite",
+      "owner": "investment-ai",
+      "priorityScore": 74,
+      "horizon": "later",
+      "dependency": "regional data model",
+      "outcomeMetric": "InvestmentAI readiness"
+    },
+    {
+      "id": "product:machine-ai:machine-taxonomy",
+      "title": "MachineAI: machine taxonomy",
+      "source": "product_prerequisite",
+      "owner": "machine-ai",
+      "priorityScore": 74,
+      "horizon": "later",
+      "dependency": "machine taxonomy",
+      "outcomeMetric": "MachineAI readiness"
+    },
+    {
+      "id": "product:standards-ai:standards-metadata-licence",
+      "title": "StandardsAI: standards metadata licence",
+      "source": "product_prerequisite",
+      "owner": "standards-ai",
+      "priorityScore": 74,
+      "horizon": "later",
+      "dependency": "standards metadata licence",
+      "outcomeMetric": "StandardsAI readiness"
+    },
+    {
+      "id": "product:supply-chain-ai:verified-supplier-claims",
+      "title": "SupplyChainAI: verified supplier claims",
+      "source": "product_prerequisite",
+      "owner": "supply-chain-ai",
+      "priorityScore": 74,
+      "horizon": "later",
+      "dependency": "verified supplier claims",
+      "outcomeMetric": "SupplyChainAI readiness"
+    },
+    {
+      "id": "ai:unit-normalisation",
+      "title": "Fiyat ve birim normalizasyonu",
+      "source": "ai_capability",
+      "owner": "fiyat-ai, energy-ai",
+      "priorityScore": 73,
+      "horizon": "later",
+      "dependency": "unit ontology; FX provenance",
+      "outcomeMetric": "Birim, kur, kalite ve teslim kapsamını karşılaştırılabilir kılar."
+    },
+    {
+      "id": "persona:manufacturer:tedarik-riski-haritasi",
+      "title": "Tedarik riski haritası",
+      "source": "persona",
+      "owner": "manufacturer",
+      "priorityScore": 73,
+      "horizon": "later",
+      "dependency": "Teklifleri normalleştirip karşılaştıramaz.",
+      "outcomeMetric": "Returning-user task completion"
+    },
+    {
+      "id": "persona:support_applicant:basvuru-belge-calisma-alani",
+      "title": "Başvuru belge çalışma alanı",
+      "source": "persona",
+      "owner": "support_applicant",
+      "priorityScore": 73,
+      "horizon": "later",
+      "dependency": "Güncel program kayıtlarıyla profil eşleşmesi alamaz.",
+      "outcomeMetric": "Successful knowledge journey"
+    },
+    {
+      "id": "persona:sme_owner:karar-calisma-alani",
+      "title": "Karar çalışma alanı",
+      "source": "persona",
+      "owner": "sme_owner",
+      "priorityScore": 72,
+      "horizon": "later",
+      "dependency": "İşletme profilini ürünler arasında taşıyamaz.",
+      "outcomeMetric": "Successful knowledge journey"
+    },
+    {
+      "id": "persona:student:okuma-ilerleme-takibi",
+      "title": "Okuma ilerleme takibi",
+      "source": "persona",
+      "owner": "student",
+      "priorityScore": 72,
+      "horizon": "later",
+      "dependency": "Not, kaynak ve ilerleme kaydedemez.",
+      "outcomeMetric": "Returning-user task completion"
+    },
+    {
+      "id": "ai:answer-audit",
+      "title": "Yanıt değerlendirme ve denetim",
+      "source": "ai_capability",
+      "owner": "all",
+      "priorityScore": 71,
+      "horizon": "later",
+      "dependency": "golden datasets; red-team cases; audit log",
+      "outcomeMetric": "Doğruluk, kaynak, tazelik ve faydayı sürüm bazında ölçer."
+    },
+    {
+      "id": "persona:ai_enthusiast:yanit-geri-bildirim-akisi",
+      "title": "Yanıt geri bildirim akışı",
+      "source": "persona",
+      "owner": "ai_enthusiast",
+      "priorityScore": 71,
+      "horizon": "later",
+      "dependency": "Kaynaklı AI yanıtını canlı deneyemez.",
+      "outcomeMetric": "Successful knowledge journey"
+    },
+    {
+      "id": "persona:researcher:atif-bicimi-uretimi",
+      "title": "Atıf biçimi üretimi",
+      "source": "persona",
+      "owner": "researcher",
+      "priorityScore": 71,
+      "horizon": "later",
+      "dependency": "İddia ve kaynak sürümlerini zaman içinde izleyemez.",
+      "outcomeMetric": "Returning-user task completion"
+    },
+    {
+      "id": "persona:support_applicant:cagri-degisiklik-uyarilari",
+      "title": "Çağrı değişiklik uyarıları",
+      "source": "persona",
+      "owner": "support_applicant",
+      "priorityScore": 70,
+      "horizon": "later",
+      "dependency": "Belge, son tarih ve değişiklikleri takip edemez.",
+      "outcomeMetric": "Returning-user task completion"
+    },
+    {
+      "id": "product:agriculture-ai:regional-eligibility-records",
+      "title": "AgricultureAI: regional eligibility records",
+      "source": "product_prerequisite",
+      "owner": "agriculture-ai",
+      "priorityScore": 70,
+      "horizon": "later",
+      "dependency": "regional eligibility records",
+      "outcomeMetric": "AgricultureAI readiness"
+    },
+    {
+      "id": "product:compliance-ai:jurisdiction-model",
+      "title": "ComplianceAI: jurisdiction model",
+      "source": "product_prerequisite",
+      "owner": "compliance-ai",
+      "priorityScore": 70,
+      "horizon": "later",
+      "dependency": "jurisdiction model",
+      "outcomeMetric": "ComplianceAI readiness"
+    },
+    {
+      "id": "product:document-ai:ocr-evaluation-set",
+      "title": "DocumentAI: OCR evaluation set",
+      "source": "product_prerequisite",
+      "owner": "document-ai",
+      "priorityScore": 70,
+      "horizon": "later",
+      "dependency": "OCR evaluation set",
+      "outcomeMetric": "DocumentAI readiness"
+    },
+    {
+      "id": "product:energy-ai:calculation-audit",
+      "title": "EnergyAI: calculation audit",
+      "source": "product_prerequisite",
+      "owner": "energy-ai",
+      "priorityScore": 70,
+      "horizon": "later",
+      "dependency": "calculation audit",
+      "outcomeMetric": "EnergyAI readiness"
+    },
+    {
+      "id": "product:factory-ai:capability-ontology",
+      "title": "FactoryAI: capability ontology",
+      "source": "product_prerequisite",
+      "owner": "factory-ai",
+      "priorityScore": 70,
+      "horizon": "later",
+      "dependency": "capability ontology",
+      "outcomeMetric": "FactoryAI readiness"
+    },
+    {
+      "id": "product:fiyat-ai:revision-aware-time-series",
+      "title": "FiyatAI: revision-aware time series",
+      "source": "product_prerequisite",
+      "owner": "fiyat-ai",
+      "priorityScore": 70,
+      "horizon": "90_days",
+      "dependency": "revision-aware time series",
+      "outcomeMetric": "FiyatAI readiness"
+    },
+    {
+      "id": "product:investment-ai:scenario-methodology",
+      "title": "InvestmentAI: scenario methodology",
+      "source": "product_prerequisite",
+      "owner": "investment-ai",
+      "priorityScore": 70,
+      "horizon": "later",
+      "dependency": "scenario methodology",
+      "outcomeMetric": "InvestmentAI readiness"
+    },
+    {
+      "id": "product:machine-ai:performance-claim-evidence-model",
+      "title": "MachineAI: performance-claim evidence model",
+      "source": "product_prerequisite",
+      "owner": "machine-ai",
+      "priorityScore": 70,
+      "horizon": "later",
+      "dependency": "performance-claim evidence model",
+      "outcomeMetric": "MachineAI readiness"
+    }
+  ],
+  "roadmap": {
+    "sevenDays": [
+      {
+        "id": "operations:production-hosting",
+        "title": "Üretim hosting ve bölge kararını onayla",
+        "source": "operations",
+        "owner": "platform",
+        "priorityScore": 96,
+        "horizon": "7_days",
+        "dependency": "Named infrastructure owner",
+        "outcomeMetric": "Release readiness"
+      },
+      {
+        "id": "operations:observability",
+        "title": "Hata, uptime ve Core Web Vitals gözlemlenebilirliğini bağla",
+        "source": "operations",
+        "owner": "platform",
+        "priorityScore": 94,
+        "horizon": "7_days",
+        "dependency": "Hosting decision",
+        "outcomeMetric": "Detected incidents"
+      },
+      {
+        "id": "operations:analytics-adapter",
+        "title": "Onay yönetimli analiz adaptörünü bağla",
+        "source": "operations",
+        "owner": "growth",
+        "priorityScore": 93,
+        "horizon": "7_days",
+        "dependency": "Privacy and consent approval",
+        "outcomeMetric": "Measured search and session depth"
+      },
+      {
+        "id": "operations:search-console",
+        "title": "Search Console salt-okunur veri hattını kur",
+        "source": "operations",
+        "owner": "seo",
+        "priorityScore": 92,
+        "horizon": "7_days",
+        "dependency": "Verified site property",
+        "outcomeMetric": "Validated demand signals"
+      }
+    ],
+    "thirtyDays": [
+      {
+        "id": "operations:content-pilot",
+        "title": "Bir dar üretim konu kümesini otorite kapısından geçir",
+        "source": "operations",
+        "owner": "editorial",
+        "priorityScore": 97,
+        "horizon": "30_days",
+        "dependency": "Expert and primary sources",
+        "outcomeMetric": "Authority-ready documents"
+      },
+      {
+        "id": "ai:source-grounded-retrieval",
+        "title": "Kaynak temelli erişim",
+        "source": "ai_capability",
+        "owner": "uretir-ai, tesvik-ai, ihracat-ai",
+        "priorityScore": 95,
+        "horizon": "30_days",
+        "dependency": "authority-ready corpus; retrieval evaluation",
+        "outcomeMetric": "Yanıtı yalnızca izinli ve izlenebilir kayıtlardan kurar."
+      },
+      {
+        "id": "operations:programme-pilot",
+        "title": "Bir TeşvikAI program ailesini uçtan uca doğrula",
+        "source": "operations",
+        "owner": "tesvik-ai",
+        "priorityScore": 95,
+        "horizon": "30_days",
+        "dependency": "Source monitor and editorial owner",
+        "outcomeMetric": "Verified programme coverage"
+      },
+      {
+        "id": "ai:entity-resolution",
+        "title": "Varlık çözümleme",
+        "source": "ai_capability",
+        "owner": "uretir-ai, factory-ai, supply-chain-ai",
+        "priorityScore": 91,
+        "horizon": "30_days",
+        "dependency": "aliases; stable IDs; review queue",
+        "outcomeMetric": "Benzer şirket, ürün ve kurum adlarını ayırır."
+      },
+      {
+        "id": "operations:source-monitor",
+        "title": "Resmî kaynak değişiklik izleyicisini kur",
+        "source": "operations",
+        "owner": "data",
+        "priorityScore": 91,
+        "horizon": "30_days",
+        "dependency": "Connector policy",
+        "outcomeMetric": "Stale records blocked"
+      },
+      {
+        "id": "ai:cross-product-handoff",
+        "title": "Ürünler arası bağlam aktarımı",
+        "source": "ai_capability",
+        "owner": "all",
+        "priorityScore": 90,
+        "horizon": "30_days",
+        "dependency": "shared identity; consent model",
+        "outcomeMetric": "Kullanıcıyı bağlam kaybetmeden ilgili AI ürününe taşır."
+      },
+      {
+        "id": "operations:search-telemetry",
+        "title": "Sıfır sonuç ve arama terk sinyallerini ölç",
+        "source": "operations",
+        "owner": "search",
+        "priorityScore": 90,
+        "horizon": "30_days",
+        "dependency": "Consent-aware analytics",
+        "outcomeMetric": "Zero-result rate"
+      },
+      {
+        "id": "persona:factory_owner:fabrika-kabiliyeti-profili",
+        "title": "Fabrika kabiliyeti profili",
+        "source": "persona",
+        "owner": "factory_owner",
+        "priorityScore": 89,
+        "horizon": "30_days",
+        "dependency": "Tesisini doğrulanmış kıyas grubuyla karşılaştıramaz.",
+        "outcomeMetric": "Successful knowledge journey"
+      },
+      {
+        "id": "ai:follow-up-planning",
+        "title": "Takip sorusu planlama",
+        "source": "ai_capability",
+        "owner": "puan-ai, tesvik-ai, investment-ai",
+        "priorityScore": 88,
+        "horizon": "30_days",
+        "dependency": "question policy; completion tests",
+        "outcomeMetric": "Eksik karar girdilerini en az soruyla tamamlar."
+      },
+      {
+        "id": "operations:cms-selection",
+        "title": "Editoryal CMS ve önizleme yetki modelini seç",
+        "source": "operations",
+        "owner": "editorial",
+        "priorityScore": 88,
+        "horizon": "30_days",
+        "dependency": "Identity and content migration plan",
+        "outcomeMetric": "Review cycle time"
+      },
+      {
+        "id": "persona:entrepreneur:girisim-arastirma-dosyasi",
+        "title": "Girişim araştırma dosyası",
+        "source": "persona",
+        "owner": "entrepreneur",
+        "priorityScore": 88,
+        "horizon": "30_days",
+        "dependency": "Fikri sektör, yatırım ve destek kanıtlarıyla tek dosyada değerlendiremez.",
+        "outcomeMetric": "Successful knowledge journey"
+      },
+      {
+        "id": "ai:source-conflict-detection",
+        "title": "Kaynak çelişkisi tespiti",
+        "source": "ai_capability",
+        "owner": "tesvik-ai, compliance-ai, ihracat-ai",
+        "priorityScore": 87,
+        "horizon": "30_days",
+        "dependency": "versioned source snapshots",
+        "outcomeMetric": "Farklı resmî kayıtlar arasındaki uyuşmazlığı işaretler."
+      },
+      {
+        "id": "operations:identity",
+        "title": "Ortak kimlik, onay ve veri yaşam döngüsünü kur",
+        "source": "operations",
+        "owner": "identity",
+        "priorityScore": 87,
+        "horizon": "30_days",
+        "dependency": "Security and privacy design",
+        "outcomeMetric": "Returning-user activation"
+      },
+      {
+        "id": "persona:engineer:makine-proses-esleme",
+        "title": "Makine–proses eşleme",
+        "source": "persona",
+        "owner": "engineer",
+        "priorityScore": 87,
+        "horizon": "30_days",
+        "dependency": "Proses gereksinimini makine ve standartlarla eşleyemez.",
+        "outcomeMetric": "Successful knowledge journey"
+      },
+      {
+        "id": "persona:architect:malzeme-bilgi-merkezi",
+        "title": "Malzeme bilgi merkezi",
+        "source": "persona",
+        "owner": "architect",
+        "priorityScore": 86,
+        "horizon": "30_days",
+        "dependency": "Malzeme, üretici, standart ve uygulama örneğini birlikte filtreleyemez.",
+        "outcomeMetric": "Successful knowledge journey"
+      },
+      {
+        "id": "persona:factory_owner:enerji-senaryo-hesaplayicisi",
+        "title": "Enerji senaryo hesaplayıcısı",
+        "source": "persona",
+        "owner": "factory_owner",
+        "priorityScore": 86,
+        "horizon": "30_days",
+        "dependency": "Enerji ve kapasite senaryosu çalıştıramaz.",
+        "outcomeMetric": "Returning-user task completion"
+      },
+      {
+        "id": "operations:rollback-rehearsal",
+        "title": "Üretim geri alma tatbikatı yap",
+        "source": "operations",
+        "owner": "platform",
+        "priorityScore": 85,
+        "horizon": "30_days",
+        "dependency": "Immutable deployment",
+        "outcomeMetric": "Recovery time"
+      },
+      {
+        "id": "persona:entrepreneur:pazar-kanit-matrisi",
+        "title": "Pazar kanıt matrisi",
+        "source": "persona",
+        "owner": "entrepreneur",
+        "priorityScore": 85,
+        "horizon": "30_days",
+        "dependency": "Sonraki adımları hesabına kaydedemez.",
+        "outcomeMetric": "Returning-user task completion"
+      },
+      {
+        "id": "persona:investor:sektor-yatirim-karsilastirmasi",
+        "title": "Sektör yatırım karşılaştırması",
+        "source": "persona",
+        "owner": "investor",
+        "priorityScore": 85,
+        "horizon": "30_days",
+        "dependency": "Sektörleri veri ve risk boyutunda karşılaştıramaz.",
+        "outcomeMetric": "Successful knowledge journey"
+      },
+      {
+        "id": "persona:engineer:teknik-ozellik-karsilastirmasi",
+        "title": "Teknik özellik karşılaştırması",
+        "source": "persona",
+        "owner": "engineer",
+        "priorityScore": 84,
+        "horizon": "30_days",
+        "dependency": "Teknik iddiaları sürüm bazında karşılaştıramaz.",
+        "outcomeMetric": "Returning-user task completion"
+      }
+    ],
+    "ninetyDays": [
+      {
+        "id": "ai:update-alerts",
+        "title": "Değişiklik ve son tarih uyarıları",
+        "source": "ai_capability",
+        "owner": "tesvik-ai, puan-ai, standards-ai",
+        "priorityScore": 86,
+        "horizon": "90_days",
+        "dependency": "identity; notification consent; change feeds",
+        "outcomeMetric": "Kaydedilen konu değiştiğinde kullanıcıyı bilgilendirir."
+      },
+      {
+        "id": "ai:research-workspace",
+        "title": "Kaydedilebilir araştırma çalışma alanı",
+        "source": "ai_capability",
+        "owner": "all",
+        "priorityScore": 85,
+        "horizon": "90_days",
+        "dependency": "identity; data retention; export/delete",
+        "outcomeMetric": "Kaynak, not ve karşılaştırmaları kullanıcı hesabında toplar."
+      },
+      {
+        "id": "ai:multilingual-retrieval",
+        "title": "Çok dilli erişim",
+        "source": "ai_capability",
+        "owner": "ihracat-ai, standards-ai, uretir-ai",
+        "priorityScore": 84,
+        "horizon": "90_days",
+        "dependency": "terminology map; translation evaluation",
+        "outcomeMetric": "Türkçe soruyu yabancı resmî kaynaklarla güvenli eşler."
+      },
+      {
+        "id": "ai:document-extraction",
+        "title": "Belge alanı çıkarımı",
+        "source": "ai_capability",
+        "owner": "document-ai, tesvik-ai",
+        "priorityScore": 83,
+        "horizon": "90_days",
+        "dependency": "OCR benchmark; document rights",
+        "outcomeMetric": "Belgeyi sayfa referanslı yapılandırılmış kayda dönüştürür."
+      },
+      {
+        "id": "persona:architect:uretici-malzeme-esleme",
+        "title": "Üretici–malzeme eşleme",
+        "source": "persona",
+        "owner": "architect",
+        "priorityScore": 83,
+        "horizon": "90_days",
+        "dependency": "Proje koleksiyonu oluşturamaz.",
+        "outcomeMetric": "Returning-user task completion"
+      },
+      {
+        "id": "persona:exporter:hedef-pazar-kanit-karsilastirmasi",
+        "title": "Hedef pazar kanıt karşılaştırması",
+        "source": "persona",
+        "owner": "exporter",
+        "priorityScore": 83,
+        "horizon": "90_days",
+        "dependency": "Ürün ve ülkeye göre güncel gereklilikleri tek ekranda karşılaştıramaz.",
+        "outcomeMetric": "Successful knowledge journey"
+      },
+      {
+        "id": "persona:factory_owner:kapasite-kiyaslama",
+        "title": "Kapasite kıyaslama",
+        "source": "persona",
+        "owner": "factory_owner",
+        "priorityScore": 83,
+        "horizon": "90_days",
+        "dependency": "Tesisini doğrulanmış kıyas grubuyla karşılaştıramaz.",
+        "outcomeMetric": "Successful knowledge journey"
+      },
+      {
+        "id": "operations:data-retention",
+        "title": "Kullanıcı ve kaynak verisi saklama politikasını onayla",
+        "source": "operations",
+        "owner": "security",
+        "priorityScore": 82,
+        "horizon": "90_days",
+        "dependency": "Identity architecture",
+        "outcomeMetric": "Audited retention compliance"
+      },
+      {
+        "id": "persona:entrepreneur:yatirim-on-fizibilite-akisi",
+        "title": "Yatırım ön fizibilite akışı",
+        "source": "persona",
+        "owner": "entrepreneur",
+        "priorityScore": 82,
+        "horizon": "90_days",
+        "dependency": "Fikri sektör, yatırım ve destek kanıtlarıyla tek dosyada değerlendiremez.",
+        "outcomeMetric": "Successful knowledge journey"
+      },
+      {
+        "id": "persona:investor:bolgesel-yatirim-haritasi",
+        "title": "Bölgesel yatırım haritası",
+        "source": "persona",
+        "owner": "investor",
+        "priorityScore": 82,
+        "horizon": "90_days",
+        "dependency": "Kaynaklı yatırım senaryosu çalıştıramaz.",
+        "outcomeMetric": "Returning-user task completion"
+      },
+      {
+        "id": "persona:manufacturer:dogrulanmis-uretici-dizini",
+        "title": "Doğrulanmış üretici dizini",
+        "source": "persona",
+        "owner": "manufacturer",
+        "priorityScore": 82,
+        "horizon": "90_days",
+        "dependency": "Doğrulanmış tedarikçi veya fabrika kabiliyeti bulamaz.",
+        "outcomeMetric": "Successful knowledge journey"
+      },
+      {
+        "id": "ai:programme-matching",
+        "title": "Resmî program eşleştirme",
+        "source": "ai_capability",
+        "owner": "tesvik-ai",
+        "priorityScore": 81,
+        "horizon": "90_days",
+        "dependency": "programme ingestion; amendment checks",
+        "outcomeMetric": "Profili güncel program kayıtlarıyla karşılaştırır."
+      },
+      {
+        "id": "persona:engineer:standart-kapsam-haritasi",
+        "title": "Standart kapsam haritası",
+        "source": "persona",
+        "owner": "engineer",
+        "priorityScore": 81,
+        "horizon": "90_days",
+        "dependency": "Proses gereksinimini makine ve standartlarla eşleyemez.",
+        "outcomeMetric": "Successful knowledge journey"
+      },
+      {
+        "id": "persona:farmer:bolgesel-destek-kesfi",
+        "title": "Bölgesel destek keşfi",
+        "source": "persona",
+        "owner": "farmer",
+        "priorityScore": 81,
+        "horizon": "90_days",
+        "dependency": "Üretim, sigorta ve fiyat verisini birlikte değerlendiremez.",
+        "outcomeMetric": "Returning-user task completion"
+      },
+      {
+        "id": "persona:student:seviyeli-ogrenme-yollari",
+        "title": "Seviyeli öğrenme yolları",
+        "source": "persona",
+        "owner": "student",
+        "priorityScore": 81,
+        "horizon": "90_days",
+        "dependency": "Öğrenme yolunu seviyesine göre düzenleyemez.",
+        "outcomeMetric": "Successful knowledge journey"
+      },
+      {
+        "id": "ai:application-checklist",
+        "title": "Başvuru kontrol listesi",
+        "source": "ai_capability",
+        "owner": "tesvik-ai, ihracat-ai",
+        "priorityScore": 80,
+        "horizon": "90_days",
+        "dependency": "document requirement model",
+        "outcomeMetric": "Belge ve hazırlık eksiklerini kaynağa bağlı açıklar."
+      },
+      {
+        "id": "persona:architect:yapi-standardi-arastirma-akisi",
+        "title": "Yapı standardı araştırma akışı",
+        "source": "persona",
+        "owner": "architect",
+        "priorityScore": 80,
+        "horizon": "90_days",
+        "dependency": "Malzeme, üretici, standart ve uygulama örneğini birlikte filtreleyemez.",
+        "outcomeMetric": "Successful knowledge journey"
+      },
+      {
+        "id": "persona:exporter:gtip-arastirma-calisma-alani",
+        "title": "GTİP araştırma çalışma alanı",
+        "source": "persona",
+        "owner": "exporter",
+        "priorityScore": 80,
+        "horizon": "90_days",
+        "dependency": "GTİP veya mevzuat için kesin sınıflandırma desteği alamaz.",
+        "outcomeMetric": "Returning-user task completion"
+      },
+      {
+        "id": "persona:factory_owner:kaydedilmis-tesis-calisma-alani",
+        "title": "Kaydedilmiş tesis çalışma alanı",
+        "source": "persona",
+        "owner": "factory_owner",
+        "priorityScore": 80,
+        "horizon": "90_days",
+        "dependency": "Enerji ve kapasite senaryosu çalıştıramaz.",
+        "outcomeMetric": "Returning-user task completion"
+      },
+      {
+        "id": "persona:researcher:kaynakli-veri-disa-aktarimi",
+        "title": "Kaynaklı veri dışa aktarımı",
+        "source": "persona",
+        "owner": "researcher",
+        "priorityScore": 80,
+        "horizon": "90_days",
+        "dependency": "Veri setlerini sorgulayıp dışa aktaramaz.",
+        "outcomeMetric": "Successful knowledge journey"
+      }
+    ]
+  },
+  "priorities": {
+    "production": [
+      "Approve hosting and data region",
+      "Connect error, uptime, logs, and Core Web Vitals",
+      "Rehearse immutable deploy and rollback",
+      "Approve consent and retention"
+    ],
+    "growth": [
+      "Connect Search Console read-only",
+      "Instrument zero-result and continuation journeys",
+      "Publish one authority-ready topic cluster",
+      "Measure internal-link continuation"
+    ],
+    "data": [
+      "Pilot one TeşvikAI source family",
+      "Fingerprint and diff official records",
+      "Expire stale records automatically",
+      "Keep human verification in the release gate"
+    ]
+  }
+}

@@ -1,0 +1,263 @@
+export type AIProductStatus = "available_foundation" | "sample_only" | "future_integration" | "candidate" | "consolidate";
+
+export type AIProduct = {
+  id: string;
+  name: string;
+  status: AIProductStatus;
+  route?: string;
+  purpose: string;
+  personas: string[];
+  inputs: string[];
+  outputs: string[];
+  officialSourceIds: string[];
+  knowledgeEntities: string[];
+  searchScopes: string[];
+  relatedContent: string[];
+  roadmap: string[];
+  prerequisites: string[];
+};
+
+const sharedRoadmap = [
+  "Kaynak sözleşmesini ve değerlendirme veri setini onayla.",
+  "Salt okunur sağlayıcı adaptörünü önizlemede doğrula.",
+  "İnsan incelemesi, tazelik ve geri alma kapıları tamamlanınca sınırlı erişim aç.",
+];
+
+export const aiProducts: AIProduct[] = [
+  {
+    id: "uretir-ai", name: "UretirAI", status: "available_foundation", route: "/uretir-ai",
+    purpose: "Üretim sorularını Uretir bilgi grafiği ve kaynaklı içeriklerle araştırmak.",
+    personas: ["engineer", "student", "researcher", "entrepreneur", "manufacturer"],
+    inputs: ["natural-language question", "entity filters", "research intent"],
+    outputs: ["source-grounded answer", "uncertainty note", "related entities", "next reading paths"],
+    officialSourceIds: ["tuik", "tse", "turkpatent", "kalkinma-kutuphanesi"],
+    knowledgeEntities: ["company", "product", "factory", "industry", "technology", "machine", "raw_material", "article"],
+    searchScopes: ["all public knowledge", "guides", "companies", "AI products"],
+    relatedContent: ["five-pillar guides", "company profiles", "technology guides"],
+    roadmap: sharedRoadmap,
+    prerequisites: ["authority-ready knowledge corpus", "citation renderer", "answer evaluation set"],
+  },
+  {
+    id: "puan-ai", name: "PuanAI", status: "sample_only", route: "/puan-ai",
+    purpose: "Alışveriş kararlarını koşul, toplam maliyet ve doğrulanmış kampanya kanıtıyla karşılaştırmak.",
+    personas: ["sme_owner", "entrepreneur", "manufacturer"],
+    inputs: ["purchase category", "amount", "payment preference", "verified provider records"],
+    outputs: ["explainable comparison", "assumptions", "verification checklist", "related shopping guides"],
+    officialSourceIds: [],
+    knowledgeEntities: ["product", "company", "article"],
+    searchScopes: ["shopping guides", "campaign records", "card guides"],
+    relatedContent: ["installment guides", "reward guides", "cashback guides"],
+    roadmap: sharedRoadmap,
+    prerequisites: ["contracted campaign providers", "freshness SLA", "revocation workflow"],
+  },
+  {
+    id: "tesvik-ai", name: "TeşvikAI", status: "available_foundation", route: "/tesvik-ai",
+    purpose: "İşletme ve yatırım profilini güncel resmî destek kaynaklarına bağlayan ön araştırma akışı sunmak.",
+    personas: ["support_applicant", "sme_owner", "entrepreneur", "farmer", "exporter", "investor"],
+    inputs: ["applicant profile", "project", "location", "budget bands", "verified programme records"],
+    outputs: ["potential-match list", "missing information", "official source links", "application checklist"],
+    officialSourceIds: ["kosgeb", "tubitak", "sanayi-destek", "yatirima-destek", "ticaret-destek", "tkdk", "iskur", "eu-funding-tenders"],
+    knowledgeEntities: ["investment_program", "government_institution", "industry", "company", "city", "article"],
+    searchScopes: ["support guides", "official programmes", "industries", "institutions"],
+    relatedContent: ["eligibility guides", "application guides", "document checklists"],
+    roadmap: sharedRoadmap,
+    prerequisites: ["programme ingestion", "rule provenance", "daily expiry and amendment checks"],
+  },
+  {
+    id: "fiyat-ai", name: "FiyatAI", status: "future_integration", route: "/fiyat-ai",
+    purpose: "Hammadde, enerji ve üretim girdilerini karşılaştırılabilir birim ve kaynaklarla analiz etmek.",
+    personas: ["factory_owner", "manufacturer", "investor", "sme_owner"],
+    inputs: ["material", "unit", "quality", "location", "time range"],
+    outputs: ["normalised series", "cost drivers", "source notes", "scenario comparison"],
+    officialSourceIds: ["tuik", "tcmb-evds", "epdk", "epias"],
+    knowledgeEntities: ["raw_material", "product", "industry", "technology"],
+    searchScopes: ["raw materials", "price literacy guides", "energy"],
+    relatedContent: ["price methodology", "procurement guides", "raw-material articles"],
+    roadmap: sharedRoadmap,
+    prerequisites: ["licensed price feeds", "unit ontology", "revision-aware time series"],
+  },
+  {
+    id: "ihracat-ai", name: "İhracatAI", status: "available_foundation", route: "/ihracat-ai",
+    purpose: "Üreticinin hedef pazar, sınıflandırma, belge, destek ve lojistik araştırmasını kaynaklandırmak.",
+    personas: ["exporter", "manufacturer", "sme_owner", "investor"],
+    inputs: ["product", "origin", "target market", "capacity", "compliance status"],
+    outputs: ["research plan", "market evidence", "document checklist", "official verification routes"],
+    officialSourceIds: ["ticaret-destek", "kolay-ihracat", "turk-eximbank", "access2markets", "un-comtrade", "wto-data", "wits"],
+    knowledgeEntities: ["product", "company", "country", "standard", "investment_program", "article"],
+    searchScopes: ["export guides", "markets", "supports", "standards"],
+    relatedContent: ["GTIP research", "market selection", "export documentation"],
+    roadmap: sharedRoadmap,
+    prerequisites: ["classification review workflow", "trade dataset adapters", "market evaluation set"],
+  },
+  {
+    id: "insan-ai", name: "İnsanAI", status: "available_foundation", route: "/insan-ai",
+    purpose: "İnsan ve yapay zekâ iş bölümünü görev, risk ve doğrulama üzerinden tasarlamak.",
+    personas: ["ai_enthusiast", "engineer", "student", "researcher"],
+    inputs: ["task", "risk level", "available evidence"],
+    outputs: ["human-AI workflow", "review points", "responsibility map"],
+    officialSourceIds: [],
+    knowledgeEntities: ["technology", "article", "ai_product"],
+    searchScopes: ["AI guides", "workflows"],
+    relatedContent: ["AI governance", "verification guides"],
+    roadmap: sharedRoadmap,
+    prerequisites: ["workflow evaluation examples", "human-review ownership"],
+  },
+  {
+    id: "trend-ai", name: "TrendAI", status: "available_foundation", route: "/trendler",
+    purpose: "Birinci taraf ve resmî sinyallerden editoryal araştırma adayları üretmek.",
+    personas: ["researcher", "investor", "entrepreneur", "ai_enthusiast"],
+    inputs: ["Search Console signals", "internal search gaps", "official announcements", "graph gaps"],
+    outputs: ["validated research candidates", "evidence trail", "editorial handoff"],
+    officialSourceIds: ["tuik", "cordis", "eurostat", "kalkinma-kutuphanesi"],
+    knowledgeEntities: ["article", "industry", "technology", "investment_program"],
+    searchScopes: ["trend signals", "content gaps", "topic clusters"],
+    relatedContent: ["trend methodology", "content gap report"],
+    roadmap: sharedRoadmap,
+    prerequisites: ["Search Console connection", "internal-search telemetry", "signal retention policy"],
+  },
+  {
+    id: "factory-ai", name: "FactoryAI", status: "candidate",
+    purpose: "Fabrika kabiliyeti, kapasite, süreç ve konum araştırmasını doğrulanmış tesis kayıtlarıyla desteklemek.",
+    personas: ["factory_owner", "manufacturer", "investor", "engineer"],
+    inputs: ["product need", "process", "capacity", "location"],
+    outputs: ["factory capability shortlist", "evidence gaps", "due-diligence checklist"],
+    officialSourceIds: ["tobb", "osbuk", "sanayi-destek"],
+    knowledgeEntities: ["factory", "company", "product", "machine", "city"],
+    searchScopes: ["factories", "companies", "capabilities"],
+    relatedContent: ["factory profiles", "capacity guides"],
+    roadmap: sharedRoadmap,
+    prerequisites: ["verified factory registry", "capability ontology", "company claim workflow"],
+  },
+  {
+    id: "machine-ai", name: "MachineAI", status: "candidate",
+    purpose: "Üretim ihtiyacını makine sınıfları, proses gereksinimleri ve güvenlik kaynaklarıyla eşlemek.",
+    personas: ["engineer", "manufacturer", "factory_owner"],
+    inputs: ["process", "material", "throughput", "constraints"],
+    outputs: ["machine category comparison", "requirements", "supplier research path"],
+    officialSourceIds: ["tse", "turkak", "tubitak"],
+    knowledgeEntities: ["machine", "technology", "raw_material", "standard", "product"],
+    searchScopes: ["machines", "technologies", "standards"],
+    relatedContent: ["machine guides", "process guides", "safety standards"],
+    roadmap: sharedRoadmap,
+    prerequisites: ["machine taxonomy", "performance-claim evidence model", "expert review panel"],
+  },
+  {
+    id: "standards-ai", name: "StandardsAI", status: "candidate",
+    purpose: "Ürün ve süreçleri ilgili standart, akreditasyon ve uygunluk araştırma yollarına bağlamak.",
+    personas: ["engineer", "exporter", "architect", "manufacturer"],
+    inputs: ["product", "market", "use case", "process"],
+    outputs: ["standards research map", "scope warnings", "accredited-body lookup path"],
+    officialSourceIds: ["tse", "turkak", "echa", "access2markets"],
+    knowledgeEntities: ["standard", "product", "technology", "country"],
+    searchScopes: ["standards", "compliance guides", "products"],
+    relatedContent: ["certification guides", "market requirements"],
+    roadmap: sharedRoadmap,
+    prerequisites: ["standards metadata licence", "scope mapping", "legal review"],
+  },
+  {
+    id: "energy-ai", name: "EnergyAI", status: "candidate",
+    purpose: "Üretim tesislerinin enerji maliyeti, verimlilik ve dönüşüm senaryolarını resmî verilerle modellemek.",
+    personas: ["factory_owner", "manufacturer", "investor", "engineer"],
+    inputs: ["load profile", "tariff context", "location", "technology options"],
+    outputs: ["scenario comparison", "assumptions", "data freshness", "support links"],
+    officialSourceIds: ["epdk", "epias", "teias", "botas"],
+    knowledgeEntities: ["factory", "technology", "investment_program", "raw_material"],
+    searchScopes: ["energy", "factories", "supports"],
+    relatedContent: ["energy efficiency", "tariff literacy", "investment guides"],
+    roadmap: sharedRoadmap,
+    prerequisites: ["authorised tariff data", "calculation audit", "engineering disclaimers"],
+  },
+  {
+    id: "agriculture-ai", name: "AgricultureAI", status: "candidate",
+    purpose: "Tarım ve hayvancılık üretim kararlarını resmî destek, istatistik ve risk kaynaklarıyla araştırmak.",
+    personas: ["farmer", "investor", "support_applicant"],
+    inputs: ["activity", "location", "scale", "investment plan"],
+    outputs: ["research map", "support discovery", "risk and insurance links"],
+    officialSourceIds: ["tarim-orman", "tkdk", "tarsim", "faostat"],
+    knowledgeEntities: ["product", "raw_material", "city", "investment_program", "technology"],
+    searchScopes: ["agriculture", "supports", "regions"],
+    relatedContent: ["production guides", "IPARD guides", "insurance guides"],
+    roadmap: sharedRoadmap,
+    prerequisites: ["agriculture ontology", "regional eligibility records", "seasonality model"],
+  },
+  {
+    id: "investment-ai", name: "InvestmentAI", status: "candidate",
+    purpose: "Sanayi yatırımını bölge, sektör, maliyet, destek ve risk kanıtlarıyla değerlendirmek.",
+    personas: ["investor", "entrepreneur", "factory_owner"],
+    inputs: ["sector", "location", "budget", "capacity", "time horizon"],
+    outputs: ["evidence matrix", "scenario risks", "official support routes"],
+    officialSourceIds: ["sanayi-destek", "yatirima-destek", "tuik", "tcmb-evds"],
+    knowledgeEntities: ["industry", "city", "factory", "investment_program", "technology"],
+    searchScopes: ["investments", "regions", "industries", "supports"],
+    relatedContent: ["feasibility guides", "regional reports"],
+    roadmap: sharedRoadmap,
+    prerequisites: ["regional data model", "scenario methodology", "financial-risk review"],
+  },
+  {
+    id: "supply-chain-ai", name: "SupplyChainAI", status: "candidate",
+    purpose: "Tedarik seçeneklerini ürün, malzeme, kapasite, lojistik ve risk ilişkileriyle araştırmak.",
+    personas: ["manufacturer", "factory_owner", "exporter", "sme_owner"],
+    inputs: ["required input", "specification", "volume", "delivery context"],
+    outputs: ["supplier research map", "risk signals", "verification checklist"],
+    officialSourceIds: ["tobb", "kap", "ticaret-destek", "un-comtrade"],
+    knowledgeEntities: ["company", "product", "raw_material", "factory", "country"],
+    searchScopes: ["suppliers", "products", "factories", "trade"],
+    relatedContent: ["procurement guides", "supplier verification"],
+    roadmap: sharedRoadmap,
+    prerequisites: ["verified supplier claims", "specification ontology", "commercial-data policy"],
+  },
+  {
+    id: "compliance-ai", name: "ComplianceAI", status: "candidate",
+    purpose: "Ürün, tesis ve pazar için uygulanabilir resmî yükümlülükleri araştırma planına dönüştürmek.",
+    personas: ["manufacturer", "exporter", "engineer", "architect"],
+    inputs: ["product", "activity", "jurisdiction", "facility context"],
+    outputs: ["obligation research map", "effective-date warnings", "expert escalation"],
+    officialSourceIds: ["resmi-gazete", "mevzuat", "tse", "echa", "gib"],
+    knowledgeEntities: ["standard", "product", "factory", "country", "government_institution"],
+    searchScopes: ["laws", "standards", "products", "markets"],
+    relatedContent: ["compliance guides", "standards guides"],
+    roadmap: sharedRoadmap,
+    prerequisites: ["legal source versioning", "jurisdiction model", "qualified expert workflow"],
+  },
+  {
+    id: "document-ai", name: "DocumentAI", status: "candidate",
+    purpose: "Resmî ve kurumsal belgelerden izlenebilir yapılandırılmış kayıtlar çıkarmak.",
+    personas: ["support_applicant", "researcher", "exporter", "sme_owner"],
+    inputs: ["authorised document", "document type", "extraction schema"],
+    outputs: ["field extraction", "page-level citations", "confidence and review queue"],
+    officialSourceIds: ["resmi-gazete", "mevzuat", "eu-funding-tenders"],
+    knowledgeEntities: ["article", "investment_program", "government_institution", "standard"],
+    searchScopes: ["documents", "programmes", "laws"],
+    relatedContent: ["document checklists", "application guides"],
+    roadmap: sharedRoadmap,
+    prerequisites: ["document rights policy", "OCR evaluation set", "human verification queue"],
+  },
+  {
+    id: "hibe-ai", name: "HibeAI", status: "consolidate",
+    purpose: "Hibe keşfi fikrini TeşvikAI içinde tek kaynak, tek uygunluk ve tek güncellik sözleşmesine taşımak.",
+    personas: ["support_applicant", "sme_owner", "farmer"],
+    inputs: ["TeşvikAI applicant profile"],
+    outputs: ["TeşvikAI grant-filtered view"],
+    officialSourceIds: ["kosgeb", "tkdk", "eu-funding-tenders"],
+    knowledgeEntities: ["investment_program", "government_institution"],
+    searchScopes: ["supports"],
+    relatedContent: ["grant guides"],
+    roadmap: ["Ayrı ürün ve rota oluşturma.", "Hibe filtresini TeşvikAI keşif modeline ekle.", "Tüm kaynak ve güncellik kontrollerini TeşvikAI ile paylaş."],
+    prerequisites: ["TeşvikAI verified programme registry"],
+  },
+];
+
+export function validateAIProductRegistry() {
+  const errors: string[] = [];
+  const ids = new Set<string>();
+  const routes = new Set<string>();
+  for (const product of aiProducts) {
+    if (ids.has(product.id)) errors.push(`Duplicate AI product id: ${product.id}`);
+    if (product.route && routes.has(product.route)) errors.push(`Duplicate AI product route: ${product.route}`);
+    if (product.status === "candidate" && product.route) errors.push(`Candidate product exposes a route: ${product.id}`);
+    if (!product.purpose || !product.inputs.length || !product.outputs.length || !product.prerequisites.length) errors.push(`Incomplete AI product: ${product.id}`);
+    ids.add(product.id);
+    if (product.route) routes.add(product.route);
+  }
+  return errors;
+}

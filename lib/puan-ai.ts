@@ -1,5 +1,30 @@
 export type CampaignCategory = "Market" | "Akaryakıt" | "Restoran" | "E-ticaret" | "Seyahat" | "Teknoloji";
 
+export type PuanAIDataMode = "verified" | "estimated" | "sample" | "future_integration";
+
+export type PuanAICampaignProvenance = {
+  mode: PuanAIDataMode;
+  label: string;
+  provider: string;
+  sourceUrl?: string;
+  retrievedAt?: string;
+  verifiedAt?: string;
+  disclaimer?: string;
+};
+
+/**
+ * Production safety contract:
+ * - sample records are explicitly hypothetical and never use real campaign claims;
+ * - verified records require a source URL and machine-readable retrieval/review dates;
+ * - incomplete provider records are downgraded before they reach the UI.
+ */
+export const puanAIDataSet: PuanAICampaignProvenance = {
+  mode: "sample",
+  label: "Varsayımsal örnek senaryo",
+  provider: "PuanAI karar modeli",
+  disclaimer: "Bu kayıt gerçek bir banka, kart, mağaza veya kampanyayı temsil etmez.",
+};
+
 export type PuanAIBank = {
   id: string;
   name: string;
@@ -36,33 +61,74 @@ export type PuanAICampaign = {
   featured?: boolean;
   cardIds: string[];
   terms: string[];
+  provenance?: PuanAICampaignProvenance;
 };
 
 export const puanAIBanks: PuanAIBank[] = [
-  { id: "akbank", name: "Akbank", shortName: "AK", color: "#e33b32", cardCount: 2 },
-  { id: "garanti", name: "Garanti BBVA", shortName: "GB", color: "#00a651", cardCount: 2 },
-  { id: "is-bankasi", name: "İş Bankası", shortName: "İŞ", color: "#1261a0", cardCount: 1 },
-  { id: "yapi-kredi", name: "Yapı Kredi", shortName: "YK", color: "#283593", cardCount: 1 },
-  { id: "qnb", name: "QNB", shortName: "QNB", color: "#5b2c83", cardCount: 1 },
+  { id: "provider-a", name: "Örnek sağlayıcı A", shortName: "A", color: "#6e766d", cardCount: 1 },
+  { id: "provider-b", name: "Örnek sağlayıcı B", shortName: "B", color: "#64748b", cardCount: 1 },
+  { id: "provider-c", name: "Örnek sağlayıcı C", shortName: "C", color: "#756a86", cardCount: 1 },
 ];
 
 export const puanAICards: PuanAICard[] = [
-  { id: "axess", bankId: "akbank", name: "Axess", network: "Visa", color: "red", reward: "Joker Vadaa", annualFee: "1.191 TL", highlight: "Market ve akaryakıtta güçlü" },
-  { id: "maximum", bankId: "is-bankasi", name: "Maximum", network: "Mastercard", color: "blue", reward: "MaxiPuan", annualFee: "1.080 TL", highlight: "Geniş marka ağı" },
-  { id: "bonus", bankId: "garanti", name: "Bonus Platinum", network: "Mastercard", color: "green", reward: "Bonus", annualFee: "1.354 TL", highlight: "Taksit ve e-ticaret avantajı" },
-  { id: "world", bankId: "yapi-kredi", name: "Worldcard", network: "Visa", color: "violet", reward: "Worldpuan", annualFee: "1.420 TL", highlight: "Seyahat ve teknoloji" },
-  { id: "cardfinans", bankId: "qnb", name: "CardFinans", network: "Mastercard", color: "purple", reward: "ParaPuan", annualFee: "990 TL", highlight: "Restoran ve günlük harcama" },
+  { id: "sample-card-a", bankId: "provider-a", name: "Örnek kart A", network: "Visa", color: "green", reward: "Örnek puan modeli", annualFee: "Canlı veri yok", highlight: "Market senaryosu" },
+  { id: "sample-card-b", bankId: "provider-b", name: "Örnek kart B", network: "Mastercard", color: "blue", reward: "Örnek indirim modeli", annualFee: "Canlı veri yok", highlight: "E-ticaret senaryosu" },
+  { id: "sample-card-c", bankId: "provider-c", name: "Örnek kart C", network: "Visa", color: "violet", reward: "Örnek taksit modeli", annualFee: "Canlı veri yok", highlight: "Teknoloji senaryosu" },
 ];
 
 export const puanAICampaigns: PuanAICampaign[] = [
-  { slug: "migros-750-tl-market-alisverisine-100-tl-puan", title: "750 TL ve üzeri market alışverişine 100 TL puan", bankId: "akbank", category: "Market", merchant: "Migros", description: "Axess ile yapacağın seçili Migros alışverişlerinde toplam 100 TL puan kazan.", benefit: "100 TL", benefitType: "Puan", minSpend: "750 TL", installment: "Peşin veya 3 taksit", expiresAt: "31 Ağustos 2026", updatedAt: "2 saat önce", active: true, featured: true, cardIds: ["axess"], terms: ["Kampanyaya Akbank Mobil üzerinden katılım gerekir.", "Kampanya döneminde en fazla 100 TL puan kazanılabilir.", "Online market siparişleri kampanyaya dahil değildir."] },
-  { slug: "hepsiburada-3-taksit", title: "Hepsiburada'da peşin fiyatına 3 taksit", bankId: "garanti", category: "E-ticaret", merchant: "Hepsiburada", description: "Bonus kartınla seçili ürün gruplarında peşin fiyatına 3 taksit fırsatından yararlan.", benefit: "3 taksit", benefitType: "Taksit", minSpend: "1.000 TL", installment: "3 taksit", expiresAt: "15 Eylül 2026", updatedAt: "35 dk önce", active: true, cardIds: ["bonus"], terms: ["Kampanya seçili satıcılarda ve ürünlerde geçerlidir.", "Taksit seçenekleri ödeme adımında görüntülenir."] },
-  { slug: "shell-500-tl-akaryakita-50-tl-puan", title: "500 TL akaryakıt alışverişine 50 TL puan", bankId: "is-bankasi", category: "Akaryakıt", merchant: "Shell", description: "Maximum kart ile Shell istasyonlarında yapacağın alışverişlerde MaxiPuan kazan.", benefit: "50 TL", benefitType: "Puan", minSpend: "500 TL", installment: "Peşin", expiresAt: "30 Ağustos 2026", updatedAt: "1 saat önce", active: true, cardIds: ["maximum"], terms: ["Kampanyaya Maximum Mobil üzerinden katılım gerekir.", "Aynı gün içinde yapılan işlemler birleştirilmez."] },
-  { slug: "teknosa-2500-tl-alisverise-6-taksit", title: "Teknosa'da 2.500 TL üzeri alışverişe 6 taksit", bankId: "yapi-kredi", category: "Teknoloji", merchant: "Teknosa", description: "Worldcard ile teknoloji alışverişini vade farksız 6 taksite böl.", benefit: "6 taksit", benefitType: "Taksit", minSpend: "2.500 TL", installment: "6 taksit", expiresAt: "30 Eylül 2026", updatedAt: "3 saat önce", active: true, cardIds: ["world"], terms: ["Kampanya Teknosa mağazalarında ve teknosa.com'da geçerlidir.", "Cep telefonu alımlarında geçerli değildir."] },
-  { slug: "getir-yemek-300-tl-alisverise-75-tl-indirim", title: "GetirYemek'te 300 TL üzeri alışverişe 75 TL indirim", bankId: "qnb", category: "Restoran", merchant: "GetirYemek", description: "CardFinans ile vereceğin siparişlerde sepette anında 75 TL indirim kazan.", benefit: "75 TL", benefitType: "İndirim", minSpend: "300 TL", installment: "Peşin", expiresAt: "25 Ağustos 2026", updatedAt: "4 saat önce", active: true, cardIds: ["cardfinans"], terms: ["İndirim kodu kampanya koşullarında belirtilen kanaldan alınır.", "Günde bir, ayda üç kez kullanılabilir."] },
-  { slug: "amazon-1000-tl-alisverise-100-tl-puan", title: "Amazon'da 1.000 TL alışverişe 100 TL puan", bankId: "garanti", category: "E-ticaret", merchant: "Amazon Türkiye", description: "Bonus kart ile Amazon Türkiye'de yapacağın seçili alışverişlerde Bonus kazan.", benefit: "100 TL", benefitType: "Puan", minSpend: "1.000 TL", installment: "Peşin veya 3 taksit", expiresAt: "10 Eylül 2026", updatedAt: "6 saat önce", active: true, cardIds: ["bonus"], terms: ["Kampanyaya BonusFlaş uygulamasından katılım gerekir.", "Amazon Prime üyelik ödemeleri dahil değildir."] },
-  { slug: "thy-yurt-disi-biletlerinde-10-indirim", title: "Yurt dışı uçuşlarında %10 indirim", bankId: "akbank", category: "Seyahat", merchant: "Türk Hava Yolları", description: "Axess ile seçili yurt dışı uçuşlarında indirimli seyahat et.", benefit: "%10", benefitType: "İndirim", minSpend: "5.000 TL", installment: "6 taksit", expiresAt: "20 Eylül 2026", updatedAt: "Dün", active: true, cardIds: ["axess"], terms: ["İndirim, kampanya kodu ile online bilet alımlarında uygulanır.", "Vergi ve hizmet bedelleri kampanyaya dahil değildir."] },
-  { slug: "starbucks-10-kahveye-1-bedava", title: "Starbucks'ta her 10. kahveye 1 kahve hediye", bankId: "is-bankasi", category: "Restoran", merchant: "Starbucks", description: "Maximum mobil ödeme ile yaptığın alışverişlerde ekstra MaxiPuan kazan.", benefit: "1 hediye", benefitType: "Puan", minSpend: "250 TL", installment: "Peşin", expiresAt: "31 Ağustos 2026", updatedAt: "Dün", active: true, cardIds: ["maximum"], terms: ["Kampanya Maximum Mobil ile yapılan ödemelerde geçerlidir.", "Hediye kahve bir sonraki alışverişte kullanılabilir."] },
+  {
+    slug: "ornek-market-puan-senaryosu",
+    title: "Örnek senaryo: market alışverişinde puan",
+    bankId: "provider-a",
+    category: "Market",
+    merchant: "Varsayımsal market",
+    description: "Karar akışının puan önceliğini nasıl değerlendirdiğini göstermek için oluşturulmuş, gerçek bir kampanyayı temsil etmeyen senaryo.",
+    benefit: "Örnek puan",
+    benefitType: "Puan",
+    minSpend: "Varsayımsal eşik",
+    installment: "Koşul belirtilmez",
+    expiresAt: "Gerçek tarih yok",
+    updatedAt: "2026-07-25",
+    active: true,
+    featured: true,
+    cardIds: ["sample-card-a"],
+    terms: ["Gerçek banka veya mağaza kampanyası değildir.", "Tutar, tarih ve uygunluk koşulu içermez.", "Canlı sürümde her koşul sağlayıcının resmî kaynağına bağlanacaktır."],
+  },
+  {
+    slug: "ornek-e-ticaret-indirim-senaryosu",
+    title: "Örnek senaryo: e-ticarette indirim",
+    bankId: "provider-b",
+    category: "E-ticaret",
+    merchant: "Varsayımsal çevrim içi mağaza",
+    description: "İndirim önceliğine göre açıklanabilir öneri üretimini gösteren, ticari teklif niteliği taşımayan örnek karar senaryosu.",
+    benefit: "Örnek indirim",
+    benefitType: "İndirim",
+    minSpend: "Varsayımsal eşik",
+    installment: "Koşul belirtilmez",
+    expiresAt: "Gerçek tarih yok",
+    updatedAt: "2026-07-25",
+    active: true,
+    cardIds: ["sample-card-b"],
+    terms: ["Gerçek kampanya veya fiyat avantajı değildir.", "Herhangi bir satın alma kararında kullanılamaz.", "Gelecekte kaynak, erişim zamanı ve doğrulama tarihi zorunlu olacaktır."],
+  },
+  {
+    slug: "ornek-teknoloji-taksit-senaryosu",
+    title: "Örnek senaryo: teknoloji alışverişinde taksit",
+    bankId: "provider-c",
+    category: "Teknoloji",
+    merchant: "Varsayımsal teknoloji mağazası",
+    description: "Taksit önceliğinin toplam maliyet ve uygunluk koşullarıyla birlikte nasıl ele alınacağını gösteren varsayımsal senaryo.",
+    benefit: "Örnek taksit",
+    benefitType: "Taksit",
+    minSpend: "Varsayımsal eşik",
+    installment: "Taksit sayısı belirtilmez",
+    expiresAt: "Gerçek tarih yok",
+    updatedAt: "2026-07-25",
+    active: true,
+    cardIds: ["sample-card-c"],
+    terms: ["Gerçek kart veya mağaza teklifi değildir.", "Taksit sayısı ve maliyet bilgisi özellikle verilmez.", "Canlı veride yasal ve sağlayıcı koşulları ayrıca doğrulanacaktır."],
+  },
 ];
 
 export function getPuanAIBank(bankId: string) {
@@ -77,3 +143,20 @@ export function getPuanAICampaign(slug: string) {
   return puanAICampaigns.find((campaign) => campaign.slug === slug);
 }
 
+export function isVerifiedPuanAIProvenance(provenance: PuanAICampaignProvenance) {
+  return provenance.mode === "verified"
+    && Boolean(provenance.sourceUrl)
+    && Boolean(provenance.retrievedAt)
+    && Boolean(provenance.verifiedAt);
+}
+
+export function getPuanAICampaignProvenance(campaign: PuanAICampaign): PuanAICampaignProvenance {
+  const provenance = campaign.provenance ?? puanAIDataSet;
+  if (provenance.mode !== "verified" || isVerifiedPuanAIProvenance(provenance)) return provenance;
+  return {
+    ...provenance,
+    mode: "estimated",
+    label: "Doğrulama bilgisi eksik",
+    disclaimer: "Kaynak ve güncellik alanları tamamlanmadığı için bu kayıt doğrulanmış olarak gösterilemez.",
+  };
+}

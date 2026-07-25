@@ -12,8 +12,8 @@ export const metadata: Metadata = {
 
 const ecosystemItems = [
   { icon: Layers, title: "Üretir", description: "Üretim, teknoloji ve yapay zekâ üzerine uzman kalitesinde makaleler, rehberler ve içerikler.", href: "/", color: "#769d32" },
-  { icon: Zap, title: "PuanAI", description: "Banka kampanyalarını, kredi kartı avantajlarını ve puan kazanımlarını tek merkezden takip edin.", href: "/puan-ai", color: "#78a5b6" },
-  { icon: Sparkles, title: "AI Araçları", description: "TeşvikAI, HibeAI, FiyatAI ve daha fazlası. Yapay zekâ destekli yeni araçlar geliştirme aşamasında.", href: "/yakinda", color: "#8b80c2" },
+  { icon: Zap, title: "PuanAI", description: "Yapılandırılmış örnek veriler üzerinde, alışveriş kararlarını açıklamalı biçimde daraltan danışman deneyimi.", href: "/puan-ai", color: "#78a5b6" },
+  { icon: Sparkles, title: "AI Bilgi Merkezleri", description: "UretirAI, TesvikAI, FiyatAI ve IhracatAI; ortak kaynak, rehber ve keşif sistemiyle birbirine bağlı.", href: "/araclar", color: "#8b80c2" },
   { icon: Rocket, title: "Startup Vizyonu", description: "Türkiye'den çıkacak, milyonlarca kullanıcıya hizmet veren bir teknoloji platformu inşa ediyoruz.", href: "/startup", color: "#d97835" },
 ];
 

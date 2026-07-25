@@ -11,12 +11,15 @@ export const metadata: Metadata = {
 };
 
 const tools = [
-  { name: "PuanAI", description: "Banka kampanyalarını tek yerden takip edin.", href: "/puan-ai", color: "#78a5b6", status: "Geliştiriliyor" },
-  { name: "TeşvikAI", description: "Devlet teşviklerini ve destekleri keşfedin.", href: "/yakinda", color: "#8b80c2", status: "Yakında" },
+  { name: "UretirAI", description: "Üretim sorularını kaynaklar ve bağlantılı varlıklarla araştırın.", href: "/uretir-ai", color: "#78a5b6", status: "Bilgi temeli" },
+  { name: "PuanAI", description: "Örnek verilerle açıklamalı alışveriş karar akışını ve rehberleri keşfedin.", href: "/puan-ai", color: "#c8f560", status: "Örnek veri" },
+  { name: "TesvikAI", description: "Teşvik hazırlığını resmî kaynaklar ve kontrol listeleriyle yönetin.", href: "/tesvik-ai", color: "#8b80c2", status: "Editoryal temel" },
   { name: "HibeAI", description: "Hibe programlarını takip edin.", href: "/yakinda", color: "#8b80c2", status: "Yakında" },
-  { name: "FiyatAI", description: "Hammadde ve ürün fiyatlarını karşılaştırın.", href: "/yakinda", color: "#d97835", status: "Yakında" },
+  { name: "FiyatAI", description: "Hammadde tekliflerini ve fiyat serilerini doğru karşılaştırmayı öğrenin.", href: "/fiyat-ai", color: "#d97835", status: "Entegrasyon gelecek" },
   { name: "EnerjiAI", description: "Enerji maliyetlerinizi optimize edin.", href: "/yakinda", color: "#769d32", status: "Yakında" },
-  { name: "İhracatAI", description: "İhracat süreçlerinizi yapay zekâ ile yönetin.", href: "/yakinda", color: "#b26959", status: "Yakında" },
+  { name: "IhracatAI", description: "İhracat hazırlığını ve resmî destek kaynaklarını tek rotada inceleyin.", href: "/ihracat-ai", color: "#b26959", status: "Bilgi temeli" },
+  { name: "InsanAI", description: "Üreten insanların katkılarını güvenilir kaynaklar ve ilişkilerle araştırın.", href: "/insan-ai", color: "#78a5b6", status: "Mimari hazır" },
+  { name: "Trend Merkezi", description: "Doğrulanmış arama ve sektör sinyallerinden içerik fırsatları üretin.", href: "/trendler", color: "#d97835", status: "Kaynak bekliyor" },
 ];
 
 export default function AraclarPage() {
@@ -35,8 +38,8 @@ export default function AraclarPage() {
             <p className="mt-2 text-xs text-muted">Planlanan araç</p>
           </div>
           <div>
-            <p className="font-display text-4xl">01</p>
-            <p className="mt-2 text-xs text-muted">Geliştirmede</p>
+            <p className="font-display text-4xl">07</p>
+            <p className="mt-2 text-xs text-muted">Bilgi merkezi</p>
           </div>
         </div>
       </div>

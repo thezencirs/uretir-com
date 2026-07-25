@@ -1,13 +1,21 @@
 import { AdSlot } from "@/components/ad-slot";
 import { AuthorBox, FaqSection, InternalLinkRail, SourcesSection } from "@/components/editorial-components";
+import Link from "next/link";
+import { ArrowUpRight, Check, CircleAlert, Minus } from "lucide-react";
 import type { ContentBlock } from "@/lib/content-model";
 
 export function ContentBlockRenderer({ blocks }: { blocks: ContentBlock[] }) {
   return <div className="content-blocks">{blocks.map((block, index) => {
     switch (block.type) {
       case "paragraph": return <p key={index} className={block.lead ? "editorial-lede" : undefined}>{block.text}</p>;
+      case "summary": return <section key={block.id} id={block.id} className="border-l-4 border-[#769d32] bg-[color:var(--surface)] p-6 md:p-8"><p className="eyebrow">{block.title ?? "Özet"}</p><ul className="mt-5 grid gap-3">{block.items.map((item) => <li key={item} className="flex items-start gap-3 text-sm leading-7"><Check size={15} className="mt-1.5 shrink-0 text-[#769d32]" aria-hidden="true" />{item}</li>)}</ul></section>;
+      case "key-takeaways": return <section key={block.id} id={block.id} className="mt-12 border-y hairline py-8"><p className="eyebrow">{block.title ?? "Önemli çıkarımlar"}</p><ol className="mt-6 grid gap-4 sm:grid-cols-3">{block.items.map((item, itemIndex) => <li key={item} className="border-l hairline pl-4 text-sm leading-7"><span className="mb-3 block font-display text-2xl text-muted/40">{String(itemIndex + 1).padStart(2, "0")}</span>{item}</li>)}</ol></section>;
       case "heading": return <section key={block.id} id={block.id} className="editorial-section"><p className="eyebrow">{block.eyebrow}</p>{block.level === 2 ? <h2>{block.text}</h2> : <h3>{block.text}</h3>}</section>;
       case "quote": return <blockquote key={index}>{block.text}{block.cite && <cite>— {block.cite}</cite>}</blockquote>;
+      case "example": return <section key={block.id} id={block.id} className="mt-12 border hairline p-6"><p className="eyebrow">Örnek</p><h2 className="mt-4 font-display text-3xl">{block.title}</h2>{block.context && <p className="mt-3 text-xs font-bold uppercase tracking-[.1em] text-muted">{block.context}</p>}<p className="mt-5 text-sm leading-7 text-muted">{block.text}</p></section>;
+      case "pros-cons": return <section key={block.id} id={block.id} className="mt-12"><p className="eyebrow">{block.title ?? "Karar dengesi"}</p><div className="mt-5 grid gap-px bg-[color:var(--line)] sm:grid-cols-2"><div className="bg-[color:var(--background)] p-6"><h2 className="font-display text-2xl text-[#769d32]">Avantajlar</h2><ul className="mt-4 grid gap-3">{block.advantages.map((item) => <li key={item} className="flex items-start gap-3 text-sm leading-6"><Check size={14} className="mt-1 shrink-0" aria-hidden="true" />{item}</li>)}</ul></div><div className="bg-[color:var(--background)] p-6"><h2 className="font-display text-2xl text-[#b26959]">Sınırlamalar</h2><ul className="mt-4 grid gap-3">{block.disadvantages.map((item) => <li key={item} className="flex items-start gap-3 text-sm leading-6"><Minus size={14} className="mt-1 shrink-0" aria-hidden="true" />{item}</li>)}</ul></div></div></section>;
+      case "editor-note": return <aside key={block.id} id={block.id} className="mt-12 flex items-start gap-3 border border-[#d6c58a] bg-[#fbf7e8] p-5 text-[#5b512d] dark:border-[#685f38] dark:bg-[#2c291d] dark:text-[#ded4a3]"><CircleAlert size={17} className="mt-1 shrink-0" aria-hidden="true" /><div><p className="text-sm font-bold">{block.title ?? "Editör notu"}</p><p className="mt-2 text-sm leading-7">{block.text}</p>{block.updatedAt && <p className="mt-3 text-[10px] uppercase tracking-[.1em] opacity-70">Güncelleme: {block.updatedAt}</p>}</div></aside>;
+      case "entity-links": return <section key={block.id} id={block.id} className="mt-12"><p className="eyebrow">{block.title}</p><div className="mt-5 grid gap-3 sm:grid-cols-2">{block.items.map((item) => <Link key={`${item.kind}-${item.href}`} href={item.href} className="group border hairline p-5"><span className="text-[9px] font-bold uppercase tracking-[.12em] text-muted">{item.kind}</span><strong className="mt-3 flex items-center justify-between gap-4 font-display text-xl">{item.label}<ArrowUpRight size={14} className="shrink-0 transition group-hover:-translate-y-1 group-hover:translate-x-1" aria-hidden="true" /></strong>{item.description && <small className="mt-3 block text-xs leading-5 text-muted">{item.description}</small>}</Link>)}</div></section>;
       case "ad": return <AdSlot key={index} format={block.format} />;
       case "company-text": return <section key={block.id} id={block.id} className="editorial-section editorial-section--company"><p className="eyebrow">{block.eyebrow}</p><p className="mt-4 text-base leading-7 text-muted">{block.text}</p></section>;
       case "company-products": return <section key={block.id} id={block.id} className="mt-14 border-t hairline pt-10"><p className="eyebrow">{block.title}</p><div className="mt-6 flex flex-wrap gap-2">{block.items.map((item) => <span key={item} className={`rounded-full border hairline px-3 py-1.5 text-sm ${block.muted ? "text-muted" : ""}`}>{item}</span>)}</div></section>;
@@ -19,4 +27,3 @@ export function ContentBlockRenderer({ blocks }: { blocks: ContentBlock[] }) {
     }
   })}</div>;
 }
-

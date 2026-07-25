@@ -17,17 +17,32 @@ This directory is the source of truth for how Uretir is built, operated, and evo
 - [Design system](./design-system.md)
 - [Animation system](./animation-system.md)
 - [Content system](./content-system.md)
+- [Content authority engine](./content-authority-engine.md)
+- [Content growth engine](./content-growth-engine.md)
+- [Sprint 04 content inventory audit](./content-inventory-audit.md)
+- [Content hub engine](./content-hubs.md)
+- [Search quality audit](./search-quality-audit.md)
+- [Production readiness](./production-readiness.md)
+- [Measurement system](./measurement-system.md)
+- [Trend discovery center](./trend-discovery.md)
+- [InsanAI](./insan-ai.md)
 - [Editorial engine](./editorial-engine.md)
 - [Manufacturing knowledge graph](./knowledge-graph.md)
+- [Topic cluster operating model](./topic-clusters.md)
 - [SEO playbook](./seo-playbook.md)
 - [Community model](./community.md)
 - [AI products](./ai-products.md)
 - [Ecosystem strategy](./ecosystem-strategy.md)
+- [Ecosystem completion operating model](./ecosystem-completion.md)
+- [TeşvikAI trust and data contract](./tesvik-ai.md)
+- [Universal search](./universal-search.md)
+- [PuanAI product loop](./puan-ai.md)
 
 ## Operations and planning
 
 - [Roadmap](./roadmap.md)
 - [Deployment](./deployment.md)
+- [Production operations](./production-operations.md)
 - [Decision log](./decision-log.md)
 
 ## Documentation rules

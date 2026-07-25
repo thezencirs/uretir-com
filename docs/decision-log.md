@@ -39,7 +39,7 @@ What must happen to make this decision safe and complete?
 
 ## ADR-2026-07-23: Establish repository documentation as the operating system
 
-Status: Accepted  
+Status: Accepted
 Owners: Product and Engineering
 
 ### Context
@@ -64,7 +64,7 @@ Review the roadmap monthly, decision log during architecture reviews, and all do
 
 ## ADR-2026-07-23: Keep the application modular before selecting backend vendors
 
-Status: Accepted  
+Status: Accepted
 Owners: Engineering
 
 ### Context
@@ -114,7 +114,7 @@ Establish analytics baselines and a monthly growth review before using this gate
 
 ## ADR-2026-07-23: Treat the manufacturing knowledge graph as the core information architecture
 
-Status: Accepted  
+Status: Accepted
 Owners: Product, Editorial, SEO, and Engineering
 
 ### Context
@@ -186,3 +186,319 @@ Using only a tactical SEO playbook was rejected because process guidance can be 
 ### Follow-up
 
 Audit high-traffic legacy pages against the constitution before optimizing them further.
+
+## ADR-2026-07-23: Make PuanAI a transparent recommendation and discovery loop
+
+Status: Accepted
+Owners: Product, Data, Editorial, and Engineering
+
+### Context
+
+Campaign lists do not solve the user's decision: the useful question is which option is best for a particular purchase, under current eligibility and payment constraints. A recommendation without source, freshness, assumptions, or related guidance would be misleading and would not deepen the Uretir ecosystem.
+
+### Decision
+
+PuanAI transforms structured campaign data and consented user preferences into explainable recommendations. Every output includes assumptions, eligibility, expiry, freshness, alternatives, and contextual paths to articles, card guides, and shopping guides. Current data remains explicitly sample data until live provider adapters are verified.
+
+### Consequences
+
+The product needs normalized campaign records and adapter boundaries before it can make live claims. Personalization is optional, consented, and inspectable. Editorial guides become a core output of the product loop, not unrelated traffic modules.
+
+### Alternatives considered
+
+Showing an unranked campaign directory or presenting opaque "best card" claims was rejected because neither earns sustained trust or solves a purchase decision responsibly.
+
+### Follow-up
+
+Define the first normalized campaign adapter and source-freshness test before any live campaign integration.
+
+## ADR-2026-07-23: Quarantine unreviewed reference records from organic search
+
+Status: Accepted
+Owners: Editorial, SEO, and Engineering
+
+### Context
+
+Seed articles and company profiles can be useful for testing a reading experience, but a visible page without attributable evidence, accountable reviewers, a refresh date, and a change record is not yet a publishable reference. Including such records in sitemaps or rich-result schema would conflict with Uretir's quality and transparency commitments.
+
+### Decision
+
+Reference records remain reachable for editorial review but default to `in_review`. Only records with a complete `EditorialPublishingRecord`, a `published` status, and no readiness issues may be indexed, added to the sitemap, or emit article, organization, offer, or FAQ structured data. Reader-facing review notices explain the state instead of implying publication.
+
+### Consequences
+
+Organic page count may be lower during the migration, by design. The next publishing work must add primary sources, reviewer ownership, a next review date, entity relations, and a change log before a record becomes eligible for discovery. This gives every future AI agent and contributor an enforceable code path rather than a documentation-only rule.
+
+### Alternatives considered
+
+Leaving seed records indexed with generic source labels was rejected because it would create an appearance of authority without the evidence required to earn it.
+
+### Follow-up
+
+Migrate one complete high-intent reference cluster end to end, then measure search discovery and reader behavior before expanding the library.
+
+## ADR-2026-07-24: Standardize AI products as source-aware content hubs
+
+Status: Accepted
+Owners: Product, Editorial, SEO, and Engineering
+
+### Context
+
+UretirAI, PuanAI, TesvikAI, FiyatAI, and IhracatAI need useful content before live integrations are available. Separate page implementations would duplicate interaction patterns, fragment internal linking, and make trust states inconsistent. Publishing unreviewed guides to create organic inventory would violate the SEO Constitution.
+
+### Decision
+
+Use one typed hub and guide model for all five products. Every hub exposes its current availability, limitations, search-intent clusters, educational guides, FAQ, related products, and a clear next action. Every guide answers a real question through a shared six-answer structure, sources, practical steps, risks, FAQ, and at least five discovery links.
+
+New hub guides default to `in_review`, remain `noindex`, stay out of the sitemap, and emit no article or FAQ structured data. Only accountable human editorial review can move a guide to `published`; AI agents and developers cannot invent reviewers or self-approve content.
+
+### Consequences
+
+The platform now has a scalable editorial surface without pretending that sample data, future integrations, or draft guidance are current verified services. Organic growth from these guides begins only after a human-reviewed cluster passes the publication contract, so near-term indexed page count is intentionally constrained.
+
+### Alternatives considered
+
+Independent hub pages, keyword-variant pages, and automatically published AI drafts were rejected because they create dead ends, inconsistent trust signals, thin inventory, and avoidable source risk.
+
+### Follow-up
+
+Select one high-intent cluster, replace institution-homepage references with exact program documents where applicable, complete subject-matter and source review, and publish the first measured reference cluster end to end.
+
+## ADR-2026-07-25: Separate trend signals from editorial publication
+
+Status: Accepted
+Owners: Editorial, SEO, Data, and Engineering
+
+### Context
+
+Search demand, industry news, statistics, and institution announcements can reveal useful questions, but individual signals are noisy and easy to misrepresent. Automatically turning them into pages would optimize for volume and expose Uretir to fabricated or short-lived trend claims.
+
+### Decision
+
+Trend discovery uses source-identified, time-bound signals. A topic needs at least two verified signals from different source classes and at least one first-party or official source before it can become an editorial candidate. Passing the signal gate never publishes content automatically.
+
+### Consequences
+
+The trend interface remains empty until trusted sources are connected. Editorial teams can explain why an opportunity exists and decide whether to enrich an existing canonical guide instead of creating a duplicate page.
+
+### Follow-up
+
+Connect read-only Search Console data after domain verification, then validate the first opportunity against an official statistical or institution source.
+
+## ADR-2026-07-25: Require evidence before creating people profiles
+
+Status: Accepted
+Owners: Editorial, Knowledge Graph, and Engineering
+
+### Context
+
+InsanAI can deepen the relationship between people, ideas, technologies, companies, and research. It also creates a high risk of invented biographies, copied summaries, mistaken affiliations, and misleading Person structured data.
+
+### Decision
+
+The initial InsanAI collection is empty. A profile requires two independent reliable sources, one primary or official source, attributable contributions, subject and source reviewers, and scheduled re-review before publication or Person schema emission.
+
+### Consequences
+
+InsanAI launches as transparent architecture rather than a populated directory. Profile quality and source accountability take priority over page count.
+
+### Follow-up
+
+Select one historically stable person with accessible primary sources and complete the workflow as a reference implementation.
+
+## ADR-2026-07-25: Use one authority gate for every reference content family
+
+Status: Accepted
+Owners: Editorial, SEO, Knowledge Graph, and Engineering
+
+### Context
+
+Articles used `ContentDocument` and `EditorialPublishingRecord`, while hub guides could become indexable from a local status check. Editorial and knowledge-graph modules also maintained overlapping entity vocabularies. At large scale, these differences would create inconsistent review standards, duplicated logic, and accidental publication paths.
+
+### Decision
+
+Use one canonical entity and relationship registry, one search-intent answer vocabulary, and one content authority audit. Hub guides adapt into `ContentDocument`; publication requires document status, editorial readiness, and authority readiness. Discovery recommendations use one reusable component and expose trust state.
+
+### Consequences
+
+A route-specific `published` flag cannot bypass source, reviewer, anatomy, intent, relationship, or internal-link checks. Legacy content remains reachable for migration but visibly fails the authority gate. New CMS or database adapters must preserve the same domain contract.
+
+### Alternatives considered
+
+Maintaining separate validators for articles, guides, and company profiles was rejected because their behavior would drift and because fixes would need to be repeated across route families.
+
+### Follow-up
+
+Use the contract to complete one three-guide manufacturing cluster, then connect the quality command to continuous integration.
+
+## ADR-2026-07-25: Exclude editorial drafts from production output
+
+Status: Accepted
+Owners: Editorial, SEO, Product, and Engineering
+
+### Context
+
+Noindex prevents search indexing but does not prevent real users from opening unfinished records or sharing their URLs. Public review pages also expose incomplete claims and create a route that future code could accidentally promote.
+
+### Decision
+
+Local development may render review records with readiness notices. Production builds only generate and list documents that pass the complete publication authority gate. Draft articles, guides, companies, and draft-only categories are absent from production HTML, navigation lists, homepage promotion, sitemap, and RSS.
+
+### Consequences
+
+The public library can be intentionally sparse while editorial work continues. Editors retain local inspection capability, and the build validator fails if known review records leak into production output.
+
+### Follow-up
+
+Add authenticated editorial preview when a CMS is introduced; do not replace the current boundary with a public query-string preview.
+
+## ADR-2026-07-25: Use claim-free PuanAI scenarios until verified providers exist
+
+Status: Accepted
+Owners: Product, Data, Editorial, Security, and Engineering
+
+### Context
+
+Demo records that combine real banks, merchants, fees, dates, and campaign conditions can be mistaken for current offers even when a sample badge is present.
+
+### Decision
+
+PuanAI sample mode uses generic, explicitly hypothetical decision scenarios without real brand, price, fee, validity, or campaign claims. Verified provider records require a source URL plus retrieval and verification timestamps. Incomplete verified provenance is downgraded before rendering.
+
+### Consequences
+
+The interaction model remains testable without creating financial misinformation. Live usefulness depends on a future provider contract, freshness service, failure policy, and source-level audit trail.
+
+### Follow-up
+
+Implement one read-only provider adapter in a non-production environment and test stale, missing, contradictory, and revoked campaign states before enabling verified output.
+
+## ADR-2026-07-25: Separate product instrumentation from analytics providers
+
+Status: Accepted
+Owners: Product, Data, Privacy, and Engineering
+
+### Context
+
+Organic growth, session depth, return behavior, and AI usefulness require consistent measurement. Adding a vendor SDK directly to product components would couple the interface to one provider, invite inconsistent event names, and risk accidental capture of search terms, prompts, email addresses, or other user-provided values.
+
+### Decision
+
+Product components declare only allowlisted event names, surfaces, and short machine targets through a typed helper. A global bridge emits local `uretir:analytics` custom events without reading input values, setting cookies, writing storage, or making network requests. Production collection remains disabled until a consent-aware provider adapter, retention policy, privacy review, and named owners are approved.
+
+The 404 output also owns an explicit metadata boundary: it is noindex and must not inherit the homepage canonical or Open Graph URL. Production navigation does not promote the non-persistent Uretir ID prototype.
+
+### Consequences
+
+Measurement semantics can be reviewed and tested before a vendor is selected. Future adapters have one stable integration seam and cannot justify broad automatic capture. The repository still has no live analytics or real-user baseline, and that limitation must remain explicit in release decisions.
+
+### Follow-up
+
+Select the production hosting and consent architecture, map one approved analytics adapter to the event channel in preview, validate denied-consent and provider-outage behavior, and establish the first audited baseline.
+
+## ADR-2026-07-25: Separate repository coverage gaps from market demand
+
+Status: Accepted
+Owners: Editorial, SEO, Knowledge Graph, Search Quality, and Engineering
+
+### Context
+
+Topic-cluster blueprints can identify missing entity and relationship coverage, but they cannot establish search volume, trend direction, or commercial value. Treating graph completeness as demand would create confidently ranked but unsupported article ideas.
+
+### Decision
+
+Generate a deterministic content-gap report from the current graph, document ownership, authority blockers, and topic-cluster requirements. Every result is marked `demandStatus: not_validated`. A separate verified-signal gate must approve demand before a gap becomes an editorial candidate.
+
+Generic guide, category, and industry entities require explicit cluster ownership before classification. Linking to an entity does not make a document the canonical owner of that entity.
+
+### Consequences
+
+Editorial teams receive a reproducible Top 100 backlog without fabricated keyword metrics or entity names. Some strategically interesting topics remain unranked until Search Console, search-interest, or official signals are connected.
+
+### Follow-up
+
+Connect read-only Search Console data, validate one cluster against a second official or first-party signal, and combine demand evidence with—not in place of—the authority score.
+
+## ADR-2026-07-25: Require governed topic-cluster membership before publication
+
+Status: Accepted
+Owners: Editorial, SEO, Knowledge Graph, and Engineering
+
+### Context
+
+Entity relationships alone do not establish why a document exists, which canonical body of knowledge it strengthens, or whether the cluster has sufficient breadth. At scale, free-text topic labels would create duplicate hubs, orphan pages, and inconsistent internal linking.
+
+### Decision
+
+Every reference document must declare a stable topic-cluster membership before it can pass the authority gate. Cluster families have governed entity and relationship expectations, five-pillar coverage, canonical roles, ownership, and review cadence. The contract supports company, factory, product, technology, manufacturing, investment, export, standard, artificial-intelligence, government-program, industrial-equipment, and supply-chain clusters.
+
+### Consequences
+
+Existing legacy documents remain review records until they receive honest cluster membership. The system gains reusable authority architecture without generating any page or pretending that an empty cluster is complete.
+
+### Follow-up
+
+Register one narrow manufacturing cluster with verified sources, accountable owners, and complete entity coverage; publish only after the full cluster audit passes.
+
+## ADR-2026-07-25: Automate repository quality but defer deployment automation
+
+Status: Accepted
+Owners: Engineering and Operations
+
+### Context
+
+The repository quality command was local-only, while production hosting, secrets, monitoring, data topology, and rollback ownership remain undecided. Combining quality automation with an assumed deployment target would hide operational gaps.
+
+### Decision
+
+Run the locked `pnpm quality` command in GitHub Actions for pull requests and pushes to `main`. Keep continuous deployment out of the workflow until the production-operating decisions and named owners in `production-operations.md` are approved.
+
+### Consequences
+
+Build, dependency, lint, and search-foundation regressions can be blocked consistently. A green check remains evidence of repository integrity, not a deploy authorization or editorial approval.
+
+### Follow-up
+
+Enable branch protection for the quality job, select preview and production infrastructure, rehearse immutable promotion and rollback, and add provider-specific delivery only after observability and secret controls exist.
+
+## ADR-2026-07-25: Complete user journeys before creating AI product routes
+
+Status: Accepted
+Owners: Product, Search, Data, Editorial, Security, and Engineering
+
+### Context
+
+The proposed AI portfolio covers valuable manufacturing tasks, but creating a landing page for every name would overstate capability, split authority, and duplicate source, freshness, identity, and evaluation work.
+
+### Decision
+
+Maintain one typed portfolio registry with explicit states: available foundation, sample only, future integration, candidate, and consolidate. Candidate products have no public route. Shared trust and retrieval capabilities are implemented once. HibeAI is consolidated into TeşvikAI because grant discovery uses the same applicant profile, programme registry, source verification, and update workflow.
+
+### Consequences
+
+The repository can plan a broad ecosystem without unsupported product promises or thin pages. New public products require a complete persona, data, discovery, operating, measurement, and failure contract.
+
+### Follow-up
+
+Prove one end-to-end TeşvikAI source family and one authority-ready manufacturing cluster before approving another AI route.
+
+## ADR-2026-07-25: Use publication-aware universal search as the discovery seam
+
+Status: Accepted
+Owners: Search, Editorial, SEO, Product, and Engineering
+
+### Context
+
+Header, homepage, and structured search previously routed only to the blog, leaving AI hubs, companies, guides, and future entity types outside one coherent discovery flow.
+
+### Decision
+
+Route global search to `/ara`. Use a provider-neutral search adapter and preserve the publication authority boundary in every implementation. Search-result pages remain noindex, and production search cannot expose editorial review records. Raw queries are not persisted before consent-aware measurement is approved.
+
+### Consequences
+
+Users gain one discovery path without changing the existing design system. The repository fallback is deterministic and safe, while an external engine can be introduced later without rewriting page contracts.
+
+### Follow-up
+
+Connect consent-aware search telemetry, establish a relevance evaluation set, and introduce a managed search provider only when corpus size and measured failures justify it.

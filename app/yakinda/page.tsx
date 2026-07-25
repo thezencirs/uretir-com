@@ -8,15 +8,16 @@ export const metadata: Metadata = {
   description: "Üretir ekosisteminin yeni yapay zekâ araçları burada yayınlanacak.",
   alternates: { canonical: "/yakinda" },
   openGraph: { title: "Yakında — Üretir", description: "Üretir ekosisteminin yeni yapay zekâ araçları burada yayınlanacak.", url: "/yakinda", type: "website" },
+  robots: { index: false, follow: true },
 };
 
 const upcomingTools = [
-  { number: "01", name: "TeşvikAI", description: "Devlet teşviklerini ve destekleri keşfedin." },
-  { number: "02", name: "HibeAI", description: "Hibe programlarını takip edin ve başvurun." },
-  { number: "03", name: "FiyatAI", description: "Hammadde ve ürün fiyatlarını karşılaştırın." },
-  { number: "04", name: "EnerjiAI", description: "Enerji maliyetlerinizi optimize edin." },
-  { number: "05", name: "İhracatAI", description: "İhracat süreçlerinizi yapay zekâ ile yönetin." },
-  { number: "06", name: "CVAI", description: "Profesyonel özgeçmiş ve portfolyo oluşturun." },
+  { number: "01", name: "HibeAI", description: "Doğrulanmış hibe programlarını kaynaklarıyla takip etmek için planlanan merkez." },
+  { number: "02", name: "EnerjiAI", description: "Üretim enerjisi ve maliyet kararları için planlanan analiz merkezi." },
+  { number: "03", name: "MakineAI", description: "Makine seçimi ve teknik karşılaştırma için planlanan bilgi merkezi." },
+  { number: "04", name: "FabrikaAI", description: "Fabrika planlama ve operasyon araştırması için planlanan bilgi merkezi." },
+  { number: "05", name: "GTIPAI", description: "Uzman doğrulamasına bağlı sınıflandırma araştırması için planlanan yardımcı." },
+  { number: "06", name: "CVAI", description: "Üretim profesyonelleri için planlanan kariyer ve portfolyo aracı." },
 ];
 
 export default function YakindaPage() {

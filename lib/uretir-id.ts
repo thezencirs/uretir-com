@@ -17,15 +17,15 @@ export type Collection = {
 };
 
 export const memberProfile = {
-  name: "Selin Yılmaz",
-  initials: "SY",
-  role: "Ürün tasarımcısı",
-  company: "Kolektif Studio",
-  location: "İstanbul, Türkiye",
-  bio: "Üretimi daha anlaşılır, teknolojiyi daha insani kılmak için çalışıyorum.",
-  followers: "1.2K",
-  following: "184",
-  score: 842,
+  name: "Örnek üye",
+  initials: "ÖÜ",
+  role: "Demo profil",
+  company: "Örnek çalışma alanı",
+  location: "Konum belirtilmez",
+  bio: "Bu profil gerçek bir kişiyi veya kuruluşu temsil etmez.",
+  followers: "Örnek",
+  following: "Örnek",
+  score: 0,
 };
 
 export const followedTopics = ["Yapay zekâ", "Ürün tasarımı", "Üretim", "Otomasyon"];
@@ -41,17 +41,17 @@ export const feedItems: FeedItem[] = [
   },
   {
     type: "Takip ettiklerinden",
-    title: "Kolektif Studio yeni üretim laboratuvarını açtı",
-    meta: "Kolektif Studio · 2 saat önce",
-    tag: "ŞİRKET",
+    title: "Örnek topluluk profili yeni bir üretim notu paylaştı",
+    meta: "Varsayımsal topluluk kaydı",
+    tag: "DEMO",
     tone: "orange",
     icon: "↗",
   },
   {
     type: "PuanAI",
-    title: "Üreten ekipler için yeni destek kampanyası",
-    meta: "PuanAI · 4 saat önce",
-    tag: "FIRSAT",
+    title: "Örnek alışveriş karar senaryosu",
+    meta: "PuanAI · gerçek kampanya değil",
+    tag: "SENARYO",
     tone: "lime",
     icon: "+",
   },
@@ -64,14 +64,13 @@ export const collections: Collection[] = [
 ];
 
 export const badges = [
-  { name: "Erken üye", mark: "01", detail: "İlk 1.000 üyeden biri" },
-  { name: "AI Explorer", mark: "✦", detail: "Yapay zekâyı keşfediyor" },
-  { name: "Top Contributor", mark: "↗", detail: "Topluluğa katkı sağlıyor" },
+  { name: "Örnek rozet", mark: "01", detail: "Gerçek kullanıcı başarımı değildir" },
+  { name: "AI keşfi", mark: "✦", detail: "Gelecek rozet modelinin örneği" },
+  { name: "Katkı modeli", mark: "↗", detail: "Gelecek katkı sisteminin örneği" },
 ];
 
 export const authProviders = [
-  { label: "Google ile devam et", key: "google" },
-  { label: "GitHub ile devam et", key: "github" },
-  { label: "Apple ile devam et", key: "apple" },
+  { label: "Google akışı örneği", key: "google" },
+  { label: "GitHub akışı örneği", key: "github" },
+  { label: "Apple akışı örneği", key: "apple" },
 ] as const;
-

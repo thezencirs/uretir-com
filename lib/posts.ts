@@ -16,12 +16,12 @@ export type Post = {
 };
 
 export const categories = [
-  { name: "Yapay Zeka", slug: "yapay-zeka", count: "12 yazı", color: "blue", description: "Yeni araçlar, yeni düşünme biçimleri ve insan-makine iş birliği.", symbol: "01" },
-  { name: "Üretim", slug: "uretim", count: "08 yazı", color: "orange", description: "Malzemeden makineye, bir fikrin dünyaya değdiği an.", symbol: "02" },
-  { name: "Teknoloji", slug: "teknoloji", count: "16 yazı", color: "violet", description: "Bugünü dönüştüren ve yarını şekillendiren sistemler.", symbol: "03" },
-  { name: "Mimarlık", slug: "mimarlik", count: "06 yazı", color: "green", description: "Mekân, malzeme ve yaşamın birbirine değdiği yer.", symbol: "04" },
-  { name: "Fabrikalar", slug: "fabrikalar", count: "09 yazı", color: "red", description: "Büyük fikirlerin somutlaştığı, veriyle nefes alan yerler.", symbol: "05" },
-  { name: "Girişimcilik", slug: "girisimcilik", count: "04 yazı", color: "blue", description: "Belirsizlikle çalışmak ve ilk adımı atmak üzerine.", symbol: "06" },
+  { name: "Yapay Zeka", slug: "yapay-zeka", count: "İncelemede", color: "blue", description: "Yeni araçlar, yeni düşünme biçimleri ve insan-makine iş birliği.", symbol: "01" },
+  { name: "Üretim", slug: "uretim", count: "İncelemede", color: "orange", description: "Malzemeden makineye, bir fikrin dünyaya değdiği an.", symbol: "02" },
+  { name: "Teknoloji", slug: "teknoloji", count: "İncelemede", color: "violet", description: "Bugünü dönüştüren ve yarını şekillendiren sistemler.", symbol: "03" },
+  { name: "Mimarlık", slug: "mimarlik", count: "İncelemede", color: "green", description: "Mekân, malzeme ve yaşamın birbirine değdiği yer.", symbol: "04" },
+  { name: "Fabrikalar", slug: "fabrikalar", count: "İncelemede", color: "red", description: "Büyük fikirlerin somutlaştığı, veriyle nefes alan yerler.", symbol: "05" },
+  { name: "Girişimcilik", slug: "girisimcilik", count: "İncelemede", color: "blue", description: "Belirsizlikle çalışmak ve ilk adımı atmak üzerine.", symbol: "06" },
 ];
 
 export const posts: Post[] = [

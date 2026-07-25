@@ -1,13 +1,20 @@
-"use client";
-
-import { Check, Send } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { ArrowUpRight, CircleAlert, Mail } from "lucide-react";
+import { analyticsAttributes } from "@/lib/analytics";
 
 export function ContactForm() {
-  const [sent, setSent] = useState(false);
-  function submit(event: FormEvent) { event.preventDefault(); setSent(true); }
-  if (sent) return <div className="surface-panel flex min-h-[360px] flex-col items-center justify-center p-8 text-center"><div className="mb-5 rounded-full bg-[#c8f560] p-3 text-[#1e2b14]"><Check size={22} /></div><h2 className="font-display text-4xl">Mesajınız ulaştı.</h2><p className="mt-4 max-w-sm text-sm leading-6 text-muted">En kısa sürede size geri dönmeye çalışacağız. İlginiz için teşekkür ederiz.</p></div>;
-  return <form onSubmit={submit} className="surface-panel grid gap-6 p-6 sm:p-9"><div className="grid gap-6 sm:grid-cols-2"><Field label="Adınız" placeholder="Ad Soyad" required /><Field label="E-posta" placeholder="ornek@mail.com" type="email" required /></div><Field label="Konu" placeholder="Nasıl yardımcı olabiliriz?" required /><label className="grid gap-2 text-[10px] font-bold uppercase tracking-[.14em]">Mesajınız<textarea required rows={6} placeholder="Bize birkaç satır bırakın..." className="resize-none border-b hairline bg-transparent px-0 py-3 text-sm font-normal normal-case tracking-normal outline-none placeholder:text-muted focus:border-[color:var(--foreground)]" /></label><button className="focus-ring inline-flex w-fit items-center gap-2 rounded-full bg-[color:var(--foreground)] px-5 py-3 text-xs font-bold text-[color:var(--background)] transition hover:opacity-80">Gönder <Send size={14} /></button></form>;
+  return <section className="surface-panel grid min-h-[360px] content-center p-8 md:p-10" aria-labelledby="contact-direct-title">
+    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#f2e6af] text-[#5b512d] dark:bg-[#4a4121] dark:text-[#f2e6af]">
+      <Mail size={20} aria-hidden="true" />
+    </div>
+    <p className="eyebrow mt-7">Doğrudan iletişim</p>
+    <h2 id="contact-direct-title" className="mt-4 font-display text-4xl">Mesajınızı e-postayla gönderin.</h2>
+    <p className="mt-4 max-w-lg text-sm leading-7 text-muted">Web formu henüz veri toplamıyor. Mesajınızın kaybolmaması ve hangi kanala gönderildiğinin açık olması için doğrudan e-posta kullanıyoruz.</p>
+    <a href="mailto:merhaba@uretir.com" className="focus-ring mt-7 inline-flex w-fit min-h-11 items-center gap-2 rounded-full bg-[color:var(--foreground)] px-5 text-xs font-bold text-[color:var(--background)]" {...analyticsAttributes({ event: "contact_select", surface: "contact", target: "email" })}>
+      merhaba@uretir.com <ArrowUpRight size={15} aria-hidden="true" />
+    </a>
+    <div className="mt-7 flex items-start gap-2 border-t hairline pt-5 text-xs leading-6 text-muted">
+      <CircleAlert size={15} className="mt-1 shrink-0" aria-hidden="true" />
+      <p>Bu sayfada ad, e-posta adresi veya mesaj içeriği saklanmaz.</p>
+    </div>
+  </section>;
 }
-
-function Field({ label, placeholder, type = "text", required = false }: { label: string; placeholder: string; type?: string; required?: boolean }) { return <label className="grid gap-2 text-[10px] font-bold uppercase tracking-[.14em]">{label}<input required={required} type={type} placeholder={placeholder} className="border-b hairline bg-transparent px-0 py-3 text-sm font-normal normal-case tracking-normal outline-none placeholder:text-muted focus:border-[color:var(--foreground)]" /></label>; }

@@ -1,28 +1,10 @@
-export const editorialEntityKinds = [
-  "company",
-  "product",
-  "category",
-  "industry",
-  "factory",
-  "city",
-  "technology",
-  "machine",
-  "raw_material",
-  "ai_tool",
-] as const;
+import { entityKinds, entityRelationshipKinds, type EntityKind, type EntityRelationship } from "@/lib/entity-types";
+import { getEditorialWorkflowIssues, type EditorialWorkflow } from "@/lib/editorial-workflow";
 
-export type EditorialEntityKind = typeof editorialEntityKinds[number];
-export type EditorialRelationship =
-  | "primary_subject"
-  | "explains"
-  | "profiles"
-  | "compares"
-  | "uses"
-  | "produces"
-  | "operates_in"
-  | "located_in"
-  | "enables"
-  | "related_to";
+export const editorialEntityKinds = entityKinds;
+export const editorialRelationshipKinds = entityRelationshipKinds;
+export type EditorialEntityKind = EntityKind;
+export type EditorialRelationship = EntityRelationship;
 
 export type EditorialEntityReference = {
   entityId: string;
@@ -100,6 +82,8 @@ export type EditorialPublishingRecord = {
   changeLog: EditorialChange[];
   uncertaintyNotes?: string[];
   review: EditorialReview;
+  /** Required for approved and published records; optional while legacy drafts migrate. */
+  workflow?: EditorialWorkflow;
 };
 
 export type EditorialReadinessIssue = {
@@ -131,6 +115,13 @@ export function getEditorialReadinessIssues(record: EditorialPublishingRecord): 
   if (!record.review.reviewedAt) issues.push({ field: "review.reviewedAt", message: "A completed review date is required." });
   if (!record.review.nextReviewAt) issues.push({ field: "review.nextReviewAt", message: "A next-review date is required for long-term maintenance." });
   if (record.changeLog.length === 0) issues.push({ field: "changeLog", message: "Published content requires a transparent initial-publication or update entry." });
+  if (!record.workflow) {
+    issues.push({ field: "workflow", message: "Approved content requires the complete editorial workflow." });
+  } else {
+    for (const issue of getEditorialWorkflowIssues(record.workflow, { publicationReady: true })) {
+      issues.push({ field: `workflow.${issue.field}`, message: issue.message });
+    }
+  }
 
   return issues;
 }

@@ -35,7 +35,7 @@ Every new article must support:
 - A transparent change log for initial publication and material updates.
 - Uncertainty notes when the available evidence is incomplete, contested, or time-sensitive.
 
-The implementation contract is defined in [lib/editorial-engine.ts](../lib/editorial-engine.ts). `ContentDocument.editorial` is intentionally optional while legacy content is migrated; new reference content must use it.
+The implementation contract is defined in [lib/editorial-engine.ts](../lib/editorial-engine.ts). `ContentDocument.editorial` is intentionally optional while legacy content is migrated; new reference content must use it. Editorial readiness is necessary but not sufficient: [content-authority-engine.md](./content-authority-engine.md) also requires complete anatomy, intent answers, canonical entity relations, and contextual discovery before indexing.
 
 ## Required article anatomy
 
@@ -70,9 +70,11 @@ Question intake
   -> refresh, merge, redirect, or retire
 ```
 
+`lib/editorial-workflow.ts` makes the review sequence enforceable. Approved and published revisions require source, entity, editorial, SEO, knowledge-graph, and publication approvals plus a completed or scheduled update review. Each decision belongs to a stable content and revision ID and names its reviewer. The general subject and source reviewer fields remain useful summary metadata; they do not replace the stage-level audit trail.
+
 ## Mandatory briefing fields
 
-Before drafting, record the target user question, intended reader, primary and secondary growth outcomes, five-pillar mapping, primary entities, search intent, source plan, expected update cadence, and existing Uretir pages that should link to or from the new page.
+Before drafting, record the target user question, intended reader, primary and secondary growth outcomes, governed topic-cluster membership, five-pillar mapping, primary entities, search intent, source plan, expected update cadence, and existing Uretir pages that should link to or from the new page.
 
 ## Review and freshness
 

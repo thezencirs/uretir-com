@@ -42,6 +42,8 @@ Every company, product, technology, industry, factory, and article must be mappe
 - Collection: an editorially curated route through multiple pieces of knowledge.
 - Entity page: an evidence-backed, canonical page for a company, product, industry, factory, city, technology, machine, material, or AI tool.
 
+The enforceable template registry in `lib/content-templates.ts` maps these editorial forms into article, guide, company, technology, machine, raw-material, factory, industry, government-program, investment, export, and AI reference families. The registry defines anatomy and governance; it never generates a page by itself. See [Content growth engine](./content-growth-engine.md).
+
 ## Editorial standards
 
 Every content item needs an intended audience, source standard, owner, update expectation, and relationship to a cluster. Time-sensitive claims must include dates and source context. Distinguish reporting, analysis, sponsored material, and AI-assisted drafts clearly.
@@ -50,7 +52,7 @@ Each brief must also identify its primary organic-growth contribution: discovera
 
 An article must name the entities it explains or connects before drafting. At minimum, the brief records relevant companies, products, categories, industries, factories, cities, technologies, machines, raw materials, and AI tools; it explicitly notes when a class is not relevant. This prevents accidental orphan content and makes internal linking intentional.
 
-The source, review, media, FAQ, freshness, and publication contract is defined in [editorial-engine.md](./editorial-engine.md). The editorial engine is mandatory for new reference content.
+The source, review, media, FAQ, freshness, and publication contract is defined in [editorial-engine.md](./editorial-engine.md). The enforceable anatomy, intent, entity, discovery, and trust gate is defined in [content-authority-engine.md](./content-authority-engine.md). Both are mandatory for new reference content.
 
 ## Lifecycle
 
@@ -63,3 +65,11 @@ Content is not complete at publication. Refresh high-value pages as conditions c
 ## AI-assisted content
 
 AI may assist with research organization, outlines, translation, classification, and drafting. It may not replace accountable editorial review, fabricate citations, or publish unverified claims. The human owner remains responsible for accuracy, utility, and tone.
+
+## Search-intent contract
+
+`lib/search-intent.ts` defines the supported intent vocabulary and the answer coverage expected from a complete reference page. It includes explicit what, who, where, why, how-to, comparison, cost, requirements, eligibility, benefits, risks, advantages, disadvantages, examples, best practices, preparation, verification, general, sector, company, technology, investment, manufacturing, supply chain, export, and AI guide intents.
+
+Every content brief names one primary intent, any secondary intents, the user's exact question, and the decision stage. Intent coverage is evaluated against what, why, how, who, where, when, advantages, disadvantages, use cases, examples, FAQ, related topics, sources, and further reading. Missing coverage enriches the canonical page; it does not automatically create a keyword-variant URL.
+
+Reusable content blocks support summaries, key takeaways, examples, advantages and limitations, editor notes, and typed entity links in addition to headings, FAQ, sources, authors, and internal links.

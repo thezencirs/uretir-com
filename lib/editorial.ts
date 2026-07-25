@@ -45,10 +45,7 @@ export function getArticleEditorial(post: Post): EditorialData {
       { question: `${post.title} neden önemli?`, answer: `${post.category} alanındaki değişimleri anlamak, daha iyi kararlar almak ve fikri uygulanabilir bir üretim sürecine dönüştürmek için önemlidir.` },
       { question: "Bu konuya başlamak için ilk adım ne olabilir?", answer: "Problemi küçük bir soruya indirmek, mevcut kaynakları listelemek ve kısa bir deneme planı hazırlamak iyi bir başlangıçtır." },
     ],
-    sources: [
-      { title: `${post.category} arşivi`, href: `/kategori/${categoryPath}`, publisher: "Üretir" },
-      { title: "Üretir hakkında", href: "/hakkimizda", publisher: "Üretir Editoryal" },
-    ],
+    sources: [],
     internalLinks: [
       { label: `${post.category} arşivini keşfet`, description: "Bu alandaki diğer fikir ve analizlere göz at.", href: `/kategori/${categoryPath}` },
       { label: "Türkiye'nin üretim atlası", description: "Şirketleri, sektörleri ve üretim hikâyelerini incele.", href: "/ne-uretir" },
@@ -65,4 +62,3 @@ export function getCompanyEditorial(company: Company): Pick<EditorialData, "auth
     internalLinks: [{ label: "Tüm üretim atlasını gör", description: "Türkiye'nin üretici şirketlerini keşfet.", href: "/ne-uretir" }, { label: "Üretim üzerine yazılar", description: "Üretim, teknoloji ve şirket kültürü üzerine analizler.", href: "/kategori/uretim" }, { label: "Üretir ekosistemini keşfet", description: "Araçlar, içerikler ve yeni üretim fikirleri.", href: "/ekosistem" }],
   };
 }
-

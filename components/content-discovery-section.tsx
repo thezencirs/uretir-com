@@ -31,7 +31,7 @@ export function ContentDiscoverySection({
       <h2 id="icerik-kesfi" className="mt-4 font-display text-4xl md:text-5xl">{title}</h2>
     </div>
     <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {items.map((item) => <Link key={`${item.href}-${item.label}`} href={item.href} className="group flex min-h-36 flex-col justify-between border hairline bg-[color:var(--background)] p-5" {...analyticsAttributes({ event: "discovery_select", surface: "content_discovery", target: item.kind })}>
+      {items.map((item, index) => <Link key={`${item.href}-${item.label}`} href={item.href} className="group flex min-h-36 flex-col justify-between border hairline bg-[color:var(--background)] p-5" {...analyticsAttributes({ event: "discovery_select", surface: "content_discovery", target: `item-${index + 1}` })}>
         <div>
           <div className="flex flex-wrap items-center gap-2 text-[9px] font-bold uppercase tracking-[.1em] text-muted">
             <span>{item.kind.replaceAll("_", " ")}</span><span aria-hidden="true">/</span><span>{trustLabels[item.trustState]}</span>

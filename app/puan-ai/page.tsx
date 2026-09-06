@@ -7,7 +7,6 @@ import { JsonLd } from "@/components/json-ld";
 import { HubKnowledgeSection } from "@/components/hub-knowledge-section";
 import { PuanAIBrowser } from "@/components/puan-ai-browser";
 import { PuanAICampaignCard } from "@/components/puan-ai-campaign-card";
-import { PuanAIAdvisor } from "@/components/puan-ai-advisor";
 import { collectionPageSchema } from "@/lib/structured-data";
 import { getPuanAIBank, puanAICampaigns, puanAICards, puanAIBanks } from "@/lib/puan-ai";
 
@@ -36,13 +35,13 @@ export default function PuanAIPage() {
   return <div className="page-reveal puan-page">
     <JsonLd data={[collectionPageSchema({ name: "PuanAI", description: "Banka kampanyaları ve kart avantajları.", path: "/puan-ai" }), productSchema]} />
     <section className="section-wrap puan-hero">
-      <Breadcrumbs items={[{ label: "Ekosistem", href: "/ekosistem" }, { label: "PuanAI" }]} />
+      <Breadcrumbs items={[{ label: "Ekosistem", href: "/ekosistem" }, { label: "PuanAI", href: "#danisman" }]} />
       <div className="puan-hero__grid">
         <div className="puan-hero__copy">
           <div className="flex items-center gap-3"><span className="puan-hero__icon"><Zap size={20} /></span><p className="eyebrow">Üretir Ekosistemi / MVP</p></div>
           <h1>Hangi kart,<br /><em>nerede kazandırır?</em></h1>
-          <p className="puan-hero__lead">Alışveriş kararını hangi koşullarla karşılaştırman gerektiğini gör. Bugünkü sürüm yalnızca marka, fiyat ve geçerlilik iddiası içermeyen varsayımsal senaryolar kullanır.</p>
-          <div className="puan-hero__actions"><Link href="#danisman" className="puan-primary-button">PuanAI&apos;a sor <ArrowUpRight size={16} /></Link><Link href="#kartlar" className="puan-secondary-button">Kartları karşılaştır <CreditCard size={15} /></Link></div>
+          <p className="puan-hero__lead">PuanAI uygulamasında alışverişini yaz, kartlarını seç ve avantajları karşılaştır. Harcamalarını birlikte planla. Uygulama şu anda örnek kampanya verileriyle çalışır.</p>
+          <div className="puan-hero__actions"><Link href="#danisman" className="puan-primary-button" data-analytics-event="ai_intent_select" data-analytics-label="puanai_embedded_app">PuanAI&apos;a sor <ArrowUpRight size={16} /></Link><Link href="#kartlar" className="puan-secondary-button">Kartları karşılaştır <CreditCard size={15} /></Link></div>
         </div>
         <div className="puan-dashboard-preview" aria-label="PuanAI özet paneli">
           <div className="puan-dashboard-preview__bar"><span><i /> PuanAI / örnek akış</span><span>Demo veri seti</span></div>
@@ -53,7 +52,13 @@ export default function PuanAIPage() {
       </div>
     </section>
 
-    <section id="danisman" className="section-wrap"><PuanAIAdvisor campaigns={puanAICampaigns} /></section>
+    <section id="danisman" className="section-wrap scroll-mt-24">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="font-display text-2xl">PuanAI&apos;a sor</h2>
+        <a href="https://puan-ai.vercel.app/" target="_blank" rel="noopener noreferrer" className="puan-secondary-button">Tam ekranda aç <ArrowUpRight size={16} /></a>
+      </div>
+      <iframe src="https://puan-ai.vercel.app/" title="PuanAI — Kart ve harcama karşılaştırma uygulaması" className="w-full rounded-2xl border hairline bg-white" style={{ height: "min(1100px, 85svh)", minHeight: 680 }} loading="lazy" allow="fullscreen" data-analytics-event="ai_prompt_submit" data-analytics-label="puanai_embedded_prompt" />
+    </section>
 
     <section id="kampanyalar" className="section-wrap puan-marketplace"><div id="kartlar"><Suspense fallback={<PuanAIBrowserSkeleton />}><PuanAIBrowser campaigns={puanAICampaigns} banks={puanAIBanks} cards={puanAICards} /></Suspense></div></section>
 
@@ -66,3 +71,4 @@ export default function PuanAIPage() {
 function PuanAIBrowserSkeleton() {
   return <div className="puan-browser-skeleton" aria-label="Kampanyalar yükleniyor"><div /><div /><div /></div>;
 }
+

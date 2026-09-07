@@ -5,3 +5,5 @@ out
 !.env.example
 *.log
 generated/prisma
+
+.vercel

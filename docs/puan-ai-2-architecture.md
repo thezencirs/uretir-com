@@ -12,7 +12,7 @@ The LLM is an explanation layer. Prices, rewards, dates, eligibility, effective 
 
 WhatsApp is an evidence-discovery channel, not an authority source. Meta Cloud API can send signed webhooks to `/api/puan-ai/whatsapp/webhook`; a custom agent can send the provider-neutral contract to `/api/puan-ai/intake` with a bearer token. Both paths persist an idempotent `CampaignSubmission` record.
 
-`WhatsApp message -> signature/authentication -> deduplication -> URL extraction -> source fetch -> expiry/date check -> structured draft -> admin review -> campaign verification -> eligibility engine`
+`WhatsApp message -> signature/authentication -> deduplication -> immediate background verification -> URL/source evidence comparison -> structured draft -> admin review -> campaign verification -> eligibility engine`
 
 - A post without an HTTPS source is `URL_REQUIRED`.
 - An unreachable source is `SOURCE_UNAVAILABLE` and is retried with a bounded attempt count.
@@ -21,7 +21,9 @@ WhatsApp is an evidence-discovery channel, not an authority source. Meta Cloud A
 - Even a `VERIFIED` submission is only a source-backed draft. It never creates or publishes a campaign automatically.
 - Existing published campaigns still require matching source fingerprints and a fresh verification log before they can enter a decision.
 
-The GitHub maintenance workflow processes intake every six hours. Vercel Hobby invokes the same protected endpoint once per day as a fallback because that plan rejects higher-frequency cron expressions. The endpoint requires `CRON_SECRET`; all operations are idempotent.
+Incoming messages are verified immediately after the durable receipt is written. Four independent daily Vercel Hobby jobs invoke the same bounded full-refresh worker at 02:17, 08:17, 14:17, and 20:17 UTC; each job itself remains within the plan's once-per-day rule. The GitHub maintenance workflow is an additional repair path when its database secret is configured. Cron endpoints require `CRON_SECRET`; intake claims are atomic and every run is recorded in `AutomationRun`.
+
+Scheduled source refresh reads one `robots.txt` per origin per run. A blocked path suspends publication; an unavailable robots policy fails closed and is retried later. Stuck verifications return to the queue after 15 minutes. Terminal WhatsApp message text and sender identifiers are redacted after 90 days by default.
 
 ## Domain boundaries
 

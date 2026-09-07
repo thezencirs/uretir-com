@@ -348,6 +348,7 @@ export function PuanAIAdmin() {
   if (!authenticated) {
     return <div className="pa-admin-login">
       <Link href="/puan-ai"><ArrowLeft size={14} /> PuanAI&apos;a dön</Link>
+      <Link href="/puan-ai/admin/otomasyon"><RefreshCcw size={14} /> Otomasyon merkezi</Link>
       <div className="pa-admin-login__card">
         <span><Database size={19} /></span>
         <p className="pa-kicker">PuanAI veri yönetimi</p>

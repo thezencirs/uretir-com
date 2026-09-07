@@ -122,6 +122,12 @@ enum CampaignSubmissionStatus {
   EXPIRED
 }
 
+enum AutomationRunStatus {
+  RUNNING
+  SUCCESS
+  FAILED
+}
+
 model Bank {
   id           String           @id @default(uuid()) @db.Uuid
   slug         String           @unique
@@ -463,4 +469,20 @@ model CampaignSubmission {
   @@index([status, nextAttemptAt])
   @@index([receivedAt(sort: Desc)])
   @@map("campaign_submissions")
+}
+
+model AutomationRun {
+  id          String              @id @default(uuid()) @db.Uuid
+  job         String
+  status      AutomationRunStatus @default(RUNNING)
+  triggeredBy String
+  startedAt   DateTime            @default(now()) @db.Timestamptz(3)
+  completedAt DateTime?           @db.Timestamptz(3)
+  summary     Json?
+  error       String?             @db.Text
+  createdAt   DateTime            @default(now())
+
+  @@index([job, startedAt(sort: Desc)])
+  @@index([status, startedAt(sort: Desc)])
+  @@map("automation_runs")
 }

@@ -19,6 +19,7 @@
     "puanai:maintenance": "tsx scripts/puan-ai-maintenance.ts",
     "puanai:refresh-sources": "tsx scripts/puan-ai-source-refresh.ts",
     "puanai:process-intake": "tsx scripts/puan-ai-intake.ts",
+    "puanai:automation": "tsx scripts/puan-ai-automation.ts",
     "postinstall": "prisma generate",
     "audit:prod": "pnpm audit --prod",
     "report:gaps": "tsx scripts/report-content-gaps.ts --write",

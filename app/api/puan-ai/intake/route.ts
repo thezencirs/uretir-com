@@ -1,14 +1,13 @@
-import { randomUUID } from "node:crypto";
-import { NextResponse, type NextRequest } from "next/server";
+import { after, NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { isAdminRequest } from "@/lib/puan-ai/admin-auth";
 import { getPrisma } from "@/lib/puan-ai/db";
-import { storeCampaignSubmission } from "@/lib/puan-ai/intake-service";
+import { processCampaignSubmission, storeCampaignSubmission } from "@/lib/puan-ai/intake-service";
 
 export const runtime = "nodejs";
 
 const bodySchema = z.object({
-  messageId: z.string().min(1).max(200).optional(),
+  messageId: z.string().min(1).max(200),
   channelId: z.string().max(200).optional(),
   senderId: z.string().max(200).optional(),
   text: z.string().min(1).max(20_000),
@@ -26,12 +25,13 @@ export async function POST(request: NextRequest) {
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Mesaj biçimi geçersiz.", issues: parsed.error.flatten() }, { status: 400 });
   const data = await storeCampaignSubmission({
-    providerMessageId: parsed.data.messageId ?? `agent:${randomUUID()}`,
+    providerMessageId: parsed.data.messageId,
     channelId: parsed.data.channelId ?? null,
     senderId: parsed.data.senderId ?? null,
     text: parsed.data.text,
     receivedAt: parsed.data.receivedAt ? new Date(parsed.data.receivedAt) : new Date(),
   });
+  if (data.status === "RECEIVED") after(() => processCampaignSubmission(data.id).then(() => undefined));
   return NextResponse.json({ data }, { status: 202 });
 }
 

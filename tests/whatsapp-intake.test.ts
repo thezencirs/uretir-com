@@ -1,6 +1,8 @@
 import { createHmac } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { extractMessageFacts, extractUrls, parseMetaWebhook, verifyMetaSignature } from "@/lib/puan-ai/whatsapp-intake";
+import { extractSourceEvidence } from "@/lib/puan-ai/source-verifier";
+import { compareMessageWithSource } from "@/lib/puan-ai/intake-service";
 
 describe("WhatsApp campaign intake", () => {
   it("accepts only a valid Meta SHA-256 signature", () => {
@@ -40,5 +42,21 @@ describe("WhatsApp campaign intake", () => {
       participationRequired: false,
       cardPrograms: [],
     });
+  });
+
+  it("requires WhatsApp amounts and card claims to exist in the official page", () => {
+    const message = extractMessageFacts("Bankkart ile 10.000 TL ve üzeri alışverişe 1.000 TL Bankkart Lira, 6 taksit.");
+    const matching = extractSourceEvidence("Bankkart kredi kartı ile 10.000 TL ve üzeri alışverişe 1.000 TL Bankkart Lira ve 6 taksit.", "bankkart.com.tr");
+    expect(compareMessageWithSource(message, matching)).toEqual([]);
+    const conflicting = extractSourceEvidence("Bankkart kredi kartı ile 10.000 TL ve üzeri alışverişe 750 TL Bankkart Lira ve 3 taksit.", "bankkart.com.tr");
+    expect(compareMessageWithSource(message, conflicting)).toEqual(expect.arrayContaining([
+      expect.stringContaining("1000 TL"),
+      expect.stringContaining("6 taksit"),
+    ]));
+  });
+
+  it("classifies only known bank and card domains as official", () => {
+    expect(extractSourceEvidence("Bankkart 1.000 TL", "www.bankkart.com.tr").trustScore).toBe(100);
+    expect(extractSourceEvidence("Bankkart 1.000 TL", "kampanya.example").trustScore).toBe(40);
   });
 });

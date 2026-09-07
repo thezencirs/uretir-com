@@ -10,7 +10,7 @@ import { getCampaignCatalog } from "../lib/puan-ai/catalog-service";
 import { deleteConversation, getConversation, getOrCreateConversation, listConversations } from "../lib/puan-ai/conversation-service";
 import { createAdminResource, deleteAdminResource, listAdminResources, updateAdminResource } from "../lib/puan-ai/admin-service";
 import { evaluateCampaigns } from "../lib/puan-ai/rule-engine";
-import { storeCampaignSubmission } from "../lib/puan-ai/intake-service";
+import { processCampaignSubmission, storeCampaignSubmission } from "../lib/puan-ai/intake-service";
 
 async function availablePort() {
   return new Promise<number>((resolvePort, reject) => {
@@ -168,9 +168,33 @@ async function main() {
     if (submission.status !== "URL_REQUIRED" || duplicate.id !== submission.id || duplicate.rawText !== submission.rawText) {
       throw new Error("WhatsApp intake was not source-gated or idempotent.");
     }
+    const verifiedCandidate = await storeCampaignSubmission({
+      providerMessageId: `verify:${randomUUID()}`,
+      channelId: "verification-channel",
+      senderId: null,
+      text: "Bankkart ile 10.000 TL ve üzeri alışverişe 1.000 TL Bankkart Lira, 6 taksit. https://www.bankkart.com.tr/kampanya",
+      receivedAt: new Date(),
+    });
+    const processedCandidate = await processCampaignSubmission(verifiedCandidate.id, new Date(), (async (url, now) => ({
+      status: "VERIFIED" as const,
+      sourceUrl: url,
+      fetchedAt: (now ?? new Date()).toISOString(),
+      httpStatus: 200,
+      title: "Bankkart kampanyası",
+      validFrom: "2026-09-01T00:00:00.000Z",
+      validUntil: "2026-09-30T20:59:59.000Z",
+      fingerprint: "c".repeat(64),
+      evidence: { hostname: "bankkart.com.tr", sourceKind: "OFFICIAL_BANK_CARD" as const, trustScore: 100, monetaryAmounts: [1000, 10000], installmentCounts: [6], cardPrograms: ["Bankkart"], participationRequired: false },
+      reason: "Test kaynağı doğrulandı.",
+    })) as typeof import("../lib/puan-ai/source-verifier").verifyCampaignUrl);
+    if (processedCandidate.status !== "VERIFIED") throw new Error("Source-backed WhatsApp candidate was not verified.");
+
+    const automation = await prisma.automationRun.create({ data: { job: "verification", triggeredBy: "manual" } });
+    await prisma.automationRun.update({ where: { id: automation.id }, data: { status: "SUCCESS", completedAt: new Date(), summary: { verified: true } } });
+    if (await prisma.automationRun.count() !== 1) throw new Error("Automation audit log was not persisted.");
 
     await prisma.$disconnect();
-    process.stdout.write(`PuanAI database verified: ${counts.join("/")} records across required tables; ${results.length} grounded Migros result(s); chat, admin and WhatsApp intake checks passed.\n`);
+    process.stdout.write(`PuanAI database verified: ${counts.join("/")} records across required tables; ${results.length} grounded Migros result(s); chat, admin, automation and WhatsApp intake checks passed.\n`);
   } finally {
     await postgres.stop().catch(() => undefined);
     const resolved = resolve(databaseDir);

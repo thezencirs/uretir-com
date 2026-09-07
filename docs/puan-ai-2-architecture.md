@@ -21,7 +21,7 @@ WhatsApp is an evidence-discovery channel, not an authority source. Meta Cloud A
 - Even a `VERIFIED` submission is only a source-backed draft. It never creates or publishes a campaign automatically.
 - Existing published campaigns still require matching source fingerprints and a fresh verification log before they can enter a decision.
 
-The scheduled intake processor runs every six hours through both the Vercel cron endpoint and the GitHub maintenance workflow. The endpoint requires `CRON_SECRET`. This redundancy is intentional; all operations are idempotent.
+The GitHub maintenance workflow processes intake every six hours. Vercel Hobby invokes the same protected endpoint once per day as a fallback because that plan rejects higher-frequency cron expressions. The endpoint requires `CRON_SECRET`; all operations are idempotent.
 
 ## Domain boundaries
 

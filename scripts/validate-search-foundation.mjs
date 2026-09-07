@@ -137,7 +137,6 @@ for (const routeFile of [
   join("app", "kategori", "[category]", "page.tsx"),
   join("app", "ne-uretir", "[slug]", "page.tsx"),
   join("app", "rehber", "[slug]", "page.tsx"),
-  join("app", "puan-ai", "kampanya", "[slug]", "page.tsx"),
 ]) {
   const source = readFileSync(join(projectRoot, routeFile), "utf8");
   assert(source.includes("export const dynamicParams = false"), `file-backed route rejects unknown production parameters: ${routeFile}`);
@@ -166,9 +165,9 @@ const puanHtml = [
   read("puan-ai.html"),
   ...collectHtml(join(appOutput, "puan-ai")).map((file) => readFileSync(file, "utf8")),
 ].join("\n");
-assert(puanHtml.includes("Varsayımsal"), "PuanAI labels hypothetical decision scenarios");
-assert(!/\b(?:Migros|Hepsiburada|Teknosa|Starbucks|Shell|Amazon|Akbank|Garanti BBVA|Worldcard|Axess)\b/i.test(puanHtml), "PuanAI production HTML contains no unverified real-brand campaign claims");
-assert(puanHtml.includes("Gerçek tarih yok"), "PuanAI sample scenarios do not imply live validity dates");
+assert(puanHtml.includes("Yalnızca güncel") || puanHtml.includes("yalnızca güncel"), "PuanAI declares its verified-current evidence boundary");
+assert(puanHtml.includes("doğrulama") || puanHtml.includes("Doğrulama"), "PuanAI explains that campaign evidence is verified");
+assert(!/\b(?:69\.999|70\.000|65\.999)\s*TL\b/i.test(puanHtml), "PuanAI production HTML contains no hard-coded campaign-price claims");
 assert(puanHtml.includes('data-analytics-event="ai_intent_select"'), "PuanAI intent choices expose typed measurement events");
 assert(puanHtml.includes('data-analytics-event="ai_prompt_submit"'), "PuanAI free-text interaction measures intent without embedding input values");
 

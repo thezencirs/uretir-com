@@ -502,3 +502,23 @@ Users gain one discovery path without changing the existing design system. The r
 ### Follow-up
 
 Connect consent-aware search telemetry, establish a relevance evaluation set, and introduce a managed search provider only when corpus size and measured failures justify it.
+# ADR-2026-09-07: Treat WhatsApp posts as candidate evidence, not campaign truth
+
+Status: Accepted
+Owners: Product, Data, Editorial, Security, and Engineering
+
+### Context
+
+PuanAI will receive campaign discoveries through a WhatsApp agent and channel. Channel copy is useful for speed and audience engagement, but it may omit dates, eligibility, exclusions, or an authoritative source.
+
+### Decision
+
+Persist every incoming message as an idempotent campaign submission. Require provider signature or a private ingest token. Extract only explicitly stated values, verify the linked HTTPS source, and keep the result in a review queue. No intake record can automatically publish a campaign. The deterministic eligibility, benefit, effective-cost, and scoring engines continue to consume only fresh verified campaign records.
+
+### Consequences
+
+New offers can be discovered quickly without allowing social copy to create financial claims. Operations must configure WhatsApp, cron, database, and admin secrets in Vercel and monitor `SOURCE_UNAVAILABLE`, `URL_REQUIRED`, and `NEEDS_REVIEW` records.
+
+### Follow-up
+
+Define the retention period for raw WhatsApp messages, connect alerting for queue age, and build approved official-source adapters for the highest-volume banks and merchants.

@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "Türkiye Üretir — Fikir burada. Gelecek burada.",
   description: "Türkiye'den uygulamalar, oyunlar ve AI ürünleri. İhtiyacına göre keşfet, karşılaştır, haritada bul.",
   alternates: { canonical: "/" },
+  openGraph: { url: "/" },
 };
 
 export default function HomePage() {

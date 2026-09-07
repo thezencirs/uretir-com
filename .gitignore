@@ -4,3 +4,4 @@ out
 .env*
 !.env.example
 *.log
+generated/prisma

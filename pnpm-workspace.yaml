@@ -1,9 +1,14 @@
 allowBuilds:
+  '@embedded-postgres/windows-x64': true
+  '@prisma/engines': true
   esbuild: true
+  prisma: true
   sharp: true
   unrs-resolver: true
 overrides:
-  postcss: ^8.5.28
+  deepmerge-ts: ^8.0.0
+  find-my-way: ^9.6.1
+  mysql2: ^3.23.1
+  postcss: ^8.5.18
   sharp: ^0.35.3
-
-  nanoid@3: ^3.3.18
+  valibot: ^1.4.2

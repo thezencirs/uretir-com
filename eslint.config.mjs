@@ -5,6 +5,6 @@ import { fileURLToPath } from "node:url";
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 const compat = new FlatCompat({ baseDirectory: dirname });
-const eslintConfig = [{ ignores: ["**/.next/**", "**/node_modules/**"] }, ...compat.extends("next/core-web-vitals", "next/typescript"), { rules: { "@typescript-eslint/triple-slash-reference": "off" } }];
+const eslintConfig = [{ ignores: ["**/.next/**", "**/node_modules/**", "embed-puanai-release.cjs"] }, ...compat.extends("next/core-web-vitals", "next/typescript"), { rules: { "@typescript-eslint/triple-slash-reference": "off" } }];
 
 export default eslintConfig;

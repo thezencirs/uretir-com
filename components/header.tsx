@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { analyticsAttributes } from "@/lib/analytics";
 
-const navItems = [{ href: "/", label: "Ana Sayfa" }, { href: "/blog", label: "Makaleler" }, { href: "/araclar", label: "Araçlar" }, { href: "/ekosistem", label: "Ekosistem" }, { href: "/hakkimizda", label: "Hakkımızda" }];
+const navItems = [{ href: "/kesfet", label: "Keşfet" }, { href: "/map", label: "Map" }, { href: "/blog", label: "Journal" }, { href: "/araclar", label: "Araçlar" }, { href: "/ekosistem", label: "Ekosistem" }];
 
 export function Header({ showPreviewLinks = false }: { showPreviewLinks?: boolean }) {
   const pathname = usePathname();
@@ -27,6 +27,7 @@ export function Header({ showPreviewLinks = false }: { showPreviewLinks?: boolea
         {navItems.map((item) => { const active = item.href === "/" ? pathname === "/" : pathname === item.href || pathname.startsWith(`${item.href}/`); return <Link key={item.href} href={item.href} data-active={active} aria-current={active ? "page" : undefined} className="nav-link" {...analyticsAttributes({ event: "navigation_select", surface: "header", target: item.href === "/" ? "home" : item.href.slice(1) })}>{item.label}</Link>; })}
       </nav>
       <div className="flex items-center gap-2">
+        <Link href="/map" className="rounded-full bg-[#e3edce] px-3 py-2 text-xs font-semibold text-[#385c25] md:hidden">Map</Link>
         {showPreviewLinks && <Link href="/uretir-id" className="hidden rounded-full bg-[color:var(--foreground)] px-3.5 py-2 text-[10px] font-bold text-[color:var(--background)] transition hover:opacity-80 sm:inline-flex">Uretir ID</Link>}
         <Link href="/ara" aria-label="Üretir içinde ara" className="header-search focus-ring" {...analyticsAttributes({ event: "navigation_select", surface: "header", target: "search" })}><Search size={15} strokeWidth={1.8} /><span className="hidden sm:inline">Ara</span></Link>
         <ThemeToggle />

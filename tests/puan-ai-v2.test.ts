@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { calculateDecision } from "@/lib/puan-ai/decision-engine";
 import { calculateCampaignBenefit, evaluateCampaigns } from "@/lib/puan-ai/rule-engine";
 import { campaignLifecycle, dataFreshness, detectConflicts } from "@/lib/puan-ai/verification-engine";
-import { verifyCampaignUrl } from "@/lib/puan-ai/source-verifier";
+import { extractSourceEvidence, verifyCampaignUrl } from "@/lib/puan-ai/source-verifier";
 import { campaignFixture } from "@/tests/support/puan-ai-fixture";
 
 const NOW = new Date("2026-09-06T09:00:00.000Z");
@@ -45,6 +45,34 @@ describe("PuanAI 2.0 zorunlu karar senaryoları", () => {
     expect(calculateCampaignBenefit(campaignFixture(), 1000)).toEqual({ eligible: true, amount: 150 });
   });
 
+  it("kademeli ödülü tutar aralığına göre deterministik hesaplar", () => {
+    const tiered = campaignFixture({
+      tiers: [
+        { id: "t1", minimumSpend: 25_000, maximumSpend: 49_999, rewardAmount: 1_500, description: "25.000-49.999 TL", priority: 0 },
+        { id: "t2", minimumSpend: 50_000, maximumSpend: 99_999, rewardAmount: 3_000, description: "50.000-99.999 TL", priority: 1 },
+        { id: "t3", minimumSpend: 100_000, maximumSpend: 174_999, rewardAmount: 5_000, description: "100.000-174.999 TL", priority: 2 },
+        { id: "t4", minimumSpend: 175_000, maximumSpend: null, rewardAmount: 7_500, description: "175.000 TL ve üzeri", priority: 3 },
+      ],
+    });
+    expect(calculateCampaignBenefit(tiered, 24_999)).toEqual({ eligible: false, amount: 0 });
+    expect(calculateCampaignBenefit(tiered, 25_000).amount).toBe(1_500);
+    expect(calculateCampaignBenefit(tiered, 50_000).amount).toBe(3_000);
+    expect(calculateCampaignBenefit(tiered, 175_000).amount).toBe(7_500);
+  });
+
+  it("kart programını daha uzun kart adının içinde güvenle eşleştirir", () => {
+    const base = campaignFixture();
+    const bankkart = campaignFixture({
+      ...base,
+      startDate: "2026-09-01T00:00:00Z",
+      endDate: "2026-09-30T20:59:59Z",
+      cards: [{ ...base.cards[0], name: "Bireysel Bankkart", rewardProgram: "Jest Lira" }],
+      verification: { ...base.verification!, checkedAt: "2026-09-06T08:00:00Z", nextCheckAt: "2026-09-07T08:00:00Z" },
+      sources: base.sources.map((source) => ({ ...source, fetchedAt: "2026-09-06T08:00:00Z" })),
+    });
+    expect(evaluateCampaigns([bankkart], "1.000 TL Bankkart ile harcayacağım", NOW)).toHaveLength(1);
+  });
+
   it("Test 8 — taksit tercihini yalnız mevcut taksit sayısıyla skorlar", () => {
     const withInstallment = calculateDecision({ price: 10_000, benefits: [], installmentCount: 6, campaignMatch: 1, preferenceMatch: 1, merchantReliability: 1, dataConfidence: 1 });
     const cash = calculateDecision({ price: 10_000, benefits: [], installmentCount: 0, campaignMatch: 1, preferenceMatch: 1, merchantReliability: 1, dataConfidence: 1 });
@@ -73,6 +101,16 @@ describe("PuanAI 2.0 zorunlu karar senaryoları", () => {
     const result = await verifyCampaignUrl("https://bank.example/kampanya", NOW, (async () => new Response(html, { status: 200 })) as typeof fetch, publicResolver);
     expect(result.status).toBe("VERIFIED");
     expect(result.validUntil).toContain("2026-09-30");
+  });
+
+  it("resmî metindeki harcama-ödül kademelerini yapılandırılmış veriye dönüştürür", () => {
+    const evidence = extractSourceEvidence("25.000 TL - 49.999 TL arasındaki alışverişiniz ile 1.500 TL Jest Lira, 50.000 TL - 99.999 TL arasındaki alışverişiniz ile 3.000 TL Jest Lira, 175.000 ve üzeri alışverişiniz ile 7.500 TL Jest Lira", "bankkart.com.tr");
+    expect(evidence.rewardTiers).toEqual([
+      { minimumSpend: 25_000, maximumSpend: 49_999, rewardAmount: 1_500 },
+      { minimumSpend: 50_000, maximumSpend: 99_999, rewardAmount: 3_000 },
+      { minimumSpend: 175_000, maximumSpend: null, rewardAmount: 7_500 },
+    ]);
+    expect(evidence.trustScore).toBe(100);
   });
 
   it("veri tazeliğini sınır değerlerde sınıflandırır", () => {

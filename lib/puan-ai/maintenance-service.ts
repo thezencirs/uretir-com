@@ -7,11 +7,13 @@ export async function enforceCampaignFreshness(now = new Date()) {
     where: { endDate: { lt: now }, status: { not: "EXPIRED" } },
     data: { status: "EXPIRED", published: false },
   });
-  const stale = await prisma.verificationLog.findMany({
-    where: { nextCheckAt: { lt: now }, status: "VERIFIED" },
-    select: { campaignId: true },
+  const candidates = await prisma.campaign.findMany({
+    where: { endDate: { gte: now }, status: { not: "EXPIRED" } },
+    select: { id: true, verificationLogs: { orderBy: [{ checkedAt: "desc" }, { createdAt: "desc" }], take: 1, select: { nextCheckAt: true, status: true } } },
   });
-  const staleCampaignIds = [...new Set(stale.map((item) => item.campaignId))];
+  const staleCampaignIds = candidates
+    .filter((campaign) => campaign.verificationLogs[0]?.status === "VERIFIED" && campaign.verificationLogs[0].nextCheckAt < now)
+    .map((campaign) => campaign.id);
   if (staleCampaignIds.length) await prisma.campaign.updateMany({
     where: { id: { in: staleCampaignIds } },
     data: { status: "UNVERIFIED", published: false },

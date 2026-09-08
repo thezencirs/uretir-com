@@ -11,6 +11,7 @@ const campaignInclude = {
   rewardType: true,
   cards: { include: { card: true } },
   rules: { orderBy: [{ priority: "asc" }, { createdAt: "asc" }] },
+  tiers: { orderBy: [{ minimumSpend: "asc" }, { priority: "asc" }] },
   installments: { orderBy: { count: "asc" } },
   officialSources: {
     where: { active: true },
@@ -90,6 +91,14 @@ export function toCampaignView(record: CampaignRecord): CampaignView {
       unit: rule.unit,
       description: rule.description,
       priority: rule.priority,
+    })),
+    tiers: record.tiers.map((tier) => ({
+      id: tier.id,
+      minimumSpend: tier.minimumSpend.toNumber(),
+      maximumSpend: numberOrNull(tier.maximumSpend),
+      rewardAmount: tier.rewardAmount.toNumber(),
+      description: tier.description,
+      priority: tier.priority,
     })),
     installments: record.installments.map((item) => ({
       id: item.id,

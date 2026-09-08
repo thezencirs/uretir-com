@@ -4,7 +4,7 @@ import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, CheckCircle2, Database, LogOut, Pencil, Plus, RefreshCcw, Save, ShieldAlert, Trash2, X } from "lucide-react";
 
-type Resource = "banks" | "cards" | "categories" | "merchants" | "reward-types" | "campaigns" | "rules" | "installments" | "verifications" | "scoring";
+type Resource = "banks" | "cards" | "categories" | "merchants" | "reward-types" | "campaigns" | "rules" | "tiers" | "installments" | "verifications" | "scoring";
 type FormValue = string | boolean;
 type FormState = Record<string, FormValue>;
 type AdminRecord = Record<string, unknown> & { id: string };
@@ -27,6 +27,7 @@ const resourceLabels: Record<Resource, { label: string; singular: string }> = {
   "reward-types": { label: "Ödül tipleri", singular: "Ödül tipi" },
   campaigns: { label: "Kampanyalar", singular: "Kampanya" },
   rules: { label: "Ödül ve katılım kuralları", singular: "Kural" },
+  tiers: { label: "Ödül kademeleri", singular: "Kademe" },
   installments: { label: "Taksitler", singular: "Taksit" },
   verifications: { label: "Doğrulama durumu", singular: "Doğrulama" },
   scoring: { label: "Skor ağırlıkları", singular: "Skor yapılandırması" },
@@ -101,6 +102,14 @@ const fields: Record<Resource, Field[]> = {
     { name: "textValue", label: "Metin değeri" },
     { name: "unit", label: "Birim" },
     { name: "description", label: "Kullanıcıya gösterilen koşul", type: "textarea", required: true },
+    { name: "priority", label: "Sıra", type: "number", required: true },
+  ],
+  tiers: [
+    { name: "campaignId", label: "Kampanya", type: "select", lookup: "campaigns", required: true },
+    { name: "minimumSpend", label: "Alt harcama sınırı", type: "number", required: true },
+    { name: "maximumSpend", label: "Üst harcama sınırı", type: "number" },
+    { name: "rewardAmount", label: "Ödül tutarı", type: "number", required: true },
+    { name: "description", label: "Kullanıcıya gösterilen kademe", type: "textarea", required: true },
     { name: "priority", label: "Sıra", type: "number", required: true },
   ],
   installments: [

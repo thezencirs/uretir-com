@@ -134,11 +134,23 @@ function entityMatch(query: string, values: Array<string | null | undefined>) {
   return values.some((value) => value && query.includes(normalizeTurkish(value)));
 }
 
+function cardEntityMatch(query: string, values: Array<string | null | undefined>) {
+  if (entityMatch(query, values)) return true;
+  const normalizedValues = values.filter(Boolean).map((value) => normalizeTurkish(value as string));
+  return knownCardEntities.some((entity) => query.includes(entity) && normalizedValues.some((value) => value.includes(entity)));
+}
+
 function mentionsAny(query: string, campaigns: CampaignView[], selector: (campaign: CampaignView) => Array<string | null | undefined>) {
   return campaigns.some((campaign) => entityMatch(query, selector(campaign)));
 }
 
 export function calculateCampaignBenefit(campaign: CampaignView, amount: number | null) {
+  const tiers = campaign.tiers ?? [];
+  if (tiers.length > 0) {
+    if (amount === null) return { eligible: false, amount: 0 };
+    const tier = tiers.find((item) => amount >= item.minimumSpend && (item.maximumSpend === null || amount <= item.maximumSpend));
+    return tier ? { eligible: true, amount: tier.rewardAmount } : { eligible: false, amount: 0 };
+  }
   const minimum = numericRule(campaign.rules, ["MIN_SPEND"]);
   const maximum = numericRule(campaign.rules, ["MAX_SPEND"]);
   if (amount === null || (minimum !== null && amount < minimum) || (maximum !== null && amount > maximum)) return { eligible: false, amount: 0 };
@@ -155,12 +167,12 @@ export function evaluateCampaigns(campaigns: CampaignView[], rawQuery: string, n
   if (current.length === 0) return [];
 
   const explicitCardOrBank = knownCardEntities.some((entity) => intent.expanded.includes(entity));
-  const requestedEntityExists = mentionsAny(intent.expanded, current, (campaign) => [campaign.bank.name, campaign.bank.officialName, campaign.bank.slug, ...campaign.cards.flatMap((card) => [card.name, card.rewardProgram])]);
+  const requestedEntityExists = current.some((campaign) => cardEntityMatch(intent.expanded, [campaign.bank.name, campaign.bank.officialName, campaign.bank.slug, ...campaign.cards.flatMap((card) => [card.name, card.rewardProgram])]));
   if (explicitCardOrBank && !requestedEntityExists) return [];
 
   const merchantMentioned = mentionsAny(intent.expanded, current, (campaign) => [campaign.merchant?.name, ...(campaign.merchant?.aliases ?? [])]);
   const bankMentioned = mentionsAny(intent.expanded, current, (campaign) => [campaign.bank.name, campaign.bank.officialName, campaign.bank.slug]);
-  const cardMentioned = mentionsAny(intent.expanded, current, (campaign) => campaign.cards.flatMap((card) => [card.name, card.rewardProgram]));
+  const cardMentioned = current.some((campaign) => cardEntityMatch(intent.expanded, campaign.cards.flatMap((card) => [card.name, card.rewardProgram])));
   const categoryMentioned = mentionsAny(intent.expanded, current, (campaign) => [campaign.category.name, ...campaign.category.aliases]);
 
   return current
@@ -169,7 +181,7 @@ export function evaluateCampaigns(campaigns: CampaignView[], rawQuery: string, n
       let score = 0;
       const merchantMatches = entityMatch(intent.expanded, [campaign.merchant?.name, ...(campaign.merchant?.aliases ?? [])]);
       const bankMatches = entityMatch(intent.expanded, [campaign.bank.name, campaign.bank.officialName, campaign.bank.slug]);
-      const cardMatches = entityMatch(intent.expanded, campaign.cards.flatMap((card) => [card.name, card.rewardProgram]));
+      const cardMatches = cardEntityMatch(intent.expanded, campaign.cards.flatMap((card) => [card.name, card.rewardProgram]));
       const categoryMatches = entityMatch(intent.expanded, [campaign.category.name, ...campaign.category.aliases]);
 
       if (merchantMentioned && !merchantMatches) return [];
@@ -211,7 +223,9 @@ export function evaluateCampaigns(campaigns: CampaignView[], rawQuery: string, n
       for (const term of terms) if (haystack.includes(term)) score += 2;
 
       const reward = calculateCampaignBenefit(campaign, intent.amount).amount;
-      const rewardCeiling = numericRule(campaign.rules, ["MAX_REWARD", "REWARD_AMOUNT"]) ?? 0;
+      const rewardCeiling = (campaign.tiers?.length ?? 0) > 0
+        ? Math.max(...(campaign.tiers ?? []).map((tier) => tier.rewardAmount))
+        : numericRule(campaign.rules, ["MAX_REWARD", "REWARD_AMOUNT"]) ?? 0;
       if (intent.wantsHighestReward) score += Math.min(rewardCeiling / 10, 50);
       if (reasons.length === 0) reasons.push("Güncel ve doğrulanmış kampanya");
 

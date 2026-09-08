@@ -53,7 +53,10 @@ export function PuanAICampaignResult({ campaign, compact = false }: CampaignResu
 
       {!compact && <div className="pa-conditions">
         <p><CheckCircle2 size={14} /> Koşullar</p>
-        <ul>{campaign.rules.map((rule) => <li key={rule.id}>{rule.description}</li>)}</ul>
+        <ul>
+          {campaign.tiers.map((tier) => <li key={tier.id}>{tier.description}</li>)}
+          {campaign.rules.map((rule) => <li key={rule.id}>{rule.description}</li>)}
+        </ul>
       </div>}
     </div>
 

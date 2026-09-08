@@ -28,6 +28,15 @@ export type InstallmentView = {
   notes: string | null;
 };
 
+export type CampaignTierView = {
+  id: string;
+  minimumSpend: number;
+  maximumSpend: number | null;
+  rewardAmount: number;
+  description: string;
+  priority: number;
+};
+
 export type CampaignSourceView = {
   id: string;
   url: string;
@@ -99,6 +108,7 @@ export type CampaignView = {
     active: boolean;
   }>;
   rules: CampaignRuleView[];
+  tiers: CampaignTierView[];
   installments: InstallmentView[];
   sources: CampaignSourceView[];
   verification: CampaignVerificationView | null;

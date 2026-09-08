@@ -17,6 +17,7 @@ export const adminResourceSchema = z.enum([
   "reward-types",
   "campaigns",
   "rules",
+  "tiers",
   "installments",
   "verifications",
   "scoring",
@@ -91,6 +92,14 @@ export const createSchemas: Record<AdminResource, z.ZodType> = {
     description: z.string().trim().min(5).max(2_000),
     priority: z.coerce.number().int().min(0).max(1_000).default(0),
   }),
+  tiers: z.object({
+    campaignId: id,
+    minimumSpend: z.coerce.number().nonnegative(),
+    maximumSpend: optionalNumber,
+    rewardAmount: z.coerce.number().positive(),
+    description: z.string().trim().min(5).max(2_000),
+    priority: z.coerce.number().int().min(0).max(1_000).default(0),
+  }).refine((value) => value.maximumSpend === null || value.maximumSpend >= value.minimumSpend, { message: "Üst sınır alt sınırdan küçük olamaz.", path: ["maximumSpend"] }),
   installments: z.object({
     campaignId: id,
     count: z.coerce.number().int().min(1).max(36),

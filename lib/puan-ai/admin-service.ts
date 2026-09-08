@@ -92,6 +92,8 @@ export async function listAdminResources(resource: AdminResource) {
       });
     case "rules":
       return prisma.campaignRule.findMany({ include: { campaign: { select: { title: true } } }, orderBy: [{ campaignId: "asc" }, { priority: "asc" }] });
+    case "tiers":
+      return prisma.campaignTier.findMany({ include: { campaign: { select: { title: true } } }, orderBy: [{ campaignId: "asc" }, { minimumSpend: "asc" }] });
     case "installments":
       return prisma.installment.findMany({ include: { campaign: { select: { title: true } } }, orderBy: [{ campaignId: "asc" }, { count: "asc" }] });
     case "verifications":
@@ -162,6 +164,13 @@ export async function createAdminResource(resource: AdminResource, data: Record<
         const rule = await tx.campaignRule.create({ data: data as Prisma.CampaignRuleUncheckedCreateInput });
         await invalidateCampaign(tx, rule.campaignId, "campaign_rule_created");
         return rule;
+      });
+    }
+    case "tiers": {
+      return prisma.$transaction(async (tx) => {
+        const tier = await tx.campaignTier.create({ data: data as Prisma.CampaignTierUncheckedCreateInput });
+        await invalidateCampaign(tx, tier.campaignId, "campaign_tier_created");
+        return tier;
       });
     }
     case "installments": {
@@ -321,6 +330,15 @@ export async function updateAdminResource(resource: AdminResource, id: string, d
         return rule;
       });
     }
+    case "tiers": {
+      return prisma.$transaction(async (tx) => {
+        const previous = await tx.campaignTier.findUniqueOrThrow({ where: { id } });
+        const tier = await tx.campaignTier.update({ where: { id }, data: data as Prisma.CampaignTierUncheckedUpdateInput });
+        await invalidateCampaign(tx, previous.campaignId, "campaign_tier_updated");
+        if (tier.campaignId !== previous.campaignId) await invalidateCampaign(tx, tier.campaignId, "campaign_tier_moved");
+        return tier;
+      });
+    }
     case "installments": {
       return prisma.$transaction(async (tx) => {
         const previous = await tx.installment.findUniqueOrThrow({ where: { id } });
@@ -433,6 +451,13 @@ export async function deleteAdminResource(resource: AdminResource, id: string) {
         const rule = await tx.campaignRule.delete({ where: { id } });
         await invalidateCampaign(tx, rule.campaignId, "campaign_rule_deleted");
         return rule;
+      });
+    }
+    case "tiers": {
+      return prisma.$transaction(async (tx) => {
+        const tier = await tx.campaignTier.delete({ where: { id } });
+        await invalidateCampaign(tx, tier.campaignId, "campaign_tier_deleted");
+        return tier;
       });
     }
     case "installments": {

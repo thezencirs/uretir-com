@@ -255,6 +255,7 @@ model Campaign {
   rewardType         RewardType?        @relation(fields: [rewardTypeId], references: [id], onDelete: SetNull)
   cards              CampaignCard[]
   rules              CampaignRule[]
+  tiers              CampaignTier[]
   installments       Installment[]
   officialSources    OfficialSource[]
   verificationLogs   VerificationLog[]
@@ -446,6 +447,22 @@ model ChatMessage {
 
   @@index([conversationId, createdAt])
   @@map("chat_messages")
+}
+
+model CampaignTier {
+  id            String   @id @default(uuid()) @db.Uuid
+  campaignId    String   @db.Uuid
+  minimumSpend  Decimal  @db.Decimal(14, 2)
+  maximumSpend  Decimal? @db.Decimal(14, 2)
+  rewardAmount  Decimal  @db.Decimal(14, 2)
+  description   String   @db.Text
+  priority      Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  campaign      Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId, minimumSpend, maximumSpend])
+  @@map("campaign_tiers")
 }
 
 model CampaignSubmission {

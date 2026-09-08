@@ -23,6 +23,7 @@ export type SourceEvidence = {
   installmentCounts: number[];
   cardPrograms: string[];
   participationRequired: boolean;
+  rewardTiers: Array<{ minimumSpend: number; maximumSpend: number | null; rewardAmount: number }>;
 };
 
 const officialDomains = new Set([
@@ -39,7 +40,7 @@ function sourceIdentity(hostname: string | null): Pick<SourceEvidence, "hostname
 }
 
 const emptyEvidence = (hostname: string | null = null): SourceEvidence => ({
-  ...sourceIdentity(hostname), monetaryAmounts: [], installmentCounts: [], cardPrograms: [], participationRequired: false,
+  ...sourceIdentity(hostname), monetaryAmounts: [], installmentCounts: [], cardPrograms: [], participationRequired: false, rewardTiers: [],
 });
 
 function parseTurkishNumber(value: string) {
@@ -56,12 +57,17 @@ export function extractSourceEvidence(text: string, hostname: string | null = nu
     .map((match) => Number(match[1])).filter((value) => value > 1 && value <= 36);
   const cardPrograms = ["Bankkart", "World", "Worldcard", "Paraf", "Maximum", "Bonus", "Axess", "CardFinans"]
     .filter((name) => new RegExp(`\\b${name}\\b`, "i").test(text));
+  const rewardTiers: SourceEvidence["rewardTiers"] = [...text.matchAll(/([\d.]+(?:,\d+)?)\s*TL\s*[-–]\s*([\d.]+(?:,\d+)?)\s*TL[^.]{0,120}?([\d.]+(?:,\d+)?)\s*TL\s+(?:Jest\s+Lira|puan|bonus|cashback)/gi)]
+    .map((match) => ({ minimumSpend: parseTurkishNumber(match[1]), maximumSpend: parseTurkishNumber(match[2]), rewardAmount: parseTurkishNumber(match[3]) }));
+  const openEndedTier = text.match(/([\d.]+(?:,\d+)?)\s*(?:TL\s*)?ve\s+üzeri[^.]{0,120}?([\d.]+(?:,\d+)?)\s*TL\s+(?:Jest\s+Lira|puan|bonus|cashback)/i);
+  if (openEndedTier) rewardTiers.push({ minimumSpend: parseTurkishNumber(openEndedTier[1]), maximumSpend: null, rewardAmount: parseTurkishNumber(openEndedTier[2]) });
   return {
     ...sourceIdentity(hostname),
     monetaryAmounts: [...new Set(monetaryAmounts)].sort((a, b) => a - b),
     installmentCounts: [...new Set(installmentCounts)].sort((a, b) => a - b),
     cardPrograms,
     participationRequired: /(kampanyaya\s+katıl|katılım\s+gerekl|işlemden\s+önce\s+katıl)/i.test(text),
+    rewardTiers,
   };
 }
 

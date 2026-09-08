@@ -12,9 +12,11 @@ export function createPrismaClient(connectionString = process.env.DATABASE_URL) 
 
   const adapter = new PrismaPg({
     connectionString,
-    connectionTimeoutMillis: 5_000,
-    idleTimeoutMillis: 10_000,
-    max: process.env.NODE_ENV === "production" ? 10 : 5,
+    connectionTimeoutMillis: 10_000,
+    idleTimeoutMillis: 5_000,
+    // Each Vercel function instance owns its pool. Keeping one connection per
+    // instance prevents a burst of cold starts from exhausting the database.
+    max: process.env.VERCEL ? 1 : 5,
   });
 
   return new PrismaClient({ adapter });

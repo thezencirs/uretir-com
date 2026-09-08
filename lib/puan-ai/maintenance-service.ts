@@ -16,7 +16,9 @@ export async function enforceCampaignFreshness(now = new Date()) {
     .map((campaign) => campaign.id);
   if (staleCampaignIds.length) await prisma.campaign.updateMany({
     where: { id: { in: staleCampaignIds } },
-    data: { status: "UNVERIFIED", published: false },
+    // Publication is editorial intent. The current-verification gate hides stale
+    // records until the source is rechecked; do not erase that intent here.
+    data: { status: "UNVERIFIED" },
   });
   const abandoned = await prisma.campaignSubmission.updateMany({
     where: { status: "VERIFYING", updatedAt: { lt: new Date(now.getTime() - 15 * 60_000) } },

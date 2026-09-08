@@ -3,6 +3,7 @@ import { getPrisma } from "@/lib/puan-ai/db";
 import { evaluateCampaigns } from "@/lib/puan-ai/rule-engine";
 import type { CampaignMatch, CampaignView } from "@/lib/puan-ai/types";
 import { getActiveScoreWeights } from "@/lib/puan-ai/scoring-service";
+import { refreshOfficialSources } from "@/lib/puan-ai/source-refresh-service";
 
 const campaignInclude = {
   bank: true,
@@ -136,7 +137,19 @@ export async function getCampaignCatalog() {
 }
 
 export async function searchVerifiedCampaigns(query: string, now = new Date()): Promise<CampaignMatch[]> {
-  return evaluateCampaigns(await getCampaignCatalog(), query, now, await getActiveScoreWeights());
+  let catalog = await getCampaignCatalog();
+  const needsRefresh = catalog.some((campaign) =>
+    campaign.published
+    && ["ACTIVE", "VERIFIED", "UNVERIFIED"].includes(campaign.status)
+    && new Date(campaign.endDate) >= now
+    && campaign.verification?.status === "VERIFIED"
+    && new Date(campaign.verification.nextCheckAt) < now,
+  );
+  if (needsRefresh) {
+    await refreshOfficialSources(4);
+    catalog = await getCampaignCatalog();
+  }
+  return evaluateCampaigns(catalog, query, needsRefresh ? new Date() : now, await getActiveScoreWeights());
 }
 
 export async function getVerifiedCampaignBySlug(slug: string, now = new Date()) {

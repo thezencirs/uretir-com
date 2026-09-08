@@ -5,7 +5,7 @@ import { checkRobotsPolicy, type RobotsFile } from "@/lib/puan-ai/robots-policy"
 export async function refreshOfficialSources(limit = 50) {
   const prisma = getPrisma();
   const sources = await prisma.officialSource.findMany({
-    where: { active: true },
+    where: { active: true, campaign: { endDate: { gte: new Date() }, status: { notIn: ["DRAFT", "REJECTED", "SUSPENDED", "EXPIRED"] } } },
     include: { campaign: true, verificationLogs: { orderBy: { checkedAt: "desc" }, take: 1 } },
     orderBy: { fetchedAt: "asc" },
     take: Math.min(Math.max(limit, 1), 100),

@@ -30,6 +30,15 @@ export default function PuanAIPage() {
   return <div className="page-reveal pa-page">
     <JsonLd data={softwareSchema} />
     <PuanAIChat />
-    <div className="section-wrap"><PuanAICampaignExplorer /></div>
+    <div className="section-wrap">
+      <section className="pa-whatsapp" aria-labelledby="pa-whatsapp-title">
+        <div>
+          <h2 id="pa-whatsapp-title">Güzel fırsatları birbirimizden duyalım.</h2>
+          <p>İlgimizi çeken kampanyaları WhatsApp kanalımızda paylaşıyoruz. Sen de aramıza katıl; alışveriş zamanı geldiğinde tutarını ve kartlarını PuanAI’a yaz, koşulları birlikte karşılaştıralım.</p>
+        </div>
+        <a href="https://whatsapp.com/channel/0029VbDbbII8PgsA574OLl1H" target="_blank" rel="noopener noreferrer">WhatsApp’ta buluşalım <span aria-hidden="true">↗</span></a>
+      </section>
+      <PuanAICampaignExplorer />
+    </div>
   </div>;
 }

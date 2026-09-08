@@ -193,6 +193,22 @@ async function main() {
     await prisma.automationRun.update({ where: { id: automation.id }, data: { status: "SUCCESS", completedAt: new Date(), summary: { verified: true } } });
     if (await prisma.automationRun.count() !== 1) throw new Error("Automation audit log was not persisted.");
 
+    // Freshness expiration must hide recommendations without erasing the
+    // publication intent needed to recover after a successful source refresh.
+    const { enforceCampaignFreshness } = await import("../lib/puan-ai/maintenance-service");
+    const recoveryCampaign = await prisma.campaign.findFirstOrThrow({ where: { verificationLogs: { some: {} } } });
+    const recoveryNow = new Date();
+    await prisma.campaign.update({ where: { id: recoveryCampaign.id }, data: {
+      status: "ACTIVE", published: true, endDate: new Date(recoveryNow.getTime() + 86_400_000),
+    } });
+    await prisma.verificationLog.updateMany({ where: { campaignId: recoveryCampaign.id }, data: {
+      status: "VERIFIED", nextCheckAt: new Date(recoveryNow.getTime() - 60_000),
+    } });
+    await enforceCampaignFreshness(recoveryNow);
+    const recoverable = await prisma.campaign.findUniqueOrThrow({ where: { id: recoveryCampaign.id } });
+    if (recoverable.status !== "UNVERIFIED" || !recoverable.published) {
+      throw new Error("Freshness expiration erased publication intent; automatic recovery would fail.");
+    }
     await prisma.$disconnect();
     process.stdout.write(`PuanAI database verified: ${counts.join("/")} records across required tables; ${results.length} grounded Migros result(s); chat, admin, automation and WhatsApp intake checks passed.\n`);
   } finally {

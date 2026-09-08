@@ -1,5 +1,4 @@
 import OpenAI from "openai";
-import { getRuleValue } from "@/lib/puan-ai/rule-engine";
 import type { CampaignMatch } from "@/lib/puan-ai/types";
 import { UNVERIFIED_RESPONSE } from "@/lib/puan-ai/types";
 
@@ -11,14 +10,14 @@ function compactCampaign(campaign: CampaignMatch) {
     merchant: campaign.merchant?.name ?? campaign.category.name,
     dates: { start: campaign.startDate, end: campaign.endDate },
     benefit: campaign.benefitSummary,
-    rewardAmount: getRuleValue(campaign, ["MAX_REWARD", "REWARD_AMOUNT"]),
+    rewardAmount: campaign.decision.rewardValue,
     rewardType: campaign.rewardType?.name ?? null,
     installments: campaign.installments.map((item) => ({
       count: item.count,
       feeFree: item.feeFree,
       scope: item.productScope,
     })),
-    conditions: campaign.rules.map((rule) => rule.description),
+    conditions: [...campaign.tiers.map((tier) => tier.description), ...campaign.rules.map((rule) => rule.description)],
     verifiedAt: campaign.verification?.checkedAt,
     officialSources: campaign.sources
       .filter((source) => source.id === campaign.verification?.officialSourceId)
@@ -45,9 +44,12 @@ function deterministicAnswer(campaigns: CampaignMatch[]) {
   const installment = first.installments.length > 0
     ? `${first.installments.map((item) => item.count).join(", ")} taksit seçeneği`
     : "taksit avantajı yok";
+  const verifiedBenefit = first.decision.rewardValue > 0
+    ? `${first.decision.price?.toLocaleString("tr-TR")} TL işlem için ${first.decision.rewardValue.toLocaleString("tr-TR")} TL ${first.rewardType?.name ?? "ödül"} karşılığı (doğrudan indirim değildir)${first.decision.effectiveValueCost !== null ? `; değer bazlı efektif maliyet ${first.decision.effectiveValueCost.toLocaleString("tr-TR")} TL` : ""}`
+    : first.benefitSummary;
   return [
     `${campaigns.length} güncel ve doğrulanmış kampanya buldum.`,
-    `En güçlü eşleşme ${first.bank.name} tarafından sunulan “${first.title}”: ${first.benefitSummary}; ${installment}.`,
+    `En güçlü eşleşme ${first.bank.name} tarafından sunulan “${first.title}”: ${verifiedBenefit}; ${installment}.`,
     alternatives > 0 ? `${alternatives} doğrulanmış alternatifi de koşullarıyla birlikte aşağıda karşılaştırabilirsin.` : "Tüm katılım ve istisna koşullarını aşağıdaki kartta kontrol et.",
     "Bu bir finansal tavsiye değildir; işlemden hemen önce resmî kampanya sayfasını yeniden kontrol et.",
   ].join(" ");

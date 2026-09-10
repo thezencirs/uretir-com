@@ -9,7 +9,7 @@ overrides:
   find-my-way: ^9.6.1
   mysql2: ^3.23.1
   postcss: ^8.5.18
-  sharp: ^0.35.3
+  sharp: ^0.35.4
   valibot: ^1.4.2
 
 importers:

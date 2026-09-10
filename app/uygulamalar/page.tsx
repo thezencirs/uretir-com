@@ -1,0 +1,4 @@
+import type { Metadata } from "next";
+import { ApplicationsDirectory } from "@/components/applications-directory";
+export const metadata:Metadata={title:"Uygulamalar",description:"Telefonunda keşfet. Türkiye’de geliştirilen uygulama ve oyunları incele.",alternates:{canonical: "/uygulamalar", languages: { tr: "/uygulamalar", en: "/en/uygulamalar" }},openGraph:{url:"/uygulamalar",locale:"tr_TR"}};
+export default function Page(){return <div className="section-wrap py-12 md:py-20"><header className="mb-10 max-w-3xl"><h1 className="font-display text-5xl md:text-7xl">Uygulamalar</h1><p className="mt-6 text-lg leading-8 text-muted">Telefonunda keşfet. Türkiye’de geliştirilen uygulama ve oyunları incele.</p></header><ApplicationsDirectory/></div>}

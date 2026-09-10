@@ -9,7 +9,7 @@ This is a living direction document, not a promise of delivery dates. Move work 
 - Establish the editorial engine: source hierarchy, expert review workflow, freshness policy, and migration audit for high-value legacy pages.
 - Stabilize the organic discovery platform: route quality, metadata, structured data, sitemap coverage, entity coverage, topic clusters, and publishing consistency.
 - Define an analytics baseline for organic traffic, indexation, internal link quality, session depth, return behavior, topical authority, and entity coverage.
-- Define product-specific data contracts and sample-to-live adapter requirements for PuanAI, TesvikAI, FiyatAI, and IhracatAI before connecting live providers.
+- Define product-specific data contracts and sample-to-live adapter requirements for PuanAI, TeşvikAI, FiyatAI, İhracatAI, MimarAI, İndirimAI, and MagazinAI before connecting live providers.
 - Define baseline performance and accessibility budgets for key templates.
 
 ## Next
@@ -25,7 +25,7 @@ This is a living direction document, not a promise of delivery dates. Move work 
 - Launch moderated comments and a verification program only after the required safety tooling exists and they can strengthen authority or useful contribution.
 - Deliver personalized feed and notification preferences based on explicit follows and consented interests.
 - Introduce UretirAI with sourced retrieval, evaluation, and conversation controls.
-- Expand PuanAI and establish reusable opportunity-data patterns for TesvikAI and HibeAI.
+- Expand PuanAI and establish reusable opportunity-data patterns for TeşvikAI and İndirimAI.
 
 ## Future
 

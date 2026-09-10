@@ -2,7 +2,7 @@
 
 ## Current deployment posture
 
-The repository has a GitHub Actions quality workflow, but it does not deploy. A production hosting provider, secret store, monitoring stack, operated data platform, and rehearsed rollback mechanism have not been selected. Treat production deployment as an explicit engineering responsibility, not an implicit result of a green build or `git push`. The detailed operating contract is in [Production operations](./production-operations.md).
+The public application is deployed from the GitHub `main` branch to the Vercel project `thezencirs-projects/uretir-com`; `www.uretir.com` and `uretir-com.vercel.app` are attached to production. Vercel provides immutable deployments and a rollback control. The repository's GitHub Actions workflow validates quality but does not itself deploy. Uptime monitoring, error tracking, privacy-aware analytics, named incident ownership, and a rehearsed database-aware rollback remain operational work. Treat a green build or `git push` as only one part of a release. The detailed operating contract is in [Production operations](./production-operations.md).
 
 ## Required environments
 
@@ -32,6 +32,8 @@ Keep secrets in the deployment platform's encrypted environment store. Document 
 `URETIR_EDITORIAL_PREVIEW` controls local access to review records. Local development shows reviews unless it is set to `false`; production builds never use it to bypass the publication authority gate. Do not configure it as a public client variable.
 
 Production builds intentionally omit unapproved article, guide, company, and category HTML. A draft must not be made reachable merely to satisfy a launch checklist.
+
+`URETIR_ADMIN_PASSWORD` and `URETIR_SESSION_SECRET` are the preferred secrets for the shared `/yonetim` and PuanAI management session. Existing `PUANAI_ADMIN_PASSWORD` and `PUANAI_SESSION_SECRET` values remain supported as compatibility fallbacks. Apply the `marketplace_products` migration before publishing entries from the general management panel.
 
 ## Observability target
 

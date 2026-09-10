@@ -49,11 +49,11 @@
   ],
   "counts": {
     "personas": 13,
-    "aiProducts": 17,
+    "aiProducts": 20,
     "aiCapabilities": 25,
     "officialSources": 50,
     "incentiveDomains": 13,
-    "searchableRecordsInCurrentEnvironment": 33,
+    "searchableRecordsInCurrentEnvironment": 34,
     "topMissingFeatures": 100
   },
   "personaAudits": [
@@ -745,6 +745,160 @@
         "Search Console connection",
         "internal-search telemetry",
         "signal retention policy"
+      ]
+    },
+    {
+      "id": "mimar-ai",
+      "name": "MimarAI",
+      "status": "available_foundation",
+      "route": "/mimar-ai",
+      "purpose": "Mekân ihtiyacını, kullanım ilişkilerini ve uzman doğrulama noktalarını düzenli bir mimari araştırma akışına dönüştürmek.",
+      "personas": [
+        "architect",
+        "engineer",
+        "entrepreneur",
+        "sme_owner"
+      ],
+      "inputs": [
+        "space brief",
+        "users",
+        "functional needs",
+        "constraints"
+      ],
+      "outputs": [
+        "design brief",
+        "option criteria",
+        "professional verification checklist"
+      ],
+      "officialSourceIds": [
+        "tse"
+      ],
+      "knowledgeEntities": [
+        "technology",
+        "standard",
+        "raw_material",
+        "article"
+      ],
+      "searchScopes": [
+        "architecture guides",
+        "materials",
+        "standards"
+      ],
+      "relatedContent": [
+        "space planning",
+        "materials",
+        "accessibility"
+      ],
+      "roadmap": [
+        "Kaynak sözleşmesini ve değerlendirme veri setini onayla.",
+        "Salt okunur sağlayıcı adaptörünü önizlemede doğrula.",
+        "İnsan incelemesi, tazelik ve geri alma kapıları tamamlanınca sınırlı erişim aç."
+      ],
+      "prerequisites": [
+        "building regulation source registry",
+        "architect review workflow",
+        "spatial evaluation set"
+      ]
+    },
+    {
+      "id": "indirim-ai",
+      "name": "İndirimAI",
+      "status": "available_foundation",
+      "route": "/indirim-ai",
+      "purpose": "İndirim, kupon, kargo ve ödeme avantajlarını toplam maliyet ve güncel kaynak koşullarıyla karşılaştırmak.",
+      "personas": [
+        "sme_owner",
+        "entrepreneur",
+        "manufacturer"
+      ],
+      "inputs": [
+        "product",
+        "merchant",
+        "price",
+        "discount conditions",
+        "payment method"
+      ],
+      "outputs": [
+        "net cost comparison",
+        "eligibility conditions",
+        "freshness warning",
+        "official links"
+      ],
+      "officialSourceIds": [],
+      "knowledgeEntities": [
+        "product",
+        "company",
+        "article"
+      ],
+      "searchScopes": [
+        "discounts",
+        "campaigns",
+        "shopping guides"
+      ],
+      "relatedContent": [
+        "price comparison",
+        "campaign verification",
+        "consumer guides"
+      ],
+      "roadmap": [
+        "Kaynak sözleşmesini ve değerlendirme veri setini onayla.",
+        "Salt okunur sağlayıcı adaptörünü önizlemede doğrula.",
+        "İnsan incelemesi, tazelik ve geri alma kapıları tamamlanınca sınırlı erişim aç."
+      ],
+      "prerequisites": [
+        "verified merchant sources",
+        "price history policy",
+        "campaign freshness SLA"
+      ]
+    },
+    {
+      "id": "magazin-ai",
+      "name": "MagazinAI",
+      "status": "available_foundation",
+      "route": "/magazin-ai",
+      "purpose": "Kültür ve yaratıcı sektör gündemini doğrulanmış yayınlar, resmî açıklamalar ve açık editoryal sınırlarla araştırmak.",
+      "personas": [
+        "researcher",
+        "student",
+        "entrepreneur",
+        "ai_enthusiast"
+      ],
+      "inputs": [
+        "topic",
+        "time range",
+        "trusted publications",
+        "official statements"
+      ],
+      "outputs": [
+        "source-backed briefing",
+        "trend context",
+        "uncertainty and rights note"
+      ],
+      "officialSourceIds": [],
+      "knowledgeEntities": [
+        "article",
+        "company",
+        "technology"
+      ],
+      "searchScopes": [
+        "culture",
+        "creative industries",
+        "media trends"
+      ],
+      "relatedContent": [
+        "culture analysis",
+        "creative economy",
+        "media literacy"
+      ],
+      "roadmap": [
+        "Kaynak sözleşmesini ve değerlendirme veri setini onayla.",
+        "Salt okunur sağlayıcı adaptörünü önizlemede doğrula.",
+        "İnsan incelemesi, tazelik ve geri alma kapıları tamamlanınca sınırlı erişim aç."
+      ],
+      "prerequisites": [
+        "editorial source policy",
+        "personality-rights review",
+        "rumour exclusion workflow"
       ]
     },
     {

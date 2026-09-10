@@ -8,7 +8,9 @@ export const cities = {
 } as const;
 export type City = keyof typeof cities;
 export type ProductCategory = "Yapay zekâ" | "Oyun" | "Mobil uygulama" | "İş araçları";
-type Maker = { name: string; city: City; source: string; locationSource: string; color: string };
+export type ProductPlatform = "WEB" | "MOBILE";
+export type Maker = { name: string; city: City; source: string; locationSource: string; color: string };
+export type MakerRegistry = Record<string, Maker>;
 export const makers: Record<string, Maker> = {
   codeway: { name: "Codeway", city: "İstanbul", source: "https://www.codeway.co/our-products", locationSource: "https://www.codeway.co/terms-conditions", color: "#7768d8" },
   hubx: { name: "HubX", city: "İzmir", source: "https://hubx.co/products", locationSource: "https://hubx.co/contact", color: "#2f937e" },
@@ -24,7 +26,7 @@ export const makers: Record<string, Maker> = {
   meditopia: { name: "Meditopia", city: "İstanbul", source: "https://meditopia.com/en/help/what-is-meditopia", locationSource: "https://web.meditopia.com/tr/terms-and-conditions/b2bTR/", color: "#438e87" },
   teknasyon: { name: "Teknasyon", city: "İstanbul", source: "https://teknasyon.com/en/job-ads/account-executive/", locationSource: "https://teknasyon.com/tr/workspace", color: "#c07050" },
 };
-export type Product = { slug: string; name: string; maker: string; category: ProductCategory; task: string; description: string; url: string };
+export type Product = { slug: string; name: string; maker: string; category: ProductCategory; platform: ProductPlatform; task: string; description: string; url: string };
 const rows: [string, string, ProductCategory, string, string][] = [
   ["codeway", "Chat & Ask AI", "Yapay zekâ", "Yazı & araştırma", "Sorular, yazma ve günlük işler için AI asistanı."],
   ["codeway", "Cleanup", "Mobil uygulama", "Fotoğraf & video", "Telefonun fotoğraf arşivini düzenle."],
@@ -83,14 +85,31 @@ export function normalizeSearch(value: string) {
 }
 export const products: Product[] = rows.map(([maker, name, category, task, description]) => ({
   slug: normalizeSearch(name).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
-  maker, name, category, task, description, url: makers[maker].source,
+  maker, name, category, platform: category === "İş araçları" ? "WEB" : "MOBILE", task, description, url: makers[maker].source,
 }));
 export const tasks = [...new Set(products.map((p) => p.task))];
-export function filterProducts(query = "", category = "Tümü", city = "Tümü", task = "Tümü") {
+export function filterProducts(query = "", category = "Tümü", city = "Tümü", task = "Tümü", productList: Product[] = products, makerList: MakerRegistry = makers) {
   const terms = normalizeSearch(query).trim().split(/\s+/).filter(Boolean);
-  return products.filter((p) => {
-    const maker = makers[p.maker];
+  return productList.filter((p) => {
+    const maker = makerList[p.maker];
     const text = normalizeSearch([p.name, maker.name, maker.city, p.description, p.task, p.category].join(" "));
     return terms.every((term) => text.includes(term)) && (category === "Tümü" || p.category === category) && (city === "Tümü" || maker.city === city) && (task === "Tümü" || p.task === task);
   });
+}
+
+export type ManagedMarketplaceProduct = {
+  id: string; slug: string; name: string; makerName: string; city: City; category: ProductCategory;
+  platform: ProductPlatform; task: string; description: string; url: string; makerUrl: string;
+  locationSourceUrl: string; color: string;
+};
+
+export function mergeManagedMarketplace(records: ManagedMarketplaceProduct[]) {
+  const nextMakers: MakerRegistry = { ...makers };
+  const managed = records.map((record): Product => {
+    const maker = `managed-${record.id}`;
+    nextMakers[maker] = { name: record.makerName, city: record.city, source: record.makerUrl, locationSource: record.locationSourceUrl, color: record.color };
+    return { slug: record.slug, name: record.name, maker, category: record.category, platform: record.platform, task: record.task, description: record.description, url: record.url };
+  });
+  const managedSlugs = new Set(managed.map((product) => product.slug));
+  return { products: [...products.filter((product) => !managedSlugs.has(product.slug)), ...managed], makers: nextMakers };
 }

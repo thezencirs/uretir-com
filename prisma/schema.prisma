@@ -128,6 +128,39 @@ enum AutomationRunStatus {
   FAILED
 }
 
+enum MarketplacePlatform {
+  WEB
+  MOBILE
+}
+
+enum MarketplaceProductStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model MarketplaceProduct {
+  id                String                   @id @default(uuid()) @db.Uuid
+  slug              String                   @unique
+  name              String
+  makerName         String
+  city              String
+  category          String
+  platform          MarketplacePlatform
+  task              String
+  description       String                   @db.Text
+  url               String
+  makerUrl          String
+  locationSourceUrl String
+  color             String                   @default("#769d32")
+  status            MarketplaceProductStatus @default(DRAFT)
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @updatedAt
+
+  @@index([status, platform, updatedAt(sort: Desc)])
+  @@index([makerName, city])
+  @@map("marketplace_products")
+}
+
 model Bank {
   id           String           @id @default(uuid()) @db.Uuid
   slug         String           @unique

@@ -1,0 +1,4 @@
+import type { Metadata } from "next";
+import { ApplicationsDirectory } from "@/components/applications-directory";
+export const metadata:Metadata={title:"Apps",description:"Discover mobile apps and games made by teams in Türkiye.",alternates:{canonical: "/en/uygulamalar", languages: { tr: "/uygulamalar", en: "/en/uygulamalar" }},openGraph:{url:"/en/uygulamalar",locale:"en_US"}};
+export default function Page(){return <div className="section-wrap py-12 md:py-20"><header className="mb-10 max-w-3xl"><h1 className="font-display text-5xl md:text-7xl">Apps</h1><p className="mt-6 text-lg leading-8 text-muted">Discover mobile apps and games made by teams in Türkiye.</p></header><ApplicationsDirectory english/></div>}

@@ -2,7 +2,7 @@
 
 ## Current state
 
-Uretir.com is a Next.js App Router application written in TypeScript. It uses Tailwind CSS for utility styling, Lucide for icons, and static or file-backed editorial data in `lib/`. PuanAI adds a PostgreSQL/Prisma application boundary for banks, cards, campaigns, sources, verification history, conversations, WhatsApp intake, and automation audit records. The identity prototype remains local-review only and is not promoted by production navigation. Uretir still has no shared production identity provider, CMS, durable general-purpose queue, or analytics provider.
+Uretir.com is a Next.js App Router application written in TypeScript. It uses Tailwind CSS for utility styling, Lucide for icons, and static or file-backed editorial data in `lib/`. PostgreSQL/Prisma provides the application boundary for PuanAI and editor-managed marketplace products. The password-protected `/yonetim` surface writes web and mobile application records as drafts or published entries; public discovery merges only published database records with the reviewed file-backed catalog. PuanAI uses the same database boundary for banks, cards, campaigns, sources, verification history, conversations, WhatsApp intake, and automation audit records. The identity prototype remains local-review only and is not promoted by production navigation. Uretir still has no shared production identity provider, full editorial CMS, durable general-purpose queue, or analytics provider.
 
 This is intentional documentation of the present state; do not treat prototype client state as persistent product behavior.
 

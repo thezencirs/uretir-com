@@ -5,12 +5,12 @@ export const ADMIN_COOKIE = "puanai_admin";
 const SESSION_TTL_SECONDS = 60 * 60 * 8;
 
 function configuredSecret() {
-  const secret = process.env.PUANAI_SESSION_SECRET;
+  const secret = process.env.URETIR_SESSION_SECRET || process.env.PUANAI_SESSION_SECRET;
   return secret && secret.length >= 32 ? secret : null;
 }
 
 export function isAdminConfigured() {
-  return Boolean(configuredSecret() && process.env.PUANAI_ADMIN_PASSWORD);
+  return Boolean(configuredSecret() && (process.env.URETIR_ADMIN_PASSWORD || process.env.PUANAI_ADMIN_PASSWORD));
 }
 
 function digest(value: string) {
@@ -18,7 +18,7 @@ function digest(value: string) {
 }
 
 export function verifyAdminPassword(value: string) {
-  const expected = process.env.PUANAI_ADMIN_PASSWORD;
+  const expected = process.env.URETIR_ADMIN_PASSWORD || process.env.PUANAI_ADMIN_PASSWORD;
   if (!expected || !configuredSecret()) return false;
   const actualHash = Buffer.from(digest(value));
   const expectedHash = Buffer.from(digest(expected));

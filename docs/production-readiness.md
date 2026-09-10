@@ -75,4 +75,4 @@ Manual browser QA must cover:
 
 ## Known release blockers
 
-The repository can produce a safe public build, but an operational launch still requires an approved hosting target, deployment pipeline, rollback mechanism, uptime monitoring, error tracking, privacy-aware analytics, Core Web Vitals monitoring, and named incident ownership.
+The application has an approved Vercel production target, GitHub-connected deployment path, custom domain, and deployment rollback control. Operational readiness still requires uptime monitoring, error tracking, privacy-aware analytics, Core Web Vitals monitoring, named incident ownership, and a rehearsed database-aware rollback procedure.

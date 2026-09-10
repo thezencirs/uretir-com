@@ -28,7 +28,8 @@ export type SearchIndexAdapter = {
 
 const discoveryRecords: SearchRecord[] = [
   { id: "discovery:ecosystem", kind: "discovery", title: "Üretir Ekosistemi", summary: "Üretim bilgisi, AI merkezleri ve keşif yollarının ortak haritası.", path: "/ekosistem", trust: "public_foundation", keywords: ["ekosistem", "üretim", "bilgi grafiği"] },
-  { id: "discovery:tools", kind: "discovery", title: "AI bilgi merkezleri", summary: "UretirAI, PuanAI, TeşvikAI, FiyatAI ve İhracatAI merkezlerini keşfedin.", path: "/araclar", trust: "public_foundation", keywords: ["araçlar", "yapay zekâ", "AI"] },
+  { id: "discovery:tools", kind: "discovery", title: "Yapay zekâ araçları", summary: "ÜretirAI, PuanAI, TeşvikAI, FiyatAI, MimarAI, İndirimAI ve MagazinAI araçlarını keşfedin.", path: "/araclar", trust: "public_foundation", keywords: ["araçlar", "yapay zekâ", "AI", "mimari", "indirim", "magazin"] },
+  { id: "discovery:applications", kind: "discovery", title: "Web ve telefon uygulamaları", summary: "Türkiye'de geliştirilen web uygulamalarını ve telefon uygulamalarını ayrı listelerde keşfedin.", path: "/uygulamalar", trust: "public_foundation", keywords: ["uygulamalar", "web", "telefon", "mobil", "oyun"] },
   { id: "discovery:trends", kind: "discovery", title: "Trend Merkezi", summary: "Doğrulanmış sinyallerden editoryal araştırma adayları üretmek için hazırlanan merkez.", path: "/trendler", trust: "public_foundation", keywords: ["trend", "araştırma", "içerik keşfi"] },
   { id: "discovery:companies", kind: "discovery", title: "Ne Üretir?", summary: "Kaynak incelemesinden geçen üretici ve üretim ilişkileri için keşif merkezi.", path: "/ne-uretir", trust: "public_foundation", keywords: ["şirket", "üretici", "fabrika", "ürün"] },
   { id: "discovery:blog", kind: "discovery", title: "Makaleler", summary: "Üretim, teknoloji, yatırım ve yapay zekâ rehberleri.", path: "/blog", trust: "public_foundation", keywords: ["makale", "rehber", "üretim"] },

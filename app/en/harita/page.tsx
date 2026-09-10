@@ -1,0 +1,4 @@
+import type { Metadata } from "next";
+import { ApplicationsDirectory } from "@/components/applications-directory";
+export const metadata:Metadata={title:"Map",description:"Discover digital products and the teams behind them, city by city.",alternates:{canonical: "/en/harita", languages: { tr: "/harita", en: "/en/harita" }},openGraph:{url:"/en/harita",locale:"en_US"}};
+export default function Page(){return <div className="section-wrap py-12 md:py-20"><header className="mb-10 max-w-3xl"><h1 className="font-display text-5xl md:text-7xl">Map</h1><p className="mt-6 text-lg leading-8 text-muted">Discover digital products and the teams behind them, city by city.</p></header><ApplicationsDirectory platform="ALL" english map/></div>}

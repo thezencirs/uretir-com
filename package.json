@@ -28,7 +28,8 @@
     "report:ecosystem": "tsx scripts/report-ecosystem.ts --write",
     "report:ecosystem:check": "tsx scripts/report-ecosystem.ts --check",
     "validate:search": "node scripts/validate-search-foundation.mjs",
-    "quality": "pnpm db:validate && pnpm lint && pnpm test && pnpm db:verify && pnpm audit:prod && pnpm report:gaps:check && pnpm report:ecosystem:check && pnpm build && pnpm validate:search"
+    "quality": "pnpm db:validate && pnpm lint && pnpm test && pnpm db:verify && pnpm audit:prod && pnpm report:gaps:check && pnpm report:ecosystem:check && pnpm build && pnpm validate:search",
+    "vercel-build": "prisma migrate deploy && next build"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.10.0",
@@ -36,12 +37,12 @@
     "dotenv": "17.2.3",
     "leaflet": "1.9.4",
     "lucide-react": "^0.468.0",
-    "next": "^15.5.21",
+    "next": "^15.5.24",
     "openai": "6.49.0",
     "pg": "8.22.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "sharp": "^0.35.0",
+    "sharp": "^0.35.4",
     "zod": "4.4.3"
   },
   "devDependencies": {
@@ -54,7 +55,7 @@
     "autoprefixer": "^10.4.20",
     "embedded-postgres": "18.4.0-beta.17",
     "eslint": "^9.17.0",
-    "eslint-config-next": "^15.1.0",
+    "eslint-config-next": "^15.5.24",
     "postcss": "^8.5.23",
     "prisma": "7.10.0",
     "tailwindcss": "^3.4.17",

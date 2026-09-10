@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   async redirects() {
     return [
+      { source: "/map", destination: "/harita", permanent: true },
       { source: "/puanai", destination: "/puan-ai", permanent: true },
       { source: "/tesvikai", destination: "/tesvik-ai", permanent: true },
       { source: "/fiyatai", destination: "/fiyat-ai", permanent: true },

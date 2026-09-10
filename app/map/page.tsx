@@ -1,4 +1,2 @@
-import type { Metadata } from "next";
-import { Marketplace } from "@/components/marketplace";
-export const metadata: Metadata = { title: "Map — Türkiye’nin ürün haritası", description: "Türkiye'deki uygulama ve oyun üreticilerini kaynaklı, aranabilir haritada keşfet.", alternates: { canonical: "/map" }, openGraph: { url: "/map" } };
-export default function Page() { return <Marketplace mapFirst />; }
+export const dynamic = "force-dynamic";
+import { permanentRedirect } from "next/navigation"; export default function MapRedirect(){ permanentRedirect("/harita"); }

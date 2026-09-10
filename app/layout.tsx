@@ -52,7 +52,7 @@ export const viewport: Viewport = { themeColor: "#c8f560" };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return <html lang="tr" suppressHydrationWarning data-scroll-behavior="smooth"><body>
-    <Script id="theme-init" strategy="beforeInteractive">{`(() => { try { const saved = localStorage.getItem("uretir-theme"); const dark = saved ? saved === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; document.documentElement.classList.toggle("dark", dark); } catch {} })()`}</Script>
+    <Script id="theme-init" strategy="beforeInteractive">{`(() => { document.documentElement.lang = /^\\/en(?:\\/|$)/.test(location.pathname) ? "en" : "tr"; try { const saved = localStorage.getItem("uretir-theme"); const dark = saved ? saved === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; document.documentElement.classList.toggle("dark", dark); } catch {} })()`}</Script>
     <a href="#main-content" className="skip-link">Ana içeriğe geç</a>
     <JsonLd data={[organizationSchema, websiteSchema]} />
     <AnalyticsEventBridge />

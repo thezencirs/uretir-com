@@ -1,0 +1,4 @@
+import type { Metadata } from "next";
+import { ApplicationsDirectory } from "@/components/applications-directory";
+export const metadata:Metadata={title:"Ideas made in Türkiye.",description:"Discover apps, games and web tools. Find what you need and meet the people who make it.",alternates:{canonical: "/en", languages: { tr: "/", en: "/en" }},openGraph:{url:"/en",locale:"en_US"}};
+export default function Page(){return <div className="section-wrap py-12 md:py-20"><header className="mb-10 max-w-3xl"><h1 className="font-display text-5xl md:text-7xl">Ideas made in Türkiye.</h1><p className="mt-6 text-lg leading-8 text-muted">Discover apps, games and web tools. Find what you need and meet the people who make it.</p></header><ApplicationsDirectory platform="ALL" english/></div>}

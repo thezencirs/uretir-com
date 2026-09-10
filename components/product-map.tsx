@@ -3,10 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import type * as Leaflet from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { cities, makers, type City, type Product } from "@/lib/marketplace";
+import { cities, type City, type MakerRegistry, type Product } from "@/lib/marketplace";
 import styles from "./marketplace.module.css";
 
-export function ProductMap({ products, city, onCity }: { products: Product[]; city: string; onCity: (city: string) => void }) {
+export function ProductMap({ products, makers, city, onCity, english = false }: { products: Product[]; makers: MakerRegistry; city: string; onCity: (city: string) => void; english?: boolean }) {
   const container = useRef<HTMLDivElement>(null);
   const map = useRef<Leaflet.Map | null>(null);
   const layer = useRef<Leaflet.LayerGroup | null>(null);
@@ -41,20 +41,20 @@ export function ProductMap({ products, city, onCity }: { products: Product[]; ci
       if (!count) return;
       L.marker([...coordinates], {
         icon: L.divIcon({ className: styles.mapMarker, html: '<span>' + count + '</span>', iconSize: [42, 42], iconAnchor: [21, 21] }),
-        title: name + ": " + count + " ürün — keşfet",
-        alt: name + ": " + count + " ürün — keşfet",
-      }).bindTooltip(name + " · " + count + " ürün", { direction: "top" }).on("click", () => onCity(name)).addTo(layer.current!);
+        title: name + ": " + count + (english ? " products — explore" : " ürün — keşfet"),
+        alt: name + ": " + count + (english ? " products — explore" : " ürün — keşfet"),
+      }).bindTooltip(name + " · " + count + (english ? " products" : " ürün"), { direction: "top" }).on("click", () => onCity(name)).addTo(layer.current!);
     });
-  }, [products, ready, onCity]);
+  }, [products, makers, ready, onCity, english]);
   useEffect(() => {
     if (!ready) return;
     const center = cities[city as City];
     map.current?.setView(center ? [...center] : [39.2, 34.5], center ? 9 : 6, { animate: !window.matchMedia("(prefers-reduced-motion: reduce)").matches });
   }, [city, ready]);
   return <div className={styles.mapWrap}>
-    <div ref={container} className={styles.mapCanvas} aria-label="Türkiye merkezli ürün haritası" />
-    <button className={styles.recenter} onClick={() => { onCity("Tümü"); map.current?.setView([39.2, 34.5], 6); }}>↗ Türkiye&apos;ye dön</button>
-    {error && <p className={styles.mapError} role="status">Harita altlığı yüklenemedi. Aşağıdaki şehir filtreleri ve ürün listesi kullanılabilir.</p>}
-    <p className={styles.mapNote}>İşaretler şehir merkezidir; ofis adresi değildir. Sayılar filtreye uyan ürünleri gösterir.</p>
+    <div ref={container} className={styles.mapCanvas} aria-label={english ? "Product map of Türkiye" : "Türkiye merkezli ürün haritası"} />
+    <button className={styles.recenter} onClick={() => { onCity("Tümü"); map.current?.setView([39.2, 34.5], 6); }}>{english ? "↗ Back to Türkiye" : "↗ Türkiye’ye dön"}</button>
+    {error && <p className={styles.mapError} role="status">{english ? "Map tiles could not load. You can still use the city filters and product list." : "Harita altlığı yüklenemedi. Şehir filtrelerini ve ürün listesini kullanabilirsin."}</p>}
+    <p className={styles.mapNote}>{english ? "Markers indicate city centers, not office addresses. Counts reflect the active filters." : "İşaretler şehir merkezidir; ofis adresi değildir. Sayılar filtreye uyan ürünleri gösterir."}</p>
   </div>;
 }

@@ -16,6 +16,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: absoluteUrl("/"), lastModified: now, changeFrequency: "weekly", priority: 1 },
     { url: absoluteUrl("/araclar"), lastModified: now, changeFrequency: "weekly", priority: .8 },
+    { url: absoluteUrl("/uygulamalar"), lastModified: now, changeFrequency: "weekly", priority: .85 },
+    { url: absoluteUrl("/en"), lastModified: now, changeFrequency: "monthly", priority: .6, alternates: { languages: { tr: absoluteUrl("/"), en: absoluteUrl("/en") } } },
     { url: absoluteUrl("/ekosistem"), lastModified: now, changeFrequency: "monthly", priority: .7 },
     { url: absoluteUrl("/puan-ai"), lastModified: now, changeFrequency: "monthly", priority: .6 },
     { url: absoluteUrl("/hakkimizda"), lastModified: now, changeFrequency: "monthly", priority: .5 },
@@ -28,6 +30,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const articleRoutes = indexablePosts.map((post) => ({ url: absoluteUrl(`/blog/${post.slug}`), lastModified: new Date(`${post.updatedAt ?? post.publishedAt}T00:00:00.000Z`), changeFrequency: "monthly" as const, priority: post.featured ? .9 : .75 }));
   const companyRoutes = indexableCompanies.map((company) => ({ url: absoluteUrl(`/ne-uretir/${company.slug}`), lastModified: now, changeFrequency: "monthly" as const, priority: .75 }));
   const guideRoutes = indexableGuides.map((guide) => ({ url: absoluteUrl(guide.seo.canonicalPath), lastModified: new Date(`${guide.updatedAt}T00:00:00.000Z`), changeFrequency: "monthly" as const, priority: .75 }));
-  const discoveryRoutes = ["/kesfet", "/map", "/urun-gonder", ...products.map((p) => "/urun/" + p.slug)].map((path) => ({ url: absoluteUrl(path), lastModified: new Date(verifiedAt), changeFrequency: "weekly" as const, priority: .8 }));
+  const discoveryRoutes = ["/gelismeler", "/en/gelismeler", "/en/harita", "/en/araclar", "/en/uygulamalar","/kesfet", "/harita", "/urun-gonder", ...products.map((p) => "/urun/" + p.slug)].map((path) => ({ url: absoluteUrl(path), lastModified: new Date(verifiedAt), changeFrequency: "weekly" as const, priority: .8 }));
   return [...staticRoutes, ...categoryRoutes, ...articleRoutes, ...companyRoutes, ...guideRoutes, ...discoveryRoutes];
 }

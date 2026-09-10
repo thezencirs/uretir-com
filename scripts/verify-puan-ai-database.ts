@@ -70,6 +70,17 @@ async function main() {
     runPnpm(["exec", "prisma", "db", "seed"], environment);
 
     const prisma = getPrisma();
+    const managedProduct = await prisma.marketplaceProduct.create({ data: {
+      slug: "release-verification", name: "Verification product", makerName: "Test team", city: "İstanbul",
+      category: "İş araçları", platform: "WEB", task: "Test", description: "Local integration test product.",
+      url: "https://example.com/product", makerUrl: "https://example.com", locationSourceUrl: "https://example.com/contact", status: "DRAFT",
+    } });
+    if (await prisma.marketplaceProduct.count({ where: { status: "PUBLISHED", id: managedProduct.id } })) throw new Error("Draft leaked into published catalog");
+    await prisma.marketplaceProduct.update({ where: { id: managedProduct.id }, data: { status: "PUBLISHED", platform: "MOBILE" } });
+    const published = await prisma.marketplaceProduct.findFirst({ where: { id: managedProduct.id, status: "PUBLISHED", platform: "MOBILE" } });
+    if (!published) throw new Error("Published mobile product missing");
+    await prisma.marketplaceProduct.update({ where: { id: managedProduct.id }, data: { status: "DRAFT" } });
+    if (await prisma.marketplaceProduct.count({ where: { id: managedProduct.id, status: "PUBLISHED" } })) throw new Error("Unpublished product remains public");
     const counts = await Promise.all([
       prisma.bank.count(),
       prisma.card.count(),

@@ -49,6 +49,7 @@ function campaign(overrides: Partial<CampaignView> = {}): CampaignView {
       rule({ kind: "MAX_REWARD", operator: "LTE", numericValue: 150, unit: "TRY", description: "En fazla 150 TL Worldpuan." }),
     ],
     installments: [],
+    tiers: [],
     sources: [{ id: officialSourceId, url: "https://www.worldcard.com.tr/kampanya", title: "Resmî kampanya", publisher: "Worldcard", fetchedAt: "2026-07-25T06:00:00.000Z", fingerprint }],
     verification: { officialSourceId, status: "VERIFIED", checkedAt: "2026-07-25T06:00:00.000Z", nextCheckAt: "2026-07-27T06:00:00.000Z", checker: "test", summary: "Kontrol edildi.", fingerprint },
     ...overrides,

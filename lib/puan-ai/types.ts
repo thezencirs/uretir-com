@@ -28,6 +28,15 @@ export type InstallmentView = {
   notes: string | null;
 };
 
+export type CampaignTierView = {
+  id: string;
+  minimumSpend: number;
+  maximumSpend: number | null;
+  rewardAmount: number;
+  description: string;
+  priority: number;
+};
+
 export type CampaignSourceView = {
   id: string;
   url: string;
@@ -39,7 +48,7 @@ export type CampaignSourceView = {
 
 export type CampaignVerificationView = {
   officialSourceId: string;
-  status: "PENDING" | "VERIFIED" | "REJECTED" | "STALE";
+  status: "PENDING" | "VERIFIED" | "REJECTED" | "STALE" | "SOURCE_UNAVAILABLE" | "CONFLICT";
   checkedAt: string;
   nextCheckAt: string;
   checker: string;
@@ -55,7 +64,7 @@ export type CampaignView = {
   benefitSummary: string;
   startDate: string;
   endDate: string;
-  status: "DRAFT" | "PENDING_VERIFICATION" | "VERIFIED" | "EXPIRED" | "REJECTED";
+  status: "DRAFT" | "PENDING_VERIFICATION" | "VERIFIED" | "ACTIVE" | "UPCOMING" | "EXPIRED" | "SUSPENDED" | "UNVERIFIED" | "SOURCE_UNAVAILABLE" | "REJECTED";
   published: boolean;
   updatedAt: string;
   bank: {
@@ -99,6 +108,7 @@ export type CampaignView = {
     active: boolean;
   }>;
   rules: CampaignRuleView[];
+  tiers: CampaignTierView[];
   installments: InstallmentView[];
   sources: CampaignSourceView[];
   verification: CampaignVerificationView | null;
@@ -107,6 +117,16 @@ export type CampaignView = {
 export type CampaignMatch = CampaignView & {
   score: number;
   matchReasons: string[];
+  decision: {
+    score: number;
+    price: number | null;
+    effectiveCashCost: number | null;
+    effectiveValueCost: number | null;
+    directDiscount: number;
+    cashback: number;
+    rewardValue: number;
+    totalVerifiedBenefit: number;
+  };
 };
 
 export type SearchIntent = {
@@ -128,4 +148,4 @@ export type ChatEvent =
   | { type: "done"; conversationId: string }
   | { type: "error"; message: string };
 
-export const UNVERIFIED_RESPONSE = "I couldn't verify a current campaign.";
+export const UNVERIFIED_RESPONSE = "Güncel kampanya bilgisini doğrulayamadım. Bu nedenle kesin bir avantaj rakamı vermiyorum.";

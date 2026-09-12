@@ -2,6 +2,8 @@ import type { Prisma } from "@/generated/prisma/client";
 import { getPrisma } from "@/lib/puan-ai/db";
 import { evaluateCampaigns } from "@/lib/puan-ai/rule-engine";
 import type { CampaignMatch, CampaignView } from "@/lib/puan-ai/types";
+import { getActiveScoreWeights } from "@/lib/puan-ai/scoring-service";
+import { refreshOfficialSources } from "@/lib/puan-ai/source-refresh-service";
 
 const campaignInclude = {
   bank: true,
@@ -10,6 +12,7 @@ const campaignInclude = {
   rewardType: true,
   cards: { include: { card: true } },
   rules: { orderBy: [{ priority: "asc" }, { createdAt: "asc" }] },
+  tiers: { orderBy: [{ minimumSpend: "asc" }, { priority: "asc" }] },
   installments: { orderBy: { count: "asc" } },
   officialSources: {
     where: { active: true },
@@ -90,6 +93,14 @@ export function toCampaignView(record: CampaignRecord): CampaignView {
       description: rule.description,
       priority: rule.priority,
     })),
+    tiers: record.tiers.map((tier) => ({
+      id: tier.id,
+      minimumSpend: tier.minimumSpend.toNumber(),
+      maximumSpend: numberOrNull(tier.maximumSpend),
+      rewardAmount: tier.rewardAmount.toNumber(),
+      description: tier.description,
+      priority: tier.priority,
+    })),
     installments: record.installments.map((item) => ({
       id: item.id,
       count: item.count,
@@ -126,7 +137,19 @@ export async function getCampaignCatalog() {
 }
 
 export async function searchVerifiedCampaigns(query: string, now = new Date()): Promise<CampaignMatch[]> {
-  return evaluateCampaigns(await getCampaignCatalog(), query, now);
+  let catalog = await getCampaignCatalog();
+  const needsRefresh = catalog.some((campaign) =>
+    campaign.published
+    && ["ACTIVE", "VERIFIED", "UNVERIFIED"].includes(campaign.status)
+    && new Date(campaign.endDate) >= now
+    && campaign.verification?.status === "VERIFIED"
+    && new Date(campaign.verification.nextCheckAt) < now,
+  );
+  if (needsRefresh) {
+    await refreshOfficialSources(4);
+    catalog = await getCampaignCatalog();
+  }
+  return evaluateCampaigns(catalog, query, needsRefresh ? new Date() : now, await getActiveScoreWeights());
 }
 
 export async function getVerifiedCampaignBySlug(slug: string, now = new Date()) {

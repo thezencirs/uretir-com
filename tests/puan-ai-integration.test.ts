@@ -36,7 +36,7 @@ describe("grounded recommendation pipeline", () => {
     vi.stubEnv("OPENAI_API_KEY", "");
     let answer = "";
     for await (const delta of streamGroundedExplanation("iPhone için taksit?", [])) answer += delta;
-    expect(answer).toBe("I couldn't verify a current campaign.");
+    expect(answer).toContain("Güncel kampanya bilgisini doğrulayamadım");
   });
 
   it("does not guess a best card when decision context is missing", async () => {

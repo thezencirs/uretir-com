@@ -5,6 +5,7 @@ import { AnalyticsEventBridge } from "@/components/analytics-event-bridge";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { JsonLd } from "@/components/json-ld";
+import { GoogleMonetization, GoogleSiteVerification } from "@/components/google-monetization";
 import { absoluteUrl, DEFAULT_DESCRIPTION, DEFAULT_TITLE, SITE_NAME, SITE_URL } from "@/lib/seo";
 
 const organizationSchema = {
@@ -52,7 +53,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = { themeColor: "#c8f560" };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="tr" suppressHydrationWarning data-scroll-behavior="smooth"><body>
+  return <html lang="tr" suppressHydrationWarning data-scroll-behavior="smooth"><body><GoogleSiteVerification />
+    <GoogleMonetization />
     <Script id="theme-init" strategy="beforeInteractive">{`(() => { document.documentElement.lang = /^\\/en(?:\\/|$)/.test(location.pathname) ? "en" : "tr"; try { const saved = localStorage.getItem("uretir-theme"); const dark = saved ? saved === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; document.documentElement.classList.toggle("dark", dark); } catch {} })()`}</Script>
     <a href="#main-content" className="skip-link">Ana içeriğe geç</a>
     <JsonLd data={[organizationSchema, websiteSchema]} />

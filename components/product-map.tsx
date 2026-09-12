@@ -26,6 +26,9 @@ export function ProductMap({ products, makers, city, onCity, english = false }: 
       }).on("tileerror", () => setError(true)).addTo(instance);
       layer.current = L.layerGroup().addTo(instance);
       setReady(true);
+      // Recalculate after mobile layout and browser address-bar settling.
+      requestAnimationFrame(() => instance.invalidateSize({ animate: false }));
+      window.setTimeout(() => instance.invalidateSize({ animate: false }), 250);
       const observer = new ResizeObserver(() => instance.invalidateSize());
       observer.observe(container.current);
       instance.on("unload", () => observer.disconnect());

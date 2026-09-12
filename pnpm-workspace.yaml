@@ -1,3 +1,11 @@
+onlyBuiltDependencies:
+  - '@embedded-postgres/windows-x64'
+  - '@prisma/engines'
+  - esbuild
+  - prisma
+  - sharp
+  - unrs-resolver
+
 allowBuilds:
   '@embedded-postgres/windows-x64': true
   '@prisma/engines': true

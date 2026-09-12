@@ -1,0 +1,20 @@
+name: HaberAI hourly refresh
+
+on:
+  schedule:
+    - cron: "7 * * * *"
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Refresh HaberAI sources
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: https://www.uretir.com
+        run: |
+          test -n "$CRON_SECRET"
+          curl --fail-with-body --retry 2 --max-time 55 \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "$SITE_URL/api/cron/haber-ai"

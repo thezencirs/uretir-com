@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ToolShortcuts } from "@/components/tool-shortcuts";
 import { getPublishedContent } from "@/lib/site-content-store";
 import { publicNews } from "@/lib/site-content-model";
 import { ArrowDownRight, ArrowUpRight, ChevronRight, Layers, Rocket, Search, Sparkles, Zap } from "lucide-react";
@@ -12,7 +13,7 @@ import { analyticsAttributes } from "@/lib/analytics";
 import { isIndexableReference, isVisibleReference } from "@/lib/publication";
 
 const ecosystemCards = [
-  { number: "01", icon: Layers, title: "Üretir", description: "Bilgi ve içerik platformu", color: "#769d32", href: "/" },
+  { number: "01", icon: Layers, title: "HaberAI", description: "Şehrini seç, kaynaklı haberleri Türkiye haritasında takip et", color: "#769d32", href: "/haber-ai" },
   { number: "02", icon: Zap, title: "PuanAI", description: "Doğrulanmış kampanyalarla alışveriş kararını açıkla", color: "#78a5b6", href: "/puan-ai" },
   { number: "03", icon: Sparkles, title: "AI Merkezleri", description: "Kaynaklı rehberler ve gelecek ürünler", color: "#8b80c2", href: "/araclar" },
   { number: "04", icon: Rocket, title: "Startup Vizyonu", description: "Türkiye'nin üretim teknolojileri platformu", color: "#d97835", href: "/startup" },
@@ -25,6 +26,7 @@ export default async function HomePage() {
   const content = await getPublishedContent();
   const latestNews = publicNews(content.news).slice(0, 3);
   return <div className="page-reveal">
+    <ToolShortcuts />
     <section className="home-entry">
       <div className="section-wrap home-entry__grid">
       <div className="home-entry__copy">

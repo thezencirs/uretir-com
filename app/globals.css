@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+.tool-shortcuts { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;padding-top:24px;padding-bottom:16px; }
+.tool-shortcuts a { display:flex;align-items:center;gap:16px;padding:22px;border:1px solid var(--line);border-radius:16px;background:var(--surface);min-height:100px;transition:background .2s; }
+.tool-shortcuts a:first-child { background:#c8f560;color:#172013;border-color:#b5d964; }
+.tool-shortcuts a:hover { box-shadow:0 4px 18px #17201315; }
+.tool-shortcuts a>span { flex:1;min-width:0; }
+.tool-shortcuts strong { display:block;font-size:22px;letter-spacing:-.025em; }
+.tool-shortcuts small { display:block;font-size:14px;line-height:1.5;margin-top:4px; }
+.mobile-app-nav a[aria-current=page] { background:var(--surface-strong);border-radius:10px;color:var(--foreground); }
+@media(max-width:600px) { .tool-shortcuts{grid-template-columns:1fr;gap:10px;padding-top:16px}.tool-shortcuts a{min-height:84px;padding:16px}.tool-shortcuts strong{font-size:20px}.mobile-app-nav a{min-height:48px}.mobile-app-nav a span{font-size:11px} }
+
 :root {
   --background: #f7f7f3;
   --foreground: #10120f;

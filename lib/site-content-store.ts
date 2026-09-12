@@ -8,8 +8,14 @@ export class ContentUnavailable extends Error {}
 const id = "main";
 export async function readPublishedContent(): Promise<SiteContent> {
   if (!process.env.DATABASE_URL) return defaultSiteContent;
-  const row = await getPrisma().siteContent.findUnique({ where: { id } });
-  return row ? siteContentSchema.parse(row.published) : defaultSiteContent;
+  try {
+    const row = await getPrisma().siteContent.findUnique({ where: { id } });
+    return row ? siteContentSchema.parse(row.published) : defaultSiteContent;
+  } catch {
+    // A fresh deployment may be running before the optional content table is migrated.
+    // Keep the public site available with the bundled, SEO-ready defaults until then.
+    return defaultSiteContent;
+  }
 }
 export const getPublishedContent = unstable_cache(readPublishedContent, ["site-content-v1"], { tags: ["site-content"], revalidate: 60 });
 export async function getEditorContent() {

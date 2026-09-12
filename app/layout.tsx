@@ -50,7 +50,7 @@ export const metadata: Metadata = {
   icons: { icon: "/icon.svg", shortcut: "/icon.svg", apple: "/icon.svg" },
 };
 
-export const viewport: Viewport = { themeColor: "#c8f560" };
+export const viewport: Viewport = { themeColor: "#c8f560", viewportFit: "cover", width: "device-width", initialScale: 1, maximumScale: 5 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return <html lang="tr" suppressHydrationWarning data-scroll-behavior="smooth"><body><GoogleSiteVerification />

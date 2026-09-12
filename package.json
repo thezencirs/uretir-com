@@ -25,7 +25,7 @@
     "validate:search": "node scripts/validate-search-foundation.mjs",
     "quality": "pnpm db:validate && pnpm lint && pnpm test && pnpm db:verify && pnpm audit:prod && pnpm report:gaps:check && pnpm report:ecosystem:check && pnpm build && pnpm validate:search",
     "haber-ai:collect": "tsx scripts/collect-haber-ai.ts",
-    "vercel-build": "pnpm build"
+    "vercel-build": "pnpm db:migrate && pnpm build"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.9.0",

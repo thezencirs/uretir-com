@@ -19,4 +19,6 @@ Vercel Hobby zamanlaması günde birdir: UTC 06.13; Hobby planında çalışma T
 
 Hedef kanal: https://whatsapp.com/channel/0029VbDk4gHGpLHXkGseaf3Y
 
+Her haber için özgün ve telifsiz Üretir SVG görsel kartı `https://www.uretir.com/api/haber-ai/share/{haberId}` adresinde üretilir; bülten metni bu kart bağlantısını içerir. Vercel Hobby tek günlük cron sınırı nedeniyle saatlik yenileme `.github/workflows/haber-ai-hourly.yml` iş akışından çalışır. İş akışının çalışması için GitHub deposunda `CRON_SECRET` Actions secret olarak tanımlanmalıdır; iş akışı her saatin 7. dakikasında `/api/cron/haber-ai` çağırır.
+
 WhatsApp kanalına yayın için yönetici oturumu veya bu belirli kanalı destekleyen yetkili bir entegrasyon gerekir. Müşterilere mesaj gönderen Business API bağlantısı tek başına kanal gönderimi kanıtı değildir. Gönderim doğrulanmadan kaydı `sent` işaretlemeyin. İlk çalışma sırasında WhatsApp Web oturumu açık değildi.

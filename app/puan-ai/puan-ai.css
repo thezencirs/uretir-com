@@ -1,4 +1,5 @@
 .pa-page { padding: 32px 0 72px; }
+.pa-quick{margin-bottom:32px}.pa-quick h1{font-size:clamp(28px,4vw,44px);font-weight:650;line-height:1.15;letter-spacing:-.035em}.pa-quick>p{max-width:750px;line-height:1.7;margin:16px 0 24px;color:var(--muted)}.pa-quick h2{font-size:24px;margin:24px 0 16px}.pa-quick input,.pa-quick select{font-size:16px;min-height:44px}
 .pa-chat-shell { display: grid; grid-template-columns: 250px minmax(0,1fr); width: min(1240px,calc(100% - 64px)); margin: 0 auto; border: 1px solid var(--line); border-radius: 24px; overflow: hidden; background: var(--background); }
 .pa-history { display: flex; flex-direction: column; gap: 22px; padding: 26px 20px; background: var(--surface); border-right: 1px solid var(--line); min-width: 0; }
 .pa-history__top,.pa-history__heading,.pa-chat-topbar,.pa-campaign-card__top,.pa-campaign-card__footer,.pa-explorer__heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }

@@ -25,6 +25,7 @@
     "validate:search": "node scripts/validate-search-foundation.mjs",
     "quality": "pnpm db:validate && pnpm lint && pnpm test && pnpm db:verify && pnpm audit:prod && pnpm report:gaps:check && pnpm report:ecosystem:check && pnpm build && pnpm validate:search",
     "haber-ai:collect": "tsx scripts/collect-haber-ai.ts",
+    "puanai:automation": "tsx scripts/puan-ai-automation.ts",
     "vercel-build": "pnpm db:migrate && pnpm build"
   },
   "dependencies": {

@@ -5,6 +5,10 @@ const synonymGroups = [
   ["iphone", "telefon", "cep telefonu", "akilli telefon"],
   ["migros", "macrocenter", "macro"],
   ["market", "supermarket", "gida"],
+  ["akaryakit", "benzin", "motorin", "otogaz", "yakit"],
+  ["egitim", "okul", "kirtasiye"],
+  ["seyahat", "otel", "ucak", "tatil"],
+  ["giyim", "ayakkabi", "kozmetik"],
   ["teknoloji", "elektronik", "bilgisayar"],
   ["puan", "odul", "worldpuan", "maxipuan", "bonus"],
   ["taksit", "vadeli", "ay"],
@@ -145,6 +149,8 @@ function mentionsAny(query: string, campaigns: CampaignView[], selector: (campai
 }
 
 export function calculateCampaignBenefit(campaign: CampaignView, amount: number | null) {
+  // A purchase amount alone does not establish cumulative purchase conditions.
+  if ((numericRule(campaign.rules, ["REQUIRED_PURCHASE_COUNT"]) ?? 1) > 1) return { eligible: false, amount: 0 };
   const tiers = campaign.tiers ?? [];
   if (tiers.length > 0) {
     if (amount === null) return { eligible: false, amount: 0 };
@@ -174,6 +180,7 @@ export function evaluateCampaigns(campaigns: CampaignView[], rawQuery: string, n
   const bankMentioned = mentionsAny(intent.expanded, current, (campaign) => [campaign.bank.name, campaign.bank.officialName, campaign.bank.slug]);
   const cardMentioned = current.some((campaign) => cardEntityMatch(intent.expanded, campaign.cards.flatMap((card) => [card.name, card.rewardProgram])));
   const categoryMentioned = mentionsAny(intent.expanded, current, (campaign) => [campaign.category.name, ...campaign.category.aliases]);
+  const explicitCategory = ["akaryakit", "egitim", "market", "elektronik", "giyim", "seyahat", "saglik", "restoran", "sigorta"].some(term => intent.expanded.split(" ").includes(term));
 
   return current
     .flatMap((campaign): CampaignMatch[] => {
@@ -185,9 +192,11 @@ export function evaluateCampaigns(campaigns: CampaignView[], rawQuery: string, n
       const categoryMatches = entityMatch(intent.expanded, [campaign.category.name, ...campaign.category.aliases]);
 
       if (merchantMentioned && !merchantMatches) return [];
-      if (bankMentioned && !bankMatches) return [];
-      if (cardMentioned && !cardMatches) return [];
-      if (categoryMentioned && !categoryMatches) return [];
+      if ((bankMentioned || cardMentioned || explicitCardOrBank) && !bankMatches && !cardMatches) return [];
+      if ((categoryMentioned || explicitCategory) && !categoryMatches) return [];
+      const debitRequested = /\b(banka karti|debit)\b/.test(intent.normalized);
+      const debitEligible = /\b(banka karti|debit)\b/.test(normalizeTurkish(campaign.cards.map(card => card.name).join(" ")));
+      if (debitRequested && !debitEligible) return [];
 
       if (merchantMatches) { score += 80; reasons.push("Mağaza eşleşti"); }
       if (bankMatches) { score += 45; reasons.push("Banka eşleşti"); }
@@ -246,7 +255,7 @@ export function evaluateCampaigns(campaigns: CampaignView[], rawQuery: string, n
       }, weights);
       return [{ ...campaign, score: decision.score, matchReasons: reasons, decision }];
     })
-    .sort((a, b) => b.score - a.score || new Date(b.verification?.checkedAt ?? 0).getTime() - new Date(a.verification?.checkedAt ?? 0).getTime())
+    .sort((a, b) => (intent.amount !== null && !intent.wantsInstallment ? b.decision.totalVerifiedBenefit - a.decision.totalVerifiedBenefit : 0) || b.score - a.score || new Date(b.verification?.checkedAt ?? 0).getTime() - new Date(a.verification?.checkedAt ?? 0).getTime())
     .slice(0, 5);
 }
 

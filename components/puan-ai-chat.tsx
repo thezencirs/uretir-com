@@ -152,7 +152,7 @@ export function PuanAIChat() {
       }
     } catch {
       setMessages((items) => items.map((item) => item.id === assistantId
-        ? { ...item, content: "I couldn't verify a current campaign.", pending: false }
+        ? { ...item, content: "Güncel kampanyayı doğrulayamadım. Lütfen yeniden deneyin.", pending: false }
         : item));
     } finally {
       setStreaming(false);

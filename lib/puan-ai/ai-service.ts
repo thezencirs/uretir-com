@@ -24,6 +24,8 @@ function compactCampaign(campaign: CampaignMatch) {
       .filter((source) => source.id === campaign.verification?.officialSourceId)
       .map((source) => source.url),
     matchReasons: campaign.matchReasons,
+    calculatedBenefit: campaign.decision.totalVerifiedBenefit,
+    purchaseAmount: campaign.decision.price,
   };
 }
 
@@ -46,7 +48,8 @@ function deterministicAnswer(campaigns: CampaignMatch[]) {
     : "taksit avantajı yok";
   return [
     `${campaigns.length} güncel ve doğrulanmış kampanya buldum.`,
-    `En güçlü eşleşme ${first.bank.name} tarafından sunulan “${first.title}”: ${first.benefitSummary}; ${installment}.`,
+    `Kayıtlı seçeneklerde öne çıkan eşleşme ${first.bank.name} tarafından sunulan “${first.title}”: ${first.benefitSummary}; ${installment}.`,
+    first.decision.totalVerifiedBenefit > 0 ? `Girdiğin tutar için koşullar sağlanırsa hesaplanan avantaj ${first.decision.totalVerifiedBenefit.toLocaleString("tr-TR")} TL değerindedir.` : "Kesin kazanç hesaplanamadı; tutar ve birden fazla işlem gerekliliği dahil katılım koşullarını kontrol et.",
     alternatives > 0 ? `${alternatives} doğrulanmış alternatifi de koşullarıyla birlikte aşağıda karşılaştırabilirsin.` : "Tüm katılım ve istisna koşullarını aşağıdaki kartta kontrol et.",
     "Bu bir finansal tavsiye değildir; işlemden hemen önce resmî kampanya sayfasını yeniden kontrol et.",
   ].join(" ");
@@ -64,7 +67,7 @@ export async function* streamGroundedExplanation(query: string, campaigns: Campa
     return;
   }
 
-  const client = new OpenAI({ apiKey });
+  const client = new OpenAI({ apiKey, timeout: 20000, maxRetries: 1 });
   const model = process.env.OPENAI_MODEL || "gpt-5.6-sol";
   const input = [
     "Kullanıcı sorusu:",
@@ -81,6 +84,7 @@ export async function* streamGroundedExplanation(query: string, campaigns: Campa
         "Sen PuanAI'sın. Türkçe, kısa ve anlaşılır yanıt ver.",
         "Yalnızca verilen doğrulanmış kampanya JSON'undaki bilgileri kullan.",
         "Kampanya, puan, taksit, tarih, tutar, limit, banka, kart veya koşul uydurma.",
+        "Kesin kazancı yalnızca calculatedBenefit alanından al. Üst limit veya benefit metnini kesin kazanç sayma. Sıfır hesaplanan avantaj, koşulların doğrulanmadığı anlamına gelebilir. Tüm piyasada en iyi olduğunu iddia etme.",
         "Kullanıcı tek bir en iyi kartı soruyor ama mağaza, kategori, tutar, kart veya taksit bağlamı vermiyorsa kazanan seçme; eksik bağlamı sor.",
         "En iyi eşleşmeyi neden seçtiğini ve önemli katılım/istisna koşullarını açıkla.",
         "Aşağıdaki arayüz kampanya ayrıntılarını ayrıca göstereceği için URL listesi üretme.",

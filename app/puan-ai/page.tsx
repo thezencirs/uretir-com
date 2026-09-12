@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { PuanAICampaignExplorer, PuanAIChat } from "@/components/puan-ai-chat";
 import { JsonLd } from "@/components/json-ld";
 import { absoluteUrl } from "@/lib/seo";
+import { PuanAIQuickCompare } from "@/components/puan-ai-quick-compare";
 
 export const metadata: Metadata = {
   title: "PuanAI — Güncel kredi kartı kampanya asistanı",
@@ -29,6 +30,7 @@ const softwareSchema = {
 export default function PuanAIPage() {
   return <div className="page-reveal pa-page">
     <JsonLd data={softwareSchema} />
+    <PuanAIQuickCompare />
     <PuanAIChat />
     <section className="section-wrap pa-whatsapp" aria-label="WhatsApp gündem kanalı">
       <div><h2>PuanAI gelişmelerini WhatsApp’tan takip et.</h2><p>Yeni doğrulanmış kampanyalar, veri güncellemeleri ve kısa kullanım notları HaberAI kanalı üzerinden paylaşılır. Gündemi tek yerden takip etmek için kanala katıl.</p></div>

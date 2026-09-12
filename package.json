@@ -77,5 +77,16 @@
   "bugs": {
     "url": "https://github.com/thezencirs/uretir-com/issues"
   },
-  "homepage": "https://github.com/thezencirs/uretir-com#readme"
+  "homepage": "https://github.com/thezencirs/uretir-com#readme",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@embedded-postgres/linux-x64",
+      "@embedded-postgres/windows-x64",
+      "@prisma/engines",
+      "esbuild",
+      "prisma",
+      "sharp",
+      "unrs-resolver"
+    ]
+  }
 }

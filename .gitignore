@@ -8,3 +8,4 @@ generated/prisma
 .tmp
 
 .local/
+.vercel

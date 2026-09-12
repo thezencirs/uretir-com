@@ -1,0 +1,7 @@
+export const siteNavigation=[
+ {label:"Gelişmeler",href:"/gelismeler",description:"Gündemi ve üretimin geleceğini takip edin.",items:[{label:"ÜretirAI",href:"/uretir-ai"},{label:"HaberAI",href:"/haber-ai"},{label:"FinansAI",href:"/finans-ai"}]},
+ {label:"Ekosistem",href:"/ekosistem",description:"Türkiye genelindeki bağımsız girişimleri keşfedin.",items:[{label:"Harita",href:"/ekosistem/harita"},{label:"Marketplace",href:"/ekosistem/marketplace"},{label:"Marketcap",href:"/ekosistem/marketcap"}]},
+ {label:"Çözümler",href:"/cozumler",description:"Üretir tarafından geliştirilen araçlar ve ürünler.",items:[{label:"PuanAI",href:"/puan-ai"},{label:"MimarAI",href:"/mimar-ai"},{label:"OyunAI",href:"/oyun-ai"},{label:"İndirimAI",href:"/indirim-ai"},{label:"GüzelAI",href:"/guzel-ai"},{label:"TeşvikAI",href:"/tesvik-ai"},{label:"FiyatAI",href:"/fiyat-ai"},{label:"İhracatAI",href:"/ihracat-ai"},{label:"İnsanAI",href:"/insan-ai"},{label:"Trend Merkezi",href:"/trendler"}]},
+ {label:"Girişimler",href:"/girisimler",description:"Web ve uygulama dünyasındaki çalışmalarımız.",items:[{label:"WEB",href:"/girisimler/web"},{label:"APP",href:"/girisimler/app"}]},
+ {label:"Kaynaklar",href:"/kaynaklar",description:"Öğrenin, paylaşın ve birlikte geliştirin.",items:[{label:"Topluluk",href:"/kaynaklar/topluluk"},{label:"E-kitaplar",href:"/kaynaklar/e-kitaplar"},{label:"Forum",href:"/kaynaklar/forum"},{label:"Blog",href:"/blog"},{label:"Destek",href:"/kaynaklar/destek"}]}
+];

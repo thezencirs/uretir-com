@@ -1,38 +1,15 @@
 "use client";
-
 import Link from "next/link";
-import { Menu, Search, X } from "lucide-react";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { analyticsAttributes } from "@/lib/analytics";
-
-const navItems = [{ href: "/", label: "Ana Sayfa" }, { href: "/blog", label: "Makaleler" }, { href: "/araclar", label: "Araçlar" }, { href: "/ekosistem", label: "Ekosistem" }, { href: "/hakkimizda", label: "Hakkımızda" }];
-
-export function Header({ showPreviewLinks = false }: { showPreviewLinks?: boolean }) {
-  const pathname = usePathname();
-  const [open, setOpen] = useState(false);
-  useEffect(() => {
-    function closeOnEscape(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false);
-    }
-    window.addEventListener("keydown", closeOnEscape);
-    return () => window.removeEventListener("keydown", closeOnEscape);
-  }, []);
-
-  return <header className="site-header sticky top-0 z-50">
-    <div className="section-wrap flex h-[78px] items-center justify-between">
-      <Link href="/" className="group flex items-center gap-3" aria-label="Üretir ana sayfa"><span className="font-display text-[30px] font-bold tracking-[-.1em]">üretir<span className="text-[#92bb39]">.</span></span><span className="hidden border-l hairline pl-3 text-[9px] font-bold uppercase tracking-[.18em] text-muted sm:block">Journal<br />& studio</span></Link>
-      <nav className="hidden items-center gap-8 md:flex" aria-label="Ana navigasyon">
-        {navItems.map((item) => { const active = item.href === "/" ? pathname === "/" : pathname === item.href || pathname.startsWith(`${item.href}/`); return <Link key={item.href} href={item.href} data-active={active} aria-current={active ? "page" : undefined} className="nav-link" {...analyticsAttributes({ event: "navigation_select", surface: "header", target: item.href === "/" ? "home" : item.href.slice(1) })}>{item.label}</Link>; })}
-      </nav>
-      <div className="flex items-center gap-2">
-        {showPreviewLinks && <Link href="/uretir-id" className="hidden rounded-full bg-[color:var(--foreground)] px-3.5 py-2 text-[10px] font-bold text-[color:var(--background)] transition hover:opacity-80 sm:inline-flex">Uretir ID</Link>}
-        <Link href="/ara" aria-label="Üretir içinde ara" className="header-search focus-ring" {...analyticsAttributes({ event: "navigation_select", surface: "header", target: "search" })}><Search size={15} strokeWidth={1.8} /><span className="hidden sm:inline">Ara</span></Link>
-        <ThemeToggle />
-        <button onClick={() => setOpen(!open)} aria-label={open ? "Menüyü kapat" : "Menüyü aç"} aria-expanded={open} aria-controls="mobile-navigation" className="focus-ring rounded-full p-2 text-muted transition hover:bg-black/5 dark:hover:bg-white/10 md:hidden">{open ? <X size={19} /> : <Menu size={19} />}</button>
-      </div>
-    </div>
-    {open && <nav id="mobile-navigation" className="mobile-menu section-wrap border-t hairline py-3 md:hidden" aria-label="Mobil navigasyon">{navItems.map((item, index) => { const active = item.href === "/" ? pathname === "/" : pathname === item.href || pathname.startsWith(`${item.href}/`); return <Link onClick={() => setOpen(false)} key={item.href} href={item.href} aria-current={active ? "page" : undefined} className="flex items-center justify-between border-b hairline py-4 text-sm" {...analyticsAttributes({ event: "navigation_select", surface: "header", target: item.href === "/" ? "home" : item.href.slice(1) })}><span>{item.label}</span><span className="font-display text-xl text-muted">0{index + 1}</span></Link>; })}{showPreviewLinks && <Link onClick={() => setOpen(false)} href="/kategori/yapay-zeka" className="flex items-center justify-between py-4 text-sm text-muted" {...analyticsAttributes({ event: "navigation_select", surface: "header", target: "kategori/yapay-zeka" })}><span>Popüler kategori</span><span>Yapay zekâ →</span></Link>}</nav>}
-  </header>;
+import {ChevronDown,Menu,Search,X,ArrowUpRight} from "lucide-react";
+import {usePathname} from "next/navigation";
+import {useEffect,useRef,useState} from "react";
+import {ThemeToggle} from "./theme-toggle";
+import {siteNavigation} from "@/lib/site-navigation";
+export function Header(){
+ const pathname=usePathname(),ref=useRef<HTMLElement>(null);const[open,setOpen]=useState(false);
+ const close=()=>{ref.current?.querySelectorAll("details[open]").forEach(d=>d.removeAttribute("open"));setOpen(false);};
+ useEffect(()=>{const outside=(e:PointerEvent)=>{if(!ref.current?.contains(e.target as Node)){ref.current?.querySelectorAll("details[open]").forEach(d=>d.removeAttribute("open"));setOpen(false);}};const escape=(e:KeyboardEvent)=>{if(e.key!=="Escape")return;const expanded=ref.current?.querySelector("details[open]");if(expanded){expanded.removeAttribute("open");expanded.querySelector("summary")?.focus();}else {setOpen(false);ref.current?.querySelector<HTMLButtonElement>(".nav-mobile-toggle")?.focus();}};document.addEventListener("pointerdown",outside);document.addEventListener("keydown",escape);return()=>{document.removeEventListener("pointerdown",outside);document.removeEventListener("keydown",escape);};},[]);
+ return <header ref={ref} className="site-header sticky top-0 z-50"><div className="section-wrap nav-frame"><Link href="/" className="nav-brand" aria-label="Üretir ana sayfa" onClick={close}><span className="font-display">üretir<span className="nav-dot">.</span></span><span className="nav-motto">Türkiye üretir,<br/>gençler yetişir.</span></Link>
+ <nav className={"nav-categories"+(open?" is-open":"")} aria-label="Ana navigasyon" id="site-navigation">{siteNavigation.map((group,index)=>{const active=pathname===group.href||group.items.some(i=>pathname===i.href||pathname.startsWith(i.href+"/"));return <details className={"nav-category"+(index===2?" nav-wide":"")} key={group.href} onToggle={e=>{if(e.currentTarget.open){const current=e.currentTarget;ref.current?.querySelectorAll("details[open]").forEach(d=>{if(d!==current)d.removeAttribute("open");});}}}><summary className="nav-category-trigger" data-active={active}>{group.label}<ChevronDown size={13} aria-hidden="true"/></summary><div className="nav-dropdown"><div className="nav-dropdown-intro"><span>{group.label}</span><p>{group.description}</p></div><div className="nav-dropdown-links">{group.items.map(item=><Link key={item.href} href={item.href} onClick={close} aria-current={pathname===item.href?"page":undefined}>{item.label}<ArrowUpRight size={13} aria-hidden="true"/></Link>)}</div><Link className="nav-category-all" href={group.href} onClick={close}>Tüm {group.label.toLocaleLowerCase("tr-TR")} <span>→</span></Link></div></details>;})}<Link className="nav-mobile-member" href="/uretir-id" onClick={close}>Üretir ID · Çalışma alanı →</Link></nav>
+ <div className="nav-actions">{<Link href="/uretir-id" className="nav-id" onClick={close}>Üretir ID</Link>}<Link href="/ara" aria-label="Üretir içinde ara" className="header-search focus-ring" onClick={close}><Search size={15}/><span className="nav-search-text">Ara</span></Link><ThemeToggle/><button className="nav-mobile-toggle focus-ring" aria-label={open?"Menüyü kapat":"Menüyü aç"} aria-expanded={open} aria-controls="site-navigation" onClick={()=>setOpen(!open)}>{open?<X size={20}/>:<Menu size={20}/>}</button></div></div></header>;
 }

@@ -1,0 +1,3 @@
+import type {Metadata} from "next"; import {HaberAI} from "@/components/haber-ai"; import {getNewsSnapshot} from "@/lib/haber-ai/store";
+export const metadata:Metadata={alternates:{canonical:"/haber-ai"},title:"HaberAI · Türkiye haritası",description:"Türkiye genelinde şehir şehir kaynaklı günlük gelişmeler."}; export const revalidate=60;
+export default async function Page(){return <HaberAI initial={await getNewsSnapshot()}/>}

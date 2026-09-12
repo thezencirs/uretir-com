@@ -18,6 +18,10 @@ Uretir combines an editorial serif voice with a pragmatic interface sans-serif. 
 
 ## Spacing and grid
 
+The homepage entry uses a 1:1.618034 text-to-scene grid (38.1966% / 61.8034%) above 760px, with 13/21/34/55/89 spacing and orbit proportions derived from the same ratio. Narrow screens stack the copy and scene, with a fixed two-column destination selector. The dark entry palette is scoped to the hero in both themes; downstream editorial surfaces retain their theme tokens.
+
+The entry scene keeps native page scrolling and adds bounded, eased pointer and scroll depth. Pause, reduced-motion preference, low-power devices, document visibility, and viewport visibility govern animation. Selecting a destination freezes its orbit for inspection; explicit navigation remains in the information card. Keyboard users can select destinations, dismiss with Escape, and follow the card action. Touch selection centers the card in the viewport. Homepage copy continues to come from the published content store.
+
 - Base spacing unit: 4px. Use a consistent rhythm such as 4, 8, 12, 16, 24, 32, 48, 64, and 96.
 - Primary content uses the existing `section-wrap` container and adapts within a fluid viewport.
 - Align adjacent sections to shared vertical rules whenever possible.

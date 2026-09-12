@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import { UretirIdShell } from "@/components/uretir-id-shell";
 
 export const metadata: Metadata = {
-  title: "Uretir ID — Deneyim prototipi",
-  description: "Hesap oluşturmayan ve kişisel veri kaydetmeyen Uretir ID deneyim prototipi.",
+  title: "Üretir ID — Girişim çalışma alanı",
+  description: "Girişimini tanıt, haritada yerini al ve fikirlerini toplulukta geliştir.",
   alternates: { canonical: "/uretir-id" },
   robots: { index: false, follow: true },
-  openGraph: { title: "Uretir ID deneyim prototipi — Üretir", description: "Hesap oluşturmayan ve kişisel veri kaydetmeyen kimlik deneyimi önizlemesi.", url: "/uretir-id", type: "website" },
+  openGraph: { title: "Üretir ID — Üretir", description: "Girişim profili, yazılar ve topluluk geri bildirimleri.", url: "/uretir-id", type: "website" },
 };
 
 export default function UretirIdPage() {

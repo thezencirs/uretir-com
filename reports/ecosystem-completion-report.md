@@ -48,7 +48,7 @@ Uretir is not missing more public pages first. It is missing production measurem
 | Product | State | Purpose | Route | Primary prerequisites |
 | --- | --- | --- | --- | --- |
 | UretirAI | available_foundation | Üretim sorularını Uretir bilgi grafiği ve kaynaklı içeriklerle araştırmak. | /uretir-ai | authority-ready knowledge corpus; citation renderer; answer evaluation set |
-| PuanAI | sample_only | Alışveriş kararlarını koşul, toplam maliyet ve doğrulanmış kampanya kanıtıyla karşılaştırmak. | /puan-ai | contracted campaign providers; freshness SLA; revocation workflow |
+| PuanAI | available_verified | Alışveriş kararlarını koşul, toplam maliyet ve doğrulanmış kampanya kanıtıyla karşılaştırmak. | /puan-ai | operated PostgreSQL; scheduled source verification; release observability |
 | TeşvikAI | available_foundation | İşletme ve yatırım profilini güncel resmî destek kaynaklarına bağlayan ön araştırma akışı sunmak. | /tesvik-ai | programme ingestion; rule provenance; daily expiry and amendment checks |
 | FiyatAI | future_integration | Hammadde, enerji ve üretim girdilerini karşılaştırılabilir birim ve kaynaklarla analiz etmek. | /fiyat-ai | licensed price feeds; unit ontology; revision-aware time series |
 | İhracatAI | available_foundation | Üreticinin hedef pazar, sınıflandırma, belge, destek ve lojistik araştırmasını kaynaklandırmak. | /ihracat-ai | classification review workflow; trade dataset adapters; market evaluation set |

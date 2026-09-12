@@ -1,0 +1,1 @@
+"use client";export default function Error({reset}:{reset:()=>void}){return <div className="section-wrap member-shell"><h1>Topluluğa şu an ulaşılamıyor.</h1><p>Veri bağlantısı yeniden kurulduğunda içerikler görünür.</p><button onClick={reset}>Yeniden dene</button></div>;}

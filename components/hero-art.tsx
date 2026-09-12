@@ -2,10 +2,10 @@
 
 import type { CSSProperties, FocusEvent } from "react";
 import { useEffect, useRef, useState } from "react";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Pause, Play, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-type PlanetId = "puan-ai" | "ai" | "technology" | "atlas" | "articles" | "tools";
+type PlanetId = "puan-ai" | "haber-ai" | "ai" | "technology" | "atlas" | "articles" | "tools";
 type Planet = {
   id: PlanetId;
   title: string;
@@ -20,7 +20,8 @@ type Planet = {
 };
 
 const planets: Planet[] = [
-  { id: "puan-ai", title: "PuanAI", label: "Kampanyalar / Avantajlar", description: "Örnek verilerle alışveriş karar akışını keşfet.", stat: "Örnek", statLabel: "veri modu", updated: "Canlı veri bağlı değil", href: "/puan-ai", color: "blue", side: "top" },
+  { id: "haber-ai", title: "HaberAI", label: "Türkiye / Günlük gelişmeler", description: "Şehir şehir Türkiye gündemini harita üzerinden izle.", stat: "81", statLabel: "şehir", updated: "Günlük kaynak akışı", href: "/haber-ai", color: "green", side: "bottom" },
+  { id: "puan-ai", title: "PuanAI", label: "Kampanyalar / Avantajlar", description: "Doğrulanmış kampanyaları alışverişine göre karşılaştır.", stat: "Canlı", statLabel: "kural motoru", updated: "Resmî kaynak zorunlu", href: "/puan-ai", color: "blue", side: "top" },
   { id: "ai", title: "Yapay Zeka", label: "AI Araçları / Asistanlar", description: "Fikri hızlandıran yeni nesil araçlar.", stat: "06", statLabel: "planlanan araç", updated: "Yol haritası", href: "/araclar", color: "violet", side: "bottom" },
   { id: "technology", title: "Teknoloji", label: "Araçlar / Bilgi merkezleri", description: "Yarını şekillendiren sistemlerin araştırma merkezlerini keşfet.", stat: "İnceleme", statLabel: "içerik durumu", updated: "Kaynak kontrolü bekliyor", href: "/araclar", color: "cyan", side: "top" },
   { id: "atlas", title: "Üretim Atlası", label: "Şirketler / Sektörler", description: "Türkiye'nin üreten haritasını keşfet.", stat: "İnceleme", statLabel: "profil durumu", updated: "Kaynak kontrolü bekliyor", href: "/ne-uretir", color: "orange", side: "bottom" },
@@ -42,16 +43,81 @@ export function HeroArt() {
   const [travelingPlanet, setTravelingPlanet] = useState<PlanetId | null>(null);
   const [awake, setAwake] = useState(false);
   const [lowPower, setLowPower] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const [inView, setInView] = useState(true);
 
   useEffect(() => {
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
     const lowDevice = (navigator.hardwareConcurrency || 8) <= 4;
-    setLowPower(reducedMotion || lowDevice);
+    const syncMotion = () => setLowPower(motionPreference.matches || lowDevice);
+    syncMotion();
+    motionPreference.addEventListener("change", syncMotion);
 
     return () => {
       if (travelTimeout.current) window.clearTimeout(travelTimeout.current);
+      motionPreference.removeEventListener("change", syncMotion);
     };
   }, []);
+
+  useEffect(() => {
+    const surface = universeRef.current;
+    if (!surface) return;
+    let visible = true;
+    const syncVisibility = () => setInView(visible && !document.hidden);
+    const observer = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      syncVisibility();
+    }, { threshold: 0.05 });
+    observer.observe(surface);
+    document.addEventListener("visibilitychange", syncVisibility);
+    return () => {
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", syncVisibility);
+    };
+  }, []);
+
+  useEffect(() => {
+    const surface = universeRef.current;
+    if (!surface) return;
+    if (lowPower || paused || !inView) {
+      surface.style.setProperty("--scene-x", "0px");
+      surface.style.setProperty("--scene-y", "0px");
+      surface.style.setProperty("--scene-scroll", "0px");
+      return;
+    }
+    let frame = 0;
+    let x = 0, y = 0, targetX = 0, targetY = 0, scroll = 0;
+    const render = () => {
+      x += (targetX - x) * 0.07;
+      y += (targetY - y) * 0.07;
+      const targetScroll = Math.min(100, Math.max(0, -surface.getBoundingClientRect().top) * 0.16);
+      scroll += (targetScroll - scroll) * 0.07;
+      surface.style.setProperty("--scene-x", `${x.toFixed(2)}px`);
+      surface.style.setProperty("--scene-y", `${y.toFixed(2)}px`);
+      surface.style.setProperty("--scene-scroll", `${scroll.toFixed(2)}px`);
+      if (Math.abs(targetX - x) + Math.abs(targetY - y) + Math.abs(targetScroll - scroll) > 0.1) frame = requestAnimationFrame(render);
+      else frame = 0;
+    };
+    const schedule = () => { if (!frame) frame = requestAnimationFrame(render); };
+    const move = (event: PointerEvent) => {
+      if (event.pointerType !== "mouse") return;
+      const rect = surface.getBoundingClientRect();
+      targetX = ((event.clientX - rect.left) / rect.width - 0.5) * 26;
+      targetY = ((event.clientY - rect.top) / rect.height - 0.5) * 26;
+      schedule();
+    };
+    const reset = () => { targetX = 0; targetY = 0; schedule(); };
+    surface.addEventListener("pointermove", move);
+    surface.addEventListener("pointerleave", reset);
+    window.addEventListener("scroll", schedule, { passive: true });
+    schedule();
+    return () => {
+      cancelAnimationFrame(frame);
+      surface.removeEventListener("pointermove", move);
+      surface.removeEventListener("pointerleave", reset);
+      window.removeEventListener("scroll", schedule);
+    };
+  }, [lowPower, paused, inView]);
 
   function wakePlanet(planet: Planet) {
     setAwake(true);
@@ -80,25 +146,28 @@ export function HeroArt() {
 
   const selectedPlanet = planets.find((planet) => planet.id === activePlanet);
 
+  useEffect(() => {
+    if (!activePlanet || !window.matchMedia("(max-width: 760px)").matches) return;
+    universeRef.current?.querySelector(".universe-card")?.scrollIntoView({ block: "center", behavior: lowPower ? "instant" : "smooth" });
+  }, [activePlanet, lowPower]);
+
   return <section
     ref={universeRef}
-    className={`hero-universe noise${lowPower ? " hero-universe--low-power" : ""}${travelingPlanet ? " hero-universe--traveling" : ""}`}
+    className={`hero-universe hero-universe--immersive noise${lowPower ? " hero-universe--low-power" : ""}${travelingPlanet ? " hero-universe--traveling" : ""}`}
     data-awake={awake}
+    data-still={paused || lowPower || !inView}
+    data-selected={Boolean(activePlanet)}
     aria-label="Üretir ekosistem haritası"
     onPointerEnter={() => setAwake(true)}
-    onPointerLeave={() => {
-      if (!travelingPlanet) {
-        setAwake(false);
-        setActivePlanet(null);
-      }
-    }}
+    onPointerLeave={() => { if (!travelingPlanet) setAwake(false); }}
+    onKeyDown={(event) => { if (event.key === "Escape") { setActivePlanet(null); setAwake(false); } }}
     onFocusCapture={() => setAwake(true)}
     onBlurCapture={handleBlur}
   >
     <div className="universe-stars" aria-hidden="true" />
     <div className="universe-grid" aria-hidden="true" />
-    <div className="universe-signal universe-signal--top" aria-hidden="true"><span>ÜRETİR / 001</span><span>İSTANBUL — 2026</span></div>
-    <div className="universe-signal universe-signal--bottom" aria-hidden="true"><span><i /> SİSTEM / PROTOTİP</span><span>01 DANIŞMAN / 06 PLANLANAN ARAÇ</span></div>
+    <div className="universe-signal universe-signal--top" aria-hidden="true"><span>ÜRETİR EVRENİ</span><span>01 — 06</span></div>
+    <div className="universe-atmosphere" aria-hidden="true"><span /><span /><span /></div>
 
     <div className="universe-stage">
       {rings.map((ring) => <div key={ring.className} className={`orbit-track ${ring.className}`} style={{ "--orbit-duration": `${ring.duration}s` } as CSSProperties}>
@@ -112,7 +181,7 @@ export function HeroArt() {
             disabled={Boolean(travelingPlanet)}
             onPointerEnter={() => wakePlanet(planet)}
             onFocus={() => wakePlanet(planet)}
-            onClick={() => travelTo(planet)}
+            onClick={() => wakePlanet(planet)}
           >
             <span className="planet-face" aria-hidden="true"><span className="planet-detail" /></span>
           </button>
@@ -126,9 +195,16 @@ export function HeroArt() {
       </div>
     </div>
 
-    <div className="universe-caption" aria-hidden="true"><span>YAKLAŞ / KEŞFET / ÜRET</span><span>SCROLL TO EXPLORE ↓</span></div>
+    <div className="universe-destinations" aria-label="Keşif alanları">
+      {planets.map((planet, index) => <button key={planet.id} type="button" className={`universe-destination universe-destination--${index + 1}`} aria-pressed={activePlanet === planet.id} onClick={() => wakePlanet(planet)} onFocus={() => wakePlanet(planet)}>
+        <span className={`universe-card__dot universe-card__dot--${planet.color}`} aria-hidden="true" />
+        <span>{planet.title}</span><ArrowUpRight size={13} aria-hidden="true" />
+      </button>)}
+    </div>
+    <div className="universe-toolbar"><span>Bir dünyaya dokun, keşfet.</span><button type="button" onClick={() => setPaused(!paused)} aria-pressed={paused} aria-label={paused ? "Hareketi oynat" : "Hareketi durdur"} disabled={lowPower}>{paused || lowPower ? <Play size={14} /> : <Pause size={14} />}<span>{lowPower ? "Sakin görünüm" : paused ? "Oynat" : "Durdur"}</span></button></div>
 
     {selectedPlanet && <aside id={`planet-card-${selectedPlanet.id}`} className="universe-card" aria-live="polite">
+      <button type="button" className="universe-card__close" aria-label="Gezegen bilgisini kapat" onClick={() => { setActivePlanet(null); setAwake(false); }}><X size={16} /></button>
       <div className="universe-card__topline"><span className={`universe-card__dot universe-card__dot--${selectedPlanet.color}`} /><span>{selectedPlanet.label}</span><span className="universe-card__index">0{planets.indexOf(selectedPlanet) + 1}</span></div>
       <h2>{selectedPlanet.title}</h2>
       <p>{selectedPlanet.description}</p>

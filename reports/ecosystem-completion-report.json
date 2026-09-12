@@ -53,7 +53,7 @@
     "aiCapabilities": 25,
     "officialSources": 50,
     "incentiveDomains": 13,
-    "searchableRecordsInCurrentEnvironment": 33,
+    "searchableRecordsInCurrentEnvironment": 40,
     "topMissingFeatures": 100
   },
   "personaAudits": [
@@ -410,7 +410,7 @@
     {
       "id": "puan-ai",
       "name": "PuanAI",
-      "status": "sample_only",
+      "status": "available_verified",
       "route": "/puan-ai",
       "purpose": "Alışveriş kararlarını koşul, toplam maliyet ve doğrulanmış kampanya kanıtıyla karşılaştırmak.",
       "personas": [
@@ -425,10 +425,10 @@
         "verified provider records"
       ],
       "outputs": [
-        "explainable comparison",
-        "assumptions",
-        "verification checklist",
-        "related shopping guides"
+        "verified campaign comparison",
+        "official source links",
+        "freshness evidence",
+        "rule explanation"
       ],
       "officialSourceIds": [],
       "knowledgeEntities": [
@@ -447,14 +447,14 @@
         "cashback guides"
       ],
       "roadmap": [
-        "Kaynak sözleşmesini ve değerlendirme veri setini onayla.",
-        "Salt okunur sağlayıcı adaptörünü önizlemede doğrula.",
-        "İnsan incelemesi, tazelik ve geri alma kapıları tamamlanınca sınırlı erişim aç."
+        "Resmî kaynak doğrulama SLA'sını işlet.",
+        "Kaynak değişikliklerini parmak iziyle izle.",
+        "Kampanya kapsamını kontrollü biçimde genişlet."
       ],
       "prerequisites": [
-        "contracted campaign providers",
-        "freshness SLA",
-        "revocation workflow"
+        "operated PostgreSQL",
+        "scheduled source verification",
+        "release observability"
       ]
     },
     {

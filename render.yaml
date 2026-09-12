@@ -1,0 +1,51 @@
+# Review the paid resource selection before creating this Blueprint.
+# See docs/yayin-plani.md. No deployment is performed by this file.
+databases:
+  - name: uretir-db
+    plan: 0.5c-1g
+    region: frankfurt
+    databaseName: uretir
+    user: uretir
+    postgresMajorVersion: "17"
+    diskSizeGB: 5
+    ipAllowList: []
+services:
+  - type: web
+    name: uretir-web
+    runtime: node
+    plan: 1c-2g
+    region: frankfurt
+    autoDeployTrigger: off
+    buildCommand: corepack pnpm install --frozen-lockfile && corepack pnpm build
+    preDeployCommand: corepack pnpm db:migrate
+    startCommand: corepack pnpm start --hostname 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: DATABASE_URL
+        fromDatabase:
+          name: uretir-db
+          property: connectionString
+      - key: APP_ORIGIN
+        sync: false
+      - key: PUANAI_ADMIN_PASSWORD
+        sync: false
+      - key: PUANAI_SESSION_SECRET
+        generateValue: true
+  - type: cron
+    name: uretir-haber-collector
+    runtime: node
+    plan: 0.5c-512mb
+    region: frankfurt
+    autoDeployTrigger: off
+    schedule: "0 5 * * *"
+    buildCommand: corepack pnpm install --frozen-lockfile
+    startCommand: corepack pnpm haber-ai:collect
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: DATABASE_URL
+        fromDatabase:
+          name: uretir-db
+          property: connectionString

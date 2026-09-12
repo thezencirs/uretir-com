@@ -1,0 +1,10 @@
+import type {Metadata} from "next";
+import Link from "next/link";
+import {notFound} from "next/navigation";
+import {publicItem,publicContent,currentMember} from "@/lib/members/store";
+import {JsonLd} from "@/components/json-ld";
+import {absoluteUrl} from "@/lib/seo";
+import {CommunityComment} from "@/components/community-comment";
+export const dynamic="force-dynamic";
+export async function generateMetadata({params}:{params:Promise<{id:string}>}):Promise<Metadata>{const {id}=await params;const p=await publicItem(id);if(!p||p.kind!=="post")return {robots:{index:false}};return {title:p.payload.title,description:p.payload.body?.slice(0,150),alternates:{canonical:"/topluluk/"+id}};}
+export default async function Page({params}:{params:Promise<{id:string}>}){const {id}=await params;const p=await publicItem(id);if(!p||p.kind!=="post")notFound();const [comments,user,startup]=await Promise.all([publicContent("comment",id),currentMember(),p.parent_id?publicItem(p.parent_id):null]);return <div className="section-wrap member-shell community-reading"><Link href="/kaynaklar/topluluk">← Topluluk gündemi</Link><JsonLd data={{"@context":"https://schema.org","@type":"Article",headline:p.payload.title,author:{"@type":"Person",name:p.display_name,url:absoluteUrl("/uye/"+p.handle)},datePublished:new Date(p.published_at!).toISOString(),mainEntityOfPage:absoluteUrl("/topluluk/"+id)}}/><article><span className="rule-label">{p.payload.topic}</span><h1>{p.payload.title}</h1><p><Link href={"/uye/"+p.handle}>{p.display_name} · @{p.handle}</Link> · {new Date(p.published_at!).toLocaleDateString("tr-TR",{timeZone:"Europe/Istanbul"})}</p>{startup&&<Link className="member-tag" href={"/ekosistem/girisim/"+startup.id}>{startup.payload.name} girişiminden ↗</Link>}<div className="member-prose">{p.payload.body}</div></article><section id="tartisma"><h2>Fikri birlikte geliştirelim · {comments.length} yorum</h2>{comments.map(c=><article className="community-comment" key={c.id}><Link href={"/uye/"+c.handle}>{c.display_name} · @{c.handle}</Link><p className="member-prose">{c.payload.body}</p></article>)}<CommunityComment parentId={id} signedIn={!!user}/></section></div>;}

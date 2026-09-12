@@ -25,7 +25,7 @@ Product interfaces use four explicit states:
 | `sample` | A hypothetical interaction example | Must not use real campaign claims |
 | `future_integration` | No operational data connection exists | Must not imply availability |
 
-PuanAI verified records require a source URL, retrieval timestamp, and verification timestamp. A provider record marked verified without this evidence is downgraded before rendering. Current PuanAI records are generic decision scenarios and do not identify a real bank, card, merchant, price, validity date, or campaign.
+PuanAI verified records require an active HTTPS official-source URL, retrieval timestamp, source fingerprint, verification timestamp, future next-review time, active related entities, and a current campaign validity interval. The most recent verification fingerprint must match the source fingerprint. Missing, stale, rejected, inactive, future-dated, expired, or mismatched records fail closed and do not reach the language model or interface. Any administrator change to verified campaign terms, rules, installments, or card scope automatically unpublishes the record until it is verified again.
 
 ## Data collection
 
@@ -34,6 +34,8 @@ The contact and newsletter surfaces do not have server-side delivery integration
 - Contact uses a transparent `mailto:` route.
 - Newsletter provides RSS until a consent-aware subscription provider is connected.
 - Uretir ID remains a noindex interaction prototype and states that it creates no account and stores no personal data. Production navigation does not promote the prototype.
+
+PuanAI stores anonymous conversation text and referenced campaign IDs in PostgreSQL so the user can reopen or delete a conversation. A random HttpOnly, SameSite=Strict cookie scopes history to one browser and contains no bank or account identifier. Prompts are not copied to the provider-neutral analytics channel. When `OPENAI_API_KEY` is configured, the current question and a bounded list of verified campaign facts are sent to OpenAI for explanation; payment credentials and transaction history are neither requested nor accepted as campaign inputs.
 
 Instrumented interactions emit provider-neutral browser events only. The bridge reads no form value, writes no browser storage, and makes no network request. This is an integration seam, not active analytics collection.
 
@@ -50,7 +52,7 @@ The application configures:
 - restrictive browser permissions for camera, microphone, and location
 - same-site resource isolation
 
-A nonce-based Content Security Policy remains required before authentication, third-party scripts, or payment-adjacent integrations are introduced.
+PuanAI administration uses a server-only password, an HMAC-signed HttpOnly session cookie, same-origin mutation checks, Zod input validation, and noindex metadata. The public assistant does not collect payment credentials. A nonce-based Content Security Policy remains a repository-wide hardening item before adding external identity, payment handling, or additional third-party browser scripts.
 
 ## Release verification
 
@@ -60,7 +62,7 @@ Every production candidate must pass:
 pnpm quality
 ```
 
-The command checks lint, production dependency advisories, TypeScript through the production build, generated routes, titles and descriptions, self-referential canonical URLs, Open Graph alignment, 404 metadata isolation, robots, sitemap, RSS, parseable structured data, authored landmarks and IDs, internal routes and anchors, draft exclusion, PuanAI sample safety, the non-persistent measurement contract, knowledge-graph integrity, security-header configuration, and documentation links.
+The command checks the Prisma schema, lint, unit and integration tests, production dependency advisories, TypeScript through the production build, generated routes, titles and descriptions, self-referential canonical URLs, Open Graph alignment, 404 metadata isolation, robots, sitemap, RSS, parseable structured data, authored landmarks and IDs, internal routes and anchors, draft exclusion, PuanAI's fail-closed verification contract, the privacy-safe measurement contract, knowledge-graph integrity, security-header configuration, and documentation links.
 
 The pinned production baseline uses Next.js `15.5.21` or newer in the 15.x line. Workspace overrides keep Sharp and PostCSS on patched versions required by the production audit; remove an override only after the parent dependency resolves to an equally safe version.
 
@@ -70,7 +72,7 @@ Manual browser QA must cover:
 - light and dark themes
 - keyboard navigation and focus visibility
 - loading, empty, not-found, and error states
-- PuanAI trust labels and scenario interaction
+- PuanAI chat streaming, search filters, history deletion, official-source links, admin re-verification, and trust labels
 - absence of console errors or hydration warnings
 
 ## Known release blockers

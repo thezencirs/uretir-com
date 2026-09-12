@@ -10,6 +10,7 @@ const kindLabels: Record<SearchRecordKind, string> = {
   ai_product: "AI merkezi", guide: "Rehber", article: "Makale", company: "Şirket", discovery: "Keşif merkezi",
 };
 const trustLabels: Record<SearchRecordTrust, string> = {
+  verified_service: "Doğrulanmış hizmet",
   public_foundation: "Kullanılabilir temel", sample_only: "Yalnızca örnek", future_integration: "Gelecek entegrasyonu",
   authority_ready: "Editoryal olarak onaylı", editorial_review: "Yerel editoryal önizleme",
 };

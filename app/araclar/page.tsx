@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 const tools = [
   { name: "UretirAI", description: "Üretim sorularını kaynaklar ve bağlantılı varlıklarla araştırın.", href: "/uretir-ai", color: "#78a5b6", status: "Bilgi temeli" },
-  { name: "PuanAI", description: "Örnek verilerle açıklamalı alışveriş karar akışını ve rehberleri keşfedin.", href: "/puan-ai", color: "#c8f560", status: "Örnek veri" },
+  { name: "PuanAI", description: "Resmî kaynakla doğrulanmış kart kampanyalarını mağaza, tutar, ödül ve taksit koşullarına göre karşılaştırın.", href: "/puan-ai", color: "#c8f560", status: "Doğrulanmış veri" },
   { name: "TesvikAI", description: "Teşvik hazırlığını resmî kaynaklar ve kontrol listeleriyle yönetin.", href: "/tesvik-ai", color: "#8b80c2", status: "Editoryal temel" },
   { name: "HibeAI", description: "Hibe programlarını takip edin.", href: "/yakinda", color: "#8b80c2", status: "Yakında" },
   { name: "FiyatAI", description: "Hammadde tekliflerini ve fiyat serilerini doğru karşılaştırmayı öğrenin.", href: "/fiyat-ai", color: "#d97835", status: "Entegrasyon gelecek" },

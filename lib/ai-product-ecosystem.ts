@@ -1,4 +1,4 @@
-export type AIProductStatus = "available_foundation" | "sample_only" | "future_integration" | "candidate" | "consolidate";
+export type AIProductStatus = "available_verified" | "available_foundation" | "sample_only" | "future_integration" | "candidate" | "consolidate";
 
 export type AIProduct = {
   id: string;
@@ -38,17 +38,17 @@ export const aiProducts: AIProduct[] = [
     prerequisites: ["authority-ready knowledge corpus", "citation renderer", "answer evaluation set"],
   },
   {
-    id: "puan-ai", name: "PuanAI", status: "sample_only", route: "/puan-ai",
+    id: "puan-ai", name: "PuanAI", status: "available_verified", route: "/puan-ai",
     purpose: "Alışveriş kararlarını koşul, toplam maliyet ve doğrulanmış kampanya kanıtıyla karşılaştırmak.",
     personas: ["sme_owner", "entrepreneur", "manufacturer"],
     inputs: ["purchase category", "amount", "payment preference", "verified provider records"],
-    outputs: ["explainable comparison", "assumptions", "verification checklist", "related shopping guides"],
+    outputs: ["verified campaign comparison", "official source links", "freshness evidence", "rule explanation"],
     officialSourceIds: [],
     knowledgeEntities: ["product", "company", "article"],
     searchScopes: ["shopping guides", "campaign records", "card guides"],
     relatedContent: ["installment guides", "reward guides", "cashback guides"],
-    roadmap: sharedRoadmap,
-    prerequisites: ["contracted campaign providers", "freshness SLA", "revocation workflow"],
+    roadmap: ["Resmî kaynak doğrulama SLA'sını işlet.", "Kaynak değişikliklerini parmak iziyle izle.", "Kampanya kapsamını kontrollü biçimde genişlet."],
+    prerequisites: ["operated PostgreSQL", "scheduled source verification", "release observability"],
   },
   {
     id: "tesvik-ai", name: "TeşvikAI", status: "available_foundation", route: "/tesvik-ai",

@@ -3,7 +3,7 @@ import type { SearchIntentKind } from "@/lib/search-intent";
 
 export type ContentHubId = "uretir-ai" | "puan-ai" | "tesvik-ai" | "fiyat-ai" | "ihracat-ai";
 export type HubGuideStatus = "in_review" | "published";
-export type HubAvailability = "sample" | "foundation" | "future_integration";
+export type HubAvailability = "verified_service" | "sample" | "foundation" | "future_integration";
 
 export type HubFaq = {
   question: string;
@@ -168,10 +168,10 @@ export const contentHubs: ContentHub[] = [
     path: "/puan-ai",
     eyebrow: "Alışveriş karar asistanı",
     title: "Kart, taksit ve toplam maliyet kararını şeffaflaştırın.",
-    description: "PuanAI, alışveriş bağlamını anlayıp seçenekleri açıklanabilir biçimde karşılaştırmak üzere tasarlanır. Mevcut kampanya kayıtları yalnızca örnek veridir.",
-    availability: "sample",
-    availabilityLabel: "Yapılandırılmış örnek veri",
-    availabilityNote: "Gösterilen kampanya ve öneriler canlı değildir. Banka veya sağlayıcı tarafından doğrulanmış güncel veri bağlantısı kurulmadan hiçbir kayıt gerçek fırsat gibi sunulmaz.",
+    description: "PuanAI, alışveriş bağlamını anlayıp yalnızca güncel resmî kaynak, geçerli tarih ve doğrulama kaydı bulunan kampanyaları açıklanabilir biçimde karşılaştırır.",
+    availability: "verified_service",
+    availabilityLabel: "Doğrulanmış kampanya hizmeti",
+    availabilityNote: "Kaynağı, parmak izi, son kontrolü veya geçerlilik tarihi eksik olan kayıtlar otomatik olarak yanıtlardan çıkarılır.",
     accent: "#c8f560",
     productPromise: "En yüksek görünen ödülü değil, koşullar ve toplam maliyet içinde en uygun kararı açıklamak.",
     intents: ["En uygun kart hangisi?", "Taksit mantıklı mı?", "Toplam maliyet nedir?", "Kampanya nasıl doğrulanır?"],
@@ -181,11 +181,11 @@ export const contentHubs: ContentHub[] = [
       { title: "Alışveriş rehberleri", description: "Kararı kart, taksit, puan ve maliyet rehberleriyle derinleştirir." },
     ],
     faq: [
-      { question: "PuanAI kampanya verileri güncel mi?", answer: "Hayır. Mevcut sürüm yapılandırılmış örnek veri kullanır ve arayüz bunu açıkça belirtir." },
+      { question: "PuanAI kampanya verileri güncel mi?", answer: "Yalnızca geçerli resmî kaynak ve tazelik kontrolünden geçen kampanyalar gösterilir. İşlemden hemen önce resmî kaynağı yeniden kontrol edin." },
       { question: "PuanAI bir kartı neden önerdiğini açıklar mı?", answer: "Evet. Sonuç; kullanılan varsayımları, eşleşen koşulları ve kontrol edilmesi gereken noktaları birlikte gösterir." },
-      { question: "Canlı kampanyalar ne zaman gösterilecek?", answer: "Yalnızca sağlayıcı kaynağı, güncellik zamanı, geçerlilik koşulları ve hata durumları doğrulanabildiğinde." },
+      { question: "Bir kampanya doğrulanamazsa ne olur?", answer: "PuanAI kampanyayı önermez ve güncel kampanya doğrulanamadığını açıkça söyler." },
     ],
-    cta: { title: "Alışveriş kararını modelleyin.", description: "Örnek danışman akışını kullanın; sonucu bankanın resmî kanallarında doğrulamadan işlem yapmayın.", label: "PuanAI'a sor", href: "#danisman" },
+    cta: { title: "Alışveriş kararını doğrulayın.", description: "Sorunuzu doğal dille yazın; PuanAI yalnızca doğrulanmış kayıtları koşulları ve resmî kaynaklarıyla karşılaştırsın.", label: "PuanAI'a sor", href: "/puan-ai" },
   },
   {
     id: "tesvik-ai",
@@ -359,10 +359,10 @@ export const hubGuides: HubGuide[] = [
     sources: [sources.bddk],
     faq: [
       { question: "En çok puan veren kart her zaman en iyi kart mıdır?", answer: "Hayır. Uygunluk, kullanım kısıtı, ücret ve toplam geri ödeme hesaba katılmadan 'en iyi' sonucu verilemez." },
-      { question: "PuanAI sonucu işlem için yeterli midir?", answer: "Hayır. Mevcut sürüm örnek veri kullanır; her kampanya bankanın resmî kanalında ayrıca doğrulanmalıdır." },
+      { question: "PuanAI sonucu işlem için yeterli midir?", answer: "Hayır. PuanAI yalnızca doğrulanmış kayıtları gösterse de koşullar değişebilir; her kampanya işlemden hemen önce bankanın resmî kanalında ayrıca kontrol edilmelidir." },
     ],
     relatedGuideSlugs: ["taksit-ve-toplam-maliyet-rehberi", "kampanya-bilgisi-nasil-dogrulanir", "hammadde-fiyati-nasil-karsilastirilir"],
-    relatedPaths: [...commonRelatedPaths, { label: "PuanAI danışmanı", href: "/puan-ai#danisman", type: "AI aracı" }, { label: "PuanAI kampanya alanı", href: "/puan-ai#kampanyalar", type: "Örnek veri" }],
+    relatedPaths: [...commonRelatedPaths, { label: "PuanAI danışmanı", href: "/puan-ai", type: "AI aracı" }, { label: "PuanAI kampanya alanı", href: "/puan-ai#pa-explorer-title", type: "Doğrulanmış veri" }],
   },
   {
     slug: "taksit-ve-toplam-maliyet-rehberi",

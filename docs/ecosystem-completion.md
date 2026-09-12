@@ -52,6 +52,7 @@ A repository gap is not demand. A trend is not authority. A candidate enters the
 
 Status meanings:
 
+- `available_verified`: a durable service returns only source-verified, freshness-gated records.
 - `available_foundation`: a truthful educational or architecture foundation exists; this does not imply live AI.
 - `sample_only`: the interaction is testable with explicitly hypothetical data.
 - `future_integration`: a public educational foundation exists but data integration does not.

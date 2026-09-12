@@ -1,0 +1,5 @@
+import type {Metadata} from "next";
+import {CategoryHub} from "@/components/category-hub";
+const data={"path":"/kaynaklar","title":"Kaynaklar","kicker":"ÜRETİR / BİRLİKTE ÖĞREN","description":"Üreten ve öğrenen bir topluluk için bilgi, paylaşım ve destek alanları.","items":[{"label":"Topluluk","href":"/kaynaklar/topluluk","description":"Girişim fikirleri, geliştirme günlükleri ve tartışmalar."},{"label":"E-kitaplar","href":"/kaynaklar/e-kitaplar","description":"Dijital yayın koleksiyonu.","status":"HAZIRLANIYOR"},{"label":"Forum","href":"/kaynaklar/forum","description":"Topluluk gündemindeki tartışmalara katılın."},{"label":"Blog","href":"/blog","description":"Makaleler ve kaynaklı üretim rehberleri."},{"label":"Destek","href":"/kaynaklar/destek","description":"Üretir ekibine ulaşın ve geri bildirim iletin."}]};
+export const metadata:Metadata={title:data.title,description:data.description,alternates:{canonical:data.path},openGraph:{title:data.title+" — Üretir",description:data.description,url:data.path,type:"website"},};
+export default function Page(){return <CategoryHub data={data}/>;}

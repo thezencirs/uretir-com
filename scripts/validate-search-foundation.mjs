@@ -137,7 +137,6 @@ for (const routeFile of [
   join("app", "kategori", "[category]", "page.tsx"),
   join("app", "ne-uretir", "[slug]", "page.tsx"),
   join("app", "rehber", "[slug]", "page.tsx"),
-  join("app", "puan-ai", "kampanya", "[slug]", "page.tsx"),
 ]) {
   const source = readFileSync(join(projectRoot, routeFile), "utf8");
   assert(source.includes("export const dynamicParams = false"), `file-backed route rejects unknown production parameters: ${routeFile}`);
@@ -162,15 +161,20 @@ for (const route of ["_not-found.html", "insan-ai.html", "trendler.html", "start
   assert(hasNoindex(read(route)), `unfinished or utility route remains noindex: ${route}`);
 }
 
-const puanHtml = [
-  read("puan-ai.html"),
-  ...collectHtml(join(appOutput, "puan-ai")).map((file) => readFileSync(file, "utf8")),
-].join("\n");
-assert(puanHtml.includes("Varsayımsal"), "PuanAI labels hypothetical decision scenarios");
-assert(!/\b(?:Migros|Hepsiburada|Teknosa|Starbucks|Shell|Amazon|Akbank|Garanti BBVA|Worldcard|Axess)\b/i.test(puanHtml), "PuanAI production HTML contains no unverified real-brand campaign claims");
-assert(puanHtml.includes("Gerçek tarih yok"), "PuanAI sample scenarios do not imply live validity dates");
-assert(puanHtml.includes('data-analytics-event="ai_intent_select"'), "PuanAI intent choices expose typed measurement events");
-assert(puanHtml.includes('data-analytics-event="ai_prompt_submit"'), "PuanAI free-text interaction measures intent without embedding input values");
+const puanHtml = read("puan-ai.html");
+const puanPageSource = readFileSync(join(projectRoot, "app", "puan-ai", "page.tsx"), "utf8");
+const puanChatSource = readFileSync(join(projectRoot, "app", "api", "puan-ai", "chat", "route.ts"), "utf8");
+const puanRuleSource = readFileSync(join(projectRoot, "lib", "puan-ai", "rule-engine.ts"), "utf8");
+const puanResultSource = readFileSync(join(projectRoot, "components", "puan-ai-campaign-result.tsx"), "utf8");
+const puanClientSource = readFileSync(join(projectRoot, "components", "puan-ai-chat.tsx"), "utf8");
+const puanAdminSource = readFileSync(join(projectRoot, "app", "puan-ai", "admin", "page.tsx"), "utf8");
+assert(puanPageSource.includes("PuanAIChat") && puanPageSource.includes("PuanAICampaignExplorer"), "PuanAI renders chat and verified campaign discovery");
+assert(puanChatSource.includes("UNVERIFIED_RESPONSE") && puanChatSource.includes("searchVerifiedCampaigns"), "PuanAI chat fails closed through the verified catalog");
+assert(puanRuleSource.includes("item.id === verification?.officialSourceId") && puanRuleSource.includes("verification.fingerprint !== source.fingerprint") && puanRuleSource.includes("verification.nextCheckAt"), "PuanAI requires the exact matching fresh source verification");
+assert(["Resmî banka", "Kampanya tarihleri", "Ödül", "Taksit", "Koşullar", "Son doğrulama", "Resmî kaynak"].every((label) => puanResultSource.includes(label)), "PuanAI exposes every required verification field");
+assert(puanAdminSource.includes("index: false"), "PuanAI administration remains noindex");
+assert(puanClientSource.includes('event: "ai_intent_select"') && puanClientSource.includes('event: "ai_prompt_submit"'), "PuanAI interaction exposes typed privacy-safe measurement events");
+assert(!puanHtml.includes("Varsayımsal") && !puanHtml.includes("Gerçek tarih yok"), "PuanAI no longer renders sample-era campaign claims");
 
 const analyticsSource = readFileSync(join(projectRoot, "lib", "analytics.ts"), "utf8");
 const analyticsBridgeSource = readFileSync(join(projectRoot, "components", "analytics-event-bridge.tsx"), "utf8");

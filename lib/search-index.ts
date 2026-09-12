@@ -6,7 +6,7 @@ import { posts } from "@/lib/posts";
 import { isIndexableReference, isVisibleReference } from "@/lib/publication";
 
 export type SearchRecordKind = "ai_product" | "guide" | "article" | "company" | "discovery";
-export type SearchRecordTrust = "public_foundation" | "sample_only" | "future_integration" | "authority_ready" | "editorial_review";
+export type SearchRecordTrust = "verified_service" | "public_foundation" | "sample_only" | "future_integration" | "authority_ready" | "editorial_review";
 
 export type SearchRecord = {
   id: string;
@@ -27,7 +27,14 @@ export type SearchIndexAdapter = {
 };
 
 const discoveryRecords: SearchRecord[] = [
-  { id: "discovery:ecosystem", kind: "discovery", title: "Üretir Ekosistemi", summary: "Üretim bilgisi, AI merkezleri ve keşif yollarının ortak haritası.", path: "/ekosistem", trust: "public_foundation", keywords: ["ekosistem", "üretim", "bilgi grafiği"] },
+  {id:"discovery:community",kind:"discovery",title:"Topluluk",summary:"Girişim fikirleri, geliştirme günlükleri ve topluluk tartışmaları.",path:"/kaynaklar/topluluk",trust:"public_foundation",keywords:["topluluk","forum","tartışma","yazı"]},
+  {id:"discovery:cozumler",kind:"discovery",title:"Çözümler",summary:"Alışverişten tasarıma, üretimden ihracata: geliştirdiğimiz araçları ve geliştirme aşamasındaki ürünlerimizi keşfedin.",path:"/cozumler",trust:"public_foundation",keywords:["Çözümler","PuanAI","MimarAI","OyunAI","İndirimAI","GüzelAI","TeşvikAI","FiyatAI","İhracatAI","İnsanAI","Trend Merkezi"]},
+  {id:"discovery:girisimler",kind:"discovery",title:"Girişimler",summary:"Bir fikrin kullanılan bir ürüne dönüşme yolculuğu. Web deneyimleri ve uygulama çalışmalarını burada bir araya getiriyoruz.",path:"/girisimler",trust:"public_foundation",keywords:["Girişimler","WEB","APP"]},
+  {id:"discovery:girisimler-web",kind:"discovery",title:"WEB",summary:"Kurulum gerektirmeden erişilen, Türkiye için geliştirilen web deneyimleri.",path:"/girisimler/web",trust:"public_foundation",keywords:["WEB","HaberAI","FinansAI","PuanAI"]},
+  {id:"discovery:kaynaklar",kind:"discovery",title:"Kaynaklar",summary:"Üreten ve öğrenen bir topluluk için bilgi, paylaşım ve destek alanları.",path:"/kaynaklar",trust:"public_foundation",keywords:["Kaynaklar","Topluluk","E-kitaplar","Forum","Blog","Destek"]},
+  {id:"discovery:kaynaklar-destek",kind:"discovery",title:"Destek",summary:"Ürünlerle ilgili sorularınız, veri düzeltme talepleriniz ve iş birliği önerileriniz için Üretir ekibine ulaşın.",path:"/kaynaklar/destek",trust:"public_foundation",keywords:["Destek","İletişim","Gizlilik politikası","Çözümler"]},
+  { id: "discovery:developments", kind: "discovery", title: "Gelişmeler", summary: "Türkiye, teknoloji, fuarlar, startuplar ve kaynaklı güncel haberler.", path: "/gelismeler", trust: "public_foundation", keywords: ["gelişmeler", "haber", "fuar", "startup", "teknoloji"] },
+  { id: "discovery:ecosystem", kind: "discovery", title: "Üretir Ekosistemi", summary: "Bağımsız girişimleri şehir, ürün ve kamuya açık finansal bilgileriyle keşfetme alanı.", path: "/ekosistem", trust: "public_foundation", keywords: ["ekosistem", "üretim", "bilgi grafiği"] },
   { id: "discovery:tools", kind: "discovery", title: "AI bilgi merkezleri", summary: "UretirAI, PuanAI, TeşvikAI, FiyatAI ve İhracatAI merkezlerini keşfedin.", path: "/araclar", trust: "public_foundation", keywords: ["araçlar", "yapay zekâ", "AI"] },
   { id: "discovery:trends", kind: "discovery", title: "Trend Merkezi", summary: "Doğrulanmış sinyallerden editoryal araştırma adayları üretmek için hazırlanan merkez.", path: "/trendler", trust: "public_foundation", keywords: ["trend", "araştırma", "içerik keşfi"] },
   { id: "discovery:companies", kind: "discovery", title: "Ne Üretir?", summary: "Kaynak incelemesinden geçen üretici ve üretim ilişkileri için keşif merkezi.", path: "/ne-uretir", trust: "public_foundation", keywords: ["şirket", "üretici", "fabrika", "ürün"] },
@@ -35,6 +42,7 @@ const discoveryRecords: SearchRecord[] = [
 ];
 
 function hubTrust(availability: (typeof contentHubs)[number]["availability"]): SearchRecordTrust {
+  if (availability === "verified_service") return "verified_service";
   if (availability === "sample") return "sample_only";
   if (availability === "future_integration") return "future_integration";
   return "public_foundation";

@@ -1,0 +1,5 @@
+"use client";
+import {useState} from "react";
+import Link from "next/link";
+import {memberCall} from "./uretir-id-shell";
+export function CommunityComment({parentId,signedIn}:{parentId:string;signedIn:boolean}){const[body,setBody]=useState(""),[busy,setBusy]=useState(false),[message,setMessage]=useState("");if(!signedIn)return <div className="member-next"><p>Somut bir öneri, deneyim veya soruyla tartışmaya katıl.</p><Link href="/uretir-id">Üretir ID ile giriş yap →</Link></div>;return <form className="member-form" onSubmit={async e=>{e.preventDefault();setBusy(true);try{await memberCall({action:"save",kind:"comment",parentId,payload:{body},submit:true});setBody("");setMessage("Yorumun incelemeye gönderildi. Onaylandıktan sonra burada görünür.");}catch(e){setMessage((e as Error).message);}finally{setBusy(false);}}}><label className="member-field"><span>Fikri ileri taşıyacak bir yorum yaz</span><textarea required minLength={5} maxLength={2000} rows={4} value={body} onChange={e=>setBody(e.target.value)}/></label><button className="member-primary" disabled={busy}>{busy?"Gönderiliyor…":"Yorumu incelemeye gönder"}</button><p role="status">{message}</p></form>;}

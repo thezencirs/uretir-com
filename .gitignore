@@ -4,3 +4,7 @@ out
 .env*
 !.env.example
 *.log
+generated/prisma
+.tmp
+
+.local/

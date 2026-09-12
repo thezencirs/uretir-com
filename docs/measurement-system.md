@@ -42,7 +42,7 @@ Current events:
 | `ai_intent_select` | A predefined shopping intent was selected | PuanAI |
 | `ai_priority_select` | A recommendation priority was selected | PuanAI |
 | `ai_prompt_submit` | The local intent classifier was invoked | PuanAI |
-| `ai_recommendation_open` | A disclosed sample recommendation was opened | PuanAI |
+| `ai_recommendation_open` | A verified recommendation detail was opened | PuanAI |
 | `ai_reset` | The advisor flow was restarted | PuanAI |
 | `contact_select` | A transparent contact channel was selected | Contact, footer |
 | `rss_select` | The RSS channel was selected | Newsletter, footer |
@@ -66,7 +66,7 @@ Definitions are stable before numbers are collected:
 
 1. **Organic discovery:** verified search click to an indexable canonical page.
 2. **Knowledge continuation:** a `discovery_select` followed by a successful internal route view.
-3. **PuanAI decision path:** intent or local prompt, priority selection, then recommendation open.
+3. **PuanAI decision path:** suggested intent or prompt submission, verified result, then recommendation or official-source open.
 4. **Trust follow-through:** opening a source, methodology, or provenance surface after an AI result.
 5. **Return cohort:** a privacy-approved returning browser or signed-in member revisiting within the declared window.
 

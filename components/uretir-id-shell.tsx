@@ -1,167 +1,32 @@
 "use client";
-
-/* eslint-disable @next/next/no-html-link-for-pages */
-import { useState } from "react";
-import {
-  ArrowUpRight,
-  Bell,
-  Bookmark,
-  Check,
-  ChevronRight,
-  Compass,
-  FolderHeart,
-  Github,
-  Globe2,
-  Heart,
-  Home,
-  LockKeyhole,
-  Mail,
-  Menu,
-  Plus,
-  Search,
-  Settings2,
-  Sparkles,
-  Users,
-} from "lucide-react";
-import {
-  authProviders,
-  badges,
-  feedItems,
-  followedTopics,
-  memberProfile,
-  type IdentityView,
-} from "@/lib/uretir-id";
-
-function ProviderIcon({ name }: { name: string }) {
-  if (name === "github") return <Github size={17} strokeWidth={1.8} />;
-  if (name === "apple") return <span className="uretir-id-apple">●</span>;
-  return <span className="uretir-id-google">G</span>;
+import {useEffect,useState,FormEvent} from "react";
+import Link from "next/link";
+import provinces from "@/lib/haber-ai/provinces.json";
+import type {Member,MemberContent,ContentKind,ContentPayload} from "@/lib/members/types";
+export async function memberCall(data:unknown){const r=await fetch("/api/members",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)});const d=await r.json();if(!r.ok)throw Error(d.error??"İşlem tamamlanamadı.");return d;}
+const statuses={draft:"Taslak",pending:"İncelemede",published:"Yayında",rejected:"Düzenleme gerekli"};
+function Field({label,value,onChange,area=false,max=2000}:{label:string;value:string;onChange:(v:string)=>void;area?:boolean;max?:number}){return <label className="member-field"><span>{label}</span>{area?<textarea required rows={6} maxLength={max} value={value} onChange={e=>onChange(e.target.value)}/>:<input required maxLength={max} value={value} onChange={e=>onChange(e.target.value)}/>}</label>;}
+function ContentForm({kind,item,startupId,onSaved}:{kind:ContentKind;item?:MemberContent;startupId?:string;onSaved:(id:string)=>Promise<void>}){
+ const[p,setP]=useState<ContentPayload>(item?.payload??(kind==="startup"?{name:"",cityCode:"",product:"",description:"",website:"",stage:"Fikir"}:{title:"",body:"",topic:"Ürün fikri"}));const[busy,setBusy]=useState(false),[error,setError]=useState("");
+ const change=(key:string,value:string)=>setP({...p,[key]:value});
+ async function save(submit:boolean){setBusy(true);setError("");try{const d=await memberCall({action:"save",id:item?.id,kind,version:item?.version,parentId:kind==="post"?(item?.parent_id??startupId??null):null,payload:p,submit});await onSaved(d.id);}catch(e){setError((e as Error).message);}finally{setBusy(false);}}
+ return <form className="member-form" onSubmit={e=>{e.preventDefault();void save(true);}}><div className="member-form-head"><h2>{kind==="startup"?"Girişimini tanıt":"Fikrini yazıya dönüştür"}</h2><span>{item?statuses[item.status]:"Yeni taslak"}</span></div>
+ {kind==="startup"?<><Field label="Girişim adı" value={p.name??""} max={100} onChange={v=>change("name",v)}/><div className="member-two"><label className="member-field"><span>Şehir</span><select required value={p.cityCode??""} onChange={e=>change("cityCode",e.target.value)}><option value="">Şehrini seç</option>{provinces.map(c=><option key={c.code} value={c.code}>{c.name}</option>)}</select></label><label className="member-field"><span>Aşama</span><select value={p.stage} onChange={e=>change("stage",e.target.value)}>{["Fikir","Prototip","Kullanımda"].map(v=><option key={v}>{v}</option>)}</select></label></div><Field label="Ne üretiyorsun? Tek cümleyle anlat." value={p.product??""} max={160} onChange={v=>change("product",v)}/><Field label="Hangi sorunu, kim için çözüyorsun? (En az 30 karakter)" value={p.description??""} area onChange={v=>change("description",v)}/><label className="member-field"><span>Web sitesi (isteğe bağlı, https://)</span><input type="url" maxLength={300} value={p.website??""} onChange={e=>change("website",e.target.value)}/></label></>:<><Field label="Yazı başlığı" value={p.title??""} max={140} onChange={v=>change("title",v)}/><label className="member-field"><span>Konu</span><select value={p.topic} onChange={e=>change("topic",e.target.value)}>{["Ürün fikri","Geliştirme günlüğü","Geri bildirim","Girişimcilik"].map(t=><option key={t}>{t}</option>)}</select></label><Field label="Fikrini anlat, deneyimini paylaş veya topluluğa bir soru sor. (En az 60 karakter)" value={p.body??""} max={12000} area onChange={v=>change("body",v)}/><p className="member-help">{startupId?"Yazın girişim profilinle ilişkilendirilir.":"Yazın profilinle yayımlanır. İstersen önce girişimini ekleyebilirsin."}</p></>}
+ {item?.review_note&&<p className="member-notice">Editör notu: {item.review_note}</p>}<p className="member-help">Yayımlanan içerik düzenlenince yeniden taslak olur ve onaylanana kadar görünmez. Metinler düz yazı olarak yayımlanır.</p>{error&&<p role="alert">{error}</p>}<div className="member-buttons"><button type="button" disabled={busy} onClick={()=>void save(false)}>Taslak kaydet</button><button className="member-primary" disabled={busy} type="submit">{busy?"Kaydediliyor…":"İncelemeye gönder →"}</button></div></form>;
 }
-
-const valueProps = [
-  { icon: Bookmark, title: "Her şeyi kaydet", copy: "Makaleler, araçlar ve AI sohbetleri tek yerde." },
-  { icon: Compass, title: "Kendi akışını kur", copy: "İlgilendiğin şirketleri, alanları ve teknolojileri takip et." },
-  { icon: Sparkles, title: "AI seni tanısın", copy: "UretirAI, merakını anlayıp daha iyi öneriler sunsun." },
-];
-
-export function UretirIdShell() {
-  const [view, setView] = useState<IdentityView>("auth");
-  const [emailMode, setEmailMode] = useState(false);
-  const [email, setEmail] = useState("");
-  const [profileName, setProfileName] = useState("");
-  const [profession, setProfession] = useState("");
-  const [activeNav, setActiveNav] = useState("Genel bakış");
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [saved, setSaved] = useState<number[]>([0]);
-  const [followed, setFollowed] = useState(false);
-  const [magicSent, setMagicSent] = useState(false);
-
-  function enterOnboarding() {
-    setView("onboarding");
-  }
-
-  function finishOnboarding() {
-    setView("dashboard");
-  }
-
-  function toggleSave(index: number) {
-    setSaved((current) => current.includes(index) ? current.filter((item) => item !== index) : [...current, index]);
-  }
-
-  if (view === "auth") {
-    return <AuthView emailMode={emailMode} email={email} magicSent={magicSent} setEmail={setEmail} setEmailMode={setEmailMode} setMagicSent={setMagicSent} onContinue={enterOnboarding} />;
-  }
-
-  if (view === "onboarding") {
-    return <OnboardingView name={profileName} profession={profession} setName={setProfileName} setProfession={setProfession} onSkip={finishOnboarding} onFinish={finishOnboarding} />;
-  }
-
-  return <DashboardView activeNav={activeNav} followed={followed} menuOpen={menuOpen} saved={saved} setActiveNav={setActiveNav} setFollowed={setFollowed} setMenuOpen={setMenuOpen} toggleSave={toggleSave} onSignOut={() => setView("auth")} />;
-}
-
-function AuthView({ emailMode, email, magicSent, setEmail, setEmailMode, setMagicSent, onContinue }: {
-  emailMode: boolean;
-  email: string;
-  magicSent: boolean;
-  setEmail: (value: string) => void;
-  setEmailMode: (value: boolean) => void;
-  setMagicSent: (value: boolean) => void;
-  onContinue: () => void;
-}) {
-  return <section className="uretir-id-auth" aria-label="Uretir ID giriş">
-    <div className="uretir-id-auth__glow" />
-    <div className="uretir-id-auth__topbar">
-      <a href="/" className="uretir-id-wordmark">üretir<span>.</span><small>ID</small></a>
-      <a href="/" className="uretir-id-back">Uretir.com’a dön <ArrowUpRight size={14} /></a>
-    </div>
-    <div className="uretir-id-auth__grid">
-      <section className="uretir-id-auth__story">
-        <div className="uretir-id-kicker"><span /> Uretir ID deneyim prototipi</div>
-        <h1>Üretmek için<br /><em>bir kimlik.</em></h1>
-        <p className="uretir-id-lede">Uretir ID ile fikirlerini, araçlarını ve ilhamını tek bir profesyonel alanda birleştir.</p>
-        <div className="uretir-id-value-list">
-          {valueProps.map(({ icon: Icon, title, copy }) => <div className="uretir-id-value" key={title}><span className="uretir-id-value__icon"><Icon size={16} /></span><div><strong>{title}</strong><p>{copy}</p></div></div>)}
-        </div>
-        <div className="uretir-id-proof"><div className="uretir-id-avatars"><span>ü.</span></div><p><strong>Hesap sistemi henüz etkin değil.</strong><br />Bu ekran, gelecekteki kimlik deneyimini gösterir.</p></div>
-      </section>
-      <section className="uretir-id-authcard">
-        <div className="uretir-id-authcard__head"><div className="uretir-id-orbit"><span /><span /><span /><b>ü.</b></div><div><span className="eyebrow">Uretir ID / 001</span><h2>Hoş geldin.</h2></div></div>
-        <p className="uretir-id-authcard__copy">Gelecekteki giriş ve profil akışının etkileşimli örneğini keşfet.</p>
-        {!emailMode ? <>
-          <div className="uretir-id-providers">{authProviders.map((provider) => <button type="button" className="uretir-id-provider" key={provider.key} onClick={onContinue}><ProviderIcon name={provider.key} /><span>{provider.label}</span><ChevronRight size={15} /></button>)}</div>
-          <div className="uretir-id-divider"><span>veya</span></div>
-          <button type="button" className="uretir-id-email-link" onClick={() => setEmailMode(true)}><Mail size={16} /> E-posta akışı örneği <ArrowUpRight size={14} /></button>
-        </> : <div className="uretir-id-email-form">
-          <label htmlFor="uretir-email">E-posta adresin</label>
-          <div className="uretir-id-input"><Mail size={16} /><input id="uretir-email" type="email" placeholder="sen@ornek.com" value={email} onChange={(event) => setEmail(event.target.value)} autoFocus /></div>
-          <button type="button" className="uretir-id-primary" onClick={() => setMagicSent(true)} disabled={!email.includes("@")}>{magicSent ? <><Check size={16} /> Gönderim yapılmadı</> : <>Demo akışını göster <ArrowUpRight size={15} /></>}</button>
-          {magicSent && <><p className="uretir-id-terms">E-posta kaydedilmedi ve bağlantı gönderilmedi. Bu yalnızca etkileşimli bir prototiptir.</p><button type="button" className="uretir-id-text-button" onClick={onContinue}>Demo akışına devam et →</button></>}
-          <button type="button" className="uretir-id-text-button" onClick={() => setEmailMode(false)}>Diğer seçeneklere dön</button>
-        </div>}
-        <p className="uretir-id-terms">Bu prototip hesap oluşturmaz, kişisel veri kaydetmez ve hiçbir sağlayıcıya bağlanmaz.</p>
-      </section>
-    </div>
-  </section>;
-}
-
-function OnboardingView({ name, profession, setName, setProfession, onSkip, onFinish }: {
-  name: string;
-  profession: string;
-  setName: (value: string) => void;
-  setProfession: (value: string) => void;
-  onSkip: () => void;
-  onFinish: () => void;
-}) {
-  return <section className="uretir-id-onboarding" aria-label="Uretir ID profil kurulumu">
-    <div className="uretir-id-onboarding__topbar"><a href="/" className="uretir-id-wordmark">üretir<span>.</span><small>ID</small></a><button type="button" onClick={onSkip} className="uretir-id-skip">Şimdilik geç <ArrowUpRight size={14} /></button></div>
-    <div className="uretir-id-onboarding__layout">
-      <div className="uretir-id-onboarding__intro"><span className="eyebrow">Profilini kur / 01</span><h1>Uretir seni<br /><em>tanısın.</em></h1><p>Birkaç küçük dokunuşla sana daha iyi içerikler, araçlar ve bağlantılar önerebiliriz. Hepsi isteğe bağlı.</p><div className="uretir-id-progress"><span className="is-active" /><span /><span /></div><small>1 / 3 · Yaklaşık 20 saniye</small></div>
-      <div className="uretir-id-formcard"><div className="uretir-id-formcard__header"><span className="uretir-id-step">01</span><div><h2>Önce seni tanıyalım.</h2><p>İstediğin zaman değiştirebilirsin.</p></div></div><div className="uretir-id-fields"><label>Adın veya görünen adın<input value={name} onChange={(event) => setName(event.target.value)} placeholder="Örn. Selin Yılmaz" /></label><label>Ne üretiyorsun?<input value={profession} onChange={(event) => setProfession(event.target.value)} placeholder="Örn. Ürün tasarımı" /></label></div><div className="uretir-id-formcard__footer"><span><LockKeyhole size={14} /> Profilin senin kontrolünde</span><button type="button" className="uretir-id-primary" onClick={onFinish}>Profilimi oluştur <ArrowUpRight size={15} /></button></div></div>
-    </div>
-  </section>;
-}
-
-function DashboardView({ activeNav, followed, menuOpen, saved, setActiveNav, setFollowed, setMenuOpen, toggleSave, onSignOut }: {
-  activeNav: string;
-  followed: boolean;
-  menuOpen: boolean;
-  saved: number[];
-  setActiveNav: (value: string) => void;
-  setFollowed: (value: boolean) => void;
-  setMenuOpen: (value: boolean) => void;
-  toggleSave: (index: number) => void;
-  onSignOut: () => void;
-}) {
-  const navItems = [
-    { label: "Genel bakış", icon: Home },
-    { label: "Takip ettiklerim", icon: Users },
-    { label: "Kaydedilenler", icon: Bookmark },
-    { label: "Koleksiyonlar", icon: FolderHeart },
-  ];
-
-  return <section className="uretir-id-dashboard" aria-label="Uretir ID paneli">
-    <header className="uretir-id-dashboard__topbar"><a href="/" className="uretir-id-wordmark">üretir<span>.</span><small>ID</small></a><div className="uretir-id-dashboard__search"><Search size={16} /><input aria-label="Uretir ID içinde ara" placeholder="Uretir’de ara" /><kbd>⌘ K</kbd></div><div className="uretir-id-dashboard__actions"><button type="button" className="uretir-id-icon-button" aria-label="Bildirimler"><Bell size={18} /><i /></button><button type="button" className="uretir-id-profile-button" onClick={() => setMenuOpen(!menuOpen)} aria-expanded={menuOpen}><span>{memberProfile.initials}</span><ChevronRight size={14} className={menuOpen ? "rotate-90" : ""} /></button>{menuOpen && <div className="uretir-id-profile-menu"><strong>{memberProfile.name}</strong><span>{memberProfile.role}</span><button type="button" onClick={onSignOut}>Çıkış yap</button></div>}</div></header>
-    <div className="uretir-id-dashboard__body"><aside className="uretir-id-sidebar"><div className="uretir-id-sidebar__member"><span className="uretir-id-avatar">{memberProfile.initials}</span><div><strong>{memberProfile.name}</strong><span>{memberProfile.role}</span></div><button type="button" aria-label="Ayarlar"><Settings2 size={15} /></button></div><nav>{navItems.map(({ label, icon: Icon }) => <button type="button" key={label} className={activeNav === label ? "is-active" : ""} onClick={() => setActiveNav(label)}><Icon size={16} /><span>{label}</span>{label === "Kaydedilenler" && saved.length > 0 && <b>{saved.length}</b>}</button>)}</nav><div className="uretir-id-sidebar__rule" /><p className="eyebrow">Takip ettiklerin</p><div className="uretir-id-topics">{followedTopics.map((topic) => <button type="button" key={topic} onClick={() => setActiveNav(topic)}><span />{topic}</button>)}</div><button type="button" className="uretir-id-sidebar__add"><Plus size={14} /> Konu ekle</button><div className="uretir-id-sidebar__bottom"><div><span className="uretir-id-score-ring">{memberProfile.score}</span><p><strong>Örnek katkı skoru</strong><small>Gerçek sıralama değil</small></p></div><a href="/" aria-label="Yardım"><Globe2 size={15} /></a></div></aside>
-      <section className="uretir-id-dashboard__content"><div className="mb-6 border border-white/10 bg-white/5 p-3 text-xs leading-5 text-[#a9ada2]" role="status">Demo görünümü: hesap, takip, beğeni ve profil verileri kalıcı değildir; gerçek kullanıcı veya topluluk verisini temsil etmez.</div><div className="uretir-id-content-heading"><div><span className="eyebrow">Deneyim prototipi</span><h1>Uretir ID&apos;yi<br /><em>keşfet.</em></h1><p>Gelecekteki kişiselleştirilmiş deneyimin yapısını gösteren örnek bir ekran.</p></div><button type="button" className="uretir-id-mobile-menu" onClick={() => setMenuOpen(!menuOpen)}><Menu size={18} /> Menü</button></div><div className="uretir-id-dashboard-grid"><div className="uretir-id-feed"><div className="uretir-id-section-label"><span>Örnek akış</span><button type="button">Tümünü gör <ArrowUpRight size={13} /></button></div>{feedItems.map((item, index) => <article className="uretir-id-feed-card" key={item.title}><div className={`uretir-id-feed-art tone-${item.tone}`}><span>{item.icon}</span><small>{item.tag}</small></div><div className="uretir-id-feed-copy"><div><span className="uretir-id-card-kicker">{item.type}</span><button type="button" onClick={() => toggleSave(index)} className={saved.includes(index) ? "is-saved" : ""} aria-label={saved.includes(index) ? "Kaydedildi" : "Kaydet"}><Bookmark size={16} fill={saved.includes(index) ? "currentColor" : "none"} /></button></div><h2>{item.title}</h2><p>{item.meta}</p><div className="uretir-id-card-actions"><button type="button"><Heart size={14} /> Örnek</button><button type="button"><Bookmark size={14} /> {saved.includes(index) ? "Kaydedildi" : "Kaydet"}</button></div></div></article>)}</div><aside className="uretir-id-rightrail"><div className="uretir-id-panel"><div className="uretir-id-panel__heading"><span className="eyebrow">Profil örneği</span><a href="/" aria-label="Profili görüntüle"><ArrowUpRight size={15} /></a></div><div className="uretir-id-profile-summary"><span className="uretir-id-avatar">{memberProfile.initials}</span><h2>{memberProfile.name}</h2><p>{memberProfile.role} · {memberProfile.company}</p><div className="uretir-id-stat-row"><span>Takipçi · örnek</span><span>Takip · örnek</span><span>Puan · örnek</span></div></div></div><div className="uretir-id-panel"><div className="uretir-id-panel__heading"><span className="eyebrow">Takip önerisi</span></div><div className="uretir-id-follow-suggestion"><span className="uretir-id-company-avatar">Ö</span><div><strong>Örnek üretim profili</strong><p>Gerçek kişi veya şirket değil</p></div><button type="button" onClick={() => setFollowed(!followed)} className={followed ? "is-followed" : ""}>{followed ? <Check size={14} /> : <Plus size={15} />}</button></div><p className="uretir-id-panel-note">Etkileşimler bu tarayıcı oturumunda gösterilir.</p></div><div className="uretir-id-panel"><div className="uretir-id-panel__heading"><span className="eyebrow">Rozet vitrini</span><a href="/" aria-label="Tüm rozetleri gör"><ArrowUpRight size={15} /></a></div><div className="uretir-id-badge-row">{badges.map((badge) => <div key={badge.name} title={badge.detail}><span>{badge.mark}</span><small>{badge.name}</small></div>)}</div></div></aside></div></section></div>
-  </section>;
+export function UretirIdShell(){
+ const[user,setUser]=useState<Member|null>(null),[items,setItems]=useState<MemberContent[]>([]),[loading,setLoading]=useState(true),[mode,setMode]=useState("login"),[tab,setTab]=useState("overview"),[selected,setSelected]=useState<string|null>(null),[message,setMessage]=useState(""),[busy,setBusy]=useState(false),[recovery,setRecovery]=useState("");
+ async function load(){const r=await fetch("/api/members",{cache:"no-store"});if(!r.ok)throw Error("Hesaba ulaşılamadı. Yenileyip tekrar deneyin.");const d=await r.json();setUser(d.user);setItems(d.items);return d;}
+ useEffect(()=>{load().catch(e=>setMessage(e.message)).finally(()=>setLoading(false));},[]);
+ const startup=items.find(i=>i.kind==="startup"),posts=items.filter(i=>i.kind==="post"),comments=items.filter(i=>i.kind==="comment");
+ async function auth(e:FormEvent<HTMLFormElement>){e.preventDefault();setBusy(true);setMessage("");try{const f=new FormData(e.currentTarget);const d=await memberCall({action:mode,handle:f.get("handle"),password:f.get("password"),displayName:f.get("displayName"),recoveryCode:f.get("recoveryCode"),consent:f.get("consent")==="on"});if(d.recoveryCode)setRecovery(d.recoveryCode);await load();if(mode==="recover"){setMode("login");setMessage("Şifre yenilendi. Yeni kurtarma kodunu saklayıp giriş yap.");}}catch(e){setMessage((e as Error).message);}finally{setBusy(false);}}
+ async function saved(id:string){await load();setSelected(id);setMessage("Kaydedildi. Durumunu çalışma alanından takip edebilirsin.");}
+ const recoveryNotice=recovery&&<aside className="member-recovery" role="status"><strong>Hesap kurtarma kodun — yalnızca şimdi gösterilir</strong><p>Bu kodu güvenli bir yerde sakla. E-posta ile kurtarma yoktur; şifreni unuttuğunda bu kod gerekir.</p><code>{recovery}</code><button onClick={()=>setRecovery("")}>Kodu güvenli yere kaydettim</button></aside>;
+ if(loading)return <div className="section-wrap member-shell"><p role="status">Çalışma alanın yükleniyor…</p></div>;
+ if(!user)return <div className="section-wrap member-shell">{recoveryNotice}<div className="member-entry"><div><span className="rule-label">ÜRETİR ID / ÜRETENLER İÇİN</span><h1>Girişiminin<br/><em>bir yeri olsun.</em></h1><p>Girişimini tanıt. Haritada yerini al.<br/>Yazılarınla fikrini aç, topluluktan geri bildirim al.</p><ol className="member-steps"><li><b>01</b><span>Profilini oluştur<small>İnsanlar ne ürettiğini ve kimin için ürettiğini görsün.</small></span></li><li><b>02</b><span>Şehrinde görünür ol<small>Onaylanan girişimin harita ve katalogda yer alsın.</small></span></li><li><b>03</b><span>Fikrini tartışmaya aç<small>Bir gelişme paylaş, anlamlı sorularla ilerle.</small></span></li></ol></div><section className="member-auth"><div className="member-tabs"><button aria-pressed={mode==="login"} onClick={()=>setMode("login")}>Giriş yap</button><button aria-pressed={mode==="register"} onClick={()=>setMode("register")}>Hesap oluştur</button></div><h2>{mode==="register"?"Üretmeye katıl.":mode==="recover"?"Hesabını kurtar.":"Kaldığın yerden."}</h2><form onSubmit={auth}><label className="member-field"><span>Kullanıcı adı</span><input name="handle" required pattern="[a-z0-9_]{3,24}" minLength={3} maxLength={24} autoComplete="username" placeholder="ornek_girisim"/></label>{mode==="register"&&<label className="member-field"><span>Görünen adın</span><input name="displayName" required minLength={2} maxLength={60} autoComplete="name"/></label>}{mode==="recover"&&<label className="member-field"><span>Kurtarma kodu</span><input name="recoveryCode" required minLength={48} maxLength={48}/></label>}<label className="member-field"><span>{mode==="recover"?"Yeni şifre":"Şifre"} · en az 12 karakter</span><input name="password" type="password" required minLength={12} maxLength={128} autoComplete={mode==="login"?"current-password":"new-password"}/></label>{mode==="register"&&<label className="member-consent"><input required type="checkbox" name="consent"/><span><Link href="/gizlilik-politikasi">Gizlilik bilgilendirmesini</Link> okudum. Gönderdiğim içeriği yayımlama hakkına sahibim; paylaşımlar inceleme sonrasında herkese açık olur.</span></label>}<button className="member-primary" disabled={busy}>{busy?"İşleniyor…":mode==="register"?"Hesabımı oluştur →":mode==="recover"?"Şifreyi yenile":"Çalışma alanıma gir →"}</button></form><button className="member-text-button" onClick={()=>setMode(mode==="recover"?"login":"recover")}>{mode==="recover"?"Girişe dön":"Şifremi unuttum"}</button>{message&&<p role="status">{message}</p>}<p className="member-help">Hesap girişinde kullanıcı adı kullanılır. Yazılar, girişim bilgileri ve görünen adın yayımlandığında herkese açıktır.</p></section></div></div>;
+ return <div className="section-wrap member-shell">{recoveryNotice}<header className="member-dashboard-head"><div><span className="rule-label">ÜRETİR ID / ÇALIŞMA ALANI</span><h1>Merhaba, {user.display_name}.</h1><p>Bugün fikrini bir adım ileri taşı.</p></div><button onClick={async()=>{try{await memberCall({action:"logout"});setUser(null);setItems([]);setRecovery("");}catch(e){setMessage((e as Error).message);}}}>Çıkış yap</button></header><nav className="member-tabs" aria-label="Çalışma alanı">{[["overview","Genel bakış"],["startup","Girişimim"],["posts","Yazılarım"],["account","Hesabım"]].map(([id,label])=><button key={id} aria-pressed={tab===id} onClick={()=>{setTab(id);setMessage("");}}>{label}</button>)}</nav>{message&&<p className="member-notice" role="status">{message}</p>}
+ {tab==="overview"&&<><div className="member-overview"><button onClick={()=>setTab("startup")}><small>HARİTADAKİ YERİN</small><strong>{startup?statuses[startup.status]:"İlk adımı at"}</strong><span>{startup?.payload.name??"Girişim profilini oluştur"} →</span></button><button onClick={()=>setTab("posts")}><small>YAZILARIN</small><strong>{posts.filter(p=>p.status==="published").length} yayında</strong><span>Fikrini güçlendir →</span></button><Link href="/kaynaklar/topluluk"><small>TOPLULUK</small><strong>Birlikte düşün</strong><span>Gündemdeki tartışmalara katıl →</span></Link></div><div className="member-next"><h2>{!startup?"Önce girişiminden bahset.":startup.status!=="published"?"Girişimini yayına hazırla.":"Şimdi hikâyeni paylaş."}</h2><p>{!startup?"Bir isim, bir şehir ve çözdüğün sorun yeterli. Başlamak için bir şirket kurmuş olman gerekmez.":"Taslaklarını tamamla; yayımlanan profilini yazılar ve topluluk geri bildirimleriyle geliştir."}</p><div className="member-buttons"><button className="member-primary" onClick={()=>setTab(!startup?"startup":"posts")}>{!startup?"Girişimimi ekle":"Yazı ekle"} →</button>{startup?.status==="published"&&<Link href={"/ekosistem/girisim/"+startup.id}>Girişim profilini gör ↗</Link>}</div></div>{comments.length>0&&<section className="member-next"><h2>Yorumların</h2>{comments.map(c=><p key={c.id}>{statuses[c.status]} · {c.payload.body?.slice(0,120)} {c.review_note&&"— "+c.review_note}</p>)}</section>}</>}
+ {tab==="startup"&&<ContentForm key={startup?.version??"new-startup"} kind="startup" item={startup} onSaved={saved}/>}
+ {tab==="posts"&&<div className="member-writing"><aside><button className="member-primary" onClick={()=>setSelected(null)}>+ Yeni yazı</button>{posts.map(p=><button className="member-post-choice" key={p.id} onClick={()=>setSelected(p.id)}><strong>{p.payload.title}</strong><small>{statuses[p.status]}</small></button>)}</aside><ContentForm key={(selected??"new")+":"+(posts.find(p=>p.id===selected)?.version??0)} kind="post" item={posts.find(p=>p.id===selected)} startupId={startup?.id} onSaved={saved}/></div>}
+ {tab==="account"&&<div className="member-form"><h2>Hesap ve içerik kontrolü</h2><p>@{user.handle}</p><form onSubmit={async e=>{e.preventDefault();const f=new FormData(e.currentTarget);try{await memberCall({action:"profile",displayName:f.get("displayName")});await load();setMessage("Görünen ad güncellendi.");}catch(e){setMessage((e as Error).message);}}}><label className="member-field"><span>Görünen ad</span><input name="displayName" defaultValue={user.display_name} required minLength={2} maxLength={60}/></label><button>Adı kaydet</button></form><h3>İçeriğini kaldır</h3><p className="member-help">Kaldırılan yazının altındaki yorumlar da silinir.</p>{items.filter(i=>i.kind!=="comment").map(i=><p key={i.id}>{i.payload.title??i.payload.name} <button onClick={async()=>{if(!window.confirm("Bu içerik ve bağlı içerikler kalıcı olarak silinsin mi?"))return;try{await memberCall({action:"delete",id:i.id});await load();setMessage("İçerik silindi.");}catch(e){setMessage((e as Error).message);}}}>Sil</button></p>)}<hr/><h3>Hesabı kalıcı olarak sil</h3><p>Profilin, girişimin, yazıların ve yorumların kaldırılır. Geri alınamaz.</p><form onSubmit={async e=>{e.preventDefault();const f=new FormData(e.currentTarget);if(!window.confirm("Hesabını ve tüm içeriklerini kalıcı olarak silmek istediğine emin misin?"))return;try{await memberCall({action:"deleteAccount",password:f.get("password")});setUser(null);setItems([]);setMessage("Hesabın silindi.");}catch(e){setMessage((e as Error).message);}}}><label className="member-field"><span>Onaylamak için mevcut şifren</span><input type="password" name="password" autoComplete="current-password" required/></label><button>Hesabımı ve içeriklerimi sil</button></form></div>}</div>;
 }

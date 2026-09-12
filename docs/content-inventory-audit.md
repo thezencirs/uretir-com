@@ -2,7 +2,7 @@
 
 ## Scope
 
-The audit covers six legacy articles, twelve hub guides, five company records, five AI hubs, PuanAI sample campaign surfaces, Trend Discovery, InsanAI, taxonomy archives, and their shared navigation and publishing systems.
+The audit covers six legacy articles, twelve hub guides, five company records, five AI hubs, PuanAI's verified campaign surfaces, Trend Discovery, InsanAI, taxonomy archives, and their shared navigation and publishing systems.
 
 This is a repository audit. It does not claim production traffic, ranking, accessibility, or Core Web Vitals results.
 
@@ -82,16 +82,17 @@ Decision: keep foundation hubs `noindex` until their first reviewed cluster crea
 
 Strengths:
 
-- recommendation flow, assumptions, limitations, and verification warnings are visible;
-- campaign detail pages remain `noindex` and emit no Offer schema in sample mode;
-- future live records require campaign-level provenance.
+- chat, search, rule explanations, limitations, and verification evidence are visible;
+- verified campaign detail pages emit Offer schema only after the runtime safety gate;
+- campaign-level provenance includes official-source URLs, fingerprints, retrieval times, review times, and immutable verification/history records;
+- PostgreSQL migrations, seed integrity, admin CRUD, deterministic fallback, and lookup exclusions have automated coverage.
 
 Weaknesses:
 
-- sample records use realistic brands and amounts and therefore require persistent, prominent labelling;
-- no bank or provider adapter, freshness service, expiry monitor, or failure-state telemetry exists.
+- source ingestion and re-verification are currently human-operated rather than scheduled;
+- no production database, freshness alert, provider-error telemetry, or named operational SLA exists.
 
-Decision: never convert sample records to `verified` without a source adapter and operational freshness checks.
+Decision: keep the rule engine fail closed, unpublish every edited verified record, and expand source coverage only after scheduled verification and alerting are operated.
 
 ## Cross-system improvements
 

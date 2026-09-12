@@ -2,7 +2,7 @@
 
 ## Current truth
 
-The repository has a reproducible pull-request quality gate: Node.js 22, pnpm 11.15.1, locked dependency installation, linting, production dependency audit, production build, and search-foundation validation. It does not have continuous deployment, a selected hosting provider, production monitoring, a secret store, or an operated data platform. Passing CI is evidence of repository integrity, not permission to send production traffic.
+The repository has a reproducible pull-request quality gate: Node.js 22, pnpm 11.15.1, locked dependency installation, Prisma validation, linting, unit and integration tests, production dependency audit, production build, and search-foundation validation. PuanAI also has an isolated PostgreSQL migration/seed verification command. The repository does not have continuous deployment, a selected hosting provider, production monitoring, a secret store, or an operated data platform. Passing CI is evidence of repository integrity, not permission to send production traffic.
 
 ## Environment contract
 
@@ -64,7 +64,7 @@ Alerts must name an owner, threshold, runbook, and escalation path. Known framew
 
 ## Configuration registry
 
-Every environment variable needs a name, purpose, owner, environments, sensitivity, default behavior, and rotation or review date. `URETIR_EDITORIAL_PREVIEW` is the only repository-documented editorial variable: it is server-only, local-review oriented, and cannot bypass production publication authority. No secret belongs in a `NEXT_PUBLIC_*` variable.
+Every environment variable needs a name, purpose, owner, environments, sensitivity, default behavior, and rotation or review date. `URETIR_EDITORIAL_PREVIEW` is server-only, local-review oriented, and cannot bypass production publication authority. PuanAI adds `DATABASE_URL`, `OPENAI_API_KEY`, optional `OPENAI_MODEL`, `PUANAI_ADMIN_PASSWORD`, and `PUANAI_SESSION_SECRET`; all are server-only. No secret belongs in a `NEXT_PUBLIC_*` variable.
 
 ## CMS adapter
 
@@ -89,17 +89,17 @@ Use versioned indexes and an alias swap for zero-downtime rebuilds. Validate doc
 
 ## Database migration path
 
-File-backed records remain the reference implementation until an operated database exists. Migrate in stages:
+Editorial records remain file-backed until an operated content database exists. PuanAI already uses the committed Prisma/PostgreSQL schema and migration as its application source of truth. Operate PuanAI in stages:
 
-1. define versioned storage schemas from the domain contracts;
-2. export and checksum source records;
-3. import into a non-production database and compare counts, IDs, relationships, and authority results;
-4. run shadow reads and report mismatches without changing user output;
-5. rehearse backup, restore, and rollback;
-6. switch one bounded content family behind a server-side control;
-7. observe, then expand.
+1. provision least-privilege preview and production PostgreSQL roles;
+2. apply the committed migration and compare the seed/source review manifest;
+3. run `pnpm db:verify` plus preview API smoke tests;
+4. schedule source re-verification before `nextCheckAt`;
+5. rehearse backup, point-in-time restore, and forward-only migration recovery;
+6. monitor stale-record rejection, database latency, provider fallback, and verification changes;
+7. expand source coverage only after the existing freshness SLA is met.
 
-Avoid irreversible schema deletion during transition. Search, CMS, and analytics stores do not become sources of truth.
+Avoid irreversible schema deletion during transition. Search, CMS, Redis, OpenAI, and analytics stores do not become PuanAI's source of truth.
 
 ## Release responsibility
 

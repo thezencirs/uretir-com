@@ -33,6 +33,18 @@ Keep secrets in the deployment platform's encrypted environment store. Document 
 
 Production builds intentionally omit unapproved article, guide, company, and category HTML. A draft must not be made reachable merely to satisfy a launch checklist.
 
+PuanAI requires these server-only variables:
+
+| Variable | Purpose | Failure behavior |
+| --- | --- | --- |
+| `DATABASE_URL` | PostgreSQL connection used by Prisma's `pg` adapter | Runtime campaign, chat, and admin APIs fail closed |
+| `OPENAI_API_KEY` | OpenAI Responses API authentication | Verified results use the deterministic explanation fallback |
+| `OPENAI_MODEL` | Optional model override; default `gpt-5.6-sol` | Default is used |
+| `PUANAI_ADMIN_PASSWORD` | Administration login secret | Admin login is disabled |
+| `PUANAI_SESSION_SECRET` | HMAC signing key for the admin session | Admin login is disabled |
+
+Apply `pnpm db:migrate` before serving a new release and run `pnpm db:seed` only when the reviewed bootstrap campaign records are intended for that environment. `pnpm db:verify` starts an isolated PostgreSQL instance, applies the committed migration, seeds it, checks required table counts, and exercises the verified lookup/exclusion path. Production needs encrypted backups and a tested point-in-time restoration procedure.
+
 ## Observability target
 
 The repository contains a typed, provider-neutral interaction event contract. It emits local browser events only; it does not send telemetry or establish a production measurement baseline. Before member data or AI products launch, add:

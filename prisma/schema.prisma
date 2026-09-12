@@ -1,0 +1,335 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum RecordStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum CardNetwork {
+  VISA
+  MASTERCARD
+  TROY
+  AMEX
+  OTHER
+}
+
+enum CampaignStatus {
+  DRAFT
+  PENDING_VERIFICATION
+  VERIFIED
+  EXPIRED
+  REJECTED
+}
+
+enum RewardKind {
+  POINTS
+  CASHBACK
+  MILES
+  DISCOUNT
+  OTHER
+}
+
+enum RuleKind {
+  MIN_SPEND
+  MAX_SPEND
+  REWARD_AMOUNT
+  MAX_REWARD
+  REQUIRED_PURCHASE_COUNT
+  REQUIRED_CHANNEL
+  REQUIRED_ENROLLMENT
+  REQUIRED_PAYMENT_METHOD
+  ELIGIBILITY
+  EXCLUSION
+  OTHER
+}
+
+enum RuleOperator {
+  EQ
+  GTE
+  LTE
+  CONTAINS
+  EXCLUDES
+  INFO
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  STALE
+}
+
+enum HistoryAction {
+  CREATED
+  UPDATED
+  VERIFIED
+  REJECTED
+  EXPIRED
+  DELETED
+}
+
+enum ChatRole {
+  USER
+  ASSISTANT
+}
+
+model Bank {
+  id           String           @id @default(uuid()) @db.Uuid
+  slug         String           @unique
+  name         String
+  officialName String
+  shortName    String
+  websiteUrl   String
+  color        String           @default("#769d32")
+  status       RecordStatus     @default(ACTIVE)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  cards        Card[]
+  campaigns    Campaign[]
+  sources      OfficialSource[]
+
+  @@map("banks")
+}
+
+model Card {
+  id            String         @id @default(uuid()) @db.Uuid
+  bankId        String         @db.Uuid
+  slug          String         @unique
+  name          String
+  network       CardNetwork
+  rewardProgram String?
+  annualFee     Decimal?       @db.Decimal(12, 2)
+  currency      String         @default("TRY")
+  active        Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  bank          Bank           @relation(fields: [bankId], references: [id], onDelete: Restrict)
+  campaigns     CampaignCard[]
+
+  @@index([bankId, active])
+  @@map("cards")
+}
+
+model MerchantCategory {
+  id        String             @id @default(uuid()) @db.Uuid
+  parentId  String?            @db.Uuid
+  slug      String             @unique
+  name      String
+  aliases   String[]           @default([])
+  status    RecordStatus       @default(ACTIVE)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  parent    MerchantCategory?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children  MerchantCategory[] @relation("CategoryTree")
+  merchants Merchant[]
+  campaigns Campaign[]
+
+  @@map("merchant_categories")
+}
+
+model Merchant {
+  id         String           @id @default(uuid()) @db.Uuid
+  categoryId String           @db.Uuid
+  slug       String           @unique
+  name       String
+  aliases    String[]         @default([])
+  websiteUrl String?
+  status     RecordStatus     @default(ACTIVE)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  category   MerchantCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  campaigns  Campaign[]
+
+  @@index([categoryId, status])
+  @@map("merchants")
+}
+
+model RewardType {
+  id        String       @id @default(uuid()) @db.Uuid
+  slug      String       @unique
+  name      String
+  kind      RewardKind
+  unit      String
+  status    RecordStatus @default(ACTIVE)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  campaigns Campaign[]
+
+  @@map("reward_types")
+}
+
+model Campaign {
+  id                 String            @id @default(uuid()) @db.Uuid
+  bankId             String            @db.Uuid
+  merchantId         String?           @db.Uuid
+  merchantCategoryId String            @db.Uuid
+  rewardTypeId       String?           @db.Uuid
+  slug               String            @unique
+  title              String
+  description        String            @db.Text
+  benefitSummary     String
+  startDate          DateTime          @db.Timestamptz(3)
+  endDate            DateTime          @db.Timestamptz(3)
+  status             CampaignStatus    @default(DRAFT)
+  published          Boolean           @default(false)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  bank               Bank              @relation(fields: [bankId], references: [id], onDelete: Restrict)
+  merchant           Merchant?         @relation(fields: [merchantId], references: [id], onDelete: SetNull)
+  merchantCategory   MerchantCategory  @relation(fields: [merchantCategoryId], references: [id], onDelete: Restrict)
+  rewardType         RewardType?       @relation(fields: [rewardTypeId], references: [id], onDelete: SetNull)
+  cards              CampaignCard[]
+  rules              CampaignRule[]
+  installments       Installment[]
+  officialSources    OfficialSource[]
+  verificationLogs   VerificationLog[]
+  history            CampaignHistory[]
+
+  @@index([status, published, startDate, endDate])
+  @@index([bankId])
+  @@index([merchantId])
+  @@index([merchantCategoryId])
+  @@map("campaigns")
+}
+
+model CampaignCard {
+  campaignId String   @db.Uuid
+  cardId     String   @db.Uuid
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  card       Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@id([campaignId, cardId])
+  @@map("campaign_cards")
+}
+
+model CampaignRule {
+  id           String       @id @default(uuid()) @db.Uuid
+  campaignId   String       @db.Uuid
+  kind         RuleKind
+  operator     RuleOperator @default(INFO)
+  numericValue Decimal?     @db.Decimal(14, 2)
+  textValue    String?
+  unit         String?
+  description  String       @db.Text
+  priority     Int          @default(0)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  campaign     Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId, kind])
+  @@map("campaign_rules")
+}
+
+model Installment {
+  id           String   @id @default(uuid()) @db.Uuid
+  campaignId   String   @db.Uuid
+  count        Int
+  feeFree      Boolean  @default(true)
+  productScope String?
+  notes        String?  @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  campaign     Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, count, productScope])
+  @@index([campaignId, count])
+  @@map("installments")
+}
+
+model OfficialSource {
+  id               String            @id @default(uuid()) @db.Uuid
+  campaignId       String            @db.Uuid
+  bankId           String            @db.Uuid
+  url              String
+  title            String
+  publisher        String
+  fetchedAt        DateTime          @db.Timestamptz(3)
+  publishedAt      DateTime?         @db.Timestamptz(3)
+  fingerprint      String
+  active           Boolean           @default(true)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  campaign         Campaign          @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  bank             Bank              @relation(fields: [bankId], references: [id], onDelete: Restrict)
+  verificationLogs VerificationLog[]
+
+  @@unique([campaignId, url])
+  @@index([campaignId, active])
+  @@map("official_sources")
+}
+
+model VerificationLog {
+  id               String             @id @default(uuid()) @db.Uuid
+  campaignId       String             @db.Uuid
+  officialSourceId String             @db.Uuid
+  status           VerificationStatus
+  checkedAt        DateTime           @db.Timestamptz(3)
+  nextCheckAt      DateTime           @db.Timestamptz(3)
+  checker          String
+  summary          String             @db.Text
+  fingerprint      String
+  createdAt        DateTime           @default(now())
+  campaign         Campaign           @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  officialSource   OfficialSource     @relation(fields: [officialSourceId], references: [id], onDelete: Restrict)
+
+  @@index([campaignId, checkedAt(sort: Desc)])
+  @@index([status, nextCheckAt])
+  @@map("verification_logs")
+}
+
+model CampaignHistory {
+  id         String        @id @default(uuid()) @db.Uuid
+  campaignId String        @db.Uuid
+  action     HistoryAction
+  snapshot   Json
+  changedBy  String
+  createdAt  DateTime      @default(now())
+  campaign   Campaign      @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId, createdAt(sort: Desc)])
+  @@map("campaign_history")
+}
+
+model ChatConversation {
+  id        String        @id @default(uuid()) @db.Uuid
+  clientKey String
+  title     String
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  messages  ChatMessage[]
+
+  @@index([clientKey, updatedAt(sort: Desc)])
+  @@map("chat_conversations")
+}
+
+model ChatMessage {
+  id             String           @id @default(uuid()) @db.Uuid
+  conversationId String           @db.Uuid
+  role           ChatRole
+  content        String           @db.Text
+  campaignIds    String[]         @default([])
+  createdAt      DateTime         @default(now())
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@map("chat_messages")
+}
+
+model SiteContent {
+  id          String    @id
+  draft       Json
+  published   Json
+  previous    Json?
+  revision    Int       @default(0)
+  publishedAt DateTime?
+  updatedAt   DateTime  @updatedAt
+
+  @@map("site_content")
+}

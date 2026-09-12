@@ -29,9 +29,9 @@ The product should not merely answer a question; it should make the next informe
 
 ## PuanAI: shopping intelligence
 
-PuanAI helps users decide which card, campaign, marketplace, installment plan, or payment method is best for a purchase. Its present data is structured sample data. It must never imply live accuracy or financial advice until verified provider integrations and update controls exist.
+PuanAI helps users decide which card, campaign, marketplace, installment plan, or payment method is best for a purchase. Its PostgreSQL catalog displays only records that pass official-source, fingerprint, freshness, validity, and deterministic eligibility checks. It never treats the language model as a campaign database and never presents its output as financial advice.
 
-Future live adapters need canonical campaign IDs, provider source URLs, publication and retrieval timestamps, expiry timestamps, eligibility rules, card/product scope, confidence or sync status, and a safe fallback when data is stale. PuanAI should recommend genuinely useful decision and purchase knowledge from Uretir, not attach unrelated links for traffic.
+Current official-page verification is human-operated. Future provider adapters must preserve the existing canonical campaign IDs, source URLs, retrieval timestamps, fingerprints, expiry timestamps, eligibility rules, card/product scope, verification history, and fail-closed stale state. PuanAI should recommend genuinely useful decision and purchase knowledge from Uretir, not attach unrelated links for traffic.
 
 The user-to-recommendation loop and its privacy, safety, and discovery requirements are maintained in [puan-ai.md](./puan-ai.md).
 

@@ -1,0 +1,6 @@
+import Link from "next/link";
+import {Breadcrumbs} from "./breadcrumbs";
+import {JsonLd} from "./json-ld";
+import {absoluteUrl} from "@/lib/seo";
+export type HubData={title:string;description:string;path:string;kicker:string;items:{label:string;href:string;description?:string;status?:string}[];note?:string;pending?:boolean};
+export function CategoryHub({data}:{data:HubData}){return <div className="section-wrap category-hub"><Breadcrumbs items={[{label:data.title}]}/><header><p className="rule-label">{data.kicker}</p><h1>{data.title}<span>.</span></h1><p>{data.description}</p></header><div className="category-hub-grid">{data.items.map((item,i)=><Link href={item.href} key={item.href}><span className="category-number">{String(i+1).padStart(2,"0")} / {item.status??"KEŞFET"}</span><h2>{item.label}<span>↗</span></h2><p>{item.description??"İlgili bölümü ve güncel çalışmaları inceleyin."}</p></Link>)}</div>{data.note&&<aside className="category-note">{data.note}</aside>}<p className="category-signature">Türkiye üretir, gençler yetişir.</p><JsonLd data={{"@context":"https://schema.org","@type":"CollectionPage",name:data.title,description:data.description,url:absoluteUrl(data.path),inLanguage:"tr-TR"}}/></div>;}

@@ -15,6 +15,7 @@ const organizationSchema = {
   url: SITE_URL,
   logo: { "@type": "ImageObject", url: `${SITE_URL}/icon.svg`, width: 512, height: 512 },
   description: DEFAULT_DESCRIPTION,
+  slogan: "Türkiye üretir, gençler yetişir.",
   email: "merhaba@uretir.com",
 };
 
@@ -50,13 +51,13 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = { themeColor: "#c8f560" };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return <html lang="tr" suppressHydrationWarning data-scroll-behavior="smooth"><body>
     <Script id="theme-init" strategy="beforeInteractive">{`(() => { try { const saved = localStorage.getItem("uretir-theme"); const dark = saved ? saved === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; document.documentElement.classList.toggle("dark", dark); } catch {} })()`}</Script>
     <a href="#main-content" className="skip-link">Ana içeriğe geç</a>
     <JsonLd data={[organizationSchema, websiteSchema]} />
     <AnalyticsEventBridge />
-    <Header showPreviewLinks={process.env.NODE_ENV !== "production"} />
+    <Header />
     <main id="main-content" tabIndex={-1}>{children}</main>
     <Footer />
   </body></html>;

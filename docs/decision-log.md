@@ -354,7 +354,7 @@ Add authenticated editorial preview when a CMS is introduced; do not replace the
 
 ## ADR-2026-07-25: Use claim-free PuanAI scenarios until verified providers exist
 
-Status: Accepted
+Status: Superseded by ADR-2026-07-25: Make PostgreSQL the PuanAI campaign source of truth
 Owners: Product, Data, Editorial, Security, and Engineering
 
 ### Context
@@ -502,3 +502,30 @@ Users gain one discovery path without changing the existing design system. The r
 ### Follow-up
 
 Connect consent-aware search telemetry, establish a relevance evaluation set, and introduce a managed search provider only when corpus size and measured failures justify it.
+
+## ADR-2026-07-25: Make PostgreSQL the PuanAI campaign source of truth
+
+Status: Accepted
+Owners: Product, Data, Security, Engineering, and Operations
+
+### Context
+
+PuanAI needs current merchant, amount, card, installment, reward, bank, and date decisions. A language model or browser-only fixture cannot establish campaign truth, freshness, exclusions, or a revocation trail. The earlier claim-free sample mode protected users while no verified data system existed.
+
+### Decision
+
+Store normalized banks, cards, campaigns, rules, merchants, categories, reward types, installments, official sources, verification logs, campaign history, and anonymous conversations in PostgreSQL through Prisma. A deterministic rule engine must reject unpublished, expired, inactive, stale, source-mismatched, or ineligible records before the OpenAI Responses API receives any context. Campaign and rule edits revoke publication until a new matching verification is recorded. The model explains bounded verified facts; it never supplies campaign facts.
+
+Seed only manually reviewed records from official bank pages. Every recommendation displays the official bank, validity interval, reward, installment state, conditions, verification date, and source link. When no record survives, return `I couldn't verify a current campaign.`
+
+### Consequences
+
+PuanAI can provide useful verified results while remaining fail closed during database, source, or model failures. The application now requires operated PostgreSQL, secret management, backups, scheduled verification, and monitoring. Manual seed review is not a substitute for continuous source ingestion.
+
+### Follow-up
+
+Provision preview and production PostgreSQL, rehearse restore, schedule verification before every `nextCheckAt`, alert on stale-record removal and provider fallback, and add reviewed official sources without weakening the gate.
+
+## 2026-09-11 — Internal site editor
+
+Reuse the existing PostgreSQL/Prisma store and administrator session for navigation labels, homepage copy and a five-category developments desk. Preserve public URL contracts. Store draft/published/previous snapshots with optimistic revision checks. Primary sources and explicit date fields are required; no automatic collection or production deployment is included. This meets the owner request without replacing the current site with WordPress.

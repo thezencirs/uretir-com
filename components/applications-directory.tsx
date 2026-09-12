@@ -1,0 +1,22 @@
+"use client";
+import Link from "next/link";
+import dynamic from "next/dynamic";
+import { ArrowUpRight, Search } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { makers, mergeManagedMarketplace, products, normalizeSearch, type MakerRegistry, type ManagedMarketplaceProduct, type Product, type ProductPlatform } from "@/lib/marketplace";
+import { catalogText } from "@/lib/catalog-language";
+const ProductMap=dynamic(()=>import("./product-map").then(m=>m.ProductMap),{ssr:false});
+export function ApplicationsDirectory({platform="MOBILE",english=false,map=false}: {platform?:ProductPlatform|"ALL";english?:boolean;map?:boolean}) {
+ const [catalog,setCatalog]=useState<{products:Product[];makers:MakerRegistry}>({products,makers}); const [query,setQuery]=useState("");const [city,setCity]=useState("Tümü");
+ useEffect(()=>{const params=new URLSearchParams(window.location.search);setQuery(params.get("q")??"");setCity(params.get("sehir")??"Tümü"); const abort=new AbortController();void fetch("/api/urunler",{signal:abort.signal}).then(r=>r.json()).then((body:{data?:ManagedMarketplaceProduct[]})=>{if(body.data?.length)setCatalog(mergeManagedMarketplace(body.data))}).catch(()=>undefined);return()=>abort.abort()},[]);
+ const t=useCallback((v:string)=>catalogText(v,english),[english]);
+ const candidates=useMemo(()=>catalog.products.filter(p=>(platform==="ALL"||p.platform===platform)&&normalizeSearch([p.name,t(p.description),t(p.category),t(p.task),catalog.makers[p.maker].name].join(" ")).includes(normalizeSearch(query))),[catalog,platform,query,t]);
+ const results=candidates.filter(p=>city==="Tümü"||catalog.makers[p.maker].city===city);
+ const changeCity=useCallback((v:string)=>setCity(v),[]);
+ return <div id="kesfet" className="scroll-mt-28"><div className="mb-8 flex flex-wrap items-center gap-4 border-b hairline pb-6"><label className="flex min-w-0 flex-1 items-center gap-3"><Search size={20}/><span className="sr-only">{english?"Search products":"Ürün ara"}</span><input className="w-full min-w-0 bg-transparent py-3 text-base outline-none focus:ring-2 focus:ring-[#769d32]" type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder={english?"Search by product, maker or need":"Ürün, üretici veya ihtiyaç ara"}/></label><label className="sr-only" htmlFor="directory-city">{english?"City":"Şehir"}</label><select id="directory-city" className="rounded-lg border hairline bg-[color:var(--background)] p-3 text-sm" value={city} onChange={e=>setCity(e.target.value)}><option value="Tümü">{english?"All cities":"Bütün şehirler"}</option>{[...new Set(Object.values(catalog.makers).map(m=>m.city))].map(c=><option key={c}>{c}</option>)}</select></div>
+ {map&&<div className="mb-8"><ProductMap products={candidates} makers={catalog.makers} city={city} onCity={changeCity} english={english}/></div>}
+ <p className="mb-6 text-sm text-muted" aria-live="polite">{results.length} {english?"products":"ürün"}</p>
+ <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{results.map(p=><article key={p.slug} className="flex flex-col border hairline p-6"><p className="text-sm text-muted">{t(p.category)} · {catalog.makers[p.maker].city}</p><Link className="mt-5 flex items-center justify-between gap-3" href={(english?"/en":"")+"/urun/"+p.slug}><h2 className="font-display text-3xl">{p.name}</h2><ArrowUpRight size={20}/></Link><p className="mt-4 flex-1 text-base leading-7 text-muted">{t(p.description)}</p><p className="mt-5 text-sm">{catalog.makers[p.maker].name}</p><a className="mt-6 border-t hairline pt-4 text-sm font-semibold underline underline-offset-4" href={p.url} target="_blank" rel="noreferrer">{english?(p.platform==="MOBILE"?"Official site and store links":"Open official site"):(p.platform==="MOBILE"?"Resmî site ve mağaza bağlantıları":"Resmî siteyi aç")} ↗</a></article>)}</div>
+ {!results.length&&<div className="border hairline p-10"><h2 className="text-xl">{english?"No matching products":"Eşleşen ürün bulunamadı"}</h2><button className="mt-4 underline" onClick={()=>{setQuery("");setCity("Tümü")}}>{english?"Clear filters":"Filtreleri temizle"}</button></div>}
+ <p className="mt-8 text-sm leading-6 text-muted">{english?"Availability, prices and store links are provided on each maker’s official site.":"Güncel erişim, fiyat ve mağaza bağlantılarını üreticinin resmî sayfasından kontrol edebilirsin."}</p></div>;
+}

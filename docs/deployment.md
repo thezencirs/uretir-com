@@ -2,7 +2,7 @@
 
 ## Current deployment posture
 
-The repository has a GitHub Actions quality workflow, but it does not deploy. A production hosting provider, secret store, monitoring stack, operated data platform, and rehearsed rollback mechanism have not been selected. Treat production deployment as an explicit engineering responsibility, not an implicit result of a green build or `git push`. The detailed operating contract is in [Production operations](./production-operations.md).
+The public application is deployed from the GitHub `main` branch to the Vercel project `thezencirs-projects/uretir-com`; `www.uretir.com` and `uretir-com.vercel.app` are attached to production. Vercel provides immutable deployments and a rollback control. The repository's GitHub Actions workflow validates quality but does not itself deploy. Uptime monitoring, error tracking, privacy-aware analytics, named incident ownership, and a rehearsed database-aware rollback remain operational work. Treat a green build or `git push` as only one part of a release. The detailed operating contract is in [Production operations](./production-operations.md).
 
 ## Required environments
 

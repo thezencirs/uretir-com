@@ -25,6 +25,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: absoluteUrl("/"), lastModified: now, changeFrequency: "weekly", priority: 1 },
     { url: absoluteUrl("/gelismeler"), lastModified: new Date("2026-09-11T00:00:00.000Z"), changeFrequency: "daily", priority: .85 },
     { url: absoluteUrl("/araclar"), lastModified: now, changeFrequency: "weekly", priority: .8 },
+    { url: absoluteUrl("/uygulamalar"), lastModified: now, changeFrequency: "weekly", priority: .85 },
+    { url: absoluteUrl("/en"), lastModified: now, changeFrequency: "monthly", priority: .6, alternates: { languages: { tr: absoluteUrl("/"), en: absoluteUrl("/en") } } },
     { url: absoluteUrl("/ekosistem"), lastModified: now, changeFrequency: "monthly", priority: .7 },
     { url: absoluteUrl("/puan-ai"), lastModified: now, changeFrequency: "monthly", priority: .6 },
     { url: absoluteUrl("/hakkimizda"), lastModified: now, changeFrequency: "monthly", priority: .5 },

@@ -1,0 +1,38 @@
+name: PuanAI source maintenance
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: puanai-source-maintenance
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URL: ${{ secrets.PUANAI_DATABASE_URL }}
+    steps:
+      - name: Configuration guard
+        if: env.DATABASE_URL == ''
+        run: echo "PUANAI_DATABASE_URL is not configured; Vercel cron remains the active scheduler."
+      - uses: actions/checkout@v4
+        if: env.DATABASE_URL != ''
+      - uses: pnpm/action-setup@v4
+        if: env.DATABASE_URL != ''
+        with:
+          version: 11.15.1
+      - uses: actions/setup-node@v4
+        if: env.DATABASE_URL != ''
+        with:
+          node-version: 22
+          cache: pnpm
+      - if: env.DATABASE_URL != ''
+        run: pnpm install --frozen-lockfile
+      - if: env.DATABASE_URL != ''
+        run: pnpm db:migrate
+      - if: env.DATABASE_URL != ''
+        run: pnpm puanai:automation

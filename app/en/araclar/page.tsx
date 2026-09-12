@@ -1,0 +1,1 @@
+import type {Metadata} from "next";import {ToolsDirectory} from "@/components/tools-directory";export const metadata:Metadata={title:"Tools",openGraph:{url:"/en/araclar"},description:"Web products and Uretir AI tools.",alternates:{canonical:"/en/araclar",languages:{tr:"/araclar",en:"/en/araclar"}}};export default function Page(){return <ToolsDirectory english={true}/>}

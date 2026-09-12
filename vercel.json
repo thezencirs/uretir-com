@@ -1,0 +1,22 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    {
+      "path": "/api/cron/puanai-refresh/02",
+      "schedule": "17 2 * * *"
+    },
+    {
+      "path": "/api/cron/puanai-refresh/08",
+      "schedule": "17 8 * * *"
+    },
+    {
+      "path": "/api/cron/puanai-refresh/14",
+      "schedule": "17 14 * * *"
+    },
+    {
+      "path": "/api/cron/puanai-refresh/20",
+      "schedule": "17 20 * * *"
+    }
+  ],
+  "buildCommand": "pnpm run vercel-build"
+}

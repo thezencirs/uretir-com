@@ -4,6 +4,10 @@
 
 Mevcut yetkili DNS: eu.guzelhosting.com, sg.guzelhosting.com, tr.guzelhosting.com, us.guzelhosting.com. Ana alan adı HTTPS ile www adresine yönleniyor; www 200 yanıtı veriyor. Vercel projesi `uretir-com`, GitHub deposu `thezencirs/uretir-com`.
 
+Squarespace hesabı içinden transfer paneli de kontrol edildi: `uretir.com` için “Transfer devam ediyor” yazıyor. A, www CNAME, MX ve Google doğrulama TXT kayıtlarının aşağıdaki değerlerle eksiksiz aktarıldığı görüldü. Ayrıca Squarespace'in `_domainconnect` CNAME kaydı bulunuyor. Bu nedenle aynı kayıtları yeniden ekleme veya ad sunucusu değişikliği yapılmadı. Panel bu aşamada yalnızca genel bakış ve faturalandırma seçeneklerini sunuyor. Transfer tamamlandıktan sonra yetkili DNS ve yenilenen bitiş tarihi ayrıca doğrulanmalı.
+
+HaberAI GitHub otomasyonundaki eksik/uyuşmayan CRON_SECRET, Vercel ve GitHub'da aynı yeni gizli değerle eşitlendi. Üretim yayını ardından 34738858447 numaralı GitHub çalışması başarılı tamamlandı. Toplayıcı altı TRT akışından 360 kayıt işledi; AA Teyit kaynağı okunamadığından veri toplama sonucu `partial`. Zamanlayıcı başarısı bütün kaynakların sağlıklı olduğu anlamına gelmez.
+
 ## Geçişte korunacak doğrulanmış kayıtlar
 
 | Ad | Tür | Değer | TTL |

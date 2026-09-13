@@ -12,7 +12,7 @@ jobs:
       - name: Refresh HaberAI sources
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
-          SITE_URL: https://www.uretir.com
+          SITE_URL: https://uretir-com.vercel.app
         run: |
           test -n "$CRON_SECRET"
           curl --fail-with-body --retry 2 --max-time 55 \

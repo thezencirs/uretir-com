@@ -62,7 +62,7 @@ export async function* streamGroundedExplanation(query: string, campaigns: Campa
   }
 
   const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
+  if (!apiKey || process.env.PUANAI_PAID_AI_ENABLED !== "true") {
     yield deterministicAnswer(campaigns);
     return;
   }

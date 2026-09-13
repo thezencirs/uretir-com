@@ -59,6 +59,7 @@ describe("grounded recommendation pipeline", () => {
     }
     responsesCreate.mockResolvedValue(providerStream());
     vi.stubEnv("OPENAI_API_KEY", "test-key");
+    vi.stubEnv("PUANAI_PAID_AI_ENABLED", "true");
     vi.stubEnv("OPENAI_MODEL", "gpt-5.6-sol");
     const matches = evaluateCampaigns(
       [campaignFixture()],

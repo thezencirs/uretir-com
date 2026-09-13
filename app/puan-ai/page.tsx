@@ -33,8 +33,8 @@ export default function PuanAIPage() {
     <PuanAIQuickCompare />
     <PuanAIChat />
     <section className="section-wrap pa-whatsapp" aria-label="WhatsApp gündem kanalı">
-      <div><h2>PuanAI gelişmelerini WhatsApp’tan takip et.</h2><p>Yeni doğrulanmış kampanyalar, veri güncellemeleri ve kısa kullanım notları HaberAI kanalı üzerinden paylaşılır. Gündemi tek yerden takip etmek için kanala katıl.</p></div>
-      <a href="https://whatsapp.com/channel/0029VbDk4gHGpLHXkGseaf3Y" target="_blank" rel="noreferrer">WhatsApp kanalına katıl <span aria-hidden="true">↗</span></a>
+      <div><h2>PuanAI gelişmelerini WhatsApp’tan takip et.</h2><p>Doğrulanmış kart kampanyaları ve kullanım notları için PuanAI kanalına katıl.</p></div>
+      <a href="https://whatsapp.com/channel/0029VbDbbII8PgsA574OLl1H" target="_blank" rel="noreferrer">PuanAI kanalına katıl <span aria-hidden="true">↗</span></a>
     </section>
     <div className="section-wrap"><PuanAICampaignExplorer /></div>
   </div>;

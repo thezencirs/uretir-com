@@ -1,6 +1,6 @@
 # HaberAI WhatsApp botu
 
-`turkiye-haber-botu.zip` içindeki bot, Üretir HaberAI kanalına bağlanacak şekilde kullanılabilir. Paket Windows üzerinde yerel çalışır; QR ile kanal yöneticisi hesabı eşleştirilmeden gerçek gönderim yapmaz. Sunucusuz Vercel fonksiyonu içinde WhatsApp Web oturumu çalıştırmak yerine bot ayrı bir bilgisayarda çalışır ve HaberAI web uygulaması aynı doğrulanmış haber verisini sunar.
+`whatsapp-bot` klasöründeki bot, Üretir HaberAI kanalına bağlanacak şekilde çalışır. Bot Windows üzerinde yerel çalışır; QR ile kanal yöneticisi hesabı eşleştirilmeden gerçek gönderim yapmaz. Sunucusuz Vercel fonksiyonu içinde WhatsApp Web oturumu çalıştırmak yerine bot ayrı bir bilgisayarda çalışır ve HaberAI web uygulaması aynı doğrulanmış haber verisini sunar.
 
 ## Kanal ve kaynak ayarı
 

@@ -29,7 +29,7 @@ export async function collectNews(){
  const today=newsDay();
  const articles=await client.query("SELECT payload FROM haber_articles WHERE (published_at AT TIME ZONE 'Europe/Istanbul')::date = $1::date AND published_at<=NOW() AND COALESCE(payload->>'hidden','false') <> 'true' ORDER BY published_at DESC",[today]);
  const body=buildBulletin(articles.rows.map(r=>r.payload),today);
- if(body)await client.query("INSERT INTO haber_bulletins(day,body,channel_url) VALUES($1,$2,$3) ON CONFLICT(day) DO UPDATE SET body=EXCLUDED.body,updated_at=NOW() WHERE haber_bulletins.status <> 'sent'",[today,body,whatsappChannel]);
+ if(body)await client.query("INSERT INTO haber_bulletins(day,body,channel_url) VALUES($1,$2,$3) ON CONFLICT(day) DO UPDATE SET body=EXCLUDED.body,channel_url=EXCLUDED.channel_url,status=CASE WHEN haber_bulletins.body IS DISTINCT FROM EXCLUDED.body THEN 'awaiting_channel_connection' ELSE haber_bulletins.status END,updated_at=CASE WHEN haber_bulletins.body IS DISTINCT FROM EXCLUDED.body THEN NOW() ELSE haber_bulletins.updated_at END",[today,body,whatsappChannel]);
  return run;
  }finally{if(locked)await client.query("SELECT pg_advisory_unlock(81071001)").catch(()=>undefined);client.release();await pool.end();}
 }

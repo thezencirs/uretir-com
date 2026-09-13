@@ -13,7 +13,7 @@ HaberAI, Üretir'in şehir eşleştirme, tarihli arşiv ve bülten yazılımıd�
 
 ## Günlük işlem
 
-Vercel Hobby zamanlaması günde birdir: UTC 06.13; Hobby planında çalışma Türkiye saatiyle 09.00–10.00 aralığına kayabilir. Site açıkken kayıtlı akış dakikada bir yenilenir; bu, kaynakların dakikada bir tarandığı anlamına gelmez. Arşiv yalnızca toplamanın başladığı tarihten itibaren birikir. 81 ilin haritası vardır; her ilde her gün haber bulunduğu iddia edilmez.
+Vercel Hobby zamanlaması günde birdir: UTC 06.13; yarım saatlik güncelleme GitHub Actions iş akışının UTC her saatin 7. ve 37. dakikasındaki çalışmasından gelir. Site açıkken kayıtlı akış dakikada bir yenilenir; bu, kaynakların dakikada bir tarandığı anlamına gelmez. Arşiv yalnızca toplamanın başladığı tarihten itibaren birikir. 81 ilin haritası vardır; her ilde her gün haber bulunduğu iddia edilmez.
 
 `haber_bulletins` tablosu bugünün şehir etiketli en fazla on haberini, özgün bağlantıları ve kanal hedefiyle tutar. Durum `awaiting_channel_connection` iken hiçbir mesaj gönderilmez. Editördeki kopyalama düğmesi manuel yayın içindir; otomatik kanal yayını değildir.
 

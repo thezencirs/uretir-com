@@ -10,7 +10,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Yetkisiz erişim." }, { status: 401 });
   }
   try {
-    return NextResponse.json(await collectNews());
+    const run = await collectNews();
+    return NextResponse.json(run, { status: "status" in run && run.status === "failed" ? 503 : 200 });
   } catch {
     return NextResponse.json({ error: "HaberAI otomasyonu tamamlanamadı." }, { status: 503 });
   }

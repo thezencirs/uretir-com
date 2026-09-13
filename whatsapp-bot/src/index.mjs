@@ -47,7 +47,10 @@ async function poll() {
   if (busy) return;
   busy = true;
   try {
-    const channel = await client.getChannelByInviteCode("0029VbDk4gHGpLHXkGseaf3Y");
+    const channels = await client.getChannels();
+    const matches = channels.filter(c => c.channelMetadata?.inviteLink === channelUrl || c.channelMetadata?.inviteCode === "0029VbDk4gHGpLHXkGseaf3Y");
+    if(matches.length!==1) throw new Error("Kanal davet bağlantısı doğrulanamadı.");
+    const channel = matches[0];
     const role = channel?.channelMetadata?.membershipType;
     if (!channel?.id?._serialized || !["owner", "admin"].includes(role)) throw new Error(`Hedef kanal yazma yetkisi doğrulanamadı (${role || "bilinmiyor"}).`);
     const refresh = await fetch(`${siteUrl}/api/cron/haber-ai`, {headers:{Authorization:`Bearer ${secret}`},signal:AbortSignal.timeout(60000)});

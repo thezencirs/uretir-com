@@ -1,5 +1,6 @@
 import {XMLParser} from "fast-xml-parser";
 import {getMarketQuotes} from "./haber-ai/markets";
+export const whatsappChannel = "https://whatsapp.com/channel/0029VbDIS6B4inoiXI8jeE05";
 export const categories=["Tümü","Borsa İstanbul","Dövizler","Metaller","Kripto paralar","Emtialar"] as const;
 export type Market={id:string;name:string;category:string;price:number|null;unit:string;change:number|null;asOf:string;source:string;url:string;note:string;history:number[]};
 export type FinanceSnapshot={items:Market[];checkedAt:string};

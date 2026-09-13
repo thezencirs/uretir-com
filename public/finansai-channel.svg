@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="FinansAI">
+  <rect width="512" height="512" rx="112" fill="#16261f"/>
+  <circle cx="256" cy="256" r="168" fill="none" stroke="#c8f560" stroke-width="10" opacity=".22"/>
+  <path d="M132 330 212 250l58 40 108-126" fill="none" stroke="#c8f560" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M330 164h48v48" fill="none" stroke="#f5f7ef" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="132" cy="330" r="13" fill="#f5f7ef"/>
+</svg>

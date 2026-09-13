@@ -48,7 +48,8 @@ async function poll() {
   busy = true;
   try {
     const channel = await client.getChannelByInviteCode("0029VbDk4gHGpLHXkGseaf3Y");
-    if (!channel?.id?._serialized || channel.isReadOnly !== false) throw new Error("Hedef kanal yazma yetkisi doğrulanamadı.");
+    const role = channel?.channelMetadata?.membershipType;
+    if (!channel?.id?._serialized || !["owner", "admin"].includes(role)) throw new Error(`Hedef kanal yazma yetkisi doğrulanamadı (${role || "bilinmiyor"}).`);
     const refresh = await fetch(`${siteUrl}/api/cron/haber-ai`, {headers:{Authorization:`Bearer ${secret}`},signal:AbortSignal.timeout(60000)});
     if (!refresh.ok) throw new Error(`Kaynak yenileme ${refresh.status}`);
     const response = await fetch(`${siteUrl}/api/haber-ai/whatsapp`, {
@@ -58,7 +59,7 @@ async function poll() {
     });
     if (!response.ok) throw new Error(`Site ${response.status}`);
     const { bulletin } = await response.json();
-    if (!bulletin) return;
+    if (!bulletin) { connectionStatus="Kontrol tamamlandı; yeni şehir haberi yok. Son kontrol: "+new Date().toLocaleString("tr-TR"); return; }
 
     if (bulletin.channel_url !== channelUrl) throw new Error("Kanal hedefi uyuşmuyor.");
     const message = await channel.sendMessage(bulletin.body);
@@ -72,6 +73,7 @@ async function poll() {
     console.log(`Bülten gönderildi: ${bulletin.claimId}`);
     connectionStatus="Son bülten gönderildi: "+new Date().toLocaleString("tr-TR",{timeZone:"Europe/Istanbul"});
   } catch (error) {
+    connectionStatus="Kontrol başarısız: "+String(error instanceof Error ? error.message : error).replace(/[<>&"']/g, " ");
     console.error("Bülten kontrolü başarısız:", error instanceof Error ? error.message : error);
   } finally { busy = false; }
 }

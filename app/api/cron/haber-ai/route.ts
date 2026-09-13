@@ -6,7 +6,7 @@ export const maxDuration = 60;
 
 export async function GET(request: NextRequest) {
   const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
-  if (!process.env.CRON_SECRET || token !== process.env.CRON_SECRET) {
+  if (![process.env.CRON_SECRET, process.env.WHATSAPP_BOT_SECRET].some(secret => secret && token === secret)) {
     return NextResponse.json({ error: "Yetkisiz erişim." }, { status: 401 });
   }
   try {

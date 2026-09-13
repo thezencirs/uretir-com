@@ -7,7 +7,7 @@ import type { Article } from "@/lib/haber-ai/model";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 const json = (body: unknown, status = 200) => NextResponse.json(body, { status, headers: { "Cache-Control": "no-store" } });
-function authorized(r: NextRequest) { return Boolean(process.env.CRON_SECRET && r.headers.get("authorization") === `Bearer ${process.env.CRON_SECRET}`); }
+function authorized(r: NextRequest) { return [process.env.CRON_SECRET,process.env.WHATSAPP_BOT_SECRET].some(token=>Boolean(token && r.headers.get("authorization") === `Bearer ${token}`)); }
 const selection = `SELECT a.id,a.payload FROM haber_articles a WHERE a.published_at <= NOW() AND (a.published_at AT TIME ZONE 'Europe/Istanbul')::date = (NOW() AT TIME ZONE 'Europe/Istanbul')::date AND COALESCE(a.payload->>'hidden','false') <> 'true' AND jsonb_array_length(a.payload->'provinceCodes') > 0 AND NOT EXISTS (SELECT 1 FROM haber_deliveries d WHERE d.article_id=a.id) ORDER BY a.published_at DESC LIMIT 5`;
 export async function GET(request: NextRequest) {
  if (!authorized(request)) return json({error:"Yetkisiz erişim."},401);

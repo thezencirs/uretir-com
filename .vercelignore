@@ -5,3 +5,6 @@ node_modules
 generated
 coverage
 *.log
+whatsapp-bot
+.env.production.local
+.env

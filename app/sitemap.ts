@@ -29,6 +29,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: absoluteUrl("/en"), lastModified: now, changeFrequency: "monthly", priority: .6, alternates: { languages: { tr: absoluteUrl("/"), en: absoluteUrl("/en") } } },
     { url: absoluteUrl("/ekosistem"), lastModified: now, changeFrequency: "monthly", priority: .7 },
     { url: absoluteUrl("/puan-ai"), lastModified: now, changeFrequency: "monthly", priority: .6 },
+    { url: absoluteUrl("/oyun-ai"), lastModified: new Date("2026-09-15T00:00:00.000Z"), changeFrequency: "monthly", priority: .7 },
     { url: absoluteUrl("/hakkimizda"), lastModified: now, changeFrequency: "monthly", priority: .5 },
     { url: absoluteUrl("/iletisim"), lastModified: now, changeFrequency: "monthly", priority: .5 },
     { url: absoluteUrl("/gizlilik-politikasi"), lastModified: now, changeFrequency: "yearly", priority: .2 },

@@ -1,5 +1,22 @@
-import type {Metadata} from "next";
-import {CategoryHub} from "@/components/category-hub";
-const data={"path":"/oyun-ai","title":"OyunAI","kicker":"ÇÖZÜMLER / PLANLANIYOR","description":"Oyun üretimi ve etkileşimli deneyimlere yönelik ürün alanı.","pending":true,"items":[{"label":"Tüm çözümler","href":"/cozumler","description":"Kullanılabilir ürünleri ve geliştirme alanlarını inceleyin."},{"label":"Öneri paylaşın","href":"/iletisim","description":"Bu üründen beklentinizi ekibe iletin."}],"note":"Bu ürün henüz kullanıma açık değil. Geliştirme kapsamı netleştikçe bu sayfada paylaşılacak."};
-export const metadata:Metadata={title:data.title,description:data.description,alternates:{canonical:data.path},openGraph:{title:data.title+" — Üretir",description:data.description,url:data.path,type:"website"},robots:{index:false,follow:true},};
-export default function Page(){return <CategoryHub data={data}/>;}
+import type { Metadata } from "next";
+import { JsonLd } from "@/components/json-ld";
+import { OyunAIMemoryGame } from "@/components/oyun-ai-memory-game";
+import { absoluteUrl } from "@/lib/seo";
+
+export const metadata: Metadata = {
+  title: "OyunAI — Memo kelime hafıza oyunu",
+  description: "İngilizce kelimeleri görselleri ve Türkçe anlamlarıyla eşleştirin. OyunAI Memo, tarayıcıda ücretsiz oynanabilen bir hafıza oyunudur.",
+  alternates: { canonical: "/oyun-ai" },
+  openGraph: { title: "OyunAI — Memo kelime hafıza oyunu", description: "Kartları ezberleyin, İngilizce kelimeleri görselleriyle eşleştirin ve en yüksek puanı yapın.", url: "/oyun-ai", type: "website" },
+  robots: { index: true, follow: true },
+};
+
+const gameSchema = {
+  "@context": "https://schema.org", "@type": "Game", name: "OyunAI Memo",
+  url: absoluteUrl("/oyun-ai"), description: "İngilizce kelimeleri görselleri ve Türkçe anlamlarıyla eşleştiren tarayıcı tabanlı hafıza oyunu.",
+  applicationCategory: "EducationalGame", operatingSystem: "Web", inLanguage: "tr-TR", isAccessibleForFree: true,
+};
+
+export default function OyunAIPage() {
+  return <><JsonLd data={gameSchema} /><OyunAIMemoryGame /></>;
+}

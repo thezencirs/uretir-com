@@ -13,6 +13,7 @@ export const metadata: Metadata = {
 const tools = [
   { name: "UretirAI", description: "Üretim sorularını kaynaklar ve bağlantılı varlıklarla araştırın.", href: "/uretir-ai", color: "#78a5b6", status: "Bilgi temeli" },
   { name: "PuanAI", description: "Resmî kaynakla doğrulanmış kart kampanyalarını mağaza, tutar, ödül ve taksit koşullarına göre karşılaştırın.", href: "/puan-ai", color: "#c8f560", status: "Doğrulanmış veri" },
+  { name: "OyunAI", description: "İngilizce kelimeleri görselleriyle eşleştiren Memo hafıza oyununu oynayın.", href: "/oyun-ai", color: "#4f46e5", status: "Kullanıma açık" },
   { name: "TesvikAI", description: "Teşvik hazırlığını resmî kaynaklar ve kontrol listeleriyle yönetin.", href: "/tesvik-ai", color: "#8b80c2", status: "Editoryal temel" },
   { name: "HibeAI", description: "Hibe programlarını takip edin.", href: "/yakinda", color: "#8b80c2", status: "Yakında" },
   { name: "FiyatAI", description: "Hammadde tekliflerini ve fiyat serilerini doğru karşılaştırmayı öğrenin.", href: "/fiyat-ai", color: "#d97835", status: "Entegrasyon gelecek" },
@@ -35,7 +36,7 @@ export default function AraclarPage() {
         <div className="grid max-w-sm grid-cols-2 border-t hairline pt-5 text-sm">
           <div>
             <p className="font-display text-4xl">{String(tools.length).padStart(2, "0")}</p>
-            <p className="mt-2 text-xs text-muted">Planlanan araç</p>
+            <p className="mt-2 text-xs text-muted">Toplam araç</p>
           </div>
           <div>
             <p className="font-display text-4xl">07</p>

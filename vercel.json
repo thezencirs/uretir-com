@@ -20,14 +20,6 @@
     {
       "path": "/api/cron/puanai-refresh/20",
       "schedule": "17 20 * * *"
-    },
-    {
-      "path": "/api/cron/indirim-ai",
-      "schedule": "47 */6 * * *"
-    },
-    {
-      "path": "/api/cron/araba-ai",
-      "schedule": "23 */4 * * *"
     }
   ],
   "buildCommand": "pnpm run vercel-build"

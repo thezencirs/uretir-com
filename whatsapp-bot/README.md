@@ -1,6 +1,6 @@
 # Üretir WhatsApp Kanal Motoru
 
-Bu bot tek bir WhatsApp Web oturumu ile **HaberAI**, **FinansAI** ve **PuanAI** kanallarını yönetir. İçeriklerin tamamı `uretir.com` API uçlarından alınır; bot içerik üretmez, yalnızca doğru kanalı doğrular ve gönderimi yapar.
+Bu bot tek bir WhatsApp Web oturumu ile **HaberAI**, **FinansAI** ve **PuanAI** kanallarını yönetir; **İndirimAI** ve **ArabaAI** ise kanal yetkisi verildiğinde aynı motorda otomatik olarak açılır. İçeriklerin tamamı `uretir.com` API uçlarından alınır; bot içerik üretmez, yalnızca doğru kanalı doğrular ve gönderimi yapar.
 
 ## Kanallar
 
@@ -25,3 +25,12 @@ Bot 30 dakikada bir kontrol yapar. HaberAI yeni şehir haberi varsa gönderir. F
 `data/auth` ve `data/channel-state.json` oturum/teslim durumudur; Git'e eklenmez ve paylaşılmamalıdır.
 
 > WhatsApp Web tabanlı kanal gönderimi Meta WhatsApp Cloud API değildir. WhatsApp Web tarafındaki değişiklikler kanal gönderimini etkileyebilir; uretir.com veri ve doğrulama API'leri bundan bağımsız çalışmaya devam eder.
+
+## Yetkilendirmesi bekleyen kanallar
+
+İndirimAI ve ArabaAI veri motorları, cron taramaları, web sayfaları ve WhatsApp-ready API çıktıları hazırdır. Kanal gönderimi bilinçli olarak ortam değişkenlerine bağlanmıştır:
+
+- `INDIRIMAI_CHANNEL_INVITE_CODE` ve `INDIRIMAI_CHANNEL_URL`
+- `ARABAAI_CHANNEL_INVITE_CODE` ve `ARABAAI_CHANNEL_URL`
+
+Bu değerler boşken bot iki kanalı hedef listesine eklemez. Yetkilendirme tamamlanınca kod değişikliği gerekmeden yalnızca değerlerin tanımlanması ve botun yeniden başlatılması yeterlidir.

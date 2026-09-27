@@ -230,13 +230,16 @@ async function publishQueue(target, channel, state) {
   const groupOf = (item) => item.bank || item.brand || item.source || "";
   const selected = unseen.find((item) => groupOf(item) !== own.lastGroup && item.category !== own.lastCategory) || unseen[0];
   const messageId = await sendMessage(channel, selected.body);
+  const day = istanbulDay();
   state[target.key] = {
     ...own,
-    sentFingerprints: [...sentFingerprints, selected.fingerprint].slice(-200),
+    sentFingerprints: [...sentFingerprints, selected.fingerprint].slice(-300),
     lastGroup: groupOf(selected),
     lastCategory: selected.category,
     lastSentAt: new Date().toISOString(),
     messageId,
+    dailyDay: day,
+    dailyCount: own.dailyDay === day ? (own.dailyCount || 0) + 1 : 1,
   };
   await writeState(state);
   return { sent:true, status:"kampanya gönderildi", messageId };

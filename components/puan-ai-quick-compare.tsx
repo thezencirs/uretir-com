@@ -8,7 +8,7 @@ export function PuanAIQuickCompare() {
   const [result,setResult]=useState<{results:{card:string;campaigns:CampaignMatch[]}[];coverage:string}|null>(null);
   async function submit(e:FormEvent<HTMLFormElement>){e.preventDefault();setBusy(true);setError("");setResult(null);const values=new FormData(e.currentTarget);const query=new URLSearchParams();values.forEach((v,k)=>{if(String(v).trim())query.set(k,String(v));});try{const r=await fetch("/api/puan-ai/compare?"+query,{cache:"no-store"});const d=await r.json();if(!r.ok)throw Error(d.error);setResult(d);}catch(e){setError((e as Error).message);}finally{setBusy(false);}}
   return <section className="section-wrap pa-quick" aria-label="Kartlarını karşılaştır">
-    <h1>Kartlarınla ne kazanabilirsin?</h1><p>Kart adlarını yaz, alışveriş kategorini seç. Tutarı eklersen hesaplanabilen ödülleri görürsün. Kart numarası ve hesap bilgisi gerekmez.</p>
+    <h2>Kartlarınla ne kazanabilirsin?</h2><p>Kart adlarını yaz, alışveriş kategorini seç. Tutarı eklersen hesaplanabilen ödülleri görürsün. Kart numarası ve hesap bilgisi gerekmez.</p>
     <form className="pa-filter-grid" onSubmit={submit}>
       <label><span>Kart adların · virgülle ayır</span><input required name="cards" maxLength={200} placeholder="Bankkart, Worldcard, Bonus" autoComplete="off"/></label>
       <label><span>Alışveriş kategorisi</span><select name="category">{["Akaryakıt","Market","Eğitim","Elektronik","Giyim","Seyahat","Sağlık","Restoran","Sigorta"].map(c=><option key={c}>{c}</option>)}</select></label>

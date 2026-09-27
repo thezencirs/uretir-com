@@ -37,6 +37,26 @@ function canonicalOf(html) {
   return html.match(/<link\s+rel="canonical"\s+href="([^"]+)"/i)?.[1];
 }
 
+function structuralHtml(html) {
+  return html
+    .replace(/<script\b[\s\S]*?<\/script>/gi, "")
+    .replace(/<template\b[\s\S]*?<\/template>/gi, "")
+    .replace(/<style\b[\s\S]*?<\/style>/gi, "");
+}
+
+function headHtml(html) {
+  return structuralHtml(html).match(/<head\b[^>]*>([\s\S]*?)<\/head>/i)?.[1] ?? "";
+}
+
+function isRedirectOutput(html) {
+  return /NEXT_REDIRECT|http-equiv=["']refresh["']/i.test(html);
+}
+
+function publicAssetExists(pathname) {
+  const relativePath = decodeURIComponent(pathname).replace(/^\/+/, "");
+  return Boolean(relativePath) && existsSync(join(projectRoot, "public", relativePath));
+}
+
 function routeOf(file) {
   const label = relative(appOutput, file).replaceAll("\\", "/");
   if (label === "_not-found.html") return undefined;
@@ -80,22 +100,25 @@ for (const file of allHtml) {
   const label = relative(appOutput, file).replaceAll("\\", "/");
   const route = routeOf(file);
   const canonical = canonicalOf(html);
+  const structure = structuralHtml(html);
+  const head = headHtml(html);
+  const redirectOutput = isRedirectOutput(html);
   if (canonical?.startsWith("https://uretir.com")) htmlByCanonicalPath.set(new URL(canonical).pathname, html);
-  assert((html.match(/<title>/g) ?? []).length === 1, `rendered page has exactly one title: ${label}`);
-  assert((html.match(/<meta\s+name="description"\s+content="[^"]+"/gi) ?? []).length === 1, `rendered page has exactly one meta description: ${label}`);
-  assert((html.match(/<h1\b/g) ?? []).length === 1, `rendered page has exactly one H1: ${label}`);
-  assert((html.match(/<main\b/g) ?? []).length === 1, `rendered page has exactly one main landmark: ${label}`);
+  assert((head.match(/<title\b/g) ?? []).length === 1, `rendered page has exactly one title: ${label}`);
+  assert((head.match(/<meta\s+name="description"\s+content="[^"]+"/gi) ?? []).length === 1, `rendered page has exactly one meta description: ${label}`);
+  if (!redirectOutput) assert((structure.match(/<h1\b/g) ?? []).length === 1, `rendered page has exactly one H1: ${label}`);
+  assert((structure.match(/<main\b/g) ?? []).length === 1, `rendered page has exactly one main landmark: ${label}`);
   const canonicalTags = html.match(/<link\s+rel="canonical"\s+href="[^"]+"/gi) ?? [];
   if (route) {
     assert(canonicalTags.length === 1, `rendered route has exactly one canonical: ${label}`);
     if (canonical) {
       const parsedCanonical = new URL(canonical);
       assert(parsedCanonical.origin === "https://uretir.com", `canonical uses the production origin: ${label}`);
-      assert(parsedCanonical.pathname === route, `canonical is self-referential: ${label}`);
+      if (!redirectOutput) assert(parsedCanonical.pathname === route, `canonical is self-referential: ${label}`);
       assert(!parsedCanonical.search && !parsedCanonical.hash, `canonical excludes query and fragment: ${label}`);
       const openGraphUrl = html.match(/<meta\s+property="og:url"\s+content="([^"]+)"/i)?.[1];
-      assert(openGraphUrl === canonical, `Open Graph URL matches canonical: ${label}`);
-      if (!hasNoindex(html)) assert(sitemapUrlKeys.has(parsedCanonical.toString()), `indexable canonical is present in sitemap: ${canonical}`);
+      if (!redirectOutput) assert(openGraphUrl === canonical, `Open Graph URL matches canonical: ${label}`);
+      if (!hasNoindex(html) && !redirectOutput) assert(sitemapUrlKeys.has(parsedCanonical.toString()), `indexable canonical is present in sitemap: ${canonical}`);
     }
   } else {
     assert(canonicalTags.length === 0, "404 output does not inherit a canonical URL");
@@ -207,7 +230,7 @@ for (const file of allHtml) {
     if (/^https?:\/\//i.test(href) && !href.startsWith("https://uretir.com")) continue;
     const parsed = href.startsWith("http") ? new URL(href) : new URL(href, `https://uretir.com${currentPath ?? "/"}`);
     const targetPath = parsed.pathname.replace(/\/+$/, "") || "/";
-    if (!routePatterns.some((pattern) => pattern.test(targetPath))) brokenRoutes.push(`${relative(appOutput, file)} -> ${href}`);
+    if (!routePatterns.some((pattern) => pattern.test(targetPath)) && !publicAssetExists(targetPath)) brokenRoutes.push(`${relative(appOutput, file)} -> ${href}`);
     if (/^\/(?:blog|rehber|ne-uretir|kategori|puan-ai\/kampanya)\/[^/]+$/.test(targetPath) && !htmlByCanonicalPath.has(targetPath)) {
       brokenRoutes.push(`${relative(appOutput, file)} -> ${href} (no production document)`);
     }

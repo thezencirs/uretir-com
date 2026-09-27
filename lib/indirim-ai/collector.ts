@@ -28,7 +28,7 @@ export function parseProductPage(html:string,url:string,source:CommerceSource){
   for(const node of productNodes(html)){
     const offer=offerFrom(node); if(!offer?.price)continue;
     const name=text(node.name); if(name.length<3)continue;
-    const brand=brandName(node.brand),sku=text(node.sku),gtin=text(node.gtin13??node.gtin14??node.gtin12??node.gtin);
+    const brand=brandName(node.brand),gtin=text(node.gtin13??node.gtin14??node.gtin12??node.gtin);
     const key=gtin?"gtin:"+gtin.replace(/\D/g,""):"name:"+hash(normalizeName((brand?brand+" ":"")+name)).slice(0,32);
     const availability:"IN_STOCK"|"OUT_OF_STOCK"|"UNKNOWN"=/outofstock|soldout/i.test(offer.availability)?"OUT_OF_STOCK":/instock|limitedavailability/i.test(offer.availability)?"IN_STOCK":"UNKNOWN";
     return {productKey:key,productName:name,amount:offer.price,currency:/TRY|TRL/i.test(offer.currency)?"TRY":offer.currency||"TRY",availability,sourceUrl:url,sourceName:source.name,trustScore:source.trustScore};

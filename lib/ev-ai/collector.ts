@@ -2,23 +2,23 @@ import {createHash} from "node:crypto";
 import {getPrisma} from "@/lib/puan-ai/db";
 import {discoverPublicUrls,fetchPublicText,jsonLdObjects,parseMoney,stripHtml} from "@/lib/public-source-crawler";
 import {enabledPropertySources,type PropertySource} from "./sources";
-const AGENT="Uretir-EvAI/1.0 (+https://www.uretir.com/ev-ai)",hash=(v:string)=>createHash("sha256").update(v).digest("hex"),clean=(v:string)=>v.replace(/\\s+/g," ").trim();
+const AGENT="Uretir-EvAI/1.0 (+https://www.uretir.com/ev-ai)",hash=(v:string)=>createHash("sha256").update(v).digest("hex"),clean=(v:string)=>v.replace(/\s+/g," ").trim();
 function reg(h:string){const p=h.toLowerCase().split(".").filter(Boolean),l2=p.slice(-2).join(".");return ["com.tr","net.tr","org.tr","gov.tr"].includes(l2)?p.slice(-3).join("."):l2;}
-function links(html:string,base:string,patterns:RegExp[]){const out:string[]=[];for(const m of html.matchAll(/<a\\b[^>]*href=["']([^"'#]+)["']/gi)){try{const u=new URL(m[1],base);u.hash="";if(u.protocol!=="https:"||reg(new URL(base).hostname)!==reg(u.hostname))continue;if(patterns.some(p=>p.test(u.pathname+u.search)))out.push(u.toString());}catch{}}return [...new Set(out)];}
+function links(html:string,base:string,patterns:RegExp[]){const out:string[]=[];for(const m of html.matchAll(/<a\b[^>]*href=["']([^"'#]+)["']/gi)){try{const u=new URL(m[1],base);u.hash="";if(u.protocol!=="https:"||reg(new URL(base).hostname)!==reg(u.hostname))continue;if(patterns.some(p=>p.test(u.pathname+u.search)))out.push(u.toString());}catch{}}return [...new Set(out)];}
 const txt=(v:unknown)=>typeof v==="string"?clean(v):"",obj=(v:unknown)=>v&&typeof v==="object"&&!Array.isArray(v)?v as Record<string,unknown>:null;
 function ld(html:string){return jsonLdObjects(html).find(n=>/Apartment|House|Residence|SingleFamilyResidence|Accommodation|Product|RealEstateListing|Offer/i.test((Array.isArray(n["@type"])?n["@type"]:[n["@type"]]).join("|")))??null;}
 function typeOf(t:string,u:string,s:PropertySource){const x=(t+" "+u).toLocaleLowerCase("tr-TR");if(s.kind!=="MARKETPLACE"||/icra|ihale|mahkeme|hazine|milli emlak/.test(x))return "AUCTION";if(/kiralık|kiralik|rent/.test(x))return "RENT";if(/satılık|satilik|sale/.test(x))return "SALE";return "OTHER";}
-function propertyType(t:string){const x=t.toLocaleLowerCase("tr-TR");if(/villa/.test(x))return "VILLA";if(/müstakil|mustakil|\\bev\\b/.test(x))return "HOUSE";if(/residence|rezidans/.test(x))return "RESIDENCE";if(/arsa/.test(x))return "LAND";if(/tarla|bahçe|bahce/.test(x))return "FIELD";if(/iş yeri|isyeri|dükkan|dukkan|ofis/.test(x))return "COMMERCIAL";if(/daire|apartman|konut|mesken/.test(x))return "APARTMENT";return "OTHER";}
-function meta(html:string,key:string){return html.match(new RegExp("<meta[^>]+(?:property|name)=[\\\"']"+key+"[\\\"'][^>]+content=[\\\"']([^\\\"']+)","i"))?.[1]?.trim()??"";}
+function propertyType(t:string){const x=t.toLocaleLowerCase("tr-TR");if(/villa/.test(x))return "VILLA";if(/müstakil|mustakil|\bev\b/.test(x))return "HOUSE";if(/residence|rezidans/.test(x))return "RESIDENCE";if(/arsa/.test(x))return "LAND";if(/tarla|bahçe|bahce/.test(x))return "FIELD";if(/iş yeri|isyeri|dükkan|dukkan|ofis/.test(x))return "COMMERCIAL";if(/daire|apartman|konut|mesken/.test(x))return "APARTMENT";return "OTHER";}
+function meta(html:string,key:string){return html.match(new RegExp("<meta[^>]+(?:property|name)=[\\"']"+key+"[\\"'][^>]+content=[\\"']([^\\"']+)","i"))?.[1]?.trim()??"";}
 function dval(v:unknown){if(typeof v!=="string")return null;const d=new Date(v);return Number.isFinite(d.getTime())?d:null;}
 export function parsePropertyPage(html:string,url:string,source:PropertySource){
  const n=ld(html),offer=obj(n?.offers),address=obj(n?.address),floor=obj(n?.floorSize),page=clean(stripHtml(html)).slice(0,12000);
- const title=txt(n?.name)||meta(html,"og:title")||clean(stripHtml(html.match(/<title[^>]*>([\\s\\S]*?)<\\/title>/i)?.[1]??""));if(title.length<4)return null;
- const raw=parseMoney(offer?.price??offer?.lowPrice??meta(html,"product:price:amount"))??parseMoney(page.match(/((?:\\d{1,3}\\.)+\\d{3})(?:,\\d{1,2})?\\s*(?:₺|TL)/i)?.[1]??null);
- const rooms=txt(n?.numberOfRooms)||page.match(/\\b(\\d+\\+\\d+)\\b/)?.[1]??null,grossM2=parseMoney(floor?.value)??parseMoney(page.match(/\\b(\\d{2,4})\\s*m(?:²|2)\\b/i)?.[1]??null);
+ const title=txt(n?.name)||meta(html,"og:title")||clean(stripHtml(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]??""));if(title.length<4)return null;
+ const raw=parseMoney(offer?.price??offer?.lowPrice??meta(html,"product:price:amount"))??parseMoney(page.match(/((?:\d{1,3}\.)+\d{3})(?:,\d{1,2})?\s*(?:₺|TL)/i)?.[1]??null);
+ const rooms=txt(n?.numberOfRooms)||page.match(/\b(\d+\+\d+)\b/)?.[1]??null,grossM2=parseMoney(floor?.value)??parseMoney(page.match(/\b(\d{2,4})\s*m(?:²|2)\b/i)?.[1]??null);
  const listingType=typeOf(title+" "+page.slice(0,1200),url,source),pType=propertyType(title+" "+page.slice(0,1200)),city=txt(address?.addressRegion)||null,district=txt(address?.addressLocality)||null,neighborhood=txt(address?.streetAddress)||null;
  const image=typeof n?.image==="string"?n.image:Array.isArray(n?.image)&&typeof n.image[0]==="string"?n.image[0]:meta(html,"og:image")||null,publishedAt=dval(n?.datePosted??n?.datePublished??meta(html,"article:published_time"));
- const externalId=url.match(/(?:-|\\/)(\\d{6,})(?:\\/|$|\\?)/)?.[1]??null,listingKey=source.id+":"+(externalId??hash(url).slice(0,24)),description=txt(n?.description)||meta(html,"og:description")||page.slice(0,1000);
+ const externalId=url.match(/(?:-|\/)(\d{6,})(?:\/|$|\?)/)?.[1]??null,listingKey=source.id+":"+(externalId??hash(url).slice(0,24)),description=txt(n?.description)||meta(html,"og:description")||page.slice(0,1000);
  const isPublicAuction=source.kind!=="MARKETPLACE"||listingType==="AUCTION",price=raw&&raw>=1000?raw:null,pricePerM2=price&&grossM2&&grossM2>0?price/grossM2:null,fingerprint=hash(JSON.stringify([listingKey,title,price,grossM2,rooms,city,district,description.slice(0,300)]));
  return {listingKey,sourceId:source.id,sourceName:source.name,sourceKind:source.kind,externalId,listingType,propertyType:pType,title,description,city,district,neighborhood,rooms,grossM2,netM2:null,price,currency:"TRY",pricePerM2,isPublicAuction,publishedAt,sourceUrl:url,imageUrl:image,trustScore:source.trustScore,fingerprint};
 }

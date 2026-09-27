@@ -548,3 +548,45 @@ model SiteContent {
 
   @@map("site_content")
 }
+
+
+model VehiclePriceObservation {
+  id            String   @id @default(uuid()) @db.Uuid
+  brand         String
+  model         String
+  trim          String?
+  modelYear     Int?
+  fuel          String?
+  transmission  String?
+  listPrice     Decimal  @db.Decimal(14, 2)
+  campaignPrice Decimal? @db.Decimal(14, 2)
+  currency      String   @default("TRY")
+  sourceUrl     String
+  sourceName    String
+  fetchedAt     DateTime @db.Timestamptz(3)
+  fingerprint   String
+  createdAt     DateTime @default(now())
+
+  @@index([brand, model, fetchedAt(sort: Desc)])
+  @@index([fetchedAt(sort: Desc)])
+  @@map("vehicle_price_observations")
+}
+
+model VehicleCampaignObservation {
+  id         String    @id @default(uuid()) @db.Uuid
+  brand      String
+  title      String
+  summary    String    @db.Text
+  validFrom  DateTime? @db.Timestamptz(3)
+  validUntil DateTime? @db.Timestamptz(3)
+  sourceUrl  String
+  sourceName String
+  fetchedAt  DateTime  @db.Timestamptz(3)
+  fingerprint String
+  active     Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+
+  @@index([brand, active, validUntil])
+  @@index([fetchedAt(sort: Desc)])
+  @@map("vehicle_campaign_observations")
+}

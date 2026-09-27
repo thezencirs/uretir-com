@@ -38,6 +38,22 @@ const targets = [
     mode: "queue",
     minIntervalMs: 60 * 60_000,
   },
+  ...(process.env.INDIRIMAI_CHANNEL_INVITE_CODE ? [{
+    key: "indirimai",
+    name: "İndirimAI",
+    inviteCode: process.env.INDIRIMAI_CHANNEL_INVITE_CODE,
+    endpoint: "/api/indirim-ai/whatsapp",
+    mode: "snapshot",
+    minIntervalMs: 60 * 60_000,
+  }] : []),
+  ...(process.env.ARABAAI_CHANNEL_INVITE_CODE ? [{
+    key: "arabaai",
+    name: "ArabaAI",
+    inviteCode: process.env.ARABAAI_CHANNEL_INVITE_CODE,
+    endpoint: "/api/araba-ai/whatsapp",
+    mode: "queue",
+    minIntervalMs: 60 * 60_000,
+  }] : []),
 ];
 
 let busy = false;
@@ -72,7 +88,7 @@ client.on("authenticated", () => {
 });
 client.on("auth_failure", (message) => console.error("WhatsApp oturum hatası:", message));
 client.on("ready", async () => {
-  connectionStatus="Bağlandı. HaberAI, FinansAI ve PuanAI kanalları kontrol ediliyor.";
+  connectionStatus="Bağlandı. Yetkilendirilmiş Üretir AI kanalları kontrol ediliyor.";
   console.log(`Hazır. ${targets.map((target) => target.name).join(", ")} için ${pollMs / 60000} dakikada bir kontrol ediliyor.`);
   await poll();
   setInterval(poll, pollMs);
@@ -197,12 +213,13 @@ async function publishQueue(target, channel, state) {
   const unseen = items.filter((item) => item?.fingerprint && item?.body && !seen.has(item.fingerprint));
   if (!unseen.length) return { sent:false, status:"yeni kampanya yok" };
 
-  const selected = unseen.find((item) => item.bank !== own.lastBank && item.category !== own.lastCategory) || unseen[0];
+  const groupOf = (item) => item.bank || item.brand || item.source || "";
+  const selected = unseen.find((item) => groupOf(item) !== own.lastGroup && item.category !== own.lastCategory) || unseen[0];
   const messageId = await sendMessage(channel, selected.body);
   state[target.key] = {
     ...own,
     sentFingerprints: [...sentFingerprints, selected.fingerprint].slice(-200),
-    lastBank: selected.bank,
+    lastGroup: groupOf(selected),
     lastCategory: selected.category,
     lastSentAt: new Date().toISOString(),
     messageId,

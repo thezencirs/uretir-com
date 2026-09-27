@@ -1,0 +1,69 @@
+name: Production smoke checks
+
+on:
+  workflow_run:
+    workflows: ["Repository quality"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-smoke
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Wait for Vercel and verify public routes
+        env:
+          SITE_URL: https://www.uretir.com
+        run: |
+          set -euo pipefail
+          routes=(
+            "/haber-ai"
+            "/finans-ai"
+            "/puan-ai"
+            "/indirim-ai"
+            "/araba-ai"
+            "/ev-ai"
+            "/api/finans-ai"
+            "/api/indirim-ai"
+            "/api/araba-ai"
+            "/api/ev-ai"
+          )
+
+          for attempt in $(seq 1 20); do
+            failed=0
+            echo "Smoke attempt $attempt/20"
+            for route in "${routes[@]}"; do
+              code=$(curl -L -sS -o /tmp/smoke-body --max-time 25 -w "%{http_code}" "$SITE_URL$route" || true)
+              echo "$route -> $code"
+              if [[ "$code" -lt 200 || "$code" -ge 400 ]]; then
+                failed=1
+              fi
+            done
+            if [[ "$failed" -eq 0 ]]; then
+              break
+            fi
+            if [[ "$attempt" -eq 20 ]]; then
+              echo "Production routes did not become healthy in time."
+              exit 1
+            fi
+            sleep 15
+          done
+
+      - name: Verify cron routes remain protected
+        env:
+          SITE_URL: https://www.uretir.com
+        run: |
+          set -euo pipefail
+          for route in /api/cron/indirim-ai /api/cron/araba-ai /api/cron/ev-ai; do
+            code=$(curl -sS -o /dev/null --max-time 20 -w "%{http_code}" "$SITE_URL$route" || true)
+            echo "$route -> $code"
+            test "$code" = "401"
+          done

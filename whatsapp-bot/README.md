@@ -1,6 +1,6 @@
 # Üretir WhatsApp Kanal Motoru
 
-Bu bot tek bir WhatsApp Web oturumu ile **HaberAI**, **FinansAI** ve **PuanAI** kanallarını yönetir; **İndirimAI** ve **ArabaAI** ise kanal yetkisi verildiğinde aynı motorda otomatik olarak açılır. İçeriklerin tamamı `uretir.com` API uçlarından alınır; bot içerik üretmez, yalnızca doğru kanalı doğrular ve gönderimi yapar.
+Bu bot tek bir WhatsApp Web oturumu ile **HaberAI**, **FinansAI** ve **PuanAI** kanallarını yönetir; **İndirimAI**, **ArabaAI** ve **EvAI** ise kanal yetkisi verildiğinde aynı motorda otomatik olarak açılır. **GüzelAI bu yayın motoruna dahil değildir.** İçeriklerin tamamı `uretir.com` API uçlarından alınır; bot içerik üretmez, yalnızca doğru kanalı doğrular ve gönderimi yapar.
 
 ## Kanallar
 
@@ -34,3 +34,11 @@ Bot 30 dakikada bir kontrol yapar. HaberAI yeni şehir haberi varsa gönderir. F
 - `ARABAAI_CHANNEL_INVITE_CODE` ve `ARABAAI_CHANNEL_URL`
 
 Bu değerler boşken bot iki kanalı hedef listesine eklemez. Yetkilendirme tamamlanınca kod değişikliği gerekmeden yalnızca değerlerin tanımlanması ve botun yeniden başlatılması yeterlidir.
+
+### EvAI
+- Veri: `https://www.uretir.com/api/ev-ai`
+- Kanal feed: `https://www.uretir.com/api/ev-ai/whatsapp`
+- Tarama: `https://www.uretir.com/api/cron/ev-ai`
+- Yetki: `EVAI_CHANNEL_URL`, `EVAI_CHANNEL_INVITE_CODE`
+- Ticari pazar yeri adaptörleri: `EVAI_ENABLE_PARTNER_SOURCES=1` yalnızca ilgili yeniden kullanım/API izni doğrulandıktan sonra açılır.
+- Yayın hedefi: günlük en fazla 10 EvAI gönderisi.

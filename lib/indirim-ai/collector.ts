@@ -1,0 +1,74 @@
+import {createHash} from "node:crypto";
+import {getPrisma} from "@/lib/puan-ai/db";
+import {discoverPublicUrls,fetchPublicText,jsonLdObjects,parseMoney} from "@/lib/public-source-crawler";
+import {commerceSources,type CommerceSource} from "./sources";
+
+const AGENT="Uretir-IndirimAI/1.0 (+https://www.uretir.com/indirim-ai)";
+const dayMs=86_400_000;
+
+function text(v:unknown){return typeof v==="string"?v.trim():"";}
+function normalizeName(v:string){return v.toLocaleLowerCase("tr-TR").normalize("NFKD").replace(/[^a-z0-9çğıöşü]+/gi," ").replace(/\s+/g," ").trim();}
+function hash(v:string){return createHash("sha256").update(v).digest("hex");}
+function brandName(v:unknown){if(typeof v==="string")return v;if(v&&typeof v==="object")return text((v as Record<string,unknown>).name);return "";}
+
+function productNodes(html:string){
+  return jsonLdObjects(html).filter(o=>{
+    const type=o["@type"]; return type==="Product"||(Array.isArray(type)&&type.includes("Product"));
+  });
+}
+
+function offerFrom(node:Record<string,unknown>){
+  const raw=node.offers;
+  const offers=(Array.isArray(raw)?raw:[raw]).filter((v):v is Record<string,unknown>=>Boolean(v&&typeof v==="object"));
+  const candidates=offers.map(o=>({price:parseMoney(o.price??o.lowPrice),currency:text(o.priceCurrency)||"TRY",availability:text(o.availability)})).filter(o=>o.price!==null);
+  return candidates.sort((a,b)=>(a.price??Infinity)-(b.price??Infinity))[0]??null;
+}
+
+export function parseProductPage(html:string,url:string,source:CommerceSource){
+  for(const node of productNodes(html)){
+    const offer=offerFrom(node); if(!offer?.price)continue;
+    const name=text(node.name); if(name.length<3)continue;
+    const brand=brandName(node.brand),sku=text(node.sku),gtin=text(node.gtin13??node.gtin14??node.gtin12??node.gtin);
+    const key=gtin?"gtin:"+gtin.replace(/\D/g,""):"name:"+hash(normalizeName((brand?brand+" ":"")+name)).slice(0,32);
+    const availability=/outofstock|soldout/i.test(offer.availability)?"OUT_OF_STOCK":/instock|limitedavailability/i.test(offer.availability)?"IN_STOCK":"UNKNOWN";
+    return {productKey:key,productName:name,amount:offer.price,currency:/TRY|TRL/i.test(offer.currency)?"TRY":offer.currency||"TRY",availability,sourceUrl:url,sourceName:source.name,trustScore:source.trustScore};
+  }
+  const title=html.match(/<meta[^>]+(?:property|name)=["']og:title["'][^>]+content=["']([^"']+)/i)?.[1]?.trim();
+  const amount=parseMoney(html.match(/<meta[^>]+(?:property|itemprop)=["'](?:product:price:amount|price)["'][^>]+content=["']([^"']+)/i)?.[1]);
+  if(title&&amount){
+    return {productKey:"name:"+hash(normalizeName(title)).slice(0,32),productName:title,amount,currency:"TRY",availability:"UNKNOWN" as const,sourceUrl:url,sourceName:source.name,trustScore:source.trustScore};
+  }
+  return null;
+}
+
+async function collectSource(source:CommerceSource,pagesPerSource:number){
+  const prisma=getPrisma();
+  const urls=await discoverPublicUrls(source.origin,source.productPatterns,{agent:AGENT,maxUrls:40,sitemapCandidates:source.sitemapCandidates});
+  if(!urls.length)return {source:source.id,discovered:0,stored:0,skipped:0};
+  const dayIndex=Math.floor(Date.now()/dayMs),start=(dayIndex*pagesPerSource)%urls.length;
+  const chosen=Array.from({length:Math.min(pagesPerSource,urls.length)},(_,i)=>urls[(start+i)%urls.length]);
+  let stored=0,skipped=0;
+  for(const url of chosen){
+    try{
+      const page=await fetchPublicText(url,{agent:AGENT});
+      const item=parseProductPage(page.text,page.url,source); if(!item){skipped++;continue;}
+      const latest=await prisma.priceObservation.findFirst({where:{productKey:item.productKey,sourceUrl:item.sourceUrl},orderBy:{fetchedAt:"desc"}});
+      if(latest&&latest.amount.toNumber()===item.amount&&Date.now()-latest.fetchedAt.getTime()<12*3600_000){skipped++;continue;}
+      const fingerprint=hash(JSON.stringify([item.productKey,item.amount,item.currency,item.sourceUrl]));
+      await prisma.priceObservation.create({data:{
+        productKey:item.productKey,productName:item.productName,merchantName:item.sourceName,amount:item.amount,currency:item.currency,
+        shippingAmount:null,availability:item.availability,sourceUrl:item.sourceUrl,sourceName:item.sourceName,sourceKind:"TRUSTED_MARKETPLACE",
+        trustScore:item.trustScore,fetchedAt:new Date(),lastVerifiedAt:new Date(),fingerprint
+      }});
+      stored++;
+    }catch{skipped++;}
+  }
+  return {source:source.id,discovered:urls.length,stored,skipped};
+}
+
+export async function collectTrustedCommercePrices(sourceBatch=4,pagesPerSource=4){
+  const slot=Math.floor(Date.now()/(6*3600_000)),offset=(slot*sourceBatch)%commerceSources.length;
+  const selected=Array.from({length:Math.min(sourceBatch,commerceSources.length)},(_,i)=>commerceSources[(offset+i)%commerceSources.length]);
+  const results=await Promise.all(selected.map(s=>collectSource(s,pagesPerSource).catch(()=>({source:s.id,discovered:0,stored:0,skipped:pagesPerSource}))));
+  return {checkedAt:new Date().toISOString(),sources:results,stored:results.reduce((n,r)=>n+r.stored,0)};
+}

@@ -55,9 +55,15 @@ export async function fetchPublicText(url:string|URL,opts:{agent:string;maxBytes
   return {text,url:final.toString(),contentType:r.headers.get("content-type")??""};
 }
 
+function registrableHost(host:string){
+  const parts=host.toLowerCase().split(".").filter(Boolean);
+  if(parts.length<=2)return parts.join(".");
+  const secondLevel=new Set(["com.tr","net.tr","org.tr","gen.tr","web.tr","biz.tr"]);
+  const last2=parts.slice(-2).join(".");
+  return secondLevel.has(last2)?parts.slice(-3).join("."):last2;
+}
 function sameSite(a:URL,b:URL){
-  const tail=(h:string)=>h.split(".").slice(-2).join(".");
-  return tail(a.hostname)===tail(b.hostname);
+  return registrableHost(a.hostname)===registrableHost(b.hostname);
 }
 
 function locs(xml:string){

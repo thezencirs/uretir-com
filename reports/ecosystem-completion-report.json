@@ -49,7 +49,7 @@
   ],
   "counts": {
     "personas": 13,
-    "aiProducts": 20,
+    "aiProducts": 22,
     "aiCapabilities": 25,
     "officialSources": 50,
     "incentiveDomains": 13,
@@ -849,6 +849,107 @@
         "verified merchant sources",
         "price history policy",
         "campaign freshness SLA"
+      ]
+    },
+    {
+      "id": "araba-ai",
+      "name": "ArabaAI",
+      "status": "available_foundation",
+      "route": "/araba-ai",
+      "purpose": "Sıfır araç fiyatlarını ve marka kampanyalarını resmî kaynaklardan tarihçeli biçimde izlemek.",
+      "personas": [
+        "consumer",
+        "entrepreneur",
+        "sme_owner"
+      ],
+      "inputs": [
+        "brand",
+        "model",
+        "official price lists",
+        "official campaigns"
+      ],
+      "outputs": [
+        "current vehicle price",
+        "price change",
+        "dated campaign",
+        "official source"
+      ],
+      "officialSourceIds": [],
+      "knowledgeEntities": [
+        "product",
+        "company",
+        "article"
+      ],
+      "searchScopes": [
+        "vehicle prices",
+        "automotive campaigns"
+      ],
+      "relatedContent": [
+        "vehicle price history",
+        "campaign comparison"
+      ],
+      "roadmap": [
+        "Kaynak sözleşmesini ve değerlendirme veri setini onayla.",
+        "Salt okunur sağlayıcı adaptörünü önizlemede doğrula.",
+        "İnsan incelemesi, tazelik ve geri alma kapıları tamamlanınca sınırlı erişim aç."
+      ],
+      "prerequisites": [
+        "official brand source registry",
+        "price history",
+        "campaign expiry checks"
+      ]
+    },
+    {
+      "id": "ev-ai",
+      "name": "EvAI",
+      "status": "available_foundation",
+      "route": "/ev-ai",
+      "purpose": "Emlak ilanlarını fiyat, metrekare, bölgesel bağlam, güncellik ve kaynak güveniyle karşılaştırmak; kamu taşınmazlarını ayrı izlemek.",
+      "personas": [
+        "consumer",
+        "investor",
+        "entrepreneur"
+      ],
+      "inputs": [
+        "listing",
+        "price",
+        "area",
+        "location",
+        "source",
+        "listing history"
+      ],
+      "outputs": [
+        "source-backed listing shortlist",
+        "local price context",
+        "price-drop signal",
+        "public-auction warning"
+      ],
+      "officialSourceIds": [],
+      "knowledgeEntities": [
+        "product",
+        "city",
+        "company",
+        "article"
+      ],
+      "searchScopes": [
+        "property listings",
+        "public property notices",
+        "housing price context"
+      ],
+      "relatedContent": [
+        "housing guides",
+        "public auction literacy",
+        "price comparison"
+      ],
+      "roadmap": [
+        "Kaynak sözleşmesini ve değerlendirme veri setini onayla.",
+        "Salt okunur sağlayıcı adaptörünü önizlemede doğrula.",
+        "İnsan incelemesi, tazelik ve geri alma kapıları tamamlanınca sınırlı erişim aç."
+      ],
+      "prerequisites": [
+        "marketplace reuse permissions",
+        "public notice source registry",
+        "listing freshness policy"
       ]
     },
     {

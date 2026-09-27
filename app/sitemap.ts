@@ -31,6 +31,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: absoluteUrl("/puan-ai"), lastModified: now, changeFrequency: "monthly", priority: .6 },
     { url: absoluteUrl("/indirim-ai"), lastModified: new Date("2026-09-27T00:00:00.000Z"), changeFrequency: "daily", priority: .75 },
     { url: absoluteUrl("/araba-ai"), lastModified: new Date("2026-09-27T00:00:00.000Z"), changeFrequency: "daily", priority: .75 },
+    { url: absoluteUrl("/ev-ai"), lastModified: new Date("2026-09-27T00:00:00.000Z"), changeFrequency: "daily", priority: .75 },
     { url: absoluteUrl("/oyun-ai"), lastModified: new Date("2026-09-15T00:00:00.000Z"), changeFrequency: "monthly", priority: .7 },
     { url: absoluteUrl("/hakkimizda"), lastModified: now, changeFrequency: "monthly", priority: .5 },
     { url: absoluteUrl("/iletisim"), lastModified: now, changeFrequency: "monthly", priority: .5 },

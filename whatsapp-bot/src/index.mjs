@@ -54,6 +54,15 @@ const targets = [
     mode: "queue",
     minIntervalMs: 60 * 60_000,
   }] : []),
+  ...(process.env.EVAI_CHANNEL_INVITE_CODE ? [{
+    key: "evai",
+    name: "EvAI",
+    inviteCode: process.env.EVAI_CHANNEL_INVITE_CODE,
+    endpoint: "/api/ev-ai/whatsapp",
+    mode: "queue",
+    minIntervalMs: 75 * 60_000,
+    dailyLimit: 10,
+  }] : []),
 ];
 
 let busy = false;
@@ -113,9 +122,14 @@ async function writeState(state) {
   await fs.writeFile(statePath, JSON.stringify(state, null, 2), "utf8");
 }
 
+function istanbulDay() {
+  return new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Istanbul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+}
 function due(target, state) {
+  const own = state?.[target.key] || {};
+  if (target.dailyLimit && own.dailyDay === istanbulDay() && (own.dailyCount || 0) >= target.dailyLimit) return false;
   if (!target.minIntervalMs) return true;
-  const last = Date.parse(state?.[target.key]?.lastSentAt || "");
+  const last = Date.parse(own.lastSentAt || "");
   return !Number.isFinite(last) || Date.now() - last >= target.minIntervalMs;
 }
 

@@ -1,9 +1,10 @@
-name: IndirimAI and ArabaAI source refresh
+name: IndirimAI ArabaAI and EvAI source refresh
 
 on:
   schedule:
     - cron: "47 */6 * * *"
     - cron: "23 */4 * * *"
+    - cron: "07 */2 * * *"
   workflow_dispatch:
 
 permissions:
@@ -43,3 +44,18 @@ jobs:
           curl --fail-with-body --retry 2 --max-time 70 \
             -H "Authorization: Bearer $CRON_SECRET" \
             "$SITE_URL/api/cron/araba-ai"
+
+  evai:
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '07 */2 * * *'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Refresh property listings
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: https://www.uretir.com
+        run: |
+          test -n "$CRON_SECRET"
+          curl --fail-with-body --retry 2 --max-time 70 \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "$SITE_URL/api/cron/ev-ai"

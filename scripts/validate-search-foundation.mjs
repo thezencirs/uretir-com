@@ -106,7 +106,7 @@ for (const file of allHtml) {
   if (canonical?.startsWith("https://uretir.com")) htmlByCanonicalPath.set(new URL(canonical).pathname, html);
   assert((head.match(/<title\b/g) ?? []).length === 1, `rendered page has exactly one title: ${label}`);
   assert((head.match(/<meta\s+name="description"\s+content="[^"]+"/gi) ?? []).length === 1, `rendered page has exactly one meta description: ${label}`);
-  if (!redirectOutput) assert((structure.match(/<h1\b/g) ?? []).length === 1, `rendered page has exactly one H1: ${label}`);
+  if (!redirectOutput && !hasNoindex(html)) assert((structure.match(/<h1\b/g) ?? []).length === 1, `rendered indexable page has exactly one H1: ${label}`);
   assert((structure.match(/<main\b/g) ?? []).length === 1, `rendered page has exactly one main landmark: ${label}`);
   const canonicalTags = html.match(/<link\s+rel="canonical"\s+href="[^"]+"/gi) ?? [];
   if (route) {

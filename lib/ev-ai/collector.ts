@@ -15,7 +15,7 @@ export function parsePropertyPage(html:string,url:string,source:PropertySource){
  const n=ld(html),offer=obj(n?.offers),address=obj(n?.address),floor=obj(n?.floorSize),page=clean(stripHtml(html)).slice(0,12000);
  const title=txt(n?.name)||meta(html,"og:title")||clean(stripHtml(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]??""));if(title.length<4)return null;
  const raw=parseMoney(offer?.price??offer?.lowPrice??meta(html,"product:price:amount"))??parseMoney(page.match(/((?:\d{1,3}\.)+\d{3})(?:,\d{1,2})?\s*(?:₺|TL)/i)?.[1]??null);
- const rooms=txt(n?.numberOfRooms)||page.match(/\b(\d+\+\d+)\b/)?.[1]??null,grossM2=parseMoney(floor?.value)??parseMoney(page.match(/\b(\d{2,4})\s*m(?:²|2)\b/i)?.[1]??null);
+ const rooms=txt(n?.numberOfRooms)||page.match(/\b(\d+\+\d+)\b/)?.[1]||null,grossM2=parseMoney(floor?.value)??parseMoney(page.match(/\b(\d{2,4})\s*m(?:²|2)\b/i)?.[1]??null);
  const listingType=typeOf(title+" "+page.slice(0,1200),url,source),pType=propertyType(title+" "+page.slice(0,1200)),city=txt(address?.addressRegion)||null,district=txt(address?.addressLocality)||null,neighborhood=txt(address?.streetAddress)||null;
  const image=typeof n?.image==="string"?n.image:Array.isArray(n?.image)&&typeof n.image[0]==="string"?n.image[0]:meta(html,"og:image")||null,publishedAt=dval(n?.datePosted??n?.datePublished??meta(html,"article:published_time"));
  const externalId=url.match(/(?:-|\/)(\d{6,})(?:\/|$|\?)/)?.[1]??null,listingKey=source.id+":"+(externalId??hash(url).slice(0,24)),description=txt(n?.description)||meta(html,"og:description")||page.slice(0,1000);

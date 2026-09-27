@@ -17,7 +17,7 @@ export function parseVehiclePricePage(html:string,url:string,source:AutomotiveSo
  for(const match of html.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)){
    const row=clean(stripHtml(match[1])),prices=priceValues(row); if(!prices.length)continue;
    const firstPrice=row.search(/(?:\d{1,3}\.)+\d{3}(?:,\d{1,2})?\s*(?:₺|TL)/i);
-   let name=clean(firstPrice>0?row.slice(0,firstPrice):row); if(name.length<2||name.length>180)continue;
+   const name=clean(firstPrice>0?row.slice(0,firstPrice):row); if(name.length<2||name.length>180)continue;
    const unique=[...new Set(prices)].sort((a,b)=>b-a),listPrice=unique[0],campaignPrice=unique.length>1?unique.at(-1)!:null;
    out.push({brand:source.brand,model:name,trim:null,listPrice,campaignPrice:campaignPrice&&campaignPrice<listPrice?campaignPrice:null,sourceUrl:url,sourceName:source.brand+" Türkiye"});
  }

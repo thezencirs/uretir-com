@@ -1,12 +1,27 @@
-# Üretir HaberAI WhatsApp Kanal Botu
+# Üretir WhatsApp Kanal Motoru
 
-Bu bot, `uretir.com/api/haber-ai/whatsapp` üzerinden hazırlanmış ve henüz gönderilmemiş bülteni alır. Kanal yöneticisi hesabı WhatsApp Web QR kodunu bir kez okuttuktan sonra bot, `CHANNEL_NAME` ile eşleşen WhatsApp Kanalına gönderir ve yalnızca başarılı gönderimden sonra bülteni `sent` olarak işaretler. Site kaynakları yarım saatte bir yenilenir; yeni şehir haberi bulunduğunda bülten tekrar gönderilebilir, aynı içerik değişmediyse tekrar gönderilmez.
+Bu bot tek bir WhatsApp Web oturumu ile **HaberAI**, **FinansAI** ve **PuanAI** kanallarını yönetir. İçeriklerin tamamı `uretir.com` API uçlarından alınır; bot içerik üretmez, yalnızca doğru kanalı doğrular ve gönderimi yapar.
 
-## Kurulum
+## Kanallar
+
+- HaberAI → `https://www.uretir.com/api/haber-ai/whatsapp`
+- FinansAI → `https://www.uretir.com/api/finans-ai/whatsapp`
+- PuanAI → `https://www.uretir.com/api/puan-ai/whatsapp`
+
+HaberAI mevcut claim/ack teslim güvenliğini korur. FinansAI değişen piyasa özetini, PuanAI ise yalnızca taze ve resmî kaynakla doğrulanmış kampanyaları yayınlar. PuanAI banka ve kategori tekrarını yerel teslim durumuyla sınırlar.
+
+Her kanal gönderisinin marka katmanı `<ÜrünAI> • uretir.com` biçimindedir. Böylece WhatsApp dağıtım kanalı olur; veri, doğrulama ve detay sayfası uretir.com üzerinde kalır.
+
+## Çalıştırma
 
 1. Bu klasörde `npm install` çalıştırın.
-2. `.env.example` dosyasını `.env` olarak kopyalayın. `CRON_SECRET`, Vercel/GitHub Actions’taki aynı değer olmalıdır.
-3. `npm start` çalıştırıp QR kodu kanal yöneticisi hesabıyla okutun.
-4. Kanal adının WhatsApp’ta tam olarak `HaberAI` olduğundan emin olun; farklıysa `CHANNEL_NAME` değerini değiştirin.
+2. Kök projedeki üretim ortamıyla aynı `WHATSAPP_BOT_SECRET` veya `CRON_SECRET` değerini bot ortamına tanımlayın.
+3. `npm start` çalıştırın.
+4. İlk kurulumda `http://127.0.0.1:3217` ekranındaki QR kodu, üç kanalın da owner/admin yetkisine sahip WhatsApp hesabıyla okutun.
+5. Panelde HaberAI, FinansAI ve PuanAI hedeflerinin ayrı ayrı doğrulandığını kontrol edin.
 
-`data/auth` oturum erişimi içerir; paylaşmayın ve Git’e eklemeyin. Bot ilk gönderimi yaptıktan sonra durumu panelden doğrulayın. WhatsApp Web tabanlı kanal gönderimi, Meta’nın resmi Cloud API’si değildir; WhatsApp tarafındaki değişikliklerle çalışması etkilenebilir.
+Bot 30 dakikada bir kontrol yapar. HaberAI yeni şehir haberi varsa gönderir. FinansAI en fazla saatte bir değişen piyasa özetini paylaşır. PuanAI en fazla saatte bir, daha önce gönderilmemiş ve doğrulaması taze bir kampanya paylaşır.
+
+`data/auth` ve `data/channel-state.json` oturum/teslim durumudur; Git'e eklenmez ve paylaşılmamalıdır.
+
+> WhatsApp Web tabanlı kanal gönderimi Meta WhatsApp Cloud API değildir. WhatsApp Web tarafındaki değişiklikler kanal gönderimini etkileyebilir; uretir.com veri ve doğrulama API'leri bundan bağımsız çalışmaya devam eder.

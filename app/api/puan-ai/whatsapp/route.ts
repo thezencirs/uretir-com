@@ -154,7 +154,15 @@ export async function GET(request: NextRequest) {
 
   try {
     const now = new Date();
-    const catalog = await withReadRetry(()=>getCampaignCatalog());
+    let catalog: CampaignView[] = [];
+    let catalogReadable = true;
+
+    try {
+      catalog = await withReadRetry(()=>getCampaignCatalog(), 5);
+    } catch {
+      catalogReadable = false;
+    }
+
     let items = catalog
       .filter((campaign) =>
         campaign.published
@@ -174,19 +182,24 @@ export async function GET(request: NextRequest) {
       .slice(0, 24);
 
     if (!items.length) {
-      const submissions = await withReadRetry(()=>getPrisma().campaignSubmission.findMany({
-        where: { status: "VERIFIED", sourceUrl: { not: null }, processedAt: { not: null } },
-        orderBy: { processedAt: "desc" },
-        take: 60,
-        select: { id:true, sourceUrl:true, normalizedDraft:true, verification:true, processedAt:true },
-      }));
-      items = submissions.map(item=>submissionItem(item,now)).filter((item):item is NonNullable<ReturnType<typeof submissionItem>>=>item!==null).slice(0,24);
+      try {
+        const submissions = await withReadRetry(()=>getPrisma().campaignSubmission.findMany({
+          where: { status: "VERIFIED", sourceUrl: { not: null }, processedAt: { not: null } },
+          orderBy: { processedAt: "desc" },
+          take: 60,
+          select: { id:true, sourceUrl:true, normalizedDraft:true, verification:true, processedAt:true },
+        }), 5);
+        items = submissions.map(item=>submissionItem(item,now)).filter((item):item is NonNullable<ReturnType<typeof submissionItem>>=>item!==null).slice(0,24);
+      } catch {
+        if (!catalogReadable) throw new Error("PuanAI catalogue and verified-submission fallback are both unavailable.");
+      }
     }
 
     return NextResponse.json({
       channel_url: whatsappChannel,
       items,
       checkedAt: now.toISOString(),
+      sourceMode: catalogReadable ? "catalog" : "verified_submission_fallback",
     }, { headers: { "Cache-Control": "no-store" } });
   } catch {
     return NextResponse.json({ error: "PuanAI kanal kuyruğu hazırlanamadı." }, { status: 503 });

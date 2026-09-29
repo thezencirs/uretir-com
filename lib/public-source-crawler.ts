@@ -72,15 +72,23 @@ function locs(xml:string){
 
 export async function discoverPublicUrls(origin:string,patterns:RegExp[],opts:{agent:string;maxUrls?:number;sitemapCandidates?:string[]}){
   const root=new URL(origin),policy=await robots(root.origin,opts.agent,fetch);
-  const seeds=[...new Set([...(policy.sitemaps??[]),...(opts.sitemapCandidates??[]),new URL("/sitemap.xml",root).toString()])];
+  const normalizeSameSiteHttps=(raw:string)=>{
+    try{
+      const u=new URL(raw,root);
+      if(!sameSite(root,u))return null;
+      if(u.protocol==="http:")u.protocol="https:";
+      return u.protocol==="https:"?u.toString():null;
+    }catch{return null;}
+  };
+  const seeds=[...new Set([...(policy.sitemaps??[]),...(opts.sitemapCandidates??[]),new URL("/sitemap.xml",root).toString()].map(normalizeSameSiteHttps).filter((v):v is string=>Boolean(v)))];
   const queue=seeds.slice(0,5),seen=new Set<string>(),out:string[]=[];
   while(queue.length&&out.length<(opts.maxUrls??40)){
     const sitemap=queue.shift()!; if(seen.has(sitemap))continue; seen.add(sitemap);
     let doc; try{doc=await fetchPublicText(sitemap,{agent:opts.agent,maxBytes:2_500_000});}catch{continue;}
     const urls=locs(doc.text),looksLikeIndex=/<sitemapindex[\s>]/i.test(doc.text);
     for(const raw of urls){
-      let u; try{u=new URL(raw);}catch{continue;}
-      if(!sameSite(root,u)||u.protocol!=="https:")continue;
+      const normalized=normalizeSameSiteHttps(raw);if(!normalized)continue;
+      const u=new URL(normalized);
       if(looksLikeIndex&&queue.length<8){queue.push(u.toString());continue;}
       if(patterns.some(p=>p.test(u.pathname+u.search))){out.push(u.toString());if(out.length>=(opts.maxUrls??40))break;}
     }

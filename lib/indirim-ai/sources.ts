@@ -22,7 +22,7 @@ export const commerceSources:CommerceSource[]=[
   {id:"sok",name:"ŞOK Market",origin:"https://www.sokmarket.com.tr",trustScore:92,productPatterns:[/\/p\//i,/\/urun\//i]},
   {id:"ebebek",name:"ebebek",origin:"https://www.e-bebek.com",trustScore:92,productPatterns:[/\/p\//i,/\/urun\//i]},
   {id:"gratis",name:"Gratis",origin:"https://www.gratis.com",trustScore:92,productPatterns:[/-p-\d+/i,/\/p\//i,/\/urun\//i],seedUrls:["https://www.gratis.com/elektrikli-urunler/duzlestirici-c-511040101"]},
-  {id:"watsons",name:"Watsons Türkiye",origin:"https://www.watsons.com.tr",trustScore:92,productPatterns:[/\/p\//i,/\/urun\//i],seedUrls:["https://www.watsons.com.tr/sac-bakim/c/102"]},
+  {id:"watsons",name:"Watsons Türkiye",origin:"https://www.watsons.com.tr",trustScore:92,productPatterns:[/\/p\//i,/\/urun\//i],seedUrls:["https://www.watsons.com.tr/tum-urunler/c/50110","https://www.watsons.com.tr/sac-bakim/sampuanlar/sampuan/c/1062"]},
   {id:"mavi",name:"Mavi",origin:"https://www.mavi.com",trustScore:92,productPatterns:[/\/p\//i,/\/urun\//i],seedUrls:["https://www.mavi.com/erkek/tisort/c/2"]},
   {id:"koton",name:"Koton",origin:"https://www.koton.com",trustScore:92,productPatterns:[/\/product\/\d+/i,/-\d{6,}(?:-\d+)?\/?$/i,/\/p\//i,/\/urun\//i],seedUrls:["https://www.koton.com/kadin-elbise/"]},
   {id:"english-home",name:"English Home",origin:"https://www.englishhome.com",trustScore:92,productPatterns:[/\/p\//i,/\/urun\//i]},

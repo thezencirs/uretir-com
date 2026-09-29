@@ -189,9 +189,59 @@ async function api(endpoint){
   throw lastError||new Error("uretir.com bağlantı hatası");
 }
 async function sendMessage(channel,body){
-  const message=await client.sendMessage(channel.id,body);
-  if(!message?.id?._serialized)throw new Error("Gönderim sonucu belirsiz; otomatik tekrar yapılmayacak.");
-  return message.id._serialized;
+  const result=await client.pupPage.evaluate(async ({channelId,body})=>{
+    const collection=window.require("WAWebCollections").WAWebNewsletterCollection;
+    const chats=collection.getModelsArray();
+    const chat=chats.find(model=>{
+      const id=model?.id?._serialized||model?.id?.toString?.()||"";
+      return id===channelId;
+    });
+    if(!chat)return {ok:false,reason:"channel_not_cached"};
+
+    const recent=()=>{
+      const models=chat.msgs?.getModelsArray?.()||chat.msgs?._models||[];
+      return models.slice(-40);
+    };
+    const idOf=(msg)=>msg?.id?._serialized||msg?.id?.toString?.()||msg?.serverId||null;
+    const existing=recent().find(msg=>msg?.body===body&&msg?.self==="out");
+    if(existing){
+      return {
+        ok:true,
+        alreadyExists:true,
+        id:idOf(existing),
+        serverId:existing?.serverId||null,
+        ack:Number(existing?.ack??0),
+      };
+    }
+
+    const msg=await window.WWebJS.sendMessage(chat,body,{
+      linkPreview:false,
+      parseVCards:false,
+    });
+
+    await new Promise(resolve=>setTimeout(resolve,1500));
+    const confirmed=msg||recent().find(item=>item?.body===body&&item?.self==="out");
+    const serverId=confirmed?.serverId||null;
+    const ack=Number(confirmed?.ack??0);
+    const id=idOf(confirmed);
+    return {
+      ok:Boolean(confirmed&&(serverId||ack>=1)),
+      alreadyExists:false,
+      id,
+      serverId,
+      ack,
+      reason:confirmed?"not_server_confirmed":"message_not_created",
+    };
+  },{channelId:channel.id,body});
+
+  if(!result?.ok){
+    throw new Error(`WhatsApp sunucu onayı alınamadı (${result?.reason||"bilinmiyor"}, ack=${result?.ack??"?"}).`);
+  }
+  const messageId=result.serverId||result.id||`confirmed-${Date.now()}`;
+  if(result.alreadyExists){
+    console.log(`Kanalda aynı içerik zaten mevcut; tekrar gönderilmedi (${messageId}).`);
+  }
+  return String(messageId);
 }
 async function publishSnapshot(target,channel,state){
   if(!due(target,state))return {sent:false,status:"sıradaki yayın saati bekleniyor"};

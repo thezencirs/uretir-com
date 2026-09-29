@@ -121,26 +121,12 @@ function due(target,state){
   const last=Date.parse(own.lastSentAt||"");
   return !Number.isFinite(last)||Date.now()-last>=target.minIntervalMs;
 }
-async function resolveChannel(target){
-  let channel;
-  try{
-    channel=await client.getChannelByInviteCode(target.inviteCode);
-  }catch(error){
-    const message=String(error instanceof Error?error.message:error);
-    if(!message.includes("getRoleByIdentifier")){
-      throw error;
-    }
-    const channelId=await client.pupPage.evaluate(async inviteCode=>{
-      const response=await window
-        .require("WAWebNewsletterMetadataQueryJob")
-        .queryNewsletterMetadataByInviteCode(inviteCode);
-      const id=response?.idJid;
-      return id?._serialized||id?.toString?.()||null;
-    },target.inviteCode);
-    if(channelId)channel=await client.getChatById(channelId);
-  }
+function normalizedChannelName(value){
+  return String(value||"").trim().toLocaleLowerCase("tr-TR").replace(/\s+/g," ");
+}
 
-  if(!channel?.id?._serialized)throw new Error(`${target.name} kanal davet bağlantısı çözülemedi.`);
+function assertWritableChannel(target,channel){
+  if(!channel?.id?._serialized)throw new Error(`${target.name} kanal kimliği alınamadı.`);
   if(channel.isChannel!==true||!channel.id._serialized.endsWith("@newsletter")){
     throw new Error(`${target.name} hedefi geçerli bir WhatsApp kanalı değil.`);
   }
@@ -148,6 +134,44 @@ async function resolveChannel(target){
     throw new Error(`${target.name} kanalında bu hesapla gönderim yetkisi yok.`);
   }
   return channel;
+}
+
+async function resolveChannel(target){
+  const cached=await client.getChannels();
+  const expected=normalizedChannelName(target.name);
+  const byName=cached.filter(channel=>normalizedChannelName(channel?.name)===expected);
+  if(byName.length===1){
+    return assertWritableChannel(target,byName[0]);
+  }
+  if(byName.length>1){
+    throw new Error(`${target.name} için birden fazla aynı isimli kanal bulundu; güvenli gönderim durduruldu.`);
+  }
+
+  try{
+    const channel=await client.getChannelByInviteCode(target.inviteCode);
+    return assertWritableChannel(target,channel);
+  }catch(error){
+    const message=String(error instanceof Error?error.message:error);
+    if(!message.includes("getRoleByIdentifier"))throw error;
+    const channelId=await client.pupPage.evaluate(async inviteCode=>{
+      try{
+        const response=await window
+          .require("WAWebNewsletterMetadataQueryJob")
+          .queryNewsletterMetadataByInviteCode(inviteCode);
+        const id=response?.idJid;
+        return id?._serialized||id?.toString?.()||null;
+      }catch{
+        return null;
+      }
+    },target.inviteCode);
+    if(channelId){
+      const channel=await client.getChatById(channelId);
+      return assertWritableChannel(target,channel);
+    }
+  }
+
+  const visible=cached.map(channel=>channel?.name).filter(Boolean).slice(0,30);
+  throw new Error(`${target.name} bulunamadı. Görünen kanallar: ${visible.join(" | ")||"yok"}`);
 }
 
 async function api(endpoint){

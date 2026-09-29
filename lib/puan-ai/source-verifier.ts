@@ -116,7 +116,16 @@ export async function verifyCampaignUrl(url: string, now = new Date(), fetcher: 
     const [validFrom, validUntil] = extractDateRange(text);
     const evidence = extractSourceEvidence(text, parsed.hostname);
     if (!title || text.length < 100) return { status: "UNVERIFIED", sourceUrl: url, fetchedAt, httpStatus: response.status, title, validFrom: validFrom?.toISOString() ?? null, validUntil: validUntil?.toISOString() ?? null, fingerprint: null, evidence, reason: "Kaynakta doğrulanabilir kampanya içeriği bulunamadı." };
-    const fingerprint = createHash("sha256").update(text).digest("hex");
+    const fingerprint = createHash("sha256").update(JSON.stringify({
+      title,
+      validFrom: validFrom?.toISOString() ?? null,
+      validUntil: validUntil?.toISOString() ?? null,
+      monetaryAmounts: evidence.monetaryAmounts,
+      installmentCounts: evidence.installmentCounts,
+      cardPrograms: evidence.cardPrograms,
+      participationRequired: evidence.participationRequired,
+      rewardTiers: evidence.rewardTiers,
+    })).digest("hex");
     if (validUntil && validUntil.getTime() < now.getTime()) return { status: "EXPIRED", sourceUrl: url, fetchedAt, httpStatus: response.status, title, validFrom: validFrom?.toISOString() ?? null, validUntil: validUntil.toISOString(), fingerprint, evidence, reason: `Kampanya ${validUntil.toLocaleDateString("tr-TR", { timeZone: "Europe/Istanbul" })} tarihinde sona ermiş.` };
     if (!validFrom || !validUntil) return { status: "UNVERIFIED", sourceUrl: url, fetchedAt, httpStatus: response.status, title, validFrom: validFrom?.toISOString() ?? null, validUntil: validUntil?.toISOString() ?? null, fingerprint, evidence, reason: "Kampanya başlangıç ve bitiş tarihleri güvenilir biçimde çıkarılamadı." };
     return { status: "VERIFIED", sourceUrl: url, fetchedAt, httpStatus: response.status, title, validFrom: validFrom.toISOString(), validUntil: validUntil.toISOString(), fingerprint, evidence, reason: "Kaynak erişilebilir; başlık ve kampanya tarihleri doğrulandı." };

@@ -103,6 +103,15 @@ describe("PuanAI 2.0 zorunlu karar senaryoları", () => {
     expect(result.validUntil).toContain("2026-09-30");
   });
 
+  it("önemsiz HTML değişikliklerinde doğrulama fingerprintini sabit tutar", async () => {
+    const body = `Kampanya Dönemi 1-30 Eylül 2026 Bankkart ile 1.000 TL alışverişe 150 TL puan. ${"Koşullar ".repeat(20)}`;
+    const first = await verifyCampaignUrl("https://bankkart.com.tr/kampanyalar/test", NOW, (async () => new Response(`<html><head><title>Test Kampanya</title></head><body><div>banner-a</div>${body}</body></html>`, { status: 200 })) as typeof fetch, publicResolver);
+    const second = await verifyCampaignUrl("https://bankkart.com.tr/kampanyalar/test", NOW, (async () => new Response(`<html><head><title>Test Kampanya</title></head><body><div>banner-b</div>${body}</body></html>`, { status: 200 })) as typeof fetch, publicResolver);
+    expect(first.status).toBe("VERIFIED");
+    expect(second.status).toBe("VERIFIED");
+    expect(second.fingerprint).toBe(first.fingerprint);
+  });
+
   it("resmî metindeki harcama-ödül kademelerini yapılandırılmış veriye dönüştürür", () => {
     const evidence = extractSourceEvidence("25.000 TL - 49.999 TL arasındaki alışverişiniz ile 1.500 TL Jest Lira, 50.000 TL - 99.999 TL arasındaki alışverişiniz ile 3.000 TL Jest Lira, 175.000 ve üzeri alışverişiniz ile 7.500 TL Jest Lira", "bankkart.com.tr");
     expect(evidence.rewardTiers).toEqual([

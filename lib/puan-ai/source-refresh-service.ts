@@ -27,9 +27,19 @@ export async function refreshOfficialSources(limit = 50) {
     }
     const result = await verifyCampaignUrl(source.url, checkedAt);
     const previous = source.verificationLogs[0];
-    const unchanged = Boolean(result.fingerprint && previous?.status === "VERIFIED" && previous.fingerprint === result.fingerprint);
-    const verificationStatus = result.status === "SOURCE_UNAVAILABLE" ? "SOURCE_UNAVAILABLE" : unchanged && result.status === "VERIFIED" ? "VERIFIED" : "STALE";
-    const campaignStatus = result.status === "EXPIRED" ? "EXPIRED" : result.status === "SOURCE_UNAVAILABLE" ? "SOURCE_UNAVAILABLE" : unchanged ? "ACTIVE" : "UNVERIFIED";
+    const unchanged = Boolean(result.fingerprint && previous?.fingerprint === result.fingerprint);
+    const verificationStatus = result.status === "SOURCE_UNAVAILABLE"
+      ? "SOURCE_UNAVAILABLE"
+      : result.status === "VERIFIED" && unchanged
+        ? "VERIFIED"
+        : "STALE";
+    const campaignStatus = result.status === "EXPIRED"
+      ? "EXPIRED"
+      : result.status === "SOURCE_UNAVAILABLE"
+        ? "SOURCE_UNAVAILABLE"
+        : result.status === "VERIFIED" && unchanged
+          ? "ACTIVE"
+          : "UNVERIFIED";
     await prisma.$transaction([
       prisma.officialSource.update({ where: { id: source.id }, data: {
         fetchedAt: checkedAt,
@@ -53,7 +63,7 @@ export async function refreshOfficialSources(limit = 50) {
       } }),
       prisma.campaign.update({ where: { id: source.campaignId }, data: {
         status: campaignStatus,
-        published: unchanged && result.status === "VERIFIED" ? source.campaign.published : false,
+        published: result.status === "EXPIRED" || result.status === "SOURCE_UNAVAILABLE" ? false : source.campaign.published,
       } }),
     ]);
     results.push({ sourceId: source.id, status: campaignStatus });

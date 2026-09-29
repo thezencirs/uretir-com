@@ -44,12 +44,12 @@ export function parseProductPage(html:string,url:string,source:CommerceSource){
 function productLinksFromHtml(html:string,baseUrl:string,source:CommerceSource){
   const base=new URL(baseUrl),urls=new Set<string>();
   const rawLinks=[
-    ...[...html.matchAll(/<a\\b[^>]*href=["']([^"'#]+)["']/gi)].map(match=>match[1]),
-    ...[...html.matchAll(/["']url["']\\s*:\\s*["'](https?:\\/\\/[^"']+)["']/gi)].map(match=>match[1]),
+    ...[...html.matchAll(/<a\b[^>]*href=["']([^"'#]+)["']/gi)].map(match=>match[1]),
+    ...[...html.matchAll(/["']url["']\s*:\s*["'](https?:\/\/[^"']+)["']/gi)].map(match=>match[1]),
   ];
   for(const raw of rawLinks){
     try{
-      const u=new URL(raw.replace(/\\\\\//g,"/").replace(/&amp;/g,"&"),base);
+      const u=new URL(raw.replaceAll("\\/","/").replace(/&amp;/g,"&"),base);
       u.hash="";
       if(u.protocol!=="https:"||u.origin!==base.origin||u.username||u.password)continue;
       if(source.productPatterns.some(pattern=>pattern.test(u.pathname+u.search)))urls.add(u.toString());

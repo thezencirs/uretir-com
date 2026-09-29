@@ -148,17 +148,31 @@ function findChannel(channels, target) {
 }
 
 async function api(path, init = {}) {
-  const response = await fetch(`${siteUrl}${path}`, {
-    ...init,
-    signal: AbortSignal.timeout(60000),
-    headers: {
-      Authorization: `Bearer ${secret}`,
-      "Content-Type": "application/json",
-      ...(init.headers || {}),
-    },
-  });
-  if (!response.ok) throw new Error(`uretir.com ${path} → HTTP ${response.status}`);
-  return response.json();
+  const method = String(init.method || "GET").toUpperCase();
+  const attempts = method === "GET" ? 3 : 1;
+  let lastStatus = 0;
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    try {
+      const response = await fetch(`${siteUrl}${path}`, {
+        ...init,
+        signal: AbortSignal.timeout(60000),
+        headers: {
+          Authorization: `Bearer ${secret}`,
+          "Content-Type": "application/json",
+          ...(init.headers || {}),
+        },
+      });
+      lastStatus = response.status;
+      if (response.ok) return response.json();
+      if (!(method === "GET" && (response.status === 429 || response.status >= 500) && attempt < attempts - 1)) {
+        throw new Error(`uretir.com ${path} → HTTP ${response.status}`);
+      }
+    } catch (error) {
+      if (method !== "GET" || attempt >= attempts - 1) throw error;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+  }
+  throw new Error(`uretir.com ${path} → HTTP ${lastStatus || "bağlantı hatası"}`);
 }
 
 async function sendMessage(channel, body) {
@@ -168,11 +182,7 @@ async function sendMessage(channel, body) {
 }
 
 async function publishHaberAI(target, channel) {
-  const refresh = await fetch(`${siteUrl}/api/cron/haber-ai`, {
-    headers:{Authorization:`Bearer ${secret}`},
-    signal:AbortSignal.timeout(60000),
-  });
-  if (!refresh.ok) throw new Error(`HaberAI kaynak yenileme ${refresh.status}`);
+  await api("/api/cron/haber-ai");
 
   const { bulletin } = await api(target.endpoint, {
     method: "POST",

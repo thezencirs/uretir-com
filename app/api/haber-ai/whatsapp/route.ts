@@ -9,11 +9,22 @@ export const dynamic = "force-dynamic";
 const json = (body: unknown, status = 200) => NextResponse.json(body, { status, headers: { "Cache-Control": "no-store" } });
 function authorized(r: NextRequest) { return [process.env.CRON_SECRET,process.env.WHATSAPP_BOT_SECRET].some(token=>Boolean(token && r.headers.get("authorization") === `Bearer ${token}`)); }
 const selection = `SELECT a.id,a.payload FROM haber_articles a WHERE a.published_at <= NOW() AND (a.published_at AT TIME ZONE 'Europe/Istanbul')::date = (NOW() AT TIME ZONE 'Europe/Istanbul')::date AND COALESCE(a.payload->>'hidden','false') <> 'true' AND jsonb_array_length(a.payload->'provinceCodes') > 0 AND NOT EXISTS (SELECT 1 FROM haber_deliveries d WHERE d.article_id=a.id) ORDER BY a.published_at DESC LIMIT 5`;
+const delay=(ms:number)=>new Promise(resolve=>setTimeout(resolve,ms));
+async function readBulletinRows(){
+ let last:unknown;
+ for(let attempt=0;attempt<3;attempt++){
+  const p=newsPool();
+  try{return await p.query<{id:string;payload:Article}>(selection);}
+  catch(error){last=error;}
+  finally{await p.end().catch(()=>undefined);}
+  await delay(200*(attempt+1));
+ }
+ throw last;
+}
 export async function GET(request: NextRequest) {
  if (!authorized(request)) return json({error:"Yetkisiz erişim."},401);
- const p=newsPool();
- try { const r=await p.query<{id:string;payload:Article}>(selection); return json({channel:whatsappChannel,body:buildBulletin(r.rows.map(a=>a.payload),newsDay()),count:r.rowCount}); }
- catch { return json({error:"Bülten okunamadı."},503); } finally { await p.end(); }
+ try { const r=await readBulletinRows(); return json({channel:whatsappChannel,body:buildBulletin(r.rows.map(a=>a.payload),newsDay()),count:r.rowCount}); }
+ catch { return json({error:"Bülten okunamadı."},503); }
 }
 export async function POST(request: NextRequest) {
  if (!authorized(request)) return json({error:"Yetkisiz erişim."},401);

@@ -15,24 +15,38 @@ jobs:
     timeout-minutes: 20
     env:
       DATABASE_URL: ${{ secrets.PUANAI_DATABASE_URL }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      SITE_URL: https://www.uretir.com
     steps:
-      - name: Configuration guard
-        if: env.DATABASE_URL == ''
-        run: echo "PUANAI_DATABASE_URL is not configured; Vercel cron remains the active scheduler."
-      - uses: actions/checkout@v4
+      - name: Run through database when configured
         if: env.DATABASE_URL != ''
+        uses: actions/checkout@v4
+
       - uses: pnpm/action-setup@v4
         if: env.DATABASE_URL != ''
         with:
           version: 11.15.1
+
       - uses: actions/setup-node@v4
         if: env.DATABASE_URL != ''
         with:
           node-version: 22
           cache: pnpm
+
       - if: env.DATABASE_URL != ''
         run: pnpm install --frozen-lockfile
+
       - if: env.DATABASE_URL != ''
         run: pnpm db:migrate
+
       - if: env.DATABASE_URL != ''
         run: pnpm puanai:automation
+
+      - name: Run production fallback
+        if: env.DATABASE_URL == ''
+        run: |
+          set -euo pipefail
+          test -n "$CRON_SECRET"
+          curl --fail-with-body --retry 2 --max-time 70 \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "$SITE_URL/api/cron/puanai-refresh/02"

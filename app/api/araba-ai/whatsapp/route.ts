@@ -2,6 +2,7 @@ import {createHash} from "node:crypto";
 import {NextRequest,NextResponse} from "next/server";
 import {getAutomotiveSnapshot} from "@/lib/araba-ai/analysis";
 import {getChannelTool} from "@/lib/channel-tools";
+import {withReadRetry} from "@/lib/read-retry";
 export const runtime="nodejs";export const dynamic="force-dynamic";
 const tl=(n:number)=>new Intl.NumberFormat("tr-TR",{maximumFractionDigits:0}).format(n)+" TL";
 const whatsappChannel=getChannelTool("araba-ai").channelUrl;
@@ -9,7 +10,7 @@ function auth(r:NextRequest){return [process.env.CRON_SECRET,process.env.WHATSAP
 export async function GET(r:NextRequest){
  if(!auth(r))return NextResponse.json({error:"Yetkisiz erişim."},{status:401});
  try{
-  const data=await getAutomotiveSnapshot(),brands=[...new Set([...data.prices.map(p=>p.brand),...data.campaigns.map(c=>c.brand)])];
+  const data=await withReadRetry(()=>getAutomotiveSnapshot()),brands=[...new Set([...data.prices.map(p=>p.brand),...data.campaigns.map(c=>c.brand)])];
   const items=brands.map(brand=>{
     const prices=data.prices.filter(p=>p.brand===brand).slice(0,6),campaigns=data.campaigns.filter(c=>c.brand===brand&&c.validUntil).slice(0,3);
     if(!prices.length&&!campaigns.length)return null;

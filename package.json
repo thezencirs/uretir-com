@@ -23,7 +23,7 @@
     "report:ecosystem": "tsx scripts/report-ecosystem.ts --write",
     "report:ecosystem:check": "tsx scripts/report-ecosystem.ts --check",
     "validate:search": "node scripts/validate-search-foundation.mjs",
-    "quality": "pnpm db:validate && pnpm lint && pnpm test && pnpm db:verify && pnpm audit:prod && pnpm report:gaps:check && pnpm report:ecosystem:check && pnpm build && pnpm validate:search",
+    "quality": "pnpm db:validate && pnpm lint && pnpm test && pnpm whatsapp:verify && pnpm db:verify && pnpm audit:prod && pnpm report:gaps:check && pnpm report:ecosystem:check && pnpm build && pnpm validate:search",
     "haber-ai:collect": "tsx scripts/collect-haber-ai.ts",
     "puanai:automation": "tsx scripts/puan-ai-automation.ts",
     "vercel-build": "pnpm db:migrate && pnpm build",

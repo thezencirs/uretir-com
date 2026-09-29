@@ -226,7 +226,7 @@ async function publishQueue(target, channel, state) {
   if (!due(target, state)) return { sent:false, status:"sıradaki yayın saati bekleniyor" };
   const payload = await api(target.endpoint);
   const items = Array.isArray(payload?.items) ? payload.items : [];
-  if (!items.length) return { sent:false, status:"taze doğrulanmış kampanya yok" };
+  if (!items.length) return { sent:false, status:"yayınlanabilir yeni içerik yok" };
 
   const expectedUrl = `https://whatsapp.com/channel/${target.inviteCode}`;
   if (payload.channel_url !== expectedUrl) throw new Error(`${target.name} kanal hedefi uyuşmuyor.`);
@@ -235,7 +235,7 @@ async function publishQueue(target, channel, state) {
   const sentFingerprints = Array.isArray(own.sentFingerprints) ? own.sentFingerprints : [];
   const seen = new Set(sentFingerprints);
   const unseen = items.filter((item) => item?.fingerprint && item?.body && !seen.has(item.fingerprint));
-  if (!unseen.length) return { sent:false, status:"yeni kampanya yok" };
+  if (!unseen.length) return { sent:false, status:"daha önce gönderilmemiş yeni içerik yok" };
 
   const groupOf = (item) => item.bank || item.brand || item.source || "";
   const selected = unseen.find((item) => groupOf(item) !== own.lastGroup && item.category !== own.lastCategory) || unseen[0];

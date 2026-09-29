@@ -2,6 +2,7 @@ import {createHash} from "node:crypto";
 import {NextRequest,NextResponse} from "next/server";
 import {getPriceLowReport,type PriceLowItem} from "@/lib/indirim-ai/analysis";
 import {getChannelTool} from "@/lib/channel-tools";
+import {withReadRetry} from "@/lib/read-retry";
 export const runtime="nodejs"; export const dynamic="force-dynamic";
 const tl=(n:number)=>new Intl.NumberFormat("tr-TR",{maximumFractionDigits:0}).format(n)+" TL";
 const whatsappChannel=getChannelTool("indirim-ai").channelUrl;
@@ -10,7 +11,7 @@ function row(i:PriceLowItem){return "• *"+i.productName+"* — "+tl(i.currentP
 export async function GET(r:NextRequest){
  if(!auth(r))return NextResponse.json({error:"Yetkisiz erişim."},{status:401});
  try{
-  const report=await getPriceLowReport(); const sections:[string,PriceLowItem[]][]=[["30 GÜN",report.lows["30"]],["90 GÜN",report.lows["90"]],["360 GÜN",report.lows["360"]]];
+  const report=await withReadRetry(()=>getPriceLowReport()); const sections:[string,PriceLowItem[]][]=[["30 GÜN",report.lows["30"]],["90 GÜN",report.lows["90"]],["360 GÜN",report.lows["360"]]];
   const usable=sections.filter(([,items])=>items.length).map(([label,items])=>"📉 *"+label+" DİP FİYATLARI*\n"+items.slice(0,3).map(row).join("\n"));
   if(!usable.length){
     const provisional=report.provisional.slice(0,5);

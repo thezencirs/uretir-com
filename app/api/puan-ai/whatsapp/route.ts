@@ -4,6 +4,7 @@ import { getCampaignCatalog } from "@/lib/puan-ai/catalog-service";
 import type { CampaignView } from "@/lib/puan-ai/types";
 import { getChannelTool } from "@/lib/channel-tools";
 import { getPrisma } from "@/lib/puan-ai/db";
+import { withReadRetry } from "@/lib/read-retry";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -153,7 +154,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const now = new Date();
-    const catalog = await getCampaignCatalog();
+    const catalog = await withReadRetry(()=>getCampaignCatalog());
     let items = catalog
       .filter((campaign) =>
         campaign.published
@@ -173,12 +174,12 @@ export async function GET(request: NextRequest) {
       .slice(0, 24);
 
     if (!items.length) {
-      const submissions = await getPrisma().campaignSubmission.findMany({
+      const submissions = await withReadRetry(()=>getPrisma().campaignSubmission.findMany({
         where: { status: "VERIFIED", sourceUrl: { not: null }, processedAt: { not: null } },
         orderBy: { processedAt: "desc" },
         take: 60,
         select: { id:true, sourceUrl:true, normalizedDraft:true, verification:true, processedAt:true },
-      });
+      }));
       items = submissions.map(item=>submissionItem(item,now)).filter((item):item is NonNullable<ReturnType<typeof submissionItem>>=>item!==null).slice(0,24);
     }
 

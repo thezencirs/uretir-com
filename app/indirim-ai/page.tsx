@@ -1,9 +1,12 @@
-import type {Metadata} from "next";
-import {getPriceLowReport} from "@/lib/indirim-ai/analysis";
-export const metadata:Metadata={title:"İndirimAI · 30/90/360 gün dip fiyat analizi",description:"Güvenilir e-ticaret kaynaklarında gözlenen fiyat geçmişinden 30, 90 ve 360 günlük gerçek dip fiyatları izleyin.",alternates:{canonical:"/indirim-ai"},openGraph:{title:"İndirimAI — Üretir",description:"Fiyat geçmişine dayalı indirim doğrulama ve dip fiyat analizi.",url:"/indirim-ai",type:"website"}};
-export const dynamic="force-dynamic";
-const tl=(n:number)=>new Intl.NumberFormat("tr-TR",{maximumFractionDigits:0}).format(n)+" TL";
-export default async function Page(){
- let report;try{report=await getPriceLowReport();}catch{return <main className="mx-auto max-w-5xl px-6 py-16"><h1 className="text-4xl font-semibold">İndirimAI</h1><p className="mt-4">Fiyat geçmişi veritabanı hazırlanıyor.</p></main>;}
- return <main className="mx-auto max-w-6xl px-6 py-12"><p className="text-sm font-semibold uppercase tracking-widest">ÜRETİR / İNDİRİMAI</p><h1 className="mt-3 text-4xl font-semibold">İndirim etiketi değil, fiyat geçmişi.</h1><p className="mt-4 max-w-3xl text-lg">Güvenilir e-ticaret kaynaklarında görülen fiyatları zaman içinde kaydeder; yalnızca yeterli gözlem geçmişi oluştuğunda 30, 90 veya 360 günlük dip fiyat etiketi verir.</p><div className="mt-8 grid gap-4 sm:grid-cols-3"><div className="rounded-2xl border p-5"><strong>{report.productCount}</strong><p>takip edilen ürün</p></div><div className="rounded-2xl border p-5"><strong>{report.observationCount}</strong><p>fiyat gözlemi</p></div><div className="rounded-2xl border p-5"><strong>{new Date(report.checkedAt).toLocaleString("tr-TR",{timeZone:"Europe/Istanbul"})}</strong><p>son analiz</p></div></div>{[30,90,360].map(days=><section key={days} className="mt-10"><h2 className="text-2xl font-semibold">{days} günlük dip fiyatlar</h2><div className="mt-4 grid gap-4">{report.lows[String(days)].slice(0,12).map(item=><article key={item.productKey+item.sourceUrl} className="rounded-2xl border p-5"><div className="flex flex-wrap items-baseline justify-between gap-3"><h3 className="font-semibold">{item.productName}</h3><strong>{tl(item.currentPrice)}</strong></div><p className="mt-2 text-sm">{item.merchantName} · dönem tepesinden %{item.dropFromHighPct.toFixed(1)} aşağı · {item.observedDays} ayrı günde gözlem</p><a className="mt-3 inline-block underline" href={item.sourceUrl} target="_blank" rel="noreferrer">Kaynağı aç ↗</a></article>)}{!report.lows[String(days)].length&&<p className="rounded-2xl border p-5">Bu etiket için henüz yeterli tarih birikmedi veya güncel fiyat dönem dibinde değil.</p>}</div></section>)}{report.provisional.length>0&&<section className="mt-10"><h2 className="text-2xl font-semibold">Takip dönemi dipleri</h2><p className="mt-2">Bunlar henüz 30 günlük etiket değildir; veri birikirken şeffaf biçimde ayrı gösterilir.</p></section>}</main>;
+import type { Metadata } from "next";
+import { ChannelToolNavigation } from "@/components/channel-tool-navigation";
+import { ToolExplorer } from "@/components/tool-explorer";
+import { getPriceLowReport } from "@/lib/indirim-ai/analysis";
+import { discountExplorer, unavailableExplorer } from "@/lib/tool-explorer-data";
+export const metadata: Metadata = { title: "İndirimAI · Fiyat geçmişini karşılaştır", description: "30, 90 ve 360 günlük fiyat gözlemlerini mağaza ve bütçeye göre inceleyin. Dönem diplerini karşılaştırın, İndirimAI WhatsApp kanalını takip edin.", alternates: { canonical: "/indirim-ai" }, openGraph: { title: "İndirimAI — Üretir", description: "Fiyat geçmişine dayalı indirim ve dönem dibi analizi.", url: "/indirim-ai", type: "website" } };
+export const dynamic = "force-dynamic";
+export default async function Page() {
+  let data = unavailableExplorer;
+  try { data = discountExplorer(await getPriceLowReport()); } catch { /* The workspace and retry remain available. */ }
+  return <><ChannelToolNavigation active="indirim-ai"/><ToolExplorer slug="indirim-ai" data={data}/></>;
 }

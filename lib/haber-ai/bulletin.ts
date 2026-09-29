@@ -1,7 +1,8 @@
 import type { Article } from "./model";
 import provinces from "./provinces.json";
 import { newsDay } from "./dates";
-export const whatsappChannel = "https://whatsapp.com/channel/0029VbDk4gHGpLHXkGseaf3Y";
+import {getChannelTool} from "../channel-tools";
+export const whatsappChannel = getChannelTool("haber-ai").channelUrl;
 export function buildBulletin(articles:Article[], day=newsDay()) {
  const seen=new Set<string>();
  const selected=articles.filter(a=>!a.hidden&&newsDay(a.publishedAt)===day&&a.provinceCodes.length).sort((a,b)=>b.publishedAt.localeCompare(a.publishedAt)).filter(a=>{if(seen.has(a.url))return false;seen.add(a.url);return true;}).slice(0,10);

@@ -3,6 +3,8 @@ import { PuanAICampaignExplorer, PuanAIChat } from "@/components/puan-ai-chat";
 import { JsonLd } from "@/components/json-ld";
 import { absoluteUrl } from "@/lib/seo";
 import { PuanAIQuickCompare } from "@/components/puan-ai-quick-compare";
+import { ChannelToolNavigation } from "@/components/channel-tool-navigation";
+import { getChannelTool } from "@/lib/channel-tools";
 
 export const metadata: Metadata = {
   title: "PuanAI — Güncel kredi kartı kampanya asistanı",
@@ -30,11 +32,12 @@ const softwareSchema = {
 export default function PuanAIPage() {
   return <div className="page-reveal pa-page">
     <JsonLd data={softwareSchema} />
+    <ChannelToolNavigation active="puan-ai" />
     <PuanAIQuickCompare />
     <PuanAIChat />
     <section className="section-wrap pa-whatsapp" aria-label="WhatsApp gündem kanalı">
       <div><h2>PuanAI gelişmelerini WhatsApp’tan takip et.</h2><p>Doğrulanmış kart kampanyaları ve kullanım notları için PuanAI kanalına katıl.</p></div>
-      <a href="https://whatsapp.com/channel/0029VbDbbII8PgsA574OLl1H" target="_blank" rel="noreferrer">PuanAI kanalına katıl <span aria-hidden="true">↗</span></a>
+      <a href={getChannelTool("puan-ai").channelUrl} target="_blank" rel="noopener noreferrer">PuanAI kanalına katıl <span aria-hidden="true">↗</span></a>
     </section>
     <div className="section-wrap"><PuanAICampaignExplorer /></div>
   </div>;

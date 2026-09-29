@@ -122,34 +122,34 @@ function due(target,state){
   return !Number.isFinite(last)||Date.now()-last>=target.minIntervalMs;
 }
 async function resolveChannel(target){
+  let channel;
   try{
-    const channel=await client.getChannelByInviteCode(target.inviteCode);
-    if(!channel?.id?._serialized)throw new Error("invite lookup returned no channel");
-    if(channel.isChannel!==true||!channel.id._serialized.endsWith("@newsletter")){
-      throw new Error(`${target.name} hedefi geçerli bir WhatsApp kanalı değil.`);
-    }
-    if(channel.isReadOnly===true){
-      throw new Error(`${target.name} kanalında bu hesapla gönderim yetkisi yok.`);
-    }
-    return channel;
+    channel=await client.getChannelByInviteCode(target.inviteCode);
   }catch(error){
-    const compat=await client.pupPage.evaluate(()=>{
-      const safeKeys=(name)=>{
-        try{return Object.keys(window.require(name)||{}).sort();}catch{return [];}
-      };
-      return {
-        modelUtils:safeKeys("WAWebNewsletterModelUtils"),
-        queryJob:safeKeys("WAWebNewsletterMetadataQueryJob"),
-        newsletterCollection:safeKeys("WAWebNewsletterCollection"),
-        newsletterMetadata:safeKeys("WAWebNewsletterMetadataCollection"),
-        widFactory:safeKeys("WAWebWidFactory"),
-        collections:safeKeys("WAWebCollections"),
-      };
-    });
-    console.error("NEWSLETTER_COMPAT "+JSON.stringify(compat));
-    throw error;
+    const message=String(error instanceof Error?error.message:error);
+    if(!message.includes("getRoleByIdentifier")){
+      throw error;
+    }
+    const channelId=await client.pupPage.evaluate(async inviteCode=>{
+      const response=await window
+        .require("WAWebNewsletterMetadataQueryJob")
+        .queryNewsletterMetadataByInviteCode(inviteCode);
+      const id=response?.idJid;
+      return id?._serialized||id?.toString?.()||null;
+    },target.inviteCode);
+    if(channelId)channel=await client.getChatById(channelId);
   }
+
+  if(!channel?.id?._serialized)throw new Error(`${target.name} kanal davet bağlantısı çözülemedi.`);
+  if(channel.isChannel!==true||!channel.id._serialized.endsWith("@newsletter")){
+    throw new Error(`${target.name} hedefi geçerli bir WhatsApp kanalı değil.`);
+  }
+  if(channel.isReadOnly===true){
+    throw new Error(`${target.name} kanalında bu hesapla gönderim yetkisi yok.`);
+  }
+  return channel;
 }
+
 async function api(endpoint){
   let lastError;
   for(let attempt=0;attempt<3;attempt++){

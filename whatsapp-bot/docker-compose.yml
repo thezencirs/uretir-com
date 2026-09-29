@@ -1,0 +1,27 @@
+services:
+  whatsapp-publisher:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      BOT_DATA_DIR: /data
+      SITE_URL: ${SITE_URL:-https://www.uretir.com}
+      POLL_MINUTES: ${POLL_MINUTES:-10}
+      PANEL_TOKEN: ${PANEL_TOKEN}
+    ports:
+      - "3217:3217"
+    volumes:
+      - whatsapp_data:/data
+    shm_size: "1gb"
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3217/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+volumes:
+  whatsapp_data:

@@ -121,11 +121,15 @@ function due(target,state){
   const last=Date.parse(own.lastSentAt||"");
   return !Number.isFinite(last)||Date.now()-last>=target.minIntervalMs;
 }
-function findChannel(channels,target){
-  const matches=channels.filter(channel=>channel.channelMetadata?.inviteCode===target.inviteCode||channel.channelMetadata?.inviteLink===`https://whatsapp.com/channel/${target.inviteCode}`);
-  if(matches.length!==1)throw new Error(`${target.name} kanal davet bağlantısı doğrulanamadı.`);
-  const channel=matches[0],role=channel?.channelMetadata?.membershipType;
-  if(!channel?.id?._serialized||!["owner","admin"].includes(role))throw new Error(`${target.name} yazma yetkisi doğrulanamadı (${role||"bilinmiyor"}).`);
+async function resolveChannel(target){
+  const channel=await client.getChannelByInviteCode(target.inviteCode);
+  if(!channel?.id?._serialized)throw new Error(`${target.name} kanal davet bağlantısı çözülemedi.`);
+  if(channel.isChannel!==true||!channel.id._serialized.endsWith("@newsletter")){
+    throw new Error(`${target.name} hedefi geçerli bir WhatsApp kanalı değil.`);
+  }
+  if(channel.isReadOnly===true){
+    throw new Error(`${target.name} kanalında bu hesapla gönderim yetkisi yok.`);
+  }
   return channel;
 }
 async function api(endpoint){
@@ -177,9 +181,9 @@ async function publishQueue(target,channel,state){
   await writeState(state);
   return {sent:true,status:"içerik gönderildi",messageId};
 }
-async function pollTarget(target,channels,state){
+async function pollTarget(target,state){
   try{
-    const channel=findChannel(channels,target);
+    const channel=await resolveChannel(target);
     const result=target.mode==="snapshot"?await publishSnapshot(target,channel,state):await publishQueue(target,channel,state);
     targetStatus[target.key]=`${result.status} · ${new Date().toLocaleString("tr-TR",{timeZone:"Europe/Istanbul"})}`;
     if(result.sent)console.log(`${target.name}: ${result.status} (${result.messageId})`);
@@ -193,8 +197,8 @@ async function poll(){
   if(busy||!ready)return;
   busy=true;
   try{
-    const channels=await client.getChannels(),state=await readState();
-    for(const target of targets)await pollTarget(target,channels,state);
+    const state=await readState();
+    for(const target of targets)await pollTarget(target,state);
     connectionStatus="Son kanal kontrolü: "+new Date().toLocaleString("tr-TR",{timeZone:"Europe/Istanbul"});
   }catch(error){
     connectionStatus="Kontrol başarısız: "+String(error instanceof Error?error.message:error);

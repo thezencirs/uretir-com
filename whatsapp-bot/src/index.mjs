@@ -125,53 +125,54 @@ function normalizedChannelName(value){
   return String(value||"").trim().toLocaleLowerCase("tr-TR").replace(/\s+/g," ");
 }
 
-function assertWritableChannel(target,channel){
-  if(!channel?.id?._serialized)throw new Error(`${target.name} kanal kimliği alınamadı.`);
-  if(channel.isChannel!==true||!channel.id._serialized.endsWith("@newsletter")){
+async function resolveChannel(target){
+  const channels=await client.pupPage.evaluate(()=>{
+    const collection=window.require("WAWebCollections").WAWebNewsletterCollection;
+    return collection.getModelsArray().map(chat=>{
+      let data={};
+      let metadata={};
+      try{data=chat.serialize?.()||{};}catch{}
+      try{metadata=chat.newsletterMetadata?.serialize?.()||{};}catch{}
+      const id=
+        chat.id?._serialized||
+        data.id?._serialized||
+        chat.id?.toString?.()||
+        data.id?.toString?.()||
+        null;
+      const name=
+        chat.name||
+        data.name||
+        metadata.name||
+        metadata.nameElementValue||
+        metadata.title||
+        data.formattedTitle||
+        "";
+      const membershipType=
+        chat.newsletterMetadata?.membershipType||
+        metadata.membershipType||
+        data.newsletterMetadata?.membershipType||
+        data.channelMetadata?.membershipType||
+        null;
+      return {id,name,membershipType};
+    }).filter(item=>item.id&&item.name);
+  });
+
+  const expected=normalizedChannelName(target.name);
+  const matches=channels.filter(channel=>normalizedChannelName(channel.name)===expected);
+  if(matches.length!==1){
+    const visible=channels.map(channel=>`${channel.name}[${channel.membershipType||"?"}]`).slice(0,30);
+    throw new Error(`${target.name} güvenli biçimde bulunamadı. Görünen kanallar: ${visible.join(" | ")||"yok"}`);
+  }
+
+  const channel=matches[0];
+  if(!channel.id.endsWith("@newsletter")){
     throw new Error(`${target.name} hedefi geçerli bir WhatsApp kanalı değil.`);
   }
-  if(channel.isReadOnly===true){
-    throw new Error(`${target.name} kanalında bu hesapla gönderim yetkisi yok.`);
+  const role=String(channel.membershipType||"").toLocaleLowerCase("en-US");
+  if(!["owner","admin"].includes(role)){
+    throw new Error(`${target.name} kanalında owner/admin yetkisi doğrulanamadı (${role||"bilinmiyor"}).`);
   }
   return channel;
-}
-
-async function resolveChannel(target){
-  const cached=await client.getChannels();
-  const expected=normalizedChannelName(target.name);
-  const byName=cached.filter(channel=>normalizedChannelName(channel?.name)===expected);
-  if(byName.length===1){
-    return assertWritableChannel(target,byName[0]);
-  }
-  if(byName.length>1){
-    throw new Error(`${target.name} için birden fazla aynı isimli kanal bulundu; güvenli gönderim durduruldu.`);
-  }
-
-  try{
-    const channel=await client.getChannelByInviteCode(target.inviteCode);
-    return assertWritableChannel(target,channel);
-  }catch(error){
-    const message=String(error instanceof Error?error.message:error);
-    if(!message.includes("getRoleByIdentifier"))throw error;
-    const channelId=await client.pupPage.evaluate(async inviteCode=>{
-      try{
-        const response=await window
-          .require("WAWebNewsletterMetadataQueryJob")
-          .queryNewsletterMetadataByInviteCode(inviteCode);
-        const id=response?.idJid;
-        return id?._serialized||id?.toString?.()||null;
-      }catch{
-        return null;
-      }
-    },target.inviteCode);
-    if(channelId){
-      const channel=await client.getChatById(channelId);
-      return assertWritableChannel(target,channel);
-    }
-  }
-
-  const visible=cached.map(channel=>channel?.name).filter(Boolean).slice(0,30);
-  throw new Error(`${target.name} bulunamadı. Görünen kanallar: ${visible.join(" | ")||"yok"}`);
 }
 
 async function api(endpoint){
@@ -188,7 +189,7 @@ async function api(endpoint){
   throw lastError||new Error("uretir.com bağlantı hatası");
 }
 async function sendMessage(channel,body){
-  const message=await channel.sendMessage(body);
+  const message=await client.sendMessage(channel.id,body);
   if(!message?.id?._serialized)throw new Error("Gönderim sonucu belirsiz; otomatik tekrar yapılmayacak.");
   return message.id._serialized;
 }

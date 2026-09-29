@@ -122,15 +122,33 @@ function due(target,state){
   return !Number.isFinite(last)||Date.now()-last>=target.minIntervalMs;
 }
 async function resolveChannel(target){
-  const channel=await client.getChannelByInviteCode(target.inviteCode);
-  if(!channel?.id?._serialized)throw new Error(`${target.name} kanal davet bağlantısı çözülemedi.`);
-  if(channel.isChannel!==true||!channel.id._serialized.endsWith("@newsletter")){
-    throw new Error(`${target.name} hedefi geçerli bir WhatsApp kanalı değil.`);
+  try{
+    const channel=await client.getChannelByInviteCode(target.inviteCode);
+    if(!channel?.id?._serialized)throw new Error("invite lookup returned no channel");
+    if(channel.isChannel!==true||!channel.id._serialized.endsWith("@newsletter")){
+      throw new Error(`${target.name} hedefi geçerli bir WhatsApp kanalı değil.`);
+    }
+    if(channel.isReadOnly===true){
+      throw new Error(`${target.name} kanalında bu hesapla gönderim yetkisi yok.`);
+    }
+    return channel;
+  }catch(error){
+    const compat=await client.pupPage.evaluate(()=>{
+      const safeKeys=(name)=>{
+        try{return Object.keys(window.require(name)||{}).sort();}catch{return [];}
+      };
+      return {
+        modelUtils:safeKeys("WAWebNewsletterModelUtils"),
+        queryJob:safeKeys("WAWebNewsletterMetadataQueryJob"),
+        newsletterCollection:safeKeys("WAWebNewsletterCollection"),
+        newsletterMetadata:safeKeys("WAWebNewsletterMetadataCollection"),
+        widFactory:safeKeys("WAWebWidFactory"),
+        collections:safeKeys("WAWebCollections"),
+      };
+    });
+    console.error("NEWSLETTER_COMPAT "+JSON.stringify(compat));
+    throw error;
   }
-  if(channel.isReadOnly===true){
-    throw new Error(`${target.name} kanalında bu hesapla gönderim yetkisi yok.`);
-  }
-  return channel;
 }
 async function api(endpoint){
   let lastError;

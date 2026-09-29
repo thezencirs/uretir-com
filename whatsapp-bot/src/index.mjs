@@ -279,7 +279,7 @@ async function pollTarget(target,state){
     const channel=await resolveChannel(target);
     const result=target.mode==="snapshot"?await publishSnapshot(target,channel,state):await publishQueue(target,channel,state);
     targetStatus[target.key]=`${result.status} · ${new Date().toLocaleString("tr-TR",{timeZone:"Europe/Istanbul"})}`;
-    if(result.sent)console.log(`${target.name}: ${result.status} (${result.messageId})`);
+    console.log(`${target.name}: ${result.status}${result.messageId?` (${result.messageId})`:""}`);
   }catch(error){
     const message=String(error instanceof Error?error.message:error);
     targetStatus[target.key]="hata: "+message;

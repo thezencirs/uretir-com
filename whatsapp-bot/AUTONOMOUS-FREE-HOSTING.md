@@ -26,7 +26,13 @@ cp .env.example .env
 bash deploy-oracle-always-free.sh
 ```
 
-Then open the panel once and scan WhatsApp QR with the account that owns/administers all six channels. Keep port 3217 private where possible (VPN, SSH tunnel, or source-IP firewall rule).
+The compose file binds the panel to localhost only. Open an SSH tunnel from your computer:
+
+```bash
+ssh -L 3217:127.0.0.1:3217 ubuntu@YOUR_VM_IP
+```
+
+Then open `http://127.0.0.1:3217/?token=YOUR_PANEL_TOKEN` once and scan the WhatsApp QR with the account that owns/administers all six channels. Port 3217 does not need to be exposed publicly.
 
 ## Local-PC fallback
 
@@ -49,3 +55,8 @@ This has no cloud hosting bill but requires the computer and internet connection
 - Persistent session state survives container replacement.
 
 No third-party free tier can be guaranteed to stay free or unlimited forever; this architecture avoids paid AI/API dependencies in the publication loop and can move between hosts without code changes.
+
+
+## Self-healing data loop
+
+`.github/workflows/channel-autopilot.yml` checks all six WhatsApp-ready feeds every hour. If HaberAI, PuanAI, IndirimAI, ArabaAI or EvAI becomes empty, it calls the corresponding protected refresh endpoint and checks again. This workflow is intentionally separate from message delivery: GitHub repairs data, the long-running publisher delivers messages.

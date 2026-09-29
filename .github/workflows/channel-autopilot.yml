@@ -1,0 +1,82 @@
+name: Channel autopilot health
+
+on:
+  schedule:
+    - cron: "37 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: channel-autopilot-health
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SITE_URL: https://www.uretir.com
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+    steps:
+      - name: Check feeds and self-heal empty sources
+        run: |
+          set -euo pipefail
+          test -n "$CRON_SECRET"
+
+          fetch_feed() {
+            local key="$1"
+            curl --fail-with-body --retry 2 --max-time 70               "$SITE_URL/api/channel-feed/$key"               -o "/tmp/$key.json"
+          }
+
+          is_ready() {
+            local key="$1"
+            node - "$key" <<'NODE'
+          const fs=require("node:fs");
+          const key=process.argv[2];
+          const d=JSON.parse(fs.readFileSync("/tmp/"+key+".json","utf8"));
+          const ready =
+            key==="haber-ai" ? (typeof d.body==="string" && d.body.length>0) :
+            key==="finans-ai" ? (typeof d.body==="string" && d.body.length>0) :
+            key==="puan-ai" ? (Array.isArray(d.items) && d.items.length>0) :
+            key==="indirim-ai" ? (typeof d.body==="string" && d.body.length>0) :
+            key==="araba-ai" ? (Array.isArray(d.items) && d.items.length>0) :
+            key==="ev-ai" ? (Array.isArray(d.items) && d.items.length>0) :
+            false;
+          process.exit(ready?0:1);
+          NODE
+          }
+
+          refresh() {
+            local route="$1"
+            echo "Self-heal: $route"
+            curl --fail-with-body --retry 2 --max-time 75               -H "Authorization: Bearer $CRON_SECRET"               "$SITE_URL$route" >/tmp/refresh.json
+            cat /tmp/refresh.json
+            echo
+          }
+
+          for key in haber-ai finans-ai puan-ai indirim-ai araba-ai ev-ai; do
+            echo "Checking $key"
+            fetch_feed "$key"
+            if is_ready "$key"; then
+              echo "$key ready"
+              continue
+            fi
+
+            case "$key" in
+              haber-ai) refresh "/api/cron/haber-ai" ;;
+              puan-ai) refresh "/api/cron/puanai-refresh/02" ;;
+              indirim-ai) refresh "/api/cron/indirim-ai" ;;
+              araba-ai) refresh "/api/cron/araba-ai" ;;
+              ev-ai) refresh "/api/cron/ev-ai" ;;
+              finans-ai) echo "FinansAI has no writable refresh job; feed fetch is its refresh." ;;
+            esac
+
+            fetch_feed "$key"
+            if is_ready "$key"; then
+              echo "$key recovered"
+            else
+              echo "::warning::$key feed is still empty after self-heal"
+            fi
+          done

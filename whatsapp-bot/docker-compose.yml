@@ -12,7 +12,7 @@ services:
       POLL_MINUTES: ${POLL_MINUTES:-10}
       PANEL_TOKEN: ${PANEL_TOKEN}
     ports:
-      - "3217:3217"
+      - "127.0.0.1:3217:3217"
     volumes:
       - whatsapp_data:/data
     shm_size: "1gb"

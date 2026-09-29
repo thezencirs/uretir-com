@@ -41,9 +41,33 @@ export function parseProductPage(html:string,url:string,source:CommerceSource){
   return null;
 }
 
+function productLinksFromHtml(html:string,baseUrl:string,source:CommerceSource){
+  const base=new URL(baseUrl),urls=new Set<string>();
+  for(const match of html.matchAll(/<a\\b[^>]*href=["']([^"'#]+)["']/gi)){
+    try{
+      const u=new URL(match[1].replace(/&amp;/g,"&"),base);
+      u.hash="";
+      if(u.protocol!=="https:"||u.origin!==base.origin||u.username||u.password)continue;
+      if(source.productPatterns.some(pattern=>pattern.test(u.pathname+u.search)))urls.add(u.toString());
+    }catch{/* Ignore invalid links. */}
+  }
+  return [...urls];
+}
+
+async function discoverSourceProducts(source:CommerceSource){
+  const sitemapUrls=await discoverPublicUrls(source.origin,source.productPatterns,{agent:AGENT,maxUrls:40,sitemapCandidates:source.sitemapCandidates});
+  if(sitemapUrls.length)return sitemapUrls;
+  try{
+    const home=await fetchPublicText(source.origin,{agent:AGENT,maxBytes:1_500_000});
+    return productLinksFromHtml(home.text,home.url,source).slice(0,40);
+  }catch{
+    return [];
+  }
+}
+
 async function collectSource(source:CommerceSource,pagesPerSource:number){
   const prisma=getPrisma();
-  const urls=await discoverPublicUrls(source.origin,source.productPatterns,{agent:AGENT,maxUrls:40,sitemapCandidates:source.sitemapCandidates});
+  const urls=await discoverSourceProducts(source);
   if(!urls.length)return {source:source.id,discovered:0,stored:0,skipped:0};
   const dayIndex=Math.floor(Date.now()/dayMs),start=(dayIndex*pagesPerSource)%urls.length;
   const chosen=Array.from({length:Math.min(pagesPerSource,urls.length)},(_,i)=>urls[(start+i)%urls.length]);

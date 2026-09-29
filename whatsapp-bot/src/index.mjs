@@ -38,31 +38,31 @@ const targets = [
     mode: "queue",
     minIntervalMs: 60 * 60_000,
   },
-  ...(process.env.INDIRIMAI_CHANNEL_INVITE_CODE ? [{
+  {
     key: "indirimai",
     name: "İndirimAI",
-    inviteCode: process.env.INDIRIMAI_CHANNEL_INVITE_CODE,
+    inviteCode: process.env.INDIRIMAI_CHANNEL_INVITE_CODE || "0029VbEFC5zICVfmJzjAfY2Q",
     endpoint: "/api/indirim-ai/whatsapp",
     mode: "snapshot",
     minIntervalMs: 60 * 60_000,
-  }] : []),
-  ...(process.env.ARABAAI_CHANNEL_INVITE_CODE ? [{
+  },
+  {
     key: "arabaai",
     name: "ArabaAI",
-    inviteCode: process.env.ARABAAI_CHANNEL_INVITE_CODE,
+    inviteCode: process.env.ARABAAI_CHANNEL_INVITE_CODE || "0029Vb8r7Vh8F2p8FcGDsj1L",
     endpoint: "/api/araba-ai/whatsapp",
     mode: "queue",
     minIntervalMs: 60 * 60_000,
-  }] : []),
-  ...(process.env.EVAI_CHANNEL_INVITE_CODE ? [{
+  },
+  {
     key: "evai",
     name: "EvAI",
-    inviteCode: process.env.EVAI_CHANNEL_INVITE_CODE,
+    inviteCode: process.env.EVAI_CHANNEL_INVITE_CODE || "0029VaBzvL33gvWb52bNHv0q",
     endpoint: "/api/ev-ai/whatsapp",
     mode: "queue",
     minIntervalMs: 75 * 60_000,
     dailyLimit: 10,
-  }] : []),
+  },
 ];
 
 let busy = false;
@@ -242,7 +242,7 @@ async function publishQueue(target, channel, state) {
     dailyCount: own.dailyDay === day ? (own.dailyCount || 0) + 1 : 1,
   };
   await writeState(state);
-  return { sent:true, status:"kampanya gönderildi", messageId };
+  return { sent:true, status:"içerik gönderildi", messageId };
 }
 
 async function pollTarget(target, channels, state) {

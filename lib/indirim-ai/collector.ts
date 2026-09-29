@@ -43,9 +43,13 @@ export function parseProductPage(html:string,url:string,source:CommerceSource){
 
 function productLinksFromHtml(html:string,baseUrl:string,source:CommerceSource){
   const base=new URL(baseUrl),urls=new Set<string>();
-  for(const match of html.matchAll(/<a\\b[^>]*href=["']([^"'#]+)["']/gi)){
+  const rawLinks=[
+    ...[...html.matchAll(/<a\\b[^>]*href=["']([^"'#]+)["']/gi)].map(match=>match[1]),
+    ...[...html.matchAll(/["']url["']\\s*:\\s*["'](https?:\\/\\/[^"']+)["']/gi)].map(match=>match[1]),
+  ];
+  for(const raw of rawLinks){
     try{
-      const u=new URL(match[1].replace(/&amp;/g,"&"),base);
+      const u=new URL(raw.replace(/\\\\\//g,"/").replace(/&amp;/g,"&"),base);
       u.hash="";
       if(u.protocol!=="https:"||u.origin!==base.origin||u.username||u.password)continue;
       if(source.productPatterns.some(pattern=>pattern.test(u.pathname+u.search)))urls.add(u.toString());
@@ -57,12 +61,17 @@ function productLinksFromHtml(html:string,baseUrl:string,source:CommerceSource){
 async function discoverSourceProducts(source:CommerceSource){
   const sitemapUrls=await discoverPublicUrls(source.origin,source.productPatterns,{agent:AGENT,maxUrls:40,sitemapCandidates:source.sitemapCandidates});
   if(sitemapUrls.length)return sitemapUrls;
-  try{
-    const home=await fetchPublicText(source.origin,{agent:AGENT,maxBytes:1_500_000});
-    return productLinksFromHtml(home.text,home.url,source).slice(0,40);
-  }catch{
-    return [];
+  const discovered=new Set<string>();
+  for(const seed of [source.origin,...(source.seedUrls??[])]){
+    try{
+      const page=await fetchPublicText(seed,{agent:AGENT,maxBytes:2_000_000});
+      for(const url of productLinksFromHtml(page.text,page.url,source)){
+        discovered.add(url);
+        if(discovered.size>=40)return [...discovered];
+      }
+    }catch{/* Try the next official seed. */}
   }
+  return [...discovered];
 }
 
 async function collectSource(source:CommerceSource,pagesPerSource:number){

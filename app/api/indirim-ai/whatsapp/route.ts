@@ -12,7 +12,14 @@ export async function GET(r:NextRequest){
  try{
   const report=await getPriceLowReport(); const sections:[string,PriceLowItem[]][]=[["30 GÜN",report.lows["30"]],["90 GÜN",report.lows["90"]],["360 GÜN",report.lows["360"]]];
   const usable=sections.filter(([,items])=>items.length).map(([label,items])=>"📉 *"+label+" DİP FİYATLARI*\n"+items.slice(0,3).map(row).join("\n"));
-  if(!usable.length)return NextResponse.json({channel_url:whatsappChannel,body:null,status:"price_history_accumulating",coverage:{products:report.productCount,observations:report.observationCount}});
+  if(!usable.length){
+    const provisional=report.provisional.slice(0,5);
+    if(!provisional.length)return NextResponse.json({channel_url:whatsappChannel,body:null,status:"price_history_accumulating",coverage:{products:report.productCount,observations:report.observationCount}});
+    const rows=provisional.map(i=>"• *"+i.productName+"* — "+tl(i.currentPrice)+" · "+i.merchantName+"\n  Takip geçmişi: "+i.coverageDays+" gün / "+i.observedDays+" ayrı gün\n  "+i.sourceUrl);
+    const body=["🧭 *İNDİRİMAI | FİYAT TAKİBİ*","Bu ürünler yeni izlemeye alındı. *Henüz 30/90/360 günlük dip fiyat etiketi değildir.*",...rows,"","Geçmiş oluştukça gerçek dönem dipleri ayrıca işaretlenecek.","https://www.uretir.com/indirim-ai","","*İndirimAI • uretir.com*"].join("\n\n");
+    const fingerprint=createHash("sha256").update(body).digest("hex").slice(0,24);
+    return NextResponse.json({channel_url:whatsappChannel,fingerprint,body,status:"tracking_history",checkedAt:report.checkedAt,coverage:{products:report.productCount,observations:report.observationCount}});
+  }
   const body=["🔥 *İNDİRİMAI | GERÇEK FİYAT DİPLERİ*",...usable,"","Tüm fiyat geçmişi ve kaynaklar:","https://www.uretir.com/indirim-ai","","*İndirimAI • uretir.com*"].join("\n\n");
   const fingerprint=createHash("sha256").update(body).digest("hex").slice(0,24);
   return NextResponse.json({channel_url:whatsappChannel,fingerprint,body,checkedAt:report.checkedAt});

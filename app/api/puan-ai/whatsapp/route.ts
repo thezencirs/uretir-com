@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCampaignCatalog } from "@/lib/puan-ai/catalog-service";
 import type { CampaignView } from "@/lib/puan-ai/types";
 import { getChannelTool } from "@/lib/channel-tools";
+import { getPrisma } from "@/lib/puan-ai/db";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -99,13 +100,61 @@ function toItem(campaign: CampaignView) {
   };
 }
 
+type VerifiedSubmissionDraft = {
+  sourceFacts?: {
+    monetaryAmounts?: number[];
+    installmentCounts?: number[];
+    cardPrograms?: string[];
+    participationRequired?: boolean;
+  };
+  sourceUrl?: string;
+  sourceTitle?: string | null;
+  validFrom?: string | null;
+  validUntil?: string | null;
+};
+
+function submissionItem(input: {id:string;sourceUrl:string|null;normalizedDraft:unknown;verification:unknown;processedAt:Date|null}, now:Date) {
+  if (!input.sourceUrl || !input.normalizedDraft || typeof input.normalizedDraft !== "object") return null;
+  const draft=input.normalizedDraft as VerifiedSubmissionDraft;
+  const facts=draft.sourceFacts;
+  const validFrom=draft.validFrom ? new Date(draft.validFrom) : null;
+  const validUntil=draft.validUntil ? new Date(draft.validUntil) : null;
+  if(!facts || !validFrom || !validUntil || validFrom>now || validUntil<now) return null;
+  const programs=Array.isArray(facts.cardPrograms)?facts.cardPrograms.filter(Boolean):[];
+  const amounts=Array.isArray(facts.monetaryAmounts)?facts.monetaryAmounts.filter(v=>Number.isFinite(v)&&v>0):[];
+  const installments=Array.isArray(facts.installmentCounts)?facts.installmentCounts.filter(v=>Number.isFinite(v)&&v>1):[];
+  if(!programs.length || (!amounts.length&&!installments.length)) return null;
+  const title=draft.sourceTitle?.trim() || programs.join(" / ")+" kampanyası";
+  const fingerprint=createHash("sha256").update(JSON.stringify([input.id,input.sourceUrl,draft.validUntil,input.verification])).digest("hex").slice(0,24);
+  const amountText=amounts.length ? amounts.slice(0,5).map(v=>money(v)).filter(Boolean).join(" · ") : null;
+  const installmentText=installments.length ? installments.slice(0,5).join(", ")+" taksit" : null;
+  const body=[
+    "💳 *PUANAI | RESMÎ KAMPANYA*",
+    "*"+title+"*",
+    "💳 Kart programı: *"+programs.join(" / ")+"*",
+    amountText ? "💰 Kaynakta geçen tutarlar: *"+amountText+"*" : null,
+    installmentText ? "🧾 Taksit: *"+installmentText+"*" : null,
+    facts.participationRequired ? "📲 Katılım: *Kampanyaya katılım gerekiyor*" : null,
+    "📅 Son gün: *"+dateTR(validUntil.toISOString())+"*",
+    "",
+    "🔗 Resmî kaynak:",
+    input.sourceUrl,
+    "",
+    "🔎 Kartları karşılaştır:",
+    "https://www.uretir.com/puan-ai",
+    "",
+    "*PuanAI • uretir.com*",
+  ].filter((line):line is string=>line!==null).join("\n");
+  return {fingerprint,campaignId:"submission:"+input.id,bank:programs[0].toLocaleLowerCase("tr-TR"),category:"official-campaign",body};
+}
+
 export async function GET(request: NextRequest) {
   if (!authorized(request)) return NextResponse.json({ error: "Yetkisiz erişim." }, { status: 401 });
 
   try {
     const now = new Date();
     const catalog = await getCampaignCatalog();
-    const items = catalog
+    let items = catalog
       .filter((campaign) =>
         campaign.published
         && ["ACTIVE", "VERIFIED"].includes(campaign.status)
@@ -122,6 +171,16 @@ export async function GET(request: NextRequest) {
       .map(toItem)
       .filter((item): item is NonNullable<ReturnType<typeof toItem>> => item !== null)
       .slice(0, 24);
+
+    if (!items.length) {
+      const submissions = await getPrisma().campaignSubmission.findMany({
+        where: { status: "VERIFIED", sourceUrl: { not: null }, processedAt: { not: null } },
+        orderBy: { processedAt: "desc" },
+        take: 60,
+        select: { id:true, sourceUrl:true, normalizedDraft:true, verification:true, processedAt:true },
+      });
+      items = submissions.map(item=>submissionItem(item,now)).filter((item):item is NonNullable<ReturnType<typeof submissionItem>>=>item!==null).slice(0,24);
+    }
 
     return NextResponse.json({
       channel_url: whatsappChannel,

@@ -1,10 +1,12 @@
-import type {Metadata} from "next";
-import {getAutomotiveSnapshot} from "@/lib/araba-ai/analysis";
-export const metadata:Metadata={title:"ArabaAI · Sıfır araç fiyatları ve kampanyaları",description:"Türkiye'deki otomobil markalarının resmî fiyat listelerini, fiyat değişimlerini ve güncel kampanyalarını tek yerde izleyin.",alternates:{canonical:"/araba-ai"},openGraph:{title:"ArabaAI — Üretir",description:"Resmî marka kaynaklarından sıfır araç fiyat ve kampanya takibi.",url:"/araba-ai",type:"website"}};
-export const dynamic="force-dynamic";
-const tl=(n:number)=>new Intl.NumberFormat("tr-TR",{maximumFractionDigits:0}).format(n)+" TL";
-export default async function Page(){
- let data;try{data=await getAutomotiveSnapshot();}catch{return <main className="mx-auto max-w-5xl px-6 py-16"><h1 className="text-4xl font-semibold">ArabaAI</h1><p className="mt-4">Resmî otomotiv kaynakları taranıyor.</p></main>;}
- const brands=[...new Set(data.prices.map(p=>p.brand))];
- return <main className="mx-auto max-w-6xl px-6 py-12"><p className="text-sm font-semibold uppercase tracking-widest">ÜRETİR / ARABAAI</p><h1 className="mt-3 text-4xl font-semibold">Sıfır araç fiyatı ve kampanyası, kaynağıyla birlikte.</h1><p className="mt-4 max-w-3xl text-lg">ArabaAI resmî marka sayfalarındaki fiyat listelerini ve tarihli kampanyaları kaydeder. Fiyat geçmişi oluştukça model bazında artış ve düşüşleri de gösterir.</p><section className="mt-10"><h2 className="text-2xl font-semibold">Güncel fiyatlar</h2>{brands.map(brand=><div key={brand} className="mt-6 rounded-2xl border p-5"><h3 className="text-xl font-semibold">{brand}</h3><div className="mt-3 grid gap-3">{data.prices.filter(p=>p.brand===brand).slice(0,20).map(p=><div key={p.model+p.sourceUrl} className="flex flex-wrap justify-between gap-3 border-t pt-3"><div><strong>{p.model}</strong><p className="text-sm">{p.changePct===null?"İlk fiyat gözlemi":("Önceki gözleme göre "+(p.changePct>0?"+":"")+p.changePct.toFixed(1)+"%")}</p></div><a href={p.sourceUrl} target="_blank" rel="noreferrer">{tl(p.effectivePrice)} ↗</a></div>)}</div></div>)}</section><section className="mt-10"><h2 className="text-2xl font-semibold">Aktif kampanyalar</h2><div className="mt-4 grid gap-4">{data.campaigns.filter(c=>c.validUntil).slice(0,30).map(c=><article key={c.brand+c.title+c.sourceUrl} className="rounded-2xl border p-5"><strong>{c.brand} · {c.title}</strong><p className="mt-2 line-clamp-3">{c.summary}</p><p className="mt-2 text-sm">Son tarih: {c.validUntil?new Date(c.validUntil).toLocaleDateString("tr-TR",{timeZone:"Europe/Istanbul"}):"Kaynakta açık tarih yok"}</p><a className="mt-3 inline-block underline" href={c.sourceUrl} target="_blank" rel="noreferrer">Resmî kaynak ↗</a></article>)}</div></section></main>;
+import type { Metadata } from "next";
+import { ChannelToolNavigation } from "@/components/channel-tool-navigation";
+import { ToolExplorer } from "@/components/tool-explorer";
+import { getAutomotiveSnapshot } from "@/lib/araba-ai/analysis";
+import { automotiveExplorer, unavailableExplorer } from "@/lib/tool-explorer-data";
+export const metadata: Metadata = { title: "ArabaAI · Araç fiyatlarını ve kampanyaları karşılaştır", description: "Resmî sıfır araç fiyatlarını marka ve bütçeye göre filtreleyin, modelleri yan yana karşılaştırın ve ArabaAI WhatsApp kanalını takip edin.", alternates: { canonical: "/araba-ai" }, openGraph: { title: "ArabaAI — Üretir", description: "Kaynaklı sıfır araç fiyatları ve tarihli kampanyalar.", url: "/araba-ai", type: "website" } };
+export const dynamic = "force-dynamic";
+export default async function Page() {
+  let data = unavailableExplorer;
+  try { data = automotiveExplorer(await getAutomotiveSnapshot()); } catch { /* The workspace and retry remain available. */ }
+  return <><ChannelToolNavigation active="araba-ai"/><ToolExplorer slug="araba-ai" data={data}/></>;
 }

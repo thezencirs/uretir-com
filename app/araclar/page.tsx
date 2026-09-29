@@ -2,17 +2,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { ToolShortcuts } from "@/components/tool-shortcuts";
+import { channelTools } from "@/lib/channel-tools";
 
 export const metadata: Metadata = {
   title: "Araçlar",
-  description: "Üretir yapay zekâ araçları: PuanAI, TeşvikAI, HibeAI ve daha fazlası.",
+  description: "Haber, finans, kart kampanyaları, fiyat geçmişi, otomobil ve konut araştırması: Üretir araçları ve WhatsApp kanalları.",
   alternates: { canonical: "/araclar" },
-  openGraph: { title: "Araçlar — Üretir", description: "Üretir yapay zekâ araçları: PuanAI, TeşvikAI, HibeAI ve daha fazlası.", url: "/araclar", type: "website" },
+  openGraph: { title: "Araçlar — Üretir", description: "Haber, finans, kart kampanyaları, fiyat geçmişi, otomobil ve konut araştırması: Üretir araçları ve WhatsApp kanalları.", url: "/araclar", type: "website" },
 };
 
 const tools = [
   { name: "UretirAI", description: "Üretim sorularını kaynaklar ve bağlantılı varlıklarla araştırın.", href: "/uretir-ai", color: "#78a5b6", status: "Bilgi temeli" },
-  { name: "PuanAI", description: "Resmî kaynakla doğrulanmış kart kampanyalarını mağaza, tutar, ödül ve taksit koşullarına göre karşılaştırın.", href: "/puan-ai", color: "#c8f560", status: "Doğrulanmış veri" },
   { name: "OyunAI", description: "İngilizce kelimeleri görselleriyle eşleştiren Memo hafıza oyununu oynayın.", href: "/oyun-ai", color: "#4f46e5", status: "Kullanıma açık" },
   { name: "TesvikAI", description: "Teşvik hazırlığını resmî kaynaklar ve kontrol listeleriyle yönetin.", href: "/tesvik-ai", color: "#8b80c2", status: "Editoryal temel" },
   { name: "HibeAI", description: "Hibe programlarını takip edin.", href: "/yakinda", color: "#8b80c2", status: "Yakında" },
@@ -35,7 +36,7 @@ export default function AraclarPage() {
         </div>
         <div className="grid max-w-sm grid-cols-2 border-t hairline pt-5 text-sm">
           <div>
-            <p className="font-display text-4xl">{String(tools.length).padStart(2, "0")}</p>
+            <p className="font-display text-4xl">{String(tools.length + channelTools.length).padStart(2, "0")}</p>
             <p className="mt-2 text-xs text-muted">Toplam araç</p>
           </div>
           <div>
@@ -46,7 +47,9 @@ export default function AraclarPage() {
       </div>
     </div>
 
+    <ToolShortcuts />
     <div className="section-wrap pb-20 md:pb-32">
+      <h2 className="font-display text-3xl mb-8">Üretim ve keşif araçları</h2>
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {tools.map((tool, index) => (
           <Link href={tool.href} key={tool.name} className="group border hairline p-6 transition duration-300 hover:border-[color:var(--foreground)] hover:shadow-[0_12px_40px_rgba(0,0,0,.06)] md:p-8">

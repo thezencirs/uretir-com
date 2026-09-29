@@ -3,291 +3,197 @@ dotenv.config({ path: "../.env.production.local", quiet: true });
 dotenv.config({ quiet: true });
 import qrcode from "qrcode-terminal";
 import QRCode from "qrcode";
+import { createHash } from "node:crypto";
 import { createServer } from "node:http";
 import fs from "node:fs/promises";
+import path from "node:path";
 import pkg from "whatsapp-web.js";
 
 const { Client, LocalAuth } = pkg;
 const siteUrl = (process.env.SITE_URL || "https://www.uretir.com").replace(/\/$/, "");
-const secret = process.env.WHATSAPP_BOT_SECRET || process.env.CRON_SECRET;
-const pollMs = 30 * 60_000;
-const statePath = "./data/channel-state.json";
+const pollMs = Math.max(5, Number(process.env.POLL_MINUTES || 10)) * 60_000;
+const dataDir = process.env.BOT_DATA_DIR || "./data";
+const statePath = path.join(dataDir, "channel-state.json");
+const panelToken = process.env.PANEL_TOKEN || "";
+const port = Number(process.env.PORT || 3217);
 
 const targets = [
-  {
-    key: "haberai",
-    name: "HaberAI",
-    inviteCode: "0029VbDk4gHGpLHXkGseaf3Y",
-    endpoint: "/api/haber-ai/whatsapp",
-    mode: "claim",
-    minIntervalMs: 0,
-  },
-  {
-    key: "finansai",
-    name: "FinansAI",
-    inviteCode: "0029VbDIS6B4inoiXI8jeE05",
-    endpoint: "/api/finans-ai/whatsapp",
-    mode: "snapshot",
-    minIntervalMs: 60 * 60_000,
-  },
-  {
-    key: "puanai",
-    name: "PuanAI",
-    inviteCode: "0029VbDbbII8PgsA574OLl1H",
-    endpoint: "/api/puan-ai/whatsapp",
-    mode: "queue",
-    minIntervalMs: 60 * 60_000,
-  },
-  {
-    key: "indirimai",
-    name: "İndirimAI",
-    inviteCode: process.env.INDIRIMAI_CHANNEL_INVITE_CODE || "0029VbEFC5zICVfmJzjAfY2Q",
-    endpoint: "/api/indirim-ai/whatsapp",
-    mode: "snapshot",
-    minIntervalMs: 60 * 60_000,
-  },
-  {
-    key: "arabaai",
-    name: "ArabaAI",
-    inviteCode: process.env.ARABAAI_CHANNEL_INVITE_CODE || "0029Vb8r7Vh8F2p8FcGDsj1L",
-    endpoint: "/api/araba-ai/whatsapp",
-    mode: "queue",
-    minIntervalMs: 60 * 60_000,
-  },
-  {
-    key: "evai",
-    name: "EvAI",
-    inviteCode: process.env.EVAI_CHANNEL_INVITE_CODE || "0029VaBzvL33gvWb52bNHv0q",
-    endpoint: "/api/ev-ai/whatsapp",
-    mode: "queue",
-    minIntervalMs: 75 * 60_000,
-    dailyLimit: 10,
-  },
+  { key:"haberai", name:"HaberAI", inviteCode:"0029VbDk4gHGpLHXkGseaf3Y", endpoint:"/api/channel-feed/haber-ai", mode:"snapshot", minIntervalMs:0 },
+  { key:"finansai", name:"FinansAI", inviteCode:"0029VbDIS6B4inoiXI8jeE05", endpoint:"/api/channel-feed/finans-ai", mode:"snapshot", minIntervalMs:60*60_000 },
+  { key:"puanai", name:"PuanAI", inviteCode:"0029VbDbbII8PgsA574OLl1H", endpoint:"/api/channel-feed/puan-ai", mode:"queue", minIntervalMs:60*60_000 },
+  { key:"indirimai", name:"İndirimAI", inviteCode:"0029VbEFC5zICVfmJzjAfY2Q", endpoint:"/api/channel-feed/indirim-ai", mode:"snapshot", minIntervalMs:60*60_000 },
+  { key:"arabaai", name:"ArabaAI", inviteCode:"0029Vb8r7Vh8F2p8FcGDsj1L", endpoint:"/api/channel-feed/araba-ai", mode:"queue", minIntervalMs:60*60_000 },
+  { key:"evai", name:"EvAI", inviteCode:"0029VaBzvL33gvWb52bNHv0q", endpoint:"/api/channel-feed/ev-ai", mode:"queue", minIntervalMs:75*60_000, dailyLimit:10 },
 ];
 
-let busy = false;
-let qrImage = "";
-let connectionStatus = "WhatsApp bağlantısı hazırlanıyor";
-const targetStatus = Object.fromEntries(targets.map((target) => [target.key, "bekleniyor"]));
+let busy=false;
+let qrImage="";
+let ready=false;
+let connectionStatus="WhatsApp bağlantısı hazırlanıyor";
+const targetStatus=Object.fromEntries(targets.map(target=>[target.key,"bekleniyor"]));
 
+function escapeHtml(value){
+  return String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
+}
+function panelAuthorized(req){
+  if(!panelToken)return false;
+  const url=new URL(req.url||"/",`http://${req.headers.host||"localhost"}`);
+  return url.searchParams.get("token")===panelToken || req.headers.authorization===`Bearer ${panelToken}`;
+}
 createServer((req,res)=>{
-  if(req.headers.host!=="127.0.0.1:3217"){res.writeHead(403);res.end();return;}
+  if(req.url?.startsWith("/health")){
+    res.writeHead(200,{"Content-Type":"application/json","Cache-Control":"no-store"});
+    res.end(JSON.stringify({ok:true,ready,status:connectionStatus,targets:targetStatus}));
+    return;
+  }
+  if(!panelAuthorized(req)){
+    res.writeHead(403,{"Content-Type":"text/plain; charset=utf-8"});
+    res.end("Yetkisiz panel erişimi.");
+    return;
+  }
   res.writeHead(200,{"Content-Type":"text/html; charset=utf-8","Cache-Control":"no-store","Content-Security-Policy":"default-src 'none'; img-src data:; style-src 'unsafe-inline'; frame-ancestors 'none'"});
-  const rows = targets.map((target) => `<li><strong>${target.name}</strong>: ${escapeHtml(targetStatus[target.key])}</li>`).join("");
-  res.end(`<!doctype html><html lang="tr"><head><meta http-equiv="refresh" content="8"><title>Üretir WhatsApp Kanal Botu</title></head><body style="font:18px system-ui;text-align:center;background:#f6f8f2;padding:30px"><h1>uretir.com · WhatsApp kanal motoru</h1><p>${escapeHtml(connectionStatus)}</p>${qrImage?`<img width="360" height="360" alt="WhatsApp bot eşleştirme QR kodu" src="${qrImage}"><p>Telefonda WhatsApp → Bağlı cihazlar → Cihaz bağla</p>`:""}<ul style="max-width:640px;margin:24px auto;text-align:left">${rows}</ul><p>Kontrol aralığı: ${pollMs / 60000} dakika</p></body></html>`);
-}).listen(3217,"127.0.0.1");
+  const rows=targets.map(target=>`<li><strong>${target.name}</strong>: ${escapeHtml(targetStatus[target.key])}</li>`).join("");
+  res.end(`<!doctype html><html lang="tr"><head><meta http-equiv="refresh" content="8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Üretir WhatsApp Kanal Motoru</title></head><body style="font:18px system-ui;text-align:center;background:#f6f8f2;padding:24px"><h1>uretir.com · WhatsApp kanal motoru</h1><p>${escapeHtml(connectionStatus)}</p>${qrImage?`<img style="max-width:90vw;height:auto" width="420" height="420" alt="WhatsApp bot eşleştirme QR kodu" src="${qrImage}"><p>WhatsApp → Bağlı cihazlar → Cihaz bağla</p>`:""}<ul style="max-width:720px;margin:24px auto;text-align:left">${rows}</ul><p>Kontrol aralığı: ${pollMs/60000} dakika</p></body></html>`);
+}).listen(port,"0.0.0.0",()=>console.log(`Durum paneli 0.0.0.0:${port} üzerinde hazır.`));
 
-if (!secret || secret === "[SENSITIVE]") throw new Error("Bot erişim anahtarı eksik.");
-
-const client = new Client({
-  authStrategy: new LocalAuth({ dataPath: "./data/auth" }),
-  puppeteer: { headless: true },
+const client=new Client({
+  authStrategy:new LocalAuth({dataPath:path.join(dataDir,"auth")}),
+  puppeteer:{
+    headless:true,
+    executablePath:process.env.PUPPETEER_EXECUTABLE_PATH||undefined,
+    args:["--no-sandbox","--disable-setuid-sandbox","--disable-dev-shm-usage","--disable-gpu"],
+  },
 });
 
-client.on("qr", async (value) => {
-  qrImage = await QRCode.toDataURL(value,{width:480,margin:3});
-  connectionStatus = "Kanal yöneticisi hesabınızla QR kodunu okutun";
-  console.log("WhatsApp Web QR kodunu kanal yöneticisi hesabıyla okutun:");
-  qrcode.generate(value, { small: true });
+client.on("qr",async value=>{
+  ready=false;
+  qrImage=await QRCode.toDataURL(value,{width:480,margin:3});
+  connectionStatus="Kanal yöneticisi hesabınızla QR kodunu bir kez okutun";
+  console.log("WhatsApp Web QR kodu üretildi.");
+  qrcode.generate(value,{small:true});
 });
-client.on("authenticated", () => {
+client.on("authenticated",()=>{
   qrImage="";
-  connectionStatus="Oturum doğrulandı; kanal bağlantıları hazırlanıyor";
+  connectionStatus="Oturum doğrulandı; kanallar hazırlanıyor";
   console.log("WhatsApp oturumu doğrulandı.");
 });
-client.on("auth_failure", (message) => console.error("WhatsApp oturum hatası:", message));
-client.on("ready", async () => {
-  connectionStatus="Bağlandı. Yetkilendirilmiş Üretir AI kanalları kontrol ediliyor.";
-  console.log(`Hazır. ${targets.map((target) => target.name).join(", ")} için ${pollMs / 60000} dakikada bir kontrol ediliyor.`);
+client.on("auth_failure",message=>{
+  ready=false;
+  connectionStatus="WhatsApp oturum hatası";
+  console.error("WhatsApp oturum hatası:",message);
+});
+client.on("disconnected",reason=>{
+  ready=false;
+  connectionStatus="WhatsApp bağlantısı koptu; servis yeniden başlatılıyor";
+  console.error("WhatsApp bağlantısı koptu:",reason);
+  setTimeout(()=>process.exit(1),1000);
+});
+client.on("ready",async()=>{
+  ready=true;
+  qrImage="";
+  connectionStatus="Bağlandı. Altı Üretir AI kanalı otomatik yayın modunda.";
+  console.log(`Hazır. ${targets.map(target=>target.name).join(", ")} için ${pollMs/60000} dakikada bir kontrol ediliyor.`);
   await poll();
-  setInterval(poll, pollMs);
+  setInterval(poll,pollMs);
 });
 
-function escapeHtml(value) {
-  return String(value ?? "").replace(/[&<>"']/g, (char) => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;",
-  })[char]);
+async function readState(){
+  try{return JSON.parse(await fs.readFile(statePath,"utf8"));}catch{return {};}
 }
-
-async function readState() {
-  try {
-    return JSON.parse(await fs.readFile(statePath, "utf8"));
-  } catch {
-    return {};
-  }
+async function writeState(state){
+  await fs.mkdir(dataDir,{recursive:true});
+  await fs.writeFile(statePath,JSON.stringify(state,null,2),"utf8");
 }
-
-async function writeState(state) {
-  await fs.mkdir("./data", { recursive: true });
-  await fs.writeFile(statePath, JSON.stringify(state, null, 2), "utf8");
-}
-
-function istanbulDay() {
+function istanbulDay(){
   return new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Istanbul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
 }
-function due(target, state) {
-  const own = state?.[target.key] || {};
-  if (target.dailyLimit && own.dailyDay === istanbulDay() && (own.dailyCount || 0) >= target.dailyLimit) return false;
-  if (!target.minIntervalMs) return true;
-  const last = Date.parse(own.lastSentAt || "");
-  return !Number.isFinite(last) || Date.now() - last >= target.minIntervalMs;
+function due(target,state){
+  const own=state?.[target.key]||{};
+  if(target.dailyLimit&&own.dailyDay===istanbulDay()&&(own.dailyCount||0)>=target.dailyLimit)return false;
+  if(!target.minIntervalMs)return true;
+  const last=Date.parse(own.lastSentAt||"");
+  return !Number.isFinite(last)||Date.now()-last>=target.minIntervalMs;
 }
-
-function findChannel(channels, target) {
-  const matches = channels.filter((channel) =>
-    channel.channelMetadata?.inviteCode === target.inviteCode
-    || channel.channelMetadata?.inviteLink === `https://whatsapp.com/channel/${target.inviteCode}`
-  );
-  if (matches.length !== 1) throw new Error(`${target.name} kanal davet bağlantısı doğrulanamadı.`);
-  const channel = matches[0];
-  const role = channel?.channelMetadata?.membershipType;
-  if (!channel?.id?._serialized || !["owner", "admin"].includes(role)) {
-    throw new Error(`${target.name} yazma yetkisi doğrulanamadı (${role || "bilinmiyor"}).`);
-  }
+function findChannel(channels,target){
+  const matches=channels.filter(channel=>channel.channelMetadata?.inviteCode===target.inviteCode||channel.channelMetadata?.inviteLink===`https://whatsapp.com/channel/${target.inviteCode}`);
+  if(matches.length!==1)throw new Error(`${target.name} kanal davet bağlantısı doğrulanamadı.`);
+  const channel=matches[0],role=channel?.channelMetadata?.membershipType;
+  if(!channel?.id?._serialized||!["owner","admin"].includes(role))throw new Error(`${target.name} yazma yetkisi doğrulanamadı (${role||"bilinmiyor"}).`);
   return channel;
 }
-
-async function api(path, init = {}) {
-  const method = String(init.method || "GET").toUpperCase();
-  const attempts = method === "GET" ? 3 : 1;
-  let lastStatus = 0;
-  for (let attempt = 0; attempt < attempts; attempt++) {
-    try {
-      const response = await fetch(`${siteUrl}${path}`, {
-        ...init,
-        signal: AbortSignal.timeout(60000),
-        headers: {
-          Authorization: `Bearer ${secret}`,
-          "Content-Type": "application/json",
-          ...(init.headers || {}),
-        },
-      });
-      lastStatus = response.status;
-      if (response.ok) return response.json();
-      if (!(method === "GET" && (response.status === 429 || response.status >= 500) && attempt < attempts - 1)) {
-        throw new Error(`uretir.com ${path} → HTTP ${response.status}`);
-      }
-    } catch (error) {
-      if (method !== "GET" || attempt >= attempts - 1) throw error;
-    }
-    await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+async function api(endpoint){
+  let lastError;
+  for(let attempt=0;attempt<3;attempt++){
+    try{
+      const response=await fetch(`${siteUrl}${endpoint}`,{signal:AbortSignal.timeout(65_000),headers:{"User-Agent":"Uretir-WhatsApp-Publisher/1.0"}});
+      if(response.ok)return response.json();
+      lastError=new Error(`uretir.com ${endpoint} → HTTP ${response.status}`);
+      if(response.status<500&&response.status!==429)break;
+    }catch(error){lastError=error;}
+    await new Promise(resolve=>setTimeout(resolve,700*(attempt+1)));
   }
-  throw new Error(`uretir.com ${path} → HTTP ${lastStatus || "bağlantı hatası"}`);
+  throw lastError||new Error("uretir.com bağlantı hatası");
 }
-
-async function sendMessage(channel, body) {
-  const message = await channel.sendMessage(body);
-  if (!message?.id?._serialized) throw new Error("Gönderim sonucu belirsiz; otomatik tekrar yapılmayacak.");
+async function sendMessage(channel,body){
+  const message=await channel.sendMessage(body);
+  if(!message?.id?._serialized)throw new Error("Gönderim sonucu belirsiz; otomatik tekrar yapılmayacak.");
   return message.id._serialized;
 }
-
-async function publishHaberAI(target, channel) {
-  await api("/api/cron/haber-ai");
-
-  const { bulletin } = await api(target.endpoint, {
-    method: "POST",
-    body: JSON.stringify({ action:"claim" }),
-  });
-  if (!bulletin) return { sent:false, status:"yeni şehir haberi yok" };
-
-  const expectedUrl = `https://whatsapp.com/channel/${target.inviteCode}`;
-  if (bulletin.channel_url !== expectedUrl) throw new Error("HaberAI kanal hedefi uyuşmuyor.");
-
-  const messageId = await sendMessage(channel, bulletin.body);
-  await api(target.endpoint, {
-    method: "POST",
-    body: JSON.stringify({ action:"ack", claimId:bulletin.claimId, messageId }),
-  });
-  return { sent:true, status:"bülten gönderildi", messageId };
-}
-
-async function publishSnapshot(target, channel, state) {
-  if (!due(target, state)) return { sent:false, status:"sıradaki yayın saati bekleniyor" };
-  const payload = await api(target.endpoint);
-  if (!payload?.body || !payload?.fingerprint) return { sent:false, status:"yayınlanabilir veri yok" };
-  const own = state[target.key] || {};
-  if (own.lastFingerprint === payload.fingerprint) return { sent:false, status:"veri değişmedi" };
-
-  const expectedUrl = `https://whatsapp.com/channel/${target.inviteCode}`;
-  if (payload.channel_url !== expectedUrl) throw new Error(`${target.name} kanal hedefi uyuşmuyor.`);
-
-  const messageId = await sendMessage(channel, payload.body);
-  state[target.key] = {
-    ...own,
-    lastFingerprint: payload.fingerprint,
-    lastSentAt: new Date().toISOString(),
-    messageId,
-  };
+async function publishSnapshot(target,channel,state){
+  if(!due(target,state))return {sent:false,status:"sıradaki yayın saati bekleniyor"};
+  const payload=await api(target.endpoint);
+  if(!payload?.body)return {sent:false,status:payload?.status||"yayınlanabilir veri yok"};
+  const fingerprint=payload.fingerprint||createHash("sha256").update(payload.body).digest("hex").slice(0,24);
+  const own=state[target.key]||{};
+  if(own.lastFingerprint===fingerprint)return {sent:false,status:"veri değişmedi"};
+  const expectedUrl=`https://whatsapp.com/channel/${target.inviteCode}`;
+  const actualUrl=payload.channel_url||payload.channel;
+  if(actualUrl!==expectedUrl)throw new Error(`${target.name} kanal hedefi uyuşmuyor.`);
+  const messageId=await sendMessage(channel,payload.body);
+  state[target.key]={...own,lastFingerprint:fingerprint,lastSentAt:new Date().toISOString(),messageId};
   await writeState(state);
-  return { sent:true, status:"piyasa özeti gönderildi", messageId };
+  return {sent:true,status:"özet gönderildi",messageId};
 }
-
-async function publishQueue(target, channel, state) {
-  if (!due(target, state)) return { sent:false, status:"sıradaki yayın saati bekleniyor" };
-  const payload = await api(target.endpoint);
-  const items = Array.isArray(payload?.items) ? payload.items : [];
-  if (!items.length) return { sent:false, status:"yayınlanabilir yeni içerik yok" };
-
-  const expectedUrl = `https://whatsapp.com/channel/${target.inviteCode}`;
-  if (payload.channel_url !== expectedUrl) throw new Error(`${target.name} kanal hedefi uyuşmuyor.`);
-
-  const own = state[target.key] || {};
-  const sentFingerprints = Array.isArray(own.sentFingerprints) ? own.sentFingerprints : [];
-  const seen = new Set(sentFingerprints);
-  const unseen = items.filter((item) => item?.fingerprint && item?.body && !seen.has(item.fingerprint));
-  if (!unseen.length) return { sent:false, status:"daha önce gönderilmemiş yeni içerik yok" };
-
-  const groupOf = (item) => item.bank || item.brand || item.source || "";
-  const selected = unseen.find((item) => groupOf(item) !== own.lastGroup && item.category !== own.lastCategory) || unseen[0];
-  const messageId = await sendMessage(channel, selected.body);
-  const day = istanbulDay();
-  state[target.key] = {
-    ...own,
-    sentFingerprints: [...sentFingerprints, selected.fingerprint].slice(-300),
-    lastGroup: groupOf(selected),
-    lastCategory: selected.category,
-    lastSentAt: new Date().toISOString(),
-    messageId,
-    dailyDay: day,
-    dailyCount: own.dailyDay === day ? (own.dailyCount || 0) + 1 : 1,
-  };
+async function publishQueue(target,channel,state){
+  if(!due(target,state))return {sent:false,status:"sıradaki yayın saati bekleniyor"};
+  const payload=await api(target.endpoint),items=Array.isArray(payload?.items)?payload.items:[];
+  if(!items.length)return {sent:false,status:"yayınlanabilir yeni içerik yok"};
+  const expectedUrl=`https://whatsapp.com/channel/${target.inviteCode}`;
+  if(payload.channel_url!==expectedUrl)throw new Error(`${target.name} kanal hedefi uyuşmuyor.`);
+  const own=state[target.key]||{},sentFingerprints=Array.isArray(own.sentFingerprints)?own.sentFingerprints:[],seen=new Set(sentFingerprints);
+  const unseen=items.filter(item=>item?.fingerprint&&item?.body&&!seen.has(item.fingerprint));
+  if(!unseen.length)return {sent:false,status:"daha önce gönderilmemiş yeni içerik yok"};
+  const groupOf=item=>item.bank||item.brand||item.source||item.city||"";
+  const selected=unseen.find(item=>groupOf(item)!==own.lastGroup&&item.category!==own.lastCategory)||unseen[0];
+  const messageId=await sendMessage(channel,selected.body),day=istanbulDay();
+  state[target.key]={...own,sentFingerprints:[...sentFingerprints,selected.fingerprint].slice(-500),lastGroup:groupOf(selected),lastCategory:selected.category,lastSentAt:new Date().toISOString(),messageId,dailyDay:day,dailyCount:own.dailyDay===day?(own.dailyCount||0)+1:1};
   await writeState(state);
-  return { sent:true, status:"içerik gönderildi", messageId };
+  return {sent:true,status:"içerik gönderildi",messageId};
 }
-
-async function pollTarget(target, channels, state) {
-  try {
-    const channel = findChannel(channels, target);
-    const result = target.mode === "claim"
-      ? await publishHaberAI(target, channel)
-      : target.mode === "snapshot"
-        ? await publishSnapshot(target, channel, state)
-        : await publishQueue(target, channel, state);
-    targetStatus[target.key] = `${result.status} · ${new Date().toLocaleString("tr-TR",{timeZone:"Europe/Istanbul"})}`;
-    if (result.sent) console.log(`${target.name}: ${result.status} (${result.messageId})`);
-  } catch (error) {
-    const message = String(error instanceof Error ? error.message : error);
-    targetStatus[target.key] = "hata: " + message;
-    console.error(`${target.name} kontrolü başarısız:`, message);
+async function pollTarget(target,channels,state){
+  try{
+    const channel=findChannel(channels,target);
+    const result=target.mode==="snapshot"?await publishSnapshot(target,channel,state):await publishQueue(target,channel,state);
+    targetStatus[target.key]=`${result.status} · ${new Date().toLocaleString("tr-TR",{timeZone:"Europe/Istanbul"})}`;
+    if(result.sent)console.log(`${target.name}: ${result.status} (${result.messageId})`);
+  }catch(error){
+    const message=String(error instanceof Error?error.message:error);
+    targetStatus[target.key]="hata: "+message;
+    console.error(`${target.name} kontrolü başarısız:`,message);
   }
 }
-
-async function poll() {
-  if (busy) return;
-  busy = true;
-  try {
-    const channels = await client.getChannels();
-    const state = await readState();
-    for (const target of targets) {
-      await pollTarget(target, channels, state);
-    }
-    connectionStatus = "Son kanal kontrolü: " + new Date().toLocaleString("tr-TR",{timeZone:"Europe/Istanbul"});
-  } catch (error) {
-    connectionStatus = "Kontrol başarısız: " + String(error instanceof Error ? error.message : error);
-    console.error("Kanal kontrolü başarısız:", error instanceof Error ? error.message : error);
-  } finally {
-    busy = false;
-  }
+async function poll(){
+  if(busy||!ready)return;
+  busy=true;
+  try{
+    const channels=await client.getChannels(),state=await readState();
+    for(const target of targets)await pollTarget(target,channels,state);
+    connectionStatus="Son kanal kontrolü: "+new Date().toLocaleString("tr-TR",{timeZone:"Europe/Istanbul"});
+  }catch(error){
+    connectionStatus="Kontrol başarısız: "+String(error instanceof Error?error.message:error);
+    console.error("Kanal kontrolü başarısız:",error instanceof Error?error.message:error);
+  }finally{busy=false;}
 }
 
+await fs.mkdir(dataDir,{recursive:true});
 client.initialize();

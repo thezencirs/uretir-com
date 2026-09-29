@@ -9,7 +9,7 @@ const txt=(v:unknown)=>typeof v==="string"?clean(v):"",obj=(v:unknown)=>v&&typeo
 function ld(html:string){return jsonLdObjects(html).find(n=>/Apartment|House|Residence|SingleFamilyResidence|Accommodation|Product|RealEstateListing|Offer/i.test((Array.isArray(n["@type"])?n["@type"]:[n["@type"]]).join("|")))??null;}
 function typeOf(t:string,u:string,s:PropertySource){const x=(t+" "+u).toLocaleLowerCase("tr-TR");if(s.kind!=="MARKETPLACE"||/icra|ihale|mahkeme|hazine|milli emlak/.test(x))return "AUCTION";if(/kiralık|kiralik|rent/.test(x))return "RENT";if(/satılık|satilik|sale/.test(x))return "SALE";return "OTHER";}
 function propertyType(t:string){const x=t.toLocaleLowerCase("tr-TR");if(/villa/.test(x))return "VILLA";if(/müstakil|mustakil|\bev\b/.test(x))return "HOUSE";if(/residence|rezidans/.test(x))return "RESIDENCE";if(/arsa/.test(x))return "LAND";if(/tarla|bahçe|bahce/.test(x))return "FIELD";if(/iş yeri|isyeri|dükkan|dukkan|ofis/.test(x))return "COMMERCIAL";if(/daire|apartman|konut|mesken/.test(x))return "APARTMENT";return "OTHER";}
-function meta(html:string,key:string){for(const m of html.matchAll(/<meta\\b[^>]*>/gi)){const tag=m[0],name=tag.match(/(?:property|name)=["']([^"']+)["']/i)?.[1];if(name!==key)continue;return tag.match(/content=["']([^"']*)["']/i)?.[1]?.trim()??"";}return "";}
+function meta(html:string,key:string){for(const m of html.matchAll(/<meta\b[^>]*>/gi)){const tag=m[0],name=tag.match(/(?:property|name)=["']([^"']+)["']/i)?.[1];if(name!==key)continue;return tag.match(/content=["']([^"']*)["']/i)?.[1]?.trim()??"";}return "";}
 function dval(v:unknown){if(typeof v!=="string")return null;const d=new Date(v);return Number.isFinite(d.getTime())?d:null;}
 export function parsePropertyPage(html:string,url:string,source:PropertySource){
  const n=ld(html),offer=obj(n?.offers),address=obj(n?.address),floor=obj(n?.floorSize),page=clean(stripHtml(html)).slice(0,12000);
@@ -22,6 +22,55 @@ export function parsePropertyPage(html:string,url:string,source:PropertySource){
  const isPublicAuction=source.kind!=="MARKETPLACE"||listingType==="AUCTION",price=raw&&raw>=1000?raw:null,pricePerM2=price&&grossM2&&grossM2>0?price/grossM2:null,fingerprint=hash(JSON.stringify([listingKey,title,price,grossM2,rooms,city,district,description.slice(0,300)]));
  return {listingKey,sourceId:source.id,sourceName:source.name,sourceKind:source.kind,externalId,listingType,propertyType:pType,title,description,city,district,neighborhood,rooms,grossM2,netM2:null,price,currency:"TRY",pricePerM2,isPublicAuction,publishedAt,sourceUrl:url,imageUrl:image,trustScore:source.trustScore,fingerprint};
 }
+type ParsedProperty=NonNullable<ReturnType<typeof parsePropertyPage>>;
+
+function parseOfficialFeed(html:string,base:string,s:PropertySource):ParsedProperty[]{
+ const out:ParsedProperty[]=[];
+ for(const m of html.matchAll(/<a\b[^>]*href=["']([^"'#]+)["'][^>]*>([\s\S]*?)<\/a>/gi)){
+  try{
+   const u=new URL(m[1],base);u.hash="";
+   if(u.protocol!=="https:"||reg(new URL(base).hostname)!==reg(u.hostname)||!s.detailPatterns.some(p=>p.test(u.pathname+u.search)))continue;
+   const title=clean(stripHtml(m[2]));if(title.length<4)continue;
+   const externalId=u.pathname.match(/^\/ilan\/(\d+)/)?.[1]??null,listingKey=s.id+":"+(externalId??hash(u.toString()).slice(0,24));
+   const rooms=title.match(/\b(\d+\+\d+)\b/)?.[1]??null,grossM2=parseMoney(title.match(/\b([\d.,]+)\s*m(?:²|2)\b/i)?.[1]??null);
+   const listingType=typeOf(title,u.toString(),s),pType=propertyType(title),fingerprint=hash(JSON.stringify([listingKey,title,grossM2,rooms,u.toString()]));
+   out.push({listingKey,sourceId:s.id,sourceName:s.name,sourceKind:s.kind,externalId,listingType,propertyType:pType,title,description:title,city:null,district:null,neighborhood:null,rooms,grossM2,netM2:null,price:null,currency:"TRY",pricePerM2:null,isPublicAuction:true,publishedAt:null,sourceUrl:u.toString(),imageUrl:null,trustScore:s.trustScore,fingerprint});
+  }catch{/* Ignore malformed feed links. */}
+ }
+ return out;
+}
+
+async function officialFeedItems(s:PropertySource){
+ const items:ParsedProperty[]=[];
+ for(const seed of s.seedUrls){
+  try{
+   const u=new URL(seed);if(u.hostname!=="medya.ilan.gov.tr")continue;
+   const page=await fetchPublicText(seed,{agent:AGENT,maxBytes:1500000});
+   items.push(...parseOfficialFeed(page.text,page.url,s));
+  }catch{/* Detail fetching remains as a second path. */}
+ }
+ const seen=new Set<string>();return items.filter(item=>{if(seen.has(item.listingKey))return false;seen.add(item.listingKey);return true;}).slice(0,24);
+}
+
 async function urls(s:PropertySource){const out:string[]=[];for(const seed of s.seedUrls){try{const p=await fetchPublicText(seed,{agent:AGENT,maxBytes:1500000});out.push(...links(p.text,p.url,s.detailPatterns));}catch{}}if(out.length<18)try{out.push(...await discoverPublicUrls(s.origin,s.detailPatterns,{agent:AGENT,maxUrls:18}));}catch{}return [...new Set(out)].slice(0,24);}
-async function collect(s:PropertySource){const prisma=getPrisma(),all=await urls(s);let stored=0,skipped=0;const slot=Math.floor(Date.now()/(2*3600000)),start=all.length?(slot*6)%all.length:0;for(const url of Array.from({length:Math.min(6,all.length)},(_,i)=>all[(start+i)%all.length])){try{const p=await fetchPublicText(url,{agent:AGENT,maxBytes:1800000}),item=parsePropertyPage(p.text,p.url,s);if(!item){skipped++;continue;}const recent=await prisma.propertyListingObservation.findFirst({where:{listingKey:item.listingKey},orderBy:{fetchedAt:"desc"}});if(recent&&recent.fingerprint===item.fingerprint&&Date.now()-recent.fetchedAt.getTime()<21600000){skipped++;continue;}await prisma.propertyListingObservation.create({data:{...item,fetchedAt:new Date()}});stored++;}catch{skipped++;}}return {source:s.id,discovered:all.length,stored,skipped};}
+async function collect(s:PropertySource){
+ const prisma=getPrisma(),[all,feed]=await Promise.all([urls(s),officialFeedItems(s)]);let stored=0,skipped=0;
+ for(const item of feed){
+  try{
+   const recent=await prisma.propertyListingObservation.findFirst({where:{listingKey:item.listingKey},orderBy:{fetchedAt:"desc"}});
+   if(recent&&recent.fingerprint===item.fingerprint&&Date.now()-recent.fetchedAt.getTime()<21600000){skipped++;continue;}
+   await prisma.propertyListingObservation.create({data:{...item,fetchedAt:new Date()}});stored++;
+  }catch{skipped++;}
+ }
+ const slot=Math.floor(Date.now()/(2*3600000)),start=all.length?(slot*6)%all.length:0;
+ for(const url of Array.from({length:Math.min(6,all.length)},(_,i)=>all[(start+i)%all.length])){
+  try{
+   const p=await fetchPublicText(url,{agent:AGENT,maxBytes:1800000}),item=parsePropertyPage(p.text,p.url,s);if(!item){skipped++;continue;}
+   const recent=await prisma.propertyListingObservation.findFirst({where:{listingKey:item.listingKey},orderBy:{fetchedAt:"desc"}});
+   if(recent&&recent.fingerprint===item.fingerprint&&Date.now()-recent.fetchedAt.getTime()<21600000){skipped++;continue;}
+   await prisma.propertyListingObservation.create({data:{...item,fetchedAt:new Date()}});stored++;
+  }catch{skipped++;}
+ }
+ return {source:s.id,discovered:new Set([...all,...feed.map(item=>item.sourceUrl)]).size,stored,skipped};
+}
 export async function collectPropertyListings(){const ss=enabledPropertySources(),results=await Promise.all(ss.map(s=>collect(s).catch(()=>({source:s.id,discovered:0,stored:0,skipped:0}))));return {checkedAt:new Date().toISOString(),partnerSourcesEnabled:process.env.EVAI_ENABLE_PARTNER_SOURCES==="1",sources:results,stored:results.reduce((n,r)=>n+r.stored,0)};}

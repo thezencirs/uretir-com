@@ -1,62 +1,39 @@
-# Üretir WhatsApp Publisher — no-prompt autonomous hosting
+# Üretir WhatsApp Publisher — autonomous no-prompt architecture
 
-## Recommended zero-recurring-hosting-cost layout
+## Primary zero-hosting-cost publisher: GitHub Actions
 
-1. **uretir.com / Vercel** remains the data and feed layer.
-2. **GitHub Actions** continues scheduled source refresh jobs.
-3. **WhatsApp Publisher** runs as one long-lived Docker container on an Oracle Cloud Always Free VM (or an always-on local machine).
-4. The WhatsApp session and send fingerprints live on persistent storage at `/data`.
-5. After one QR pairing, the container restarts automatically and publishes without ChatGPT prompts.
+The repository is public. The primary publisher therefore runs as a short-lived GitHub Actions job twice per hour instead of consuming an always-on VM.
 
-## Why Railway is not the primary free host
+- The WhatsApp LocalAuth directory and channel fingerprint state are archived after every run.
+- The archive is encrypted with a key derived from the existing GitHub `CRON_SECRET` secret before it enters Actions cache.
+- Each run restores and decrypts that state, starts WhatsApp Web, checks all six channels once, sends only due/unseen content, then encrypts state again and exits.
+- One initial QR scan is required. After that no ChatGPT prompt is part of the publication loop.
+- Railway and Oracle/local Docker remain optional fallback modes.
 
-Railway Free has a monthly resource credit, not unlimited compute. It is useful as a staging/fallback host but must not be the only publisher if the requirement is no recurring hosting bill.
+This avoids a recurring publisher-hosting bill and keeps publication compute ephemeral. Standard GitHub-hosted runner usage for public repositories is free under GitHub's published policy.
 
-## Oracle Always Free deployment
+## Data self-healing
 
-Use an Always Free-eligible compute shape in the tenancy home region. ARM/Ampere is suitable; the Dockerfile supports Debian/ARM Chromium packages.
+`.github/workflows/channel-autopilot.yml` checks all six uretir.com feeds hourly. Empty feeds trigger the relevant protected refresh endpoint and are checked again.
 
-On the VM:
+## Fallback: long-running Docker publisher
+
+If scheduled Actions are ever unavailable, the same bot can run continuously with Docker Compose on an owner-controlled machine or an eligible cloud VM.
 
 ```bash
-git clone https://github.com/thezencirs/uretir-com.git
-cd uretir-com/whatsapp-bot
+cd whatsapp-bot
 cp .env.example .env
-# Edit PANEL_TOKEN in .env
-bash deploy-oracle-always-free.sh
+docker compose up -d --build
 ```
 
-The compose file binds the panel to localhost only. Open an SSH tunnel from your computer:
+The compose profile stores LocalAuth and delivery state on a persistent Docker volume and restarts automatically. Its panel binds only to localhost. For a remote machine use SSH tunneling:
 
 ```bash
 ssh -L 3217:127.0.0.1:3217 ubuntu@YOUR_VM_IP
 ```
 
-Then open `http://127.0.0.1:3217/?token=YOUR_PANEL_TOKEN` once and scan the WhatsApp QR with the account that owns/administers all six channels. Port 3217 does not need to be exposed publicly.
+Then open `http://127.0.0.1:3217/?token=YOUR_PANEL_TOKEN`.
 
-## Local-PC fallback
+## Cost caveat
 
-The same folder also works with Docker Desktop:
-
-```powershell
-Copy-Item .env.example .env
-docker compose up -d --build
-```
-
-This has no cloud hosting bill but requires the computer and internet connection to remain on.
-
-## Operational guarantees
-
-- One Chromium/WhatsApp session serves all six channels.
-- Poll interval defaults to 10 minutes.
-- Per-channel publish limits and fingerprint deduplication remain active.
-- EvAI keeps its daily cap.
-- Container restarts automatically after host reboot.
-- Persistent session state survives container replacement.
-
-No third-party free tier can be guaranteed to stay free or unlimited forever; this architecture avoids paid AI/API dependencies in the publication loop and can move between hosts without code changes.
-
-
-## Self-healing data loop
-
-`.github/workflows/channel-autopilot.yml` checks all six WhatsApp-ready feeds every hour. If HaberAI, PuanAI, IndirimAI, ArabaAI or EvAI becomes empty, it calls the corresponding protected refresh endpoint and checks again. This workflow is intentionally separate from message delivery: GitHub repairs data, the long-running publisher delivers messages.
+"No recurring hosting bill" is achievable; no third-party service can be guaranteed to remain literally unlimited forever. Railway Free is credit-limited, Vercel Hobby is quota-limited, and Oracle Always Free has resource and idle-reclamation rules. The repository is designed so the publisher is portable and does not depend on paid LLM/API calls.

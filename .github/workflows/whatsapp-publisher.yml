@@ -1,0 +1,91 @@
+name: WhatsApp six-channel publisher
+
+on:
+  schedule:
+    - cron: "7,37 * * * *"
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/whatsapp-publisher.yml"
+      - "whatsapp-bot/src/**"
+      - "whatsapp-bot/package.json"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: whatsapp-six-channel-publisher
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      WA_STATE_KEY: ${{ secrets.CRON_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: whatsapp-bot/package-lock.json
+
+      - name: Restore encrypted WhatsApp session cache
+        id: restore-wa
+        uses: actions/cache/restore@v4
+        with:
+          path: whatsapp-bot/.autonomous-state.enc
+          key: whatsapp-state-${{ github.run_id }}
+          restore-keys: |
+            whatsapp-state-
+
+      - name: Decrypt prior session
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$WA_STATE_KEY"
+          mkdir -p whatsapp-bot/data
+          if [ -s whatsapp-bot/.autonomous-state.enc ]; then
+            openssl enc -d -aes-256-cbc -pbkdf2               -in whatsapp-bot/.autonomous-state.enc               -out /tmp/whatsapp-state.tar.gz               -pass env:WA_STATE_KEY
+            tar -xzf /tmp/whatsapp-state.tar.gz -C whatsapp-bot
+            echo "Encrypted WhatsApp session restored."
+          else
+            echo "No prior session found. A QR code will be printed below; scan it once from WhatsApp > Linked devices."
+          fi
+
+      - name: Install publisher dependencies
+        working-directory: whatsapp-bot
+        run: npm install --omit=dev
+
+      - name: Publish one autonomous cycle
+        working-directory: whatsapp-bot
+        env:
+          RUN_ONCE: "1"
+          BOT_DATA_DIR: "./data"
+          SITE_URL: "https://www.uretir.com"
+          POLL_MINUTES: "10"
+        run: |
+          export PUPPETEER_EXECUTABLE_PATH="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$PUPPETEER_EXECUTABLE_PATH"
+          npm start
+
+      - name: Encrypt updated session and delivery state
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$WA_STATE_KEY"
+          if [ -d whatsapp-bot/data ]; then
+            find whatsapp-bot/data -type d \( -name Cache -o -name "Code Cache" -o -name GPUCache \) -prune -exec rm -rf {} + 2>/dev/null || true
+            tar -czf /tmp/whatsapp-state.tar.gz -C whatsapp-bot data
+            openssl enc -aes-256-cbc -salt -pbkdf2               -in /tmp/whatsapp-state.tar.gz               -out whatsapp-bot/.autonomous-state.enc               -pass env:WA_STATE_KEY
+          fi
+
+      - name: Save encrypted WhatsApp session cache
+        if: always() && hashFiles('whatsapp-bot/.autonomous-state.enc') != ''
+        uses: actions/cache/save@v4
+        with:
+          path: whatsapp-bot/.autonomous-state.enc
+          key: whatsapp-state-${{ github.run_id }}

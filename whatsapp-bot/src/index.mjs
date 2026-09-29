@@ -16,6 +16,7 @@ const dataDir = process.env.BOT_DATA_DIR || "./data";
 const statePath = path.join(dataDir, "channel-state.json");
 const panelToken = process.env.PANEL_TOKEN || "";
 const port = Number(process.env.PORT || 3217);
+const runOnce = process.env.RUN_ONCE === "1";
 
 const targets = [
   { key:"haberai", name:"HaberAI", inviteCode:"0029VbDk4gHGpLHXkGseaf3Y", endpoint:"/api/channel-feed/haber-ai", mode:"snapshot", minIntervalMs:0 },
@@ -40,7 +41,7 @@ function panelAuthorized(req){
   const url=new URL(req.url||"/",`http://${req.headers.host||"localhost"}`);
   return url.searchParams.get("token")===panelToken || req.headers.authorization===`Bearer ${panelToken}`;
 }
-createServer((req,res)=>{
+if (!runOnce) createServer((req,res)=>{
   if(req.url?.startsWith("/health")){
     res.writeHead(200,{"Content-Type":"application/json","Cache-Control":"no-store"});
     res.end(JSON.stringify({ok:true,ready,status:connectionStatus,targets:targetStatus}));
@@ -81,6 +82,7 @@ client.on("auth_failure",message=>{
   ready=false;
   connectionStatus="WhatsApp oturum hatası";
   console.error("WhatsApp oturum hatası:",message);
+  if(runOnce)setTimeout(()=>process.exit(2),500);
 });
 client.on("disconnected",reason=>{
   ready=false;
@@ -92,8 +94,13 @@ client.on("ready",async()=>{
   ready=true;
   qrImage="";
   connectionStatus="Bağlandı. Altı Üretir AI kanalı otomatik yayın modunda.";
-  console.log(`Hazır. ${targets.map(target=>target.name).join(", ")} için ${pollMs/60000} dakikada bir kontrol ediliyor.`);
+  console.log(`Hazır. ${targets.map(target=>target.name).join(", ")} için ${runOnce?"tek seferlik":"sürekli"} kontrol başlıyor.`);
   await poll();
+  if(runOnce){
+    await new Promise(resolve=>setTimeout(resolve,2500));
+    await client.destroy();
+    process.exit(0);
+  }
   setInterval(poll,pollMs);
 });
 

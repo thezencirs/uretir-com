@@ -2,11 +2,12 @@ import { createHash } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { getCampaignCatalog } from "@/lib/puan-ai/catalog-service";
 import type { CampaignView } from "@/lib/puan-ai/types";
+import { getChannelTool } from "@/lib/channel-tools";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const whatsappChannel = "https://whatsapp.com/channel/0029VbDbbII8PgsA574OLl1H";
+const whatsappChannel = getChannelTool("puan-ai").channelUrl;
 
 function authorized(request: NextRequest) {
   return [process.env.CRON_SECRET, process.env.WHATSAPP_BOT_SECRET]

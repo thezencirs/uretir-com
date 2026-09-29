@@ -1,6 +1,6 @@
 # Üretir WhatsApp Kanal Motoru
 
-Bu bot tek bir WhatsApp Web oturumu ile **HaberAI**, **FinansAI** ve **PuanAI** kanallarını yönetir; **İndirimAI**, **ArabaAI** ve **EvAI** ise kanal yetkisi verildiğinde aynı motorda otomatik olarak açılır. **GüzelAI bu yayın motoruna dahil değildir.** İçeriklerin tamamı `uretir.com` API uçlarından alınır; bot içerik üretmez, yalnızca doğru kanalı doğrular ve gönderimi yapar.
+Bu bot tek bir WhatsApp Web oturumu ile **HaberAI**, **FinansAI**, **PuanAI**, **İndirimAI**, **ArabaAI** ve **EvAI** kanallarını yönetir. **GüzelAI bu yayın motoruna dahil değildir.** İçeriklerin tamamı `uretir.com` API uçlarından alınır; bot içerik üretmez, yalnızca doğru kanalı doğrular ve gönderimi yapar.
 
 ## Kanallar
 
@@ -18,9 +18,9 @@ Her kanal gönderisinin marka katmanı `<ÜrünAI> • uretir.com` biçimindedir
 2. Kök projedeki üretim ortamıyla aynı `WHATSAPP_BOT_SECRET` veya `CRON_SECRET` değerini bot ortamına tanımlayın.
 3. `npm start` çalıştırın.
 4. İlk kurulumda `http://127.0.0.1:3217` ekranındaki QR kodu, üç kanalın da owner/admin yetkisine sahip WhatsApp hesabıyla okutun.
-5. Panelde HaberAI, FinansAI ve PuanAI hedeflerinin ayrı ayrı doğrulandığını kontrol edin.
+5. Panelde altı kanal hedefinin ayrı ayrı owner/admin olarak doğrulandığını kontrol edin.
 
-Bot 30 dakikada bir kontrol yapar. HaberAI yeni şehir haberi varsa gönderir. FinansAI en fazla saatte bir değişen piyasa özetini paylaşır. PuanAI en fazla saatte bir, daha önce gönderilmemiş ve doğrulaması taze bir kampanya paylaşır.
+Bot 30 dakikada bir kontrol yapar. HaberAI yeni şehir haberi varsa gönderir. FinansAI ve İndirimAI değişen özetleri, PuanAI ve ArabaAI yeni doğrulanmış kayıtları, EvAI ise günlük sınırı aşmadan uygun kayıtları yayınlar.
 
 `data/auth` ve `data/channel-state.json` oturum/teslim durumudur; Git'e eklenmez ve paylaşılmamalıdır.
 

@@ -57,6 +57,41 @@ jobs:
             sleep 15
           done
 
+      - name: Verify WhatsApp-ready channel feeds
+        env:
+          SITE_URL: https://www.uretir.com
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          set -euo pipefail
+          test -n "$CRON_SECRET"
+          feeds=(
+            "/api/haber-ai/whatsapp"
+            "/api/finans-ai/whatsapp"
+            "/api/puan-ai/whatsapp"
+            "/api/indirim-ai/whatsapp"
+            "/api/araba-ai/whatsapp"
+            "/api/ev-ai/whatsapp"
+          )
+          for route in "${feeds[@]}"; do
+            echo "Checking $route"
+            curl --fail-with-body --retry 2 --max-time 70 \
+              -H "Authorization: Bearer $CRON_SECRET" \
+              "$SITE_URL$route" -o /tmp/channel-feed.json
+            node -e '
+              const fs=require("node:fs");
+              const d=JSON.parse(fs.readFileSync("/tmp/channel-feed.json","utf8"));
+              const channel=d.channel_url||d.channel;
+              if(typeof channel!=="string"||!channel.startsWith("https://whatsapp.com/channel/")) process.exit(2);
+              console.log(JSON.stringify({
+                channel,
+                items:Array.isArray(d.items)?d.items.length:undefined,
+                count:typeof d.count==="number"?d.count:undefined,
+                hasBody:typeof d.body==="string"&&d.body.length>0,
+                status:d.status
+              }));
+            '
+          done
+
       - name: Verify cron routes remain protected
         env:
           SITE_URL: https://www.uretir.com

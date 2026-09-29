@@ -5,7 +5,7 @@ export const propertySources:PropertySource[]=[
 {id:"hepsiemlak",name:"Hepsiemlak",origin:"https://www.hepsiemlak.com",kind:"MARKETPLACE",trustScore:93,requiresAgreement:true,detailPatterns:[/\/ilan\//i,/satilik-.*\d+$/i,/kiralik-.*\d+$/i],seedUrls:["https://www.hepsiemlak.com/satilik","https://www.hepsiemlak.com/kiralik"]},
 {id:"zingat",name:"Zingat",origin:"https://www.zingat.com",kind:"MARKETPLACE",trustScore:90,requiresAgreement:true,detailPatterns:[/\/.*satilik.*\d+/i,/\/.*kiralik.*\d+/i,/\/ilan\//i],seedUrls:["https://www.zingat.com/satilik-konut","https://www.zingat.com/kiralik-konut"]},
 {id:"ilan-gov",name:"ilan.gov.tr",origin:"https://www.ilan.gov.tr",kind:"PUBLIC_NOTICE",trustScore:100,requiresAgreement:false,detailPatterns:[/\/ilan\//i,/gayrimenkul/i,/tasinmaz/i,/taşınmaz/i],seedUrls:["https://www.ilan.gov.tr"]},
-{id:"uyap-esatis",name:"UYAP e-Satış",origin:"https://esatis.uyap.gov.tr",kind:"PUBLIC_AUCTION",trustScore:100,requiresAgreement:false,detailPatterns:[/ihale/i,/tasinmaz/i,/taşınmaz/i,/dosya/i],seedUrls:["https://esatis.uyap.gov.tr"]},
+{id:"uyap-esatis",name:"UYAP e-Satış",origin:"https://esatis.uyap.gov.tr",kind:"PUBLIC_AUCTION",trustScore:100,requiresAgreement:false,detailPatterns:[/\/pp\/index\.jsp\?[^#]*kayitId=/i,/kayitId=/i,/ihale/i,/tasinmaz/i,/taşınmaz/i,/dosya/i],seedUrls:["https://esatis.uyap.gov.tr/pp/index.jsp"]},
 {id:"milli-emlak",name:"Milli Emlak",origin:"https://www.milliemlak.gov.tr",kind:"PUBLIC_AUCTION",trustScore:100,requiresAgreement:false,detailPatterns:[/ihale/i,/tasinmaz/i,/taşınmaz/i,/sat/i],seedUrls:["https://www.milliemlak.gov.tr"]}
 ];
 export function enabledPropertySources(){const partner=process.env.EVAI_ENABLE_PARTNER_SOURCES==="1";return propertySources.filter(s=>!s.requiresAgreement||partner);}

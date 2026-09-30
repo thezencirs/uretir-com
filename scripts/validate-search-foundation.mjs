@@ -81,14 +81,14 @@ assert(existsSync(appOutput), "Next.js production build exists");
 const robots = read("robots.txt.body");
 assert(!/Disallow:\s*\/_next\b/i.test(robots), "robots.txt allows framework rendering assets");
 assert(/Disallow:\s*\/api\/?$/im.test(robots), "robots.txt protects API routes");
-assert(/Sitemap:\s*https:\/\/uretir\.com\/sitemap\.xml/im.test(robots), "robots.txt advertises the canonical sitemap");
+assert(/Sitemap:\s*https:\/\/www\.uretir\.com\/sitemap\.xml/im.test(robots), "robots.txt advertises the canonical sitemap");
 
 const sitemap = read("sitemap.xml.body");
 const sitemapUrls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map((match) => match[1]);
 const sitemapUrlKeys = new Set(sitemapUrls.map((url) => new URL(url).toString()));
 assert(sitemapUrls.length > 0, "sitemap contains at least one approved URL");
 assert(new Set(sitemapUrls).size === sitemapUrls.length, "sitemap contains no duplicate URLs");
-assert(sitemapUrls.every((url) => url.startsWith("https://uretir.com/")), "sitemap URLs use the canonical HTTPS origin");
+assert(sitemapUrls.every((url) => url.startsWith("https://www.uretir.com/")), "sitemap URLs use the canonical HTTPS origin");
 
 const allHtml = collectHtml(appOutput);
 const noindexPages = allHtml.filter((file) => hasNoindex(readFileSync(file, "utf8")));
@@ -103,7 +103,7 @@ for (const file of allHtml) {
   const structure = structuralHtml(html);
   const head = headHtml(html);
   const redirectOutput = isRedirectOutput(html);
-  if (canonical?.startsWith("https://uretir.com")) htmlByCanonicalPath.set(new URL(canonical).pathname, html);
+  if (canonical?.startsWith("https://www.uretir.com")) htmlByCanonicalPath.set(new URL(canonical).pathname, html);
   assert((head.match(/<title\b/g) ?? []).length === 1, `rendered page has exactly one title: ${label}`);
   assert((head.match(/<meta\s+name="description"\s+content="[^"]+"/gi) ?? []).length === 1, `rendered page has exactly one meta description: ${label}`);
   if (!redirectOutput && !hasNoindex(html)) assert((structure.match(/<h1\b/g) ?? []).length === 1, `rendered indexable page has exactly one H1: ${label}`);
@@ -113,7 +113,7 @@ for (const file of allHtml) {
     assert(canonicalTags.length === 1, `rendered route has exactly one canonical: ${label}`);
     if (canonical) {
       const parsedCanonical = new URL(canonical);
-      assert(parsedCanonical.origin === "https://uretir.com", `canonical uses the production origin: ${label}`);
+      assert(parsedCanonical.origin === "https://www.uretir.com", `canonical uses the production origin: ${label}`);
       if (!redirectOutput) assert(parsedCanonical.pathname === route, `canonical is self-referential: ${label}`);
       assert(!parsedCanonical.search && !parsedCanonical.hash, `canonical excludes query and fragment: ${label}`);
       const openGraphUrl = html.match(/<meta\s+property="og:url"\s+content="([^"]+)"/i)?.[1];
@@ -176,9 +176,9 @@ assert(home.includes('action="/ara"'), "homepage search submits to universal dis
 const searchPageSource = readFileSync(join(projectRoot, "app", "ara", "page.tsx"), "utf8");
 assert(searchPageSource.includes("robots: { index: false, follow: true }"), "universal search results remain noindex");
 assert(searchPageSource.includes("Evrensel keşif"), "universal search renders its discovery boundary");
-assert(!sitemapUrls.includes("https://uretir.com/ara"), "internal search is absent from the sitemap");
+assert(!sitemapUrls.includes("https://www.uretir.com/ara"), "internal search is absent from the sitemap");
 assert(home.includes('href="/ara"'), "production header exposes universal search");
-assert(home.includes("/ara?q={search_term_string}"), "WebSite SearchAction points to universal search");
+assert(!home.includes('"@type":"SearchAction"'), "WebSite schema omits the retired sitelinks SearchAction");
 
 for (const route of ["_not-found.html", "insan-ai.html", "trendler.html", "startup.html", "uretir-id.html", "yakinda.html"]) {
   assert(hasNoindex(read(route)), `unfinished or utility route remains noindex: ${route}`);
@@ -223,12 +223,12 @@ const brokenAnchors = [];
 
 for (const file of allHtml) {
   const html = readFileSync(file, "utf8");
-  const currentPath = canonicalOf(html)?.startsWith("https://uretir.com") ? new URL(canonicalOf(html)).pathname : undefined;
+  const currentPath = canonicalOf(html)?.startsWith("https://www.uretir.com") ? new URL(canonicalOf(html)).pathname : undefined;
   const hrefs = [...html.matchAll(/<a\b[^>]*\shref="([^"]+)"/gi)].map((match) => decodeHtml(match[1]));
   for (const href of hrefs) {
     if (/^(?:mailto:|tel:|javascript:)/i.test(href)) continue;
-    if (/^https?:\/\//i.test(href) && !href.startsWith("https://uretir.com")) continue;
-    const parsed = href.startsWith("http") ? new URL(href) : new URL(href, `https://uretir.com${currentPath ?? "/"}`);
+    if (/^https?:\/\//i.test(href) && !href.startsWith("https://www.uretir.com")) continue;
+    const parsed = href.startsWith("http") ? new URL(href) : new URL(href, `https://www.uretir.com${currentPath ?? "/"}`);
     const targetPath = parsed.pathname.replace(/\/+$/, "") || "/";
     if (!routePatterns.some((pattern) => pattern.test(targetPath)) && !publicAssetExists(targetPath)) brokenRoutes.push(`${relative(appOutput, file)} -> ${href}`);
     if (/^\/(?:blog|rehber|ne-uretir|kategori|puan-ai\/kampanya)\/[^/]+$/.test(targetPath) && !htmlByCanonicalPath.has(targetPath)) {

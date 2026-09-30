@@ -6,11 +6,30 @@ export type PriceLowItem={
   currentPrice:number;currency:string;windowDays:number;windowLow:number;windowHigh:number;median:number;
   dropFromHighPct:number;observedDays:number;coverageDays:number;fetchedAt:string
 };
+export type PriceLowReport={checkedAt:string;lows:Record<string,PriceLowItem[]>;provisional:Array<PriceLowItem&{eligibleWindowDays:number}>;observationCount:number;productCount:number};
+export type RankedPriceDeal={rank:1|2|3;item:PriceLowItem;label:string;qualified:boolean};
+export function rankPriceDeals(report:PriceLowReport):RankedPriceDeal[]{
+  const picked=new Map<string,Omit<RankedPriceDeal,"rank">>();
+  for(const window of [360,90,30] as const){
+    for(const item of report.lows[String(window)]??[]){
+      if(!picked.has(item.productKey))picked.set(item.productKey,{item,label:window+" gün dibi",qualified:true});
+    }
+  }
+  for(const item of report.provisional){
+    if(!picked.has(item.productKey))picked.set(item.productKey,{item,label:"takip dönemi",qualified:false});
+  }
+  return [...picked.values()].sort((a,b)=>
+    Number(b.qualified)-Number(a.qualified)
+    || (b.qualified?b.item.windowDays-a.item.windowDays:b.item.coverageDays-a.item.coverageDays)
+    || b.item.dropFromHighPct-a.item.dropFromHighPct
+    || a.item.currentPrice-b.item.currentPrice
+  ).slice(0,3).map((entry,index)=>({...entry,rank:(index+1) as 1|2|3}));
+}
 
 function median(values:number[]){const v=[...values].sort((a,b)=>a-b);if(!v.length)return 0;const m=Math.floor(v.length/2);return v.length%2?v[m]:(v[m-1]+v[m])/2;}
 function dayKey(d:Date){return d.toISOString().slice(0,10);}
 
-export async function getPriceLowReport(now=new Date()){
+export async function getPriceLowReport(now=new Date()):Promise<PriceLowReport>{
   const prisma=getPrisma(),since=new Date(now.getTime()-361*DAY);
   const rows=await prisma.priceObservation.findMany({where:{fetchedAt:{gte:since},trustScore:{gte:70},availability:{not:"OUT_OF_STOCK"}},orderBy:{fetchedAt:"desc"},take:25_000});
   const groups=new Map<string,typeof rows>();

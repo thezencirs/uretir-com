@@ -1,31 +1,13 @@
 import {createHash} from "node:crypto";
 import {NextRequest,NextResponse} from "next/server";
-import {getPriceLowReport,type PriceLowItem} from "@/lib/indirim-ai/analysis";
+import {getPriceLowReport,rankPriceDeals,type RankedPriceDeal} from "@/lib/indirim-ai/analysis";
 import {getChannelTool} from "@/lib/channel-tools";
 import {withReadRetry} from "@/lib/read-retry";
 export const runtime="nodejs";export const dynamic="force-dynamic";
 const tl=(n:number)=>new Intl.NumberFormat("tr-TR",{maximumFractionDigits:0}).format(n)+" TL";
 const whatsappChannel=getChannelTool("indirim-ai").channelUrl;
-type Ranked={item:PriceLowItem;label:string;qualified:boolean};
-function ranked(report:Awaited<ReturnType<typeof getPriceLowReport>>){
- const picked=new Map<string,Ranked>();
- for(const window of [360,90,30] as const){
-  for(const item of report.lows[String(window)]){
-   if(!picked.has(item.productKey))picked.set(item.productKey,{item,label:window+" gün dibi",qualified:true});
-  }
- }
- for(const item of report.provisional){
-  if(!picked.has(item.productKey))picked.set(item.productKey,{item,label:"takip dönemi",qualified:false});
- }
- return [...picked.values()].sort((a,b)=>
-   Number(b.qualified)-Number(a.qualified)
-   || (b.qualified?b.item.windowDays-a.item.windowDays:b.item.coverageDays-a.item.coverageDays)
-   || b.item.dropFromHighPct-a.item.dropFromHighPct
-   || a.item.currentPrice-b.item.currentPrice
- ).slice(0,3);
-}
 const medals=["🥇","🥈","🥉"];
-function row(entry:Ranked,index:number){
+function row(entry:RankedPriceDeal,index:number){
  const i=entry.item;
  const why=entry.qualified
    ? `${i.windowDays} günlük yeterli gözlemde dönem dibinde · dönem tepesine göre %${i.dropFromHighPct.toFixed(1)} aşağı`
@@ -40,7 +22,7 @@ function row(entry:Ranked,index:number){
 }
 export async function GET(r:NextRequest){
  try{
-  const report=await withReadRetry(()=>getPriceLowReport()),top=ranked(report);
+  const report=await withReadRetry(()=>getPriceLowReport()),top=rankPriceDeals(report);
   if(!top.length)return NextResponse.json({channel_url:whatsappChannel,body:null,status:"price_history_accumulating",coverage:{products:report.productCount,observations:report.observationCount}});
   const body=[
    "🏆 *İNDİRİMAI | FIRSAT SIRALAMASI*",

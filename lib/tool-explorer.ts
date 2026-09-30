@@ -10,6 +10,8 @@ export type ExplorerItem = {
   url: string;
   checkedAt: string;
   imageUrl?: string;
+  rank?: 1|2|3;
+  rankLabel?: string;
   description?: string;
   notice?: string;
   facts: { label: string; value: string }[];

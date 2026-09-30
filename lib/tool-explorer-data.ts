@@ -1,6 +1,6 @@
 import type { getAutomotiveSnapshot } from "@/lib/araba-ai/analysis";
 import type { getEvAIReport } from "@/lib/ev-ai/analysis";
-import type { getPriceLowReport } from "@/lib/indirim-ai/analysis";
+import { rankPriceDeals, type getPriceLowReport } from "@/lib/indirim-ai/analysis";
 import { type ExplorerData, type ExplorerItem, formatToolDate, formatToolPrice } from "@/lib/tool-explorer";
 
 export const unavailableExplorer: ExplorerData = { available: false, checkedAt: null, stats: [], items: [] };
@@ -16,8 +16,9 @@ export function automotiveExplorer(data: Awaited<ReturnType<typeof getAutomotive
 }
 
 export function discountExplorer(data: Awaited<ReturnType<typeof getPriceLowReport>>): ExplorerData {
+  const ranking=new Map(rankPriceDeals(data).map(x=>[x.item.productKey,x]));
   const entries = [...Object.entries(data.lows).flatMap(([days,items])=>items.map(item=>({item,category:`${days} gün`,provisional:false}))),...data.provisional.map(item=>({item,category:"Takip dönemi",provisional:true}))];
-  const items: ExplorerItem[] = entries.filter(({item})=>safeSource(item.sourceUrl)).map(({item,category,provisional})=>({id:`${category}:${item.productKey}:${item.sourceUrl}`,title:item.productName,group:item.merchantName,category,price:item.currentPrice,currency:item.currency,priceLabel:"Son gözlenen fiyat",source:"Mağazaya git",url:item.sourceUrl,checkedAt:item.fetchedAt,notice:provisional?"Henüz 30 günlük dip fiyat etiketi için yeterli geçmiş yok.":undefined,facts:[{label:"Gözlenen en düşük",value:formatToolPrice(item.windowLow,item.currency)},{label:"Gözlenen en yüksek",value:formatToolPrice(item.windowHigh,item.currency)},{label:"Gözlenen medyan",value:formatToolPrice(item.median,item.currency)},{label:"Gözlem sıklığı",value:`${item.observedDays} ayrı gün`},{label:"Geçmiş kapsamı",value:`${item.coverageDays} gün`}]}));
+  const items: ExplorerItem[] = entries.filter(({item})=>safeSource(item.sourceUrl)).map(({item,category,provisional})=>{const ranked=ranking.get(item.productKey);return {id:`${category}:${item.productKey}:${item.sourceUrl}`,title:item.productName,group:item.merchantName,category,price:item.currentPrice,currency:item.currency,priceLabel:"Son gözlenen fiyat",source:"Mağazaya git",url:item.sourceUrl,checkedAt:item.fetchedAt,imageUrl:item.imageUrl??undefined,rank:ranked?.rank,rankLabel:ranked?.label,notice:provisional?"Henüz 30 günlük dip fiyat etiketi için yeterli geçmiş yok.":undefined,facts:[{label:"Gözlenen en düşük",value:formatToolPrice(item.windowLow,item.currency)},{label:"Gözlenen en yüksek",value:formatToolPrice(item.windowHigh,item.currency)},{label:"Gözlenen medyan",value:formatToolPrice(item.median,item.currency)},{label:"Gözlem sıklığı",value:`${item.observedDays} ayrı gün`},{label:"Geçmiş kapsamı",value:`${item.coverageDays} gün`}]};});
   return {available:true,checkedAt:data.checkedAt,items,stats:[{label:"takip edilen ürün",value:data.productCount},{label:"fiyat gözlemi",value:data.observationCount},{label:"dönem dibi bulunan ürün",value:new Set(items.filter(i=>i.category!=="Takip dönemi").map(i=>i.title+":"+i.group)).size}]};
 }
 

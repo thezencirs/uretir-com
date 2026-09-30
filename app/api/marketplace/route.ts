@@ -14,8 +14,12 @@ export async function GET(req:NextRequest){try{
  if(view==="review"){if(!isAdminRequest(req))return fail("Yönetici girişi gerekli.",401);const r=await db().query(`SELECT l.*,a.handle,a.display_name,(SELECT count(*)::int FROM marketplace_reports x WHERE x.listing_id=l.id AND x.status='open') report_count FROM marketplace_listings l JOIN member_accounts a ON a.id=l.user_id WHERE l.status IN ('pending','published','rejected') ORDER BY CASE WHEN l.status='pending' THEN 0 ELSE 1 END,l.updated_at DESC LIMIT 400`);return json({items:r.rows});}
  const id=req.nextUrl.searchParams.get("id");if(id){const item=await publicMemberListing(id);return item?json({item}):fail("İlan bulunamadı.",404);}
  const user=await currentMember();if(!user)return json({user:null,items:[],contacts:[]});
- const [mine,contacts]=await Promise.all([db().query("SELECT * FROM marketplace_listings WHERE user_id=$1 ORDER BY updated_at DESC",[user.id]),db().query(`SELECT r.*,l.title,l.kind,b.handle buyer_handle,b.display_name buyer_name,s.handle seller_handle FROM marketplace_contact_requests r JOIN marketplace_listings l ON l.id=r.listing_id JOIN member_accounts b ON b.id=r.buyer_user_id JOIN member_accounts s ON s.id=r.seller_user_id WHERE r.buyer_user_id=$1 OR r.seller_user_id=$1 ORDER BY r.updated_at DESC LIMIT 200`,[user.id])]);
- return json({user,items:mine.rows,contacts:contacts.rows});
+ const [mine,contacts,deals]=await Promise.all([
+   db().query("SELECT * FROM marketplace_listings WHERE user_id=$1 ORDER BY updated_at DESC",[user.id]),
+   db().query(`SELECT r.*,l.title,l.kind,b.handle buyer_handle,b.display_name buyer_name,s.handle seller_handle FROM marketplace_contact_requests r JOIN marketplace_listings l ON l.id=r.listing_id JOIN member_accounts b ON b.id=r.buyer_user_id JOIN member_accounts s ON s.id=r.seller_user_id WHERE r.buyer_user_id=$1 OR r.seller_user_id=$1 ORDER BY r.updated_at DESC LIMIT 200`,[user.id]),
+   db().query(`SELECT d.*,l.title,l.kind,l.price,b.handle buyer_handle,s.handle seller_handle FROM marketplace_deal_requests d JOIN marketplace_listings l ON l.id=d.listing_id JOIN member_accounts b ON b.id=d.buyer_user_id JOIN member_accounts s ON s.id=d.seller_user_id WHERE d.buyer_user_id=$1 OR d.seller_user_id=$1 ORDER BY d.updated_at DESC LIMIT 200`,[user.id])
+ ]);
+ return json({user,items:mine.rows,contacts:contacts.rows,deals:deals.rows});
 }catch(e){console.error("Marketplace GET failed",e);return fail("İlan servisine ulaşılamadı.",503);}}
 export async function POST(req:NextRequest){try{
  if(!hasSameOrigin(req))return fail("Geçersiz istek kaynağı.",403);
@@ -31,6 +35,24 @@ export async function POST(req:NextRequest){try{
  return json({ok:true,pausedForReview:Number(risk.rows[0]?.total??0)>=3});}
  if(body.action==="contact"){const v=contactSchema.parse(body);const l=(await db().query("SELECT user_id FROM marketplace_listings WHERE id=$1 AND status='published' AND (expires_at IS NULL OR expires_at>now())",[v.listingId])).rows[0] as {user_id:string}|undefined;if(!l)return fail("İlan bulunamadı.",404);if(l.user_id===user.id)return fail("Kendi ilanınıza iletişim isteği gönderemezsiniz.",400);await db().query(`INSERT INTO marketplace_contact_requests(id,listing_id,buyer_user_id,seller_user_id,message) VALUES($1,$2,$3,$4,$5) ON CONFLICT(listing_id,buyer_user_id) DO UPDATE SET message=EXCLUDED.message,status='pending',updated_at=now()`,[randomUUID(),v.listingId,user.id,l.user_id,v.message]);return json({ok:true});}
  if(body.action==="contactDecision"){const v=z.object({id:z.string().uuid(),decision:z.enum(["accepted","declined"]),reply:z.string().trim().max(700).default("")}).parse(body);const r=await db().query("UPDATE marketplace_contact_requests SET status=$3,seller_reply=$4,updated_at=now() WHERE id=$1 AND seller_user_id=$2 RETURNING id",[v.id,user.id,v.decision,v.reply]);return r.rowCount?json({ok:true}):fail("İletişim isteği bulunamadı.",404);}
+ if(body.action==="dealRequest"){
+  const v=z.object({listingId:z.string().uuid(),kind:z.enum(["offer","visit","inspection"]),amount:z.number().positive().max(1_000_000_000).nullable().optional(),preferredAt:z.string().datetime().nullable().optional(),message:z.string().trim().max(700).default("")}).parse(body);
+  if(v.kind==="offer"&&!v.amount)return fail("Teklif tutarı gerekli.",400);
+  if(v.kind!=="offer"&&!v.preferredAt)return fail("Tarih ve saat gerekli.",400);
+  const l=(await db().query("SELECT user_id,kind,price FROM marketplace_listings WHERE id=$1 AND status='published' AND (expires_at IS NULL OR expires_at>now())",[v.listingId])).rows[0] as {user_id:string;kind:"property"|"vehicle";price:number|string}|undefined;
+  if(!l)return fail("İlan bulunamadı.",404);if(l.user_id===user.id)return fail("Kendi ilanınıza işlem isteği gönderemezsiniz.",400);
+  if(v.kind==="inspection"&&l.kind!=="vehicle")return fail("Ekspertiz isteği yalnız araç ilanlarında kullanılabilir.",400);
+  const id=randomUUID();
+  try{await db().query(`INSERT INTO marketplace_deal_requests(id,listing_id,buyer_user_id,seller_user_id,kind,amount,preferred_at,message) VALUES($1,$2,$3,$4,$5,$6,$7,$8)`,[id,v.listingId,user.id,l.user_id,v.kind,v.amount??null,v.preferredAt?new Date(v.preferredAt):null,v.message]);}
+  catch(e){if((e as {code?:string}).code==="23505")return fail("Bu ilan için aynı türde açık bir isteğiniz zaten var.",409);throw e;}
+  return json({ok:true,id});
+ }
+ if(body.action==="dealDecision"){
+  const v=z.object({id:z.string().uuid(),decision:z.enum(["accepted","declined","countered"]),counterAmount:z.number().positive().max(1_000_000_000).nullable().optional(),reply:z.string().trim().max(700).default("")}).parse(body);
+  if(v.decision==="countered"&&!v.counterAmount)return fail("Karşı teklif tutarı gerekli.",400);
+  const r=await db().query(`UPDATE marketplace_deal_requests SET status=$3,counter_amount=$4,seller_reply=$5,updated_at=now() WHERE id=$1 AND seller_user_id=$2 AND status IN ('pending','countered') AND expires_at>now() RETURNING id`,[v.id,user.id,v.decision,v.counterAmount??null,v.reply]);
+  return r.rowCount?json({ok:true}):fail("İşlem isteği bulunamadı veya süresi dolmuş.",404);
+ }
  if(body.action==="delete"){const id=z.string().uuid().parse(body.id);const r=await db().query("DELETE FROM marketplace_listings WHERE id=$1 AND user_id=$2 RETURNING id",[id,user.id]);return r.rowCount?json({ok:true}):fail("İlan bulunamadı.",404);}
  if(body.action==="renew"){const id=z.string().uuid().parse(body.id);const r=await db().query(`UPDATE marketplace_listings SET last_verified_at=now(),expires_at=now()+interval '30 days',updated_at=now(),version=version+1 WHERE id=$1 AND user_id=$2 AND status='published' AND jsonb_array_length(moderation_flags)=0 RETURNING id`,[id,user.id]);return r.rowCount?json({ok:true}):fail("İlan yeniden doğrulanamadı; düzenleyip incelemeye gönderin.",409);}
  if(body.action==="save"){

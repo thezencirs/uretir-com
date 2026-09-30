@@ -1,6 +1,11 @@
 import type { Company } from "@/lib/companies";
 import { absoluteUrl, SITE_NAME, SITE_URL } from "@/lib/seo";
 
+function employeeMinimum(value: string) {
+  const n = Number(value.replace(/[^0-9]/g, ""));
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
 export function companyOrganizationSchema(company: Company) {
   return {
     "@context": "https://schema.org",
@@ -10,7 +15,7 @@ export function companyOrganizationSchema(company: Company) {
     url: company.website,
     description: company.description,
     foundingDate: String(company.foundedYear),
-    numberOfEmployees: { "@type": "QuantitativeValue", value: company.employeeCount },
+    numberOfEmployees: employeeMinimum(company.employeeCount) ? { "@type": "QuantitativeValue", minValue: employeeMinimum(company.employeeCount) } : undefined,
     address: { "@type": "PostalAddress", addressLocality: company.headquarters, addressCountry: "TR" },
     brand: company.brands.map((b) => ({ "@type": "Brand", name: b })),
     hasCredential: company.certifications.map((c) => ({ "@type": "EducationalOccupationalCredential", credentialCategory: "certification", name: c })),

@@ -54,8 +54,9 @@ export async function POST(req:NextRequest){try{
   return r.rowCount?json({ok:true}):fail("İşlem isteği bulunamadı veya süresi dolmuş.",404);
  }
  if(body.action==="delete"){const id=z.string().uuid().parse(body.id);const r=await db().query("DELETE FROM marketplace_listings WHERE id=$1 AND user_id=$2 RETURNING id",[id,user.id]);return r.rowCount?json({ok:true}):fail("İlan bulunamadı.",404);}
- if(body.action==="renew"){const id=z.string().uuid().parse(body.id);const r=await db().query(`UPDATE marketplace_listings SET last_verified_at=now(),expires_at=now()+interval '30 days',updated_at=now(),version=version+1 WHERE id=$1 AND user_id=$2 AND status='published' AND jsonb_array_length(moderation_flags)=0 RETURNING id`,[id,user.id]);return r.rowCount?json({ok:true}):fail("İlan yeniden doğrulanamadı; düzenleyip incelemeye gönderin.",409);}
+ if(body.action==="renew"){if(!user.marketplace_roles.includes("seller"))return fail("Satıcı rolü gerekli.",403);const id=z.string().uuid().parse(body.id);const r=await db().query(`UPDATE marketplace_listings SET last_verified_at=now(),expires_at=now()+interval '30 days',updated_at=now(),version=version+1 WHERE id=$1 AND user_id=$2 AND status='published' AND jsonb_array_length(moderation_flags)=0 RETURNING id`,[id,user.id]);return r.rowCount?json({ok:true}):fail("İlan yeniden doğrulanamadı; düzenleyip incelemeye gönderin.",409);}
  if(body.action==="save"){
+  if(!user.marketplace_roles.includes("seller"))return fail("İlan vermek için Üretir ID hesabında Satıcı rolünü açın.",403);
   const v=listingSchema.parse(body);if(v.submit&&v.images.length<2)return fail("Yayın incelemesi için en az iki fotoğraf ekleyin.",400);
   const fp=listingFingerprint(v);let reference:number|null=null,anomaly:number|null=null;const flags:string[]=[];
   if(v.kind==="property"){const ref=await propertyReference(v.city,v.district,v.attributes.grossM2);reference=ref.reference;if(reference)anomaly=(v.price/reference-1)*100;}

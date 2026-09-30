@@ -16,7 +16,7 @@ const organizationSchema = {
   "@id": `${SITE_URL}/#organization`,
   name: SITE_NAME,
   url: SITE_URL,
-  logo: { "@type": "ImageObject", url: `${SITE_URL}/icon.svg`, width: 512, height: 512 },
+  logo: absoluteUrl("/icon.svg"),
   description: DEFAULT_DESCRIPTION,
   slogan: "Türkiye üretir, gençler yetişir.",
   email: "merhaba@uretir.com",
@@ -31,7 +31,6 @@ const websiteSchema = {
   description: DEFAULT_DESCRIPTION,
   inLanguage: "tr-TR",
   publisher: { "@id": `${SITE_URL}/#organization` },
-  potentialAction: { "@type": "SearchAction", target: `${SITE_URL}/ara?q={search_term_string}`, "query-input": "required name=search_term_string" },
 };
 
 export const metadata: Metadata = {

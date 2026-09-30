@@ -1,4 +1,4 @@
-export const SITE_URL = "https://uretir.com";
+export const SITE_URL = "https://www.uretir.com";
 export const SITE_NAME = "Üretir";
 export const DEFAULT_TITLE = "Üretir — Türkiye üretir, gençler yetişir";
 export const DEFAULT_DESCRIPTION = "Türkiye üretir, gençler yetişir. Gelişmeler, girişim ekosistemi, yapay zekâ çözümleri ve öğrenme kaynakları Üretir platformunda.";

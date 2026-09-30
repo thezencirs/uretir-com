@@ -64,7 +64,7 @@
 .tool-state-panel p{font-size:14px;line-height:1.85;max-width:560px;margin:14px auto;color:var(--muted)}
 .tool-state-panel button{padding:8px 14px;border:1px solid var(--line);border-radius:8px}
 .tool-result-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
-.tool-result-card{display:flex;flex-direction:column;padding:22px;border:1px solid var(--line);border-radius:14px;min-width:0}
+.tool-result-card{display:flex;flex-direction:column;padding:22px;border:1px solid var(--line);border-radius:14px;min-width:0;overflow:hidden}.tool-result-image{margin:-22px -22px 18px;height:190px;background:#fff;display:grid;place-items:center;border-bottom:1px solid var(--line)}.tool-result-image img{width:100%;height:100%;object-fit:contain;padding:12px}
 .tool-result-meta{display:flex;justify-content:space-between;gap:12px;font-size:10px;color:var(--muted)}
 .tool-result-card h3{font-size:20px;line-height:1.4;font-weight:600;letter-spacing:-.025em;margin:16px 0;overflow-wrap:anywhere}
 .tool-result-price{padding:15px 0;border-block:1px solid var(--line)}

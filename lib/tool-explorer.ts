@@ -9,6 +9,7 @@ export type ExplorerItem = {
   source: string;
   url: string;
   checkedAt: string;
+  imageUrl?: string;
   description?: string;
   notice?: string;
   facts: { label: string; value: string }[];

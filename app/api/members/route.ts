@@ -30,7 +30,7 @@ export async function POST(req:NextRequest){try{
  if(action==="register"){
  const input=registration.parse(body);
  const code=randomBytes(24).toString("hex");const userId=randomUUID();
- try{await db().query("INSERT INTO member_accounts(id,handle,display_name,password_hash,recovery_hash) VALUES($1,$2,$3,$4,$5)",[userId,input.handle,input.displayName,await hashPassword(input.password),digest(code)]);}
+ try{await db().query("INSERT INTO member_accounts(id,handle,display_name,password_hash,recovery_hash,marketplace_roles) VALUES($1,$2,$3,$4,$5,$6)",[userId,input.handle,input.displayName,await hashPassword(input.password),digest(code),input.marketplaceRoles]);}
  catch(e){if((e as {code:string}).code==="23505")return failure("Bu kullanıcı adı kullanılıyor.",409);throw e;}
  return cookie(json({ok:true,recoveryCode:code}),await session(userId));
  }
@@ -62,6 +62,7 @@ export async function POST(req:NextRequest){try{
  await db().query("DELETE FROM member_accounts WHERE id=$1",[user.id]);return cookie(json({ok:true}),"");
  }
  if(action==="profile"){const name=z.string().trim().min(2).max(60).parse(body.displayName);await db().query("UPDATE member_accounts SET display_name=$2 WHERE id=$1",[user.id,name]);return json({ok:true});}
+ if(action==="marketplaceRoles"){const roles=z.array(z.enum(["buyer","seller"])).min(1).max(2).parse(body.roles);await db().query("UPDATE member_accounts SET marketplace_roles=$2 WHERE id=$1",[user.id,roles]);return json({ok:true,roles});}
  if(action==="delete"){
  const id=z.string().uuid().parse(body.id);const r=await db().query("DELETE FROM member_content WHERE id=$1 AND user_id=$2 RETURNING id",[id,user.id]);return r.rowCount?json({ok:true}):failure("İçerik bulunamadı.",404);}
  if(action==="save"){

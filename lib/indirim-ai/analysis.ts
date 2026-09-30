@@ -1,7 +1,11 @@
 import {getPrisma} from "@/lib/puan-ai/db";
 
 const DAY=86_400_000;
-export type PriceLowItem={productKey:string;productName:string;merchantName:string;sourceUrl:string;currentPrice:number;currency:string;windowDays:number;windowLow:number;windowHigh:number;median:number;dropFromHighPct:number;observedDays:number;coverageDays:number;fetchedAt:string};
+export type PriceLowItem={
+  productKey:string;productName:string;merchantName:string;sourceUrl:string;imageUrl:string|null;
+  currentPrice:number;currency:string;windowDays:number;windowLow:number;windowHigh:number;median:number;
+  dropFromHighPct:number;observedDays:number;coverageDays:number;fetchedAt:string
+};
 
 function median(values:number[]){const v=[...values].sort((a,b)=>a-b);if(!v.length)return 0;const m=Math.floor(v.length/2);return v.length%2?v[m]:(v[m-1]+v[m])/2;}
 function dayKey(d:Date){return d.toISOString().slice(0,10);}
@@ -26,13 +30,13 @@ export async function getPriceLowReport(now=new Date()){
       const values=windowRows.map(r=>r.amount.toNumber()).filter(v=>Number.isFinite(v)&&v>0);
       const low=Math.min(...values),high=Math.max(...values),currentPrice=current.amount.toNumber();
       const observedDays=new Set(windowRows.map(r=>dayKey(r.fetchedAt))).size;
-      const item:PriceLowItem={productKey,productName:current.productName,merchantName:current.merchantName,sourceUrl:current.sourceUrl,currentPrice,currency:current.currency,windowDays,windowLow:low,windowHigh:high,median:median(values),dropFromHighPct:high>0?Math.max(0,(high-currentPrice)/high*100):0,observedDays,coverageDays,fetchedAt:current.fetchedAt.toISOString()};
+      const item:PriceLowItem={productKey,productName:current.productName,merchantName:current.merchantName,sourceUrl:current.sourceUrl,imageUrl:current.imageUrl,currentPrice,currency:current.currency,windowDays,windowLow:low,windowHigh:high,median:median(values),dropFromHighPct:high>0?Math.max(0,(high-currentPrice)/high*100):0,observedDays,coverageDays,fetchedAt:current.fetchedAt.toISOString()};
       const eligible=coverageDays>=windowDays&&observedDays>=Math.max(5,Math.ceil(windowDays/15));
       if(eligible&&currentPrice<=low*1.001)lows[String(windowDays)].push(item);
       if(windowDays===30&&!eligible&&currentPrice<=low*1.001)provisional.push({...item,eligibleWindowDays:coverageDays});
     }
   }
   for(const key of Object.keys(lows))lows[key].sort((a,b)=>b.dropFromHighPct-a.dropFromHighPct||a.currentPrice-b.currentPrice);
-  provisional.sort((a,b)=>b.dropFromHighPct-a.dropFromHighPct);
+  provisional.sort((a,b)=>b.coverageDays-a.coverageDays||b.dropFromHighPct-a.dropFromHighPct||a.currentPrice-b.currentPrice);
   return {checkedAt:now.toISOString(),lows,provisional:provisional.slice(0,20),observationCount:rows.length,productCount:groups.size};
 }

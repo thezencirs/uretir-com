@@ -9,7 +9,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import pkg from "whatsapp-web.js";
 
-const { Client, LocalAuth } = pkg;
+const { Client, LocalAuth, MessageMedia } = pkg;
 const siteUrl = (process.env.SITE_URL || "https://www.uretir.com").replace(/\/$/, "");
 const pollMs = Math.max(5, Number(process.env.POLL_MINUTES || 10)) * 60_000;
 const dataDir = process.env.BOT_DATA_DIR || "./data";
@@ -188,7 +188,28 @@ async function api(endpoint){
   }
   throw lastError||new Error("uretir.com bağlantı hatası");
 }
-async function sendMessage(channel,body){
+async function sendMessage(channel,body,mediaUrl=null){
+  if(mediaUrl){
+    try{
+      const url=new URL(mediaUrl);
+      if(url.protocol!=="https:")throw new Error("yalnız HTTPS görsel kabul edilir");
+      const response=await fetch(url,{signal:AbortSignal.timeout(20_000),headers:{"User-Agent":"Uretir-WhatsApp-Publisher/1.0"}});
+      if(!response.ok)throw new Error("HTTP "+response.status);
+      const mime=(response.headers.get("content-type")||"").split(";")[0].trim();
+      if(!mime.startsWith("image/"))throw new Error("görsel MIME türü alınamadı");
+      const bytes=Buffer.from(await response.arrayBuffer());
+      if(bytes.length>8_000_000)throw new Error("görsel 8 MB sınırını aşıyor");
+      const media=new MessageMedia(mime,bytes.toString("base64"),"indirimai."+((mime.split("/")[1]||"jpg").replace("jpeg","jpg")));
+      const message=await client.sendMessage(channel.id,media,{caption:body,sendMediaAsHd:false});
+      if(message?.id?._serialized){
+        console.log("Görselli kanal gönderimi WhatsApp tarafından kabul edildi.");
+        return message.id._serialized;
+      }
+      throw new Error("medya gönderimi sunucu kimliği döndürmedi");
+    }catch(error){
+      console.warn("Görselli gönderim başarısız; metin fail-safe kullanılacak:",error instanceof Error?error.message:String(error));
+    }
+  }
   const result=await client.pupPage.evaluate(async ({channelId,body})=>{
     const collection=window.require("WAWebCollections").WAWebNewsletterCollection;
     const chats=collection.getModelsArray();
@@ -253,7 +274,7 @@ async function publishSnapshot(target,channel,state){
   const expectedUrl=`https://whatsapp.com/channel/${target.inviteCode}`;
   const actualUrl=payload.channel_url||payload.channel;
   if(actualUrl!==expectedUrl)throw new Error(`${target.name} kanal hedefi uyuşmuyor.`);
-  const messageId=await sendMessage(channel,payload.body);
+  const messageId=await sendMessage(channel,payload.body,payload.image_url||null);
   state[target.key]={...own,lastFingerprint:fingerprint,lastSentAt:new Date().toISOString(),messageId};
   await writeState(state);
   return {sent:true,status:"özet gönderildi",messageId};

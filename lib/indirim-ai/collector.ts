@@ -10,6 +10,11 @@ function text(v:unknown){return typeof v==="string"?v.trim():"";}
 function normalizeName(v:string){return v.toLocaleLowerCase("tr-TR").normalize("NFKD").replace(/[^a-z0-9çğıöşü]+/gi," ").replace(/\s+/g," ").trim();}
 function hash(v:string){return createHash("sha256").update(v).digest("hex");}
 function brandName(v:unknown){if(typeof v==="string")return v;if(v&&typeof v==="object")return text((v as Record<string,unknown>).name);return "";}
+function imageUrl(v:unknown,base:string){
+  const raw=typeof v==="string"?v:Array.isArray(v)?v.find(x=>typeof x==="string"):v&&typeof v==="object"?((v as Record<string,unknown>).url??(v as Record<string,unknown>).contentUrl):null;
+  if(typeof raw!=="string"||!raw.trim())return null;
+  try{const u=new URL(raw,base);return u.protocol==="https:"&&!u.username&&!u.password?u.toString():null;}catch{return null;}
+}
 
 function productNodes(html:string){
   return jsonLdObjects(html).filter(o=>{
@@ -31,12 +36,13 @@ export function parseProductPage(html:string,url:string,source:CommerceSource){
     const brand=brandName(node.brand),gtin=text(node.gtin13??node.gtin14??node.gtin12??node.gtin);
     const key=gtin?"gtin:"+gtin.replace(/\D/g,""):"name:"+hash(normalizeName((brand?brand+" ":"")+name)).slice(0,32);
     const availability:"IN_STOCK"|"OUT_OF_STOCK"|"UNKNOWN"=/outofstock|soldout/i.test(offer.availability)?"OUT_OF_STOCK":/instock|limitedavailability/i.test(offer.availability)?"IN_STOCK":"UNKNOWN";
-    return {productKey:key,productName:name,amount:offer.price,currency:/TRY|TRL/i.test(offer.currency)?"TRY":offer.currency||"TRY",availability,sourceUrl:url,sourceName:source.name,trustScore:source.trustScore};
+    return {productKey:key,productName:name,amount:offer.price,currency:/TRY|TRL/i.test(offer.currency)?"TRY":offer.currency||"TRY",availability,sourceUrl:url,imageUrl:imageUrl(node.image,url),sourceName:source.name,trustScore:source.trustScore};
   }
   const title=html.match(/<meta[^>]+(?:property|name)=["']og:title["'][^>]+content=["']([^"']+)/i)?.[1]?.trim();
   const amount=parseMoney(html.match(/<meta[^>]+(?:property|itemprop)=["'](?:product:price:amount|price)["'][^>]+content=["']([^"']+)/i)?.[1]);
+  const fallbackImage=imageUrl(html.match(/<meta[^>]+(?:property|name)=["']og:image["'][^>]+content=["']([^"']+)/i)?.[1],url);
   if(title&&amount){
-    return {productKey:"name:"+hash(normalizeName(title)).slice(0,32),productName:title,amount,currency:"TRY",availability:"UNKNOWN" as const,sourceUrl:url,sourceName:source.name,trustScore:source.trustScore};
+    return {productKey:"name:"+hash(normalizeName(title)).slice(0,32),productName:title,amount,currency:"TRY",availability:"UNKNOWN" as const,sourceUrl:url,imageUrl:fallbackImage,sourceName:source.name,trustScore:source.trustScore};
   }
   return null;
 }
@@ -90,7 +96,7 @@ async function collectSource(source:CommerceSource,pagesPerSource:number){
       const fingerprint=hash(JSON.stringify([item.productKey,item.amount,item.currency,item.sourceUrl]));
       await prisma.priceObservation.create({data:{
         productKey:item.productKey,productName:item.productName,merchantName:item.sourceName,amount:item.amount,currency:item.currency,
-        shippingAmount:null,availability:item.availability,sourceUrl:item.sourceUrl,sourceName:item.sourceName,sourceKind:"TRUSTED_MARKETPLACE",
+        shippingAmount:null,availability:item.availability,sourceUrl:item.sourceUrl,imageUrl:item.imageUrl,sourceName:item.sourceName,sourceKind:"TRUSTED_MARKETPLACE",
         trustScore:item.trustScore,fetchedAt:new Date(),lastVerifiedAt:new Date(),fingerprint
       }});
       stored++;

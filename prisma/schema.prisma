@@ -400,6 +400,7 @@ model PriceObservation {
   shippingAmount Decimal?          @db.Decimal(14, 2)
   availability   PriceAvailability @default(UNKNOWN)
   sourceUrl      String
+  imageUrl       String?
   sourceName     String
   sourceKind     SourceKind
   trustScore     Int

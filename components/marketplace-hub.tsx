@@ -3,6 +3,7 @@ import {useMemo,useState} from "react";
 import Link from "next/link";
 import {ListingMap} from "./listing-map";
 import {ListingComposer} from "./listing-composer";
+import {MarketplaceDealInbox} from "./marketplace-deal-inbox";
 import type {MarketplaceDashboard,MarketplaceListing} from "@/lib/marketplace/types";
 const money=(n:number|null)=>n===null?"—":new Intl.NumberFormat("tr-TR",{style:"currency",currency:"TRY",maximumFractionDigits:0}).format(n);
 export function MarketplaceHub({data}:{data:MarketplaceDashboard}){
@@ -11,7 +12,7 @@ export function MarketplaceHub({data}:{data:MarketplaceDashboard}){
  const visible=useMemo(()=>{const q=search.trim().toLocaleLowerCase("tr-TR"),m=max?Number(max):null;return data.listings.filter(x=>(!city||x.city===city)&&(!m||x.price<=m)&&(!q||[x.title,x.city,x.district,...Object.values(x.attributes).map(String)].join(" ").toLocaleLowerCase("tr-TR").includes(q))&&(!onlyTrusted||x.trustBadges.some(b=>b.tone==="good")&&!x.trustBadges.some(b=>b.tone==="warn")));},[data.listings,search,city,max,onlyTrusted]);
  return <main className="market-shell section-wrap"><header className="market-hero"><div><span className="rule-label">{data.kind==="property"?"EVAI / HARİTALI İLAN":"ARABAAI / HARİTALI İLAN"}</span><h1>{data.kind==="property"?"Evi haritada gör.\nVeriyi yanında tut.":"Aracı haritada gör.\nFiyatı referansla kıyasla."}</h1><p>{data.kind==="property"?"Kaynaklı ilanlar, kullanıcı ilanları ve yerel m² referansı tek yerde.":"İkinci el ilan fiyatını resmî sıfır araç fiyatı ve Üretir'deki benzer ikinci el ilanlarla birlikte gör."}</p></div><div className="market-trust-promise"><strong>Güven, rozet değil kanıt.</strong><p>İlanın kimden geldiğini, ne zaman kontrol edildiğini ve fiyatın referanslardan ne kadar saptığını açıkça gösteriyoruz.</p></div></header>
  <div className="market-stats">{data.stats.map(s=><div key={s.label}><strong>{s.value.toLocaleString("tr-TR")}</strong><span>{s.label}</span></div>)}</div>
- <ListingComposer kind={data.kind}/>
+ <ListingComposer kind={data.kind}/><MarketplaceDealInbox/>
  <section className="market-browser"><div className="market-toolbar"><label><span>Ara</span><input value={search} onChange={e=>setSearch(e.target.value)} placeholder={data.kind==="property"?"İlçe, oda, ilan…":"Marka, model, şehir…"}/></label><label><span>Şehir</span><select value={city} onChange={e=>setCity(e.target.value)}><option value="">Tümü</option>{cities.map(c=><option key={c}>{c}</option>)}</select></label><label><span>En yüksek fiyat</span><input type="number" min="0" value={max} onChange={e=>setMax(e.target.value)} placeholder="Sınır yok"/></label><label className="market-check"><input type="checkbox" checked={onlyTrusted} onChange={e=>setOnlyTrusted(e.target.checked)}/> Uyarısız ilanlar</label></div><div className="market-count"><b>{visible.length}</b> sonuç · harita ve tablo aynı filtreyi kullanıyor</div>
  <ListingMap items={visible}/>
  <div className="market-table-wrap"><table className="market-table"><thead><tr><th>İlan</th><th>Konum</th><th>Fiyat</th>{data.kind==="vehicle"&&<><th>Sıfır fiyat</th><th>2. el ort.</th></>}<th>Referans</th><th>Güven</th><th>Güncelleme</th></tr></thead><tbody>{visible.map(item=><MarketRow key={item.id} item={item}/>)}</tbody></table></div>

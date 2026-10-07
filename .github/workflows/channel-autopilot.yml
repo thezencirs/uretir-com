@@ -51,32 +51,36 @@ jobs:
           refresh() {
             local route="$1"
             echo "Self-heal: $route"
-            curl --fail-with-body --retry 2 --max-time 75               -H "Authorization: Bearer $CRON_SECRET"               "$SITE_URL$route" >/tmp/refresh.json
+            curl --fail-with-body --retry 2 --max-time 75               -H "Authorization: Bearer $CRON_SECRET"               "$SITE_URL$route" >/tmp/refresh.json || return 1
             cat /tmp/refresh.json
             echo
           }
 
+          unresolved=0
           for key in haber-ai finans-ai puan-ai indirim-ai araba-ai ev-ai; do
             echo "Checking $key"
-            fetch_feed "$key"
-            if is_ready "$key"; then
+            if fetch_feed "$key" && is_ready "$key"; then
               echo "$key ready"
               continue
             fi
 
-            case "$key" in
+            if ! case "$key" in
               haber-ai) refresh "/api/cron/haber-ai" ;;
               puan-ai) refresh "/api/cron/puanai-refresh/02" ;;
               indirim-ai) refresh "/api/cron/indirim-ai" ;;
               araba-ai) refresh "/api/cron/araba-ai" ;;
               ev-ai) refresh "/api/cron/ev-ai" ;;
               finans-ai) echo "FinansAI has no writable refresh job; feed fetch is its refresh." ;;
-            esac
+            esac; then
+              echo "::warning::$key refresh request failed"
+            fi
 
-            fetch_feed "$key"
-            if is_ready "$key"; then
+            if fetch_feed "$key" && is_ready "$key"; then
               echo "$key recovered"
             else
-              echo "::warning::$key feed is still empty after self-heal"
+              echo "::error::$key feed is still empty after self-heal"
+              unresolved=$((unresolved+1))
             fi
           done
+
+          test "$unresolved" -eq 0

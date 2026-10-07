@@ -42,5 +42,5 @@ export async function GET(r:NextRequest){
    status:top.every(x=>x.qualified)?"ranked_price_lows":"ranked_tracking",
    checkedAt:report.checkedAt,coverage:{products:report.productCount,observations:report.observationCount}
   });
- }catch(error){console.error("IndirimAI WhatsApp feed unavailable",error);return NextResponse.json({channel_url:whatsappChannel,body:null,image_url:null,ranked:[],status:"temporarily_unavailable",checkedAt:new Date().toISOString(),coverage:{products:0,observations:0}},{headers:{"Cache-Control":"no-store"}});}
+ }catch(error){console.error("IndirimAI WhatsApp feed unavailable",error);return NextResponse.json({channel_url:whatsappChannel,body:null,image_url:null,ranked:[],status:"temporarily_unavailable",checkedAt:new Date().toISOString(),coverage:{products:0,observations:0}},{status:503,headers:{"Cache-Control":"no-store"}});}
 }

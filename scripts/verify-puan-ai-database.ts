@@ -69,6 +69,16 @@ async function main() {
     runPnpm(["exec", "prisma", "db", "seed"], environment);
 
     const prisma = getPrisma();
+    // Regression: the shipped migration calls this column image_url.
+    const price = await prisma.priceObservation.create({ data: {
+      productKey: "verification:image-column", productName: "Verification product", merchantName: "Verification merchant",
+      amount: 100, currency: "TRY", availability: "IN_STOCK", sourceUrl: "https://example.com/product",
+      imageUrl: "https://example.com/image.jpg", sourceName: "Verification source", sourceKind: "TRUSTED_MARKETPLACE",
+      trustScore: 90, fetchedAt: new Date(), lastVerifiedAt: new Date(), fingerprint: "verification-image-column",
+    } });
+    const storedPrice = await prisma.priceObservation.findUniqueOrThrow({ where: { id: price.id } });
+    if (storedPrice.imageUrl !== "https://example.com/image.jpg") throw new Error("Price image mapping failed.");
+
     const counts = await Promise.all([
       prisma.bank.count(),
       prisma.card.count(),

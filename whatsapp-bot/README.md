@@ -2,6 +2,16 @@
 
 Bu bot tek bir WhatsApp Web oturumu ile **HaberAI**, **FinansAI**, **PuanAI**, **İndirimAI**, **ArabaAI** ve **EvAI** kanallarını yönetir. **GüzelAI bu yayın motoruna dahil değildir.** İçeriklerin tamamı `uretir.com` API uçlarından alınır; bot içerik üretmez, yalnızca doğru kanalı doğrular ve gönderimi yapar.
 
+## 2026-10-07 repair (pending deployment)
+
+The current publisher reads `/api/channel-feed/<slug>` for all six channels. All six invite codes are configured in `src/index.mjs`; the older environment-gated instructions below describe the previous implementation. GüzelAI remains excluded.
+
+Channel resolution now queries the configured invite code through the installed whatsapp-web.js metadata API, validates the exact returned invite link, requires a newsletter ID and an explicit owner/admin role, and hydrates that exact channel. A missing role still blocks publishing. Renamed channels do not fall back to name matching.
+
+A cycle continues checking other channels after a failure, but `RUN_ONCE=1` exits nonzero if any channel fails. `/health` returns 503 until a complete healthy cycle. Legitimate "no new content" remains successful; an unavailable feed does not. CI exits if re-pairing is required instead of printing an authentication QR to public logs. Pairing must be performed using the private persistent bot panel.
+
+Run `node --test whatsapp-bot/test/*.test.mjs` from the repository root. The tests are also part of `pnpm whatsapp:verify` and the publisher workflow. The workflow uses `npm ci` to preserve the committed dependency lock.
+
 ## Kanallar
 
 - HaberAI → `https://www.uretir.com/api/haber-ai/whatsapp`

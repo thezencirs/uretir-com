@@ -1,3 +1,4 @@
+import { resolveVerifiedChannel, runChannelCycle, assertFeedAvailable } from "./channel-runtime.mjs";
 import dotenv from "dotenv";
 dotenv.config({ path: "../.env.production.local", quiet: true });
 dotenv.config({ quiet: true });
@@ -30,6 +31,7 @@ const targets = [
 let busy=false;
 let qrImage="";
 let ready=false;
+let lastCycle=null;
 let connectionStatus="WhatsApp bağlantısı hazırlanıyor";
 const targetStatus=Object.fromEntries(targets.map(target=>[target.key,"bekleniyor"]));
 
@@ -43,8 +45,9 @@ function panelAuthorized(req){
 }
 if (!runOnce) createServer((req,res)=>{
   if(req.url?.startsWith("/health")){
-    res.writeHead(200,{"Content-Type":"application/json","Cache-Control":"no-store"});
-    res.end(JSON.stringify({ok:true,ready,status:connectionStatus,targets:targetStatus}));
+    const healthy=ready&&lastCycle?.ok===true;
+    res.writeHead(healthy?200:503,{"Content-Type":"application/json","Cache-Control":"no-store"});
+    res.end(JSON.stringify({ok:healthy,ready,status:connectionStatus,targets:targetStatus}));
     return;
   }
   if(!panelAuthorized(req)){
@@ -68,6 +71,10 @@ const client=new Client({
 
 client.on("qr",async value=>{
   ready=false;
+  if(runOnce){
+    console.error("WhatsApp oturumu eşleştirilmemiş. Kalıcı, özel bot panelinde yeniden eşleştirme gerekli.");
+    process.exit(2);
+  }
   qrImage=await QRCode.toDataURL(value,{width:480,margin:3});
   connectionStatus="Kanal yöneticisi hesabınızla QR kodunu bir kez okutun";
   console.log("WhatsApp Web QR kodu üretildi.");
@@ -93,13 +100,13 @@ client.on("disconnected",reason=>{
 client.on("ready",async()=>{
   ready=true;
   qrImage="";
-  connectionStatus="Bağlandı. Altı Üretir AI kanalı otomatik yayın modunda.";
+  connectionStatus="Bağlandı. Kanal yetkileri ve veri kaynakları doğrulanıyor.";
   console.log(`Hazır. ${targets.map(target=>target.name).join(", ")} için ${runOnce?"tek seferlik":"sürekli"} kontrol başlıyor.`);
-  await poll();
+  const cycle=await poll();
   if(runOnce){
     await new Promise(resolve=>setTimeout(resolve,2500));
     await client.destroy();
-    process.exit(0);
+    process.exit(cycle?.ok?0:1);
   }
   setInterval(poll,pollMs);
 });
@@ -121,66 +128,13 @@ function due(target,state){
   const last=Date.parse(own.lastSentAt||"");
   return !Number.isFinite(last)||Date.now()-last>=target.minIntervalMs;
 }
-function normalizedChannelName(value){
-  return String(value||"").trim().toLocaleLowerCase("tr-TR").replace(/\s+/g," ");
-}
-
-async function resolveChannel(target){
-  const channels=await client.pupPage.evaluate(()=>{
-    const collection=window.require("WAWebCollections").WAWebNewsletterCollection;
-    return collection.getModelsArray().map(chat=>{
-      let data={};
-      let metadata={};
-      try{data=chat.serialize?.()||{};}catch{}
-      try{metadata=chat.newsletterMetadata?.serialize?.()||{};}catch{}
-      const id=
-        chat.id?._serialized||
-        data.id?._serialized||
-        chat.id?.toString?.()||
-        data.id?.toString?.()||
-        null;
-      const name=
-        chat.name||
-        data.name||
-        metadata.name||
-        metadata.nameElementValue||
-        metadata.title||
-        data.formattedTitle||
-        "";
-      const membershipType=
-        chat.newsletterMetadata?.membershipType||
-        metadata.membershipType||
-        data.newsletterMetadata?.membershipType||
-        data.channelMetadata?.membershipType||
-        null;
-      return {id,name,membershipType};
-    }).filter(item=>item.id&&item.name);
-  });
-
-  const expected=normalizedChannelName(target.name);
-  const matches=channels.filter(channel=>normalizedChannelName(channel.name)===expected);
-  if(matches.length!==1){
-    const visible=channels.map(channel=>`${channel.name}[${channel.membershipType||"?"}]`).slice(0,30);
-    throw new Error(`${target.name} güvenli biçimde bulunamadı. Görünen kanallar: ${visible.join(" | ")||"yok"}`);
-  }
-
-  const channel=matches[0];
-  if(!channel.id.endsWith("@newsletter")){
-    throw new Error(`${target.name} hedefi geçerli bir WhatsApp kanalı değil.`);
-  }
-  const role=String(channel.membershipType||"").toLocaleLowerCase("en-US");
-  if(!["owner","admin"].includes(role)){
-    throw new Error(`${target.name} kanalında owner/admin yetkisi doğrulanamadı (${role||"bilinmiyor"}).`);
-  }
-  return channel;
-}
 
 async function api(endpoint){
   let lastError;
   for(let attempt=0;attempt<3;attempt++){
     try{
       const response=await fetch(`${siteUrl}${endpoint}`,{signal:AbortSignal.timeout(65_000),headers:{"User-Agent":"Uretir-WhatsApp-Publisher/1.0"}});
-      if(response.ok)return response.json();
+      if(response.ok)return assertFeedAvailable(await response.json());
       lastError=new Error(`uretir.com ${endpoint} → HTTP ${response.status}`);
       if(response.status<500&&response.status!==429)break;
     }catch(error){lastError=error;}
@@ -295,29 +249,26 @@ async function publishQueue(target,channel,state){
   await writeState(state);
   return {sent:true,status:"içerik gönderildi",messageId};
 }
-async function pollTarget(target,state){
-  try{
-    const channel=await resolveChannel(target);
-    const result=target.mode==="snapshot"?await publishSnapshot(target,channel,state):await publishQueue(target,channel,state);
-    targetStatus[target.key]=`${result.status} · ${new Date().toLocaleString("tr-TR",{timeZone:"Europe/Istanbul"})}`;
-    console.log(`${target.name}: ${result.status}${result.messageId?` (${result.messageId})`:""}`);
-  }catch(error){
-    const message=String(error instanceof Error?error.message:error);
-    targetStatus[target.key]="hata: "+message;
-    console.error(`${target.name} kontrolü başarısız:`,message);
-  }
-}
 async function poll(){
   if(busy||!ready)return;
   busy=true;
   try{
     const state=await readState();
-    for(const target of targets)await pollTarget(target,state);
-    connectionStatus="Son kanal kontrolü: "+new Date().toLocaleString("tr-TR",{timeZone:"Europe/Istanbul"});
+    lastCycle=await runChannelCycle(targets,async target=>{
+      const channel=await resolveVerifiedChannel(client,target);
+      return target.mode==="snapshot"?publishSnapshot(target,channel,state):publishQueue(target,channel,state);
+    },(target,result)=>{
+      targetStatus[target.key]=`${result.ok?"":"hata: "}${result.status} · ${new Date().toLocaleString("tr-TR",{timeZone:"Europe/Istanbul"})}`;
+      const line=`${target.name}: ${result.status}${result.messageId?` (${result.messageId})`:""}`;
+      if(result.ok)console.log(line);else console.error(line);
+    });
+    connectionStatus=(lastCycle.ok?"Son kanal kontrolü: ":"Kanal kontrolünde hata var: ")+new Date().toLocaleString("tr-TR",{timeZone:"Europe/Istanbul"});
   }catch(error){
+    lastCycle={ok:false,results:[]};
     connectionStatus="Kontrol başarısız: "+String(error instanceof Error?error.message:error);
-    console.error("Kanal kontrolü başarısız:",error instanceof Error?error.message:error);
+    console.error(connectionStatus);
   }finally{busy=false;}
+  return lastCycle;
 }
 
 await fs.mkdir(dataDir,{recursive:true});

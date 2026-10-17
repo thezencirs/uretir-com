@@ -30,9 +30,10 @@ jobs:
       SITE_URL: https://www.uretir.com
       SLOT: ${{ github.event.inputs.slot }}
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-      TELEGRAM_CHAT_ID: ${{ github.event.inputs.telegram_chat_id || secrets.TELEGRAM_CHAT_ID }}
+      TELEGRAM_CHAT_ID: ${{ github.event.inputs.telegram_chat_id || secrets.TELEGRAM_CHAT_ID || '995164733' }}
       IG_USERNAME: ${{ secrets.IG_USERNAME || 'uretirai' }}
       IG_PASSWORD: ${{ secrets.IG_PASSWORD }}
+      IG_SESSIONID: ${{ secrets.IG_SESSIONID }}
       CRON_SECRET: ${{ secrets.CRON_SECRET }}
     steps:
       - uses: actions/checkout@v4

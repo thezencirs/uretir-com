@@ -18,7 +18,7 @@ const requireOpenSource = createRequire(
 
 const SITE_URL = (process.env.SITE_URL || "https://www.uretir.com").replace(/\/$/, "");
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "";
-const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || process.env.TELEGRAM_ADMIN_CHAT_ID || "";
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || process.env.TELEGRAM_ADMIN_CHAT_ID || "995164733";
 const IG_USERNAME = process.env.IG_USERNAME || "uretirai";
 const IG_PASSWORD = process.env.IG_PASSWORD || "";
 

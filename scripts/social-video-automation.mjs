@@ -477,7 +477,22 @@ async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path) {
     // Fallback to CLI or HTTPS TTS
   }
 
-  // 2. Try open-source rany2/edge-tts CLI (Microsoft Neural Turkish Voice)
+  // 2. Try uv + rany2/edge-tts (10k+ ⭐ Microsoft Neural Turkish Voice)
+  const localUv = path.resolve(".local", "open-source-stack", "bin", process.platform === "win32" ? "uv.exe" : "uv");
+  if (existsSync(localUv)) {
+    try {
+      await execFileAsync(
+        localUv,
+        ["run", "--python", "3.12", "--with", "edge-tts", "python", "-m", "edge_tts", "--voice", voice, "--rate=+4%", "--text", text, "--write-media", outMp3Path],
+        { timeout: 60_000 }
+      );
+      if (existsSync(outMp3Path)) return true;
+    } catch {
+      // Try next binary
+    }
+  }
+
+  // 3. Try open-source rany2/edge-tts CLI (Microsoft Neural Turkish Voice)
   for (const bin of ["edge-tts", "python", "python3"]) {
     try {
       const args =
@@ -688,7 +703,7 @@ async function publishToInstagramReels(videoPath, coverPngPath, slotData) {
     `#Üretir #UretirAI #YapayZeka #HaberAI #FinansAI #İndirimAI #PuanAI #ArabaAI #EvAI #Teknoloji #Ekonomi #Keşfet #ReelsTürkiye`,
   ].join("\n");
 
-  // 1. Try uv + cloned subzeroid/instagrapi (449.0.0.52.84 Bloks CAA Login)
+  // 1. Try uv + cloned subzeroid/instagrapi v3.0.25 (449.0.0.52.84 Bloks CAA Login + curl_cffi TLS)
   const localUv = path.resolve(".local", "open-source-stack", "bin", process.platform === "win32" ? "uv.exe" : "uv");
   if (existsSync(localUv)) {
     try {
@@ -698,6 +713,10 @@ async function publishToInstagramReels(videoPath, coverPngPath, slotData) {
           "run",
           "--python",
           "3.12",
+          "--with",
+          "curl_cffi",
+          "--with",
+          "PySocks",
           "--with",
           "pillow",
           "--with",

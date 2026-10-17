@@ -3,7 +3,6 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
 import sharp from "sharp";
-import { chromium } from "@playwright/test";
 import dotenv from "dotenv";
 
 dotenv.config({ path: ".env.local", quiet: true });
@@ -38,6 +37,12 @@ async function patchInstagramPrivateApiConstants() {
 }
 
 async function publishViaPlaywrightWeb({ username, password, videoPath, feedJpgPath, caption }) {
+  let chromium;
+  try {
+    ({ chromium } = requireStack("playwright"));
+  } catch {
+    return { ok: false, reason: "playwright_module_missing" };
+  }
   console.log(`[Instagram Playwright Web] @${username} için tarayıcı otomasyonu başlatılıyor...`);
   const userDataDir = path.resolve("reports", "social-media", "ig_browser_profile");
   await fs.mkdir(userDataDir, { recursive: true });

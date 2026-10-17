@@ -65,9 +65,13 @@ def main():
                 cl = Client()
                 cl.delay_range = [2, 4]
 
-        # 2. Try sessionid captured from browser if available
-        if not logged_in and sessionid_file.exists():
-            sid = sessionid_file.read_text(encoding="utf-8").strip()
+        # 2. Try sessionid from IG_SESSIONID env or ig_sessionid.txt
+        if not logged_in:
+            from urllib.parse import unquote
+            raw_sid = os.environ.get("IG_SESSIONID", "").strip()
+            if not raw_sid and sessionid_file.exists():
+                raw_sid = sessionid_file.read_text(encoding="utf-8").strip()
+            sid = unquote(raw_sid)
             if len(sid) > 20:
                 try:
                     logged_in = bool(cl.login_by_sessionid(sid))

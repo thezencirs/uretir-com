@@ -78,8 +78,42 @@ async function publishViaPlaywrightWeb({ username, password, videoPath, feedJpgP
   }
 
   try {
+    const sidFile = path.resolve("reports", "social-media", "ig_sessionid.txt");
+    let rawSid = (process.env.IG_SESSIONID || "").trim();
+    if (!rawSid && existsSync(sidFile)) {
+      rawSid = (await fs.readFile(sidFile, "utf8")).trim();
+    }
+    if (rawSid) {
+      const decodedSid = decodeURIComponent(rawSid);
+      const encodedSid = encodeURIComponent(decodedSid);
+      const dsUserId = decodedSid.split(":")[0] || "";
+      const cookieList = [
+        {
+          name: "sessionid",
+          value: encodedSid,
+          domain: ".instagram.com",
+          path: "/",
+          httpOnly: true,
+          secure: true,
+          sameSite: "None",
+        },
+      ];
+      if (/^\d+$/.test(dsUserId)) {
+        cookieList.push({
+          name: "ds_user_id",
+          value: dsUserId,
+          domain: ".instagram.com",
+          path: "/",
+          httpOnly: false,
+          secure: true,
+          sameSite: "None",
+        });
+      }
+      await context.addCookies(cookieList).catch(() => {});
+    }
+
     const page = context.pages()[0] || (await context.newPage());
-    await page.goto("https://www.instagram.com/accounts/login/", { waitUntil: "domcontentloaded", timeout: 45_000 });
+    await page.goto("https://www.instagram.com/", { waitUntil: "domcontentloaded", timeout: 45_000 });
     await page.waitForTimeout(4000);
 
     // Dismiss cookie banners if any

@@ -908,6 +908,109 @@ async function runSlot(slot) {
   return { slot, videoBuilt, igPublished, tgPublished, videoPath, audioPath, coverPngPath };
 }
 
+async function pollTelegramBotInteractive(state) {
+  if (!TELEGRAM_BOT_TOKEN) return;
+  try {
+    if (!state.webhookCleared) {
+      await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/deleteWebhook?drop_pending_updates=false`);
+      state.webhookCleared = true;
+    }
+    const res = await fetch(
+      `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates?offset=${state.offset}&timeout=5`,
+      { signal: AbortSignal.timeout(12_000) }
+    );
+    const data = await res.json();
+    for (const upd of data?.result || []) {
+      state.offset = upd.update_id + 1;
+      const cb = upd.callback_query;
+      const msg = upd.message || upd.edited_message;
+
+      if (cb) {
+        const cbData = String(cb.data || "");
+        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/answerCallbackQuery`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            callback_query_id: cb.id,
+            text: "Üretir AI video ve yayın işlemini başlatıyor...",
+          }),
+        }).catch(() => {});
+
+        if (cbData.startsWith("slot:")) {
+          const targetSlot = cbData.split(":")[1];
+          if (["09", "12", "15", "20"].includes(targetSlot)) {
+            await runSlot(targetSlot);
+          }
+        }
+        continue;
+      }
+
+      if (msg?.chat?.id) {
+        const cid = String(msg.chat.id);
+        const text = String(msg.text || "").trim().toLowerCase();
+        if (text.startsWith("/sabah") || text === "09") {
+          await runSlot("09");
+        } else if (text.startsWith("/ogle") || text === "12") {
+          await runSlot("12");
+        } else if (text.startsWith("/ikindi") || text === "15") {
+          await runSlot("15");
+        } else if (text.startsWith("/aksam") || text === "20") {
+          await runSlot("20");
+        } else if (text.startsWith("/video") || text.startsWith("/paylas")) {
+          await runSlot(detectSlot());
+        } else if (text.startsWith("/yenile")) {
+          await syncUretirPrimaryDataHub();
+          await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              chat_id: cid,
+              text: "✅ *uretir.com üzerindeki 6 AI aracının canlı verileri yenilendi!*\n🌐 https://www.uretir.com",
+              parse_mode: "Markdown",
+            }),
+          }).catch(() => {});
+        } else if (text.startsWith("/start") || text.startsWith("/durum")) {
+          await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              chat_id: cid,
+              text: [
+                `🤖 *ÜRETİR AI OTONOM YÖNETİM PANELİ (@uretirbot)*`,
+                `━━━━━━━━━━━━━━━━━━━━`,
+                `✅ *Canlı Veri Merkezi:* https://www.uretir.com`,
+                `✅ *Instagram (@uretirai):* Aktif (Otomatik Reels & Story)`,
+                `✅ *Otonom Saatler:* 09:00 · 12:00 · 15:00 · 20:00`,
+                "",
+                `Komutlar: /sabah · /ogle · /ikindi · /aksam · /video · /yenile`,
+              ].join("\n"),
+              parse_mode: "Markdown",
+              reply_markup: {
+                inline_keyboard: [
+                  [
+                    { text: "🎬 09:00 Sabah Video", callback_data: "slot:09" },
+                    { text: "🎬 12:00 Öğle Video", callback_data: "slot:12" },
+                  ],
+                  [
+                    { text: "🎬 15:00 Araç & Konut Video", callback_data: "slot:15" },
+                    { text: "🎬 20:00 Akşam Özeti Video", callback_data: "slot:20" },
+                  ],
+                  [
+                    { text: "🌐 uretir.com Aç", url: "https://www.uretir.com" },
+                    { text: "📸 Instagram @uretirai", url: "https://www.instagram.com/uretirai/" },
+                  ],
+                ],
+              },
+            }),
+          }).catch(() => {});
+        }
+      }
+    }
+  } catch {
+    // ignore transient poll error
+  }
+}
+
 async function main() {
   if (process.argv.includes("--all-slots")) {
     for (const s of ["09", "12", "15", "20"]) {
@@ -916,12 +1019,22 @@ async function main() {
     return;
   }
 
-  const slot = detectSlot();
-  await runSlot(slot);
+  if (!process.argv.includes("--daemon-only")) {
+    const slot = detectSlot();
+    await runSlot(slot);
+  }
 
-  if (process.argv.includes("--daemon")) {
-    console.log("[Üretir 7/24 Otomasyon Daemon] 09:00, 12:00, 15:00 ve 20:00 (Europe/Istanbul) zamanlayıcısı aktif...");
+  if (process.argv.includes("--daemon") || process.argv.includes("--daemon-only")) {
+    console.log("[Üretir 7/24 Otomasyon Daemon] 09:00, 12:00, 15:00, 20:00 zamanlayıcısı ve @uretirbot canlı dinleyici aktif...");
     let lastTriggeredKey = "";
+    const tgState = { offset: 0, webhookCleared: false };
+
+    // Poll Telegram commands & buttons every 4 seconds
+    setInterval(() => {
+      pollTelegramBotInteractive(tgState);
+    }, 4_000);
+
+    // Check 09:00, 12:00, 15:00, 20:00 schedule every 45 seconds
     setInterval(async () => {
       try {
         const now = new Date();
@@ -945,7 +1058,7 @@ async function main() {
       } catch (e) {
         console.warn("Daemon tick uyarısı:", e);
       }
-    }, 60_000);
+    }, 45_000);
   }
 }
 

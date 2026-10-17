@@ -328,8 +328,21 @@ function istanbulDay() {
     day: "2-digit",
   }).format(new Date());
 }
+function isBroadcastWindowOpen() {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Istanbul",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(new Date());
+  const map = Object.fromEntries(parts.map((p) => [p.type, p.value]));
+  const totalMinutes = Number(map.hour || 0) * 60 + Number(map.minute || 0);
+  // Daily active broadcast window: 08:55 (535m) to 20:20 (1220m) Europe/Istanbul
+  return totalMinutes >= 8 * 60 + 55 && totalMinutes <= 20 * 60 + 20;
+}
 function due(target, state, force = false) {
   if (force) return true;
+  if (!isBroadcastWindowOpen()) return false;
   const own = state?.[target.key] || {};
   if (target.dailyLimit && own.dailyDay === istanbulDay() && (own.dailyCount || 0) >= target.dailyLimit) return false;
   if (!target.minIntervalMs) return true;
@@ -767,7 +780,14 @@ async function sendMessage(channel, body, target, item = {}) {
 }
 
 async function publishSnapshot(target, channel, state, force = false) {
-  if (!due(target, state, force)) return { sent: false, status: "sıradaki yayın saati bekleniyor" };
+  if (!due(target, state, force)) {
+    return {
+      sent: false,
+      status: isBroadcastWindowOpen()
+        ? "sıradaki yayın saati bekleniyor"
+        : "bugünkü yayınlar tamamlandı · yarın 09:00 planında",
+    };
+  }
   const payload = await api(target.endpoint);
   if (!payload?.body) return { sent: false, status: payload?.status || "yayınlanabilir veri yok" };
   const fingerprint = payload.fingerprint || createHash("sha256").update(payload.body).digest("hex").slice(0, 24);
@@ -782,7 +802,14 @@ async function publishSnapshot(target, channel, state, force = false) {
   return { sent: true, status: "fotoğraflı özet gönderildi", messageId };
 }
 async function publishQueue(target, channel, state, force = false) {
-  if (!due(target, state, force)) return { sent: false, status: "sıradaki yayın saati bekleniyor" };
+  if (!due(target, state, force)) {
+    return {
+      sent: false,
+      status: isBroadcastWindowOpen()
+        ? "sıradaki yayın saati bekleniyor"
+        : "bugünkü yayınlar tamamlandı · yarın 09:00 planında",
+    };
+  }
   const payload = await api(target.endpoint),
     items = Array.isArray(payload?.items) ? payload.items : [];
   if (!items.length) return { sent: false, status: "yayınlanabilir yeni içerik yok" };
@@ -832,12 +859,7 @@ async function poll(forceRequest = false) {
   busy = true;
   try {
     const state = await readState();
-    const forceFirstVisualPass = forceRequest || !state._visualStudioPassV4;
-    if (!state._visualStudioPassV4) {
-      state._visualStudioPassV4 = new Date().toISOString();
-      await writeState(state);
-    }
-    for (const target of targets) await pollTarget(target, state, forceFirstVisualPass);
+    for (const target of targets) await pollTarget(target, state, forceRequest);
     connectionStatus = "Son kanal kontrolü: " + new Date().toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" });
   } catch (error) {
     connectionStatus = "Kontrol başarısız: " + String(error instanceof Error ? error.message : error);

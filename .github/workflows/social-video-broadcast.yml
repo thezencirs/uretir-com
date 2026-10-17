@@ -1,0 +1,63 @@
+name: "Üretir 7/24 Veri & Sosyal Medya Otomasyonu (09:00, 12:00, 15:00, 20:00)"
+
+on:
+  schedule:
+    # 09:00 Europe/Istanbul (06:00 UTC) - Sabah Gündem & Piyasa Kancası (HaberAI 81 İl + FinansAI)
+    - cron: "0 6 * * *"
+    # 12:00 Europe/Istanbul (09:00 UTC) - Öğle İndirim & Kart Kancası (İndirimAI Dip Fiyat + PuanAI)
+    - cron: "0 9 * * *"
+    # 15:00 Europe/Istanbul (12:00 UTC) - İkindi Otomobil & Konut Kancası (ArabaAI + EvAI Kamu İhale)
+    - cron: "0 12 * * *"
+    # 20:00 Europe/Istanbul (17:00 UTC) - Akşam Kapanış Özeti (6 AI Aracı Günün Özeti)
+    - cron: "0 17 * * *"
+  workflow_dispatch:
+    inputs:
+      slot:
+        description: "Yayın kuşağı (09, 12, 15, 20 veya dyson)"
+        required: false
+        default: "auto"
+
+permissions:
+  contents: read
+
+jobs:
+  uretir-broadcast:
+    name: "uretir.com Veri Senkronizasyonu + Hook & Fon Video + Çok Kanallı Yayın"
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Setup Python 3.11 & FFmpeg
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies & Edge-TTS + Instagrapi
+        run: |
+          sudo apt-get update && sudo apt-get install -y ffmpeg
+          npm ci
+          pip install edge-tts instagrapi Pillow
+
+      - name: Run Üretir Data Sync & Social Video Broadcast
+        env:
+          SITE_URL: "https://www.uretir.com"
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          IG_USERNAME: ${{ secrets.IG_USERNAME }}
+          IG_PASSWORD: ${{ secrets.IG_PASSWORD }}
+          IG_SESSIONID: ${{ secrets.IG_SESSIONID }}
+        run: |
+          if [ "${{ github.event.inputs.slot }}" = "dyson" ]; then
+            node scripts/social-video-automation.mjs --dyson-special
+          else
+            node scripts/social-video-automation.mjs
+          fi

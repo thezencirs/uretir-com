@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { ToolShortcuts } from "@/components/tool-shortcuts";
+import { FinanceStrip } from "@/components/finance-strip";
 import { getPublishedContent } from "@/lib/site-content-store";
 import { publicNews } from "@/lib/site-content-model";
-import { ArrowDownRight, ArrowUpRight, ChevronRight, Layers, Rocket, Search, Sparkles, Zap } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, CarFront, ChartNoAxesCombined, ChevronRight, House, Layers, MapPinned, Rocket, Search, Sparkles, Tags, WalletCards, Zap } from "lucide-react";
 import { HeroArt } from "@/components/hero-art";
 import { NewsletterForm } from "@/components/newsletter-form";
 import { PostCard } from "@/components/post-card";
@@ -13,10 +14,27 @@ import { analyticsAttributes } from "@/lib/analytics";
 import { isIndexableReference, isVisibleReference } from "@/lib/publication";
 
 const ecosystemCards = [
-  { number: "01", icon: Layers, title: "HaberAI", description: "Şehrini seç, kaynaklı haberleri Türkiye haritasında takip et", color: "#769d32", href: "/haber-ai" },
-  { number: "02", icon: Zap, title: "PuanAI", description: "Doğrulanmış kampanyalarla alışveriş kararını açıkla", color: "#78a5b6", href: "/puan-ai" },
-  { number: "03", icon: Sparkles, title: "AI Merkezleri", description: "Kaynaklı rehberler ve gelecek ürünler", color: "#8b80c2", href: "/araclar" },
-  { number: "04", icon: Rocket, title: "Startup Vizyonu", description: "Türkiye'nin üretim teknolojileri platformu", color: "#d97835", href: "/startup" },
+  { number: "01", icon: MapPinned, title: "HaberAI · 81 İl Haritası", description: "81 ilin tamamında resmi ajans ve kurum kaynaklı sıcak gündemi interaktif haritada takip et", color: "#769d32", href: "/haber-ai" },
+  { number: "02", icon: Tags, title: "İndirimAI · Dip Fiyat", description: "30/90/360 günlük gerçek fiyat geçmişi, kupon kodları ve sahte indirim filtresiyle fırsatları yakala", color: "#f6ad55", href: "/indirim-ai" },
+  { number: "03", icon: ChartNoAxesCombined, title: "FinansAI · Canlı Piyasa", description: "Dolar, Euro, Gram Altın, BIST 100, Bitcoin ve Brent Petrol verilerini tek ekranda izle", color: "#4fd1c5", href: "/finans-ai" },
+  { number: "04", icon: WalletCards, title: "PuanAI · Kart Kampanya", description: "Bankaların resmi kredi kartı puan, nakit iade ve taksit kampanyalarını net kazanca göre kıyasla", color: "#78a5b6", href: "/puan-ai" },
+  { number: "05", icon: CarFront, title: "ArabaAI · Sıfır & 2. El", description: "Resmi distribütör sıfır araç liste fiyatlarıyla 81 il haritalı 2. el ilanlarını karşılaştır", color: "#63b3ed", href: "/araba-ai" },
+  { number: "06", icon: House, title: "EvAI · Konut & İhale", description: "Harita üzerinde konut m² fiyatları, kira çarpanı ve resmi kamu ihale taşınmaz ilanlarını incele", color: "#f687b3", href: "/ev-ai" },
+];
+
+const quickMapCities = [
+  { code: "34", name: "İstanbul", region: "Marmara" },
+  { code: "06", name: "Ankara", region: "İç Anadolu" },
+  { code: "35", name: "İzmir", region: "Ege" },
+  { code: "16", name: "Bursa", region: "Marmara" },
+  { code: "07", name: "Antalya", region: "Akdeniz" },
+  { code: "01", name: "Adana", region: "Akdeniz" },
+  { code: "42", name: "Konya", region: "İç Anadolu" },
+  { code: "27", name: "Gaziantep", region: "Güneydoğu" },
+  { code: "61", name: "Trabzon", region: "Karadeniz" },
+  { code: "25", name: "Erzurum", region: "Doğu Anadolu" },
+  { code: "21", name: "Diyarbakır", region: "Güneydoğu" },
+  { code: "55", name: "Samsun", region: "Karadeniz" },
 ];
 
 const openSourceEngines = [
@@ -73,6 +91,64 @@ export default async function HomePage() {
   const latestNews = publicNews(content.news).slice(0, 3);
   return <div className="page-reveal">
     <ToolShortcuts />
+    <div className="section-wrap py-4">
+      <FinanceStrip />
+    </div>
+
+    <section className="section-wrap py-6" aria-label="Canlı Komuta ve Hızlı Etkileşim Merkezi">
+      <div className="grid gap-5 lg:grid-cols-[1.15fr_.85fr]">
+        <div className="rounded-2xl border hairline bg-surface p-6">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="text-[11px] font-extrabold uppercase tracking-[.16em] text-[#769d32]">🗺️ HABERAI · 81 İL İNTERAKTİF TÜRKİYE HARİTASI</span>
+            <Link href="/haber-ai" className="text-xs font-bold underline hover:text-[#769d32]">Tam ekran haritayı aç ↗</Link>
+          </div>
+          <h2 className="mt-2 font-display text-2xl md:text-3xl">Şehrini seç, 81 ilin sıcak gündemini haritada incele.</h2>
+          <p className="mt-2 text-xs leading-6 text-muted">Anadolu Ajansı, TRT Haber ve resmi kurum kaynaklı şehir bültenleri 7 coğrafi bölge ve 81 il plaka koduyla anlık güncellenir.</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {quickMapCities.map((c) => (
+              <Link
+                key={c.code}
+                href={`/haber-ai?city=${c.code}`}
+                className="inline-flex items-center gap-1.5 rounded-full border hairline bg-[color:var(--background)] px-3 py-1.5 text-xs font-semibold transition hover:border-[#769d32] hover:text-[#769d32]"
+              >
+                <span className="font-mono text-[10px] font-bold opacity-60">{c.code}</span>
+                <span>{c.name}</span>
+              </Link>
+            ))}
+            <Link
+              href="/haber-ai"
+              className="inline-flex items-center gap-1 rounded-full bg-[#769d32] px-3.5 py-1.5 text-xs font-bold text-white transition hover:opacity-90"
+            >
+              81 İlin Tamamı <ArrowUpRight size={13} />
+            </Link>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border hairline bg-surface p-6">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="text-[11px] font-extrabold uppercase tracking-[.16em] text-[#d97835]">🔥 İNDİRİMAI · GÜNÜN DOĞRULANMIŞ KANCASI</span>
+            <Link href="/indirim-ai" className="text-xs font-bold underline hover:text-[#d97835]">Tüm fırsatlar ↗</Link>
+          </div>
+          <h2 className="mt-2 font-display text-2xl md:text-3xl">Dyson 360° Combi Filtrede 2 Al 1 Öde (-%50)</h2>
+          <p className="mt-2 text-xs leading-6 text-muted">Sepette <strong>COMBI360</strong> kupon koduyla 2 adet alımda birim fiyat <strong>3.899 TL</strong> yerine <strong>1.949,50 TL</strong>. 360 günlük dip fiyat doğrulaması yapıldı.</p>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t hairline pt-4">
+            <div>
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-muted">Kupon Kodu &amp; Birim Fiyat</span>
+              <strong className="text-sm font-black text-[#769d32]">COMBI360 · 1.949,50 TL</strong>
+            </div>
+            <div className="flex gap-2">
+              <Link href="/indirim-ai" className="inline-flex items-center gap-1 rounded-full border hairline bg-[color:var(--background)] px-3.5 py-2 text-xs font-bold transition hover:border-[#769d32]">
+                Fiyat Grafiği <ArrowUpRight size={13} />
+              </Link>
+              <Link href="/puan-ai" className="inline-flex items-center gap-1 rounded-full border hairline bg-[color:var(--background)] px-3.5 py-2 text-xs font-bold transition hover:border-[#769d32]">
+                Kart Puanı Ekle <ArrowUpRight size={13} />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section className="home-entry">
       <div className="section-wrap home-entry__grid">
       <div className="home-entry__copy">
@@ -86,7 +162,8 @@ export default async function HomePage() {
         <p className="mt-8 max-w-md text-base leading-7 text-muted md:text-lg">{content.home.description}</p>
         <form action="/ara" className="group mt-9 flex max-w-md items-center gap-3 border-b hairline py-3.5 transition-colors focus-within:border-[#769d32]" {...analyticsAttributes({ event: "search_submit", surface: "global_search", target: "home" })}><Search size={17} className="shrink-0 text-muted transition group-focus-within:text-[#769d32]" /><label className="sr-only" htmlFor="home-search">Ne arıyorsun?</label><input id="home-search" name="q" maxLength={120} placeholder="Şirket, ürün, rehber veya AI merkezi ara" className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted" /><button className="text-[10px] font-bold uppercase tracking-[.16em] text-muted transition hover:text-[color:var(--foreground)]">Ara</button></form>
         <div className="mt-7 flex flex-wrap gap-3">
-          <Link href="/blog" className="focus-ring inline-flex items-center gap-2 rounded-full bg-[color:var(--foreground)] px-6 py-3.5 text-xs font-bold text-[color:var(--background)] shadow-[0_4px_20px_rgba(118,157,50,.15)] transition hover:shadow-[0_8px_30px_rgba(118,157,50,.25)] hover:opacity-90">Keşfetmeye başla <ArrowUpRight size={15} /></Link>
+          <Link href="/haber-ai" className="focus-ring inline-flex items-center gap-2 rounded-full bg-[color:var(--foreground)] px-6 py-3.5 text-xs font-bold text-[color:var(--background)] shadow-[0_4px_20px_rgba(118,157,50,.15)] transition hover:shadow-[0_8px_30px_rgba(118,157,50,.25)] hover:opacity-90">81 İl Haritasını Aç <ArrowUpRight size={15} /></Link>
+          <Link href="/indirim-ai" className="focus-ring inline-flex items-center gap-2 rounded-full border hairline px-6 py-3.5 text-xs font-bold transition hover:bg-surface hover:shadow-[0_4px_16px_rgba(0,0,0,.04)]">İndirim Radarı <ArrowUpRight size={15} /></Link>
           <Link href="#manifesto" className="focus-ring inline-flex items-center gap-2 rounded-full border hairline px-6 py-3.5 text-xs font-bold transition hover:bg-surface hover:shadow-[0_4px_16px_rgba(0,0,0,.04)]">Biz kimiz? <ArrowDownRight size={15} /></Link>
         </div>
         <div className="mt-14 flex items-center gap-6 border-t hairline pt-5">
@@ -103,8 +180,8 @@ export default async function HomePage() {
       <div className="section-wrap py-20 md:py-28">
         <p className="eyebrow">Platform / Çözümler</p>
         <h2 className="mt-6 font-display text-4xl leading-[.95] md:text-6xl">{content.home.ecosystemTitle}</h2>
-        <p className="mt-6 max-w-xl text-base leading-7 text-muted">Her biri birbirini besleyen araçlar, içerikler ve yapay zeka servisleri. Tek platform, sınırsız olanak.</p>
-        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <p className="mt-6 max-w-xl text-base leading-7 text-muted">Her biri birbirini besleyen 6 canlı yapay zeka veri aracı ve 6 resmi WhatsApp kanalı. Tek platform, doğrulanmış referans.</p>
+        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {ecosystemCards.map((card, index) => {
             const Icon = card.icon;
             return <Link href={card.href} key={card.title} className="group relative overflow-hidden border hairline bg-[color:var(--background)] p-6 transition duration-300 hover:border-[color:var(--foreground)] hover:shadow-[0_16px_48px_rgba(0,0,0,.07)] animate-rise md:p-7" style={{ animationDelay: `${index * 100}ms` }}>

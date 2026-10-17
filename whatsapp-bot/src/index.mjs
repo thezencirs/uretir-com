@@ -255,19 +255,32 @@ client.on("authenticated", () => {
   qrImage = "";
   connectionStatus = "Oturum doğrulandı; kanallar hazırlanıyor";
   console.log("WhatsApp oturumu doğrulandı.");
-  setTimeout(async () => {
-    if (!ready && client.pupPage) {
-      try {
-        await client.pupPage.evaluate(() => {
-          if (typeof window.onAppStateHasSyncedEvent === "function") {
-            window.onAppStateHasSyncedEvent();
+  const checkHydrated = async (attempt = 0) => {
+    if (ready || !client.pupPage) return;
+    try {
+      const hydrated = await client.pupPage.evaluate(() => {
+        try {
+          const { getMaybeMeLidUser, getMaybeMePnUser } = window.require("WAWebUserPrefsMeUser");
+          const me = getMaybeMePnUser?.() || getMaybeMeLidUser?.() || window.require("WAWebConnModel")?.Conn?.wid;
+          const newsletters = window.require("WAWebCollections")?.WAWebNewsletterCollection?.getModelsArray?.() || [];
+          if (me && (newsletters.length > 0 || window.__uretirWaitTicks > 3)) {
+            if (typeof window.onAppStateHasSyncedEvent === "function") {
+              window.onAppStateHasSyncedEvent();
+              return true;
+            }
           }
-        });
-      } catch {
-        // ignore if page is still navigating
+          window.__uretirWaitTicks = (window.__uretirWaitTicks || 0) + 1;
+        } catch {}
+        return false;
+      });
+      if (!hydrated && attempt < 15) {
+        setTimeout(() => checkHydrated(attempt + 1), 3000);
       }
+    } catch {
+      if (attempt < 15) setTimeout(() => checkHydrated(attempt + 1), 3000);
     }
-  }, 6000);
+  };
+  setTimeout(() => checkHydrated(0), 5000);
 });
 client.on("auth_failure", (message) => {
   ready = false;
@@ -685,6 +698,7 @@ async function sendMessage(channel, body, target, item = {}) {
       };
       const idOf = (msg) => msg?.id?._serialized || msg?.id?.toString?.() || msg?.serverId || null;
 
+      let mediaError = null;
       if (mediaBase64) {
         let step = "init";
         try {
@@ -714,10 +728,7 @@ async function sendMessage(channel, body, target, item = {}) {
             };
           }
         } catch (mediaErr) {
-          return {
-            ok: false,
-            mediaError: `[${step}] ` + String(mediaErr?.stack || mediaErr?.message || mediaErr),
-          };
+          mediaError = `[${step}] ` + String(mediaErr?.stack || mediaErr?.message || mediaErr);
         }
       }
 
@@ -734,6 +745,7 @@ async function sendMessage(channel, body, target, item = {}) {
       return {
         ok: Boolean(confirmed && (serverId || ack >= 1)),
         withMedia: false,
+        mediaError,
         id,
         serverId,
         ack,
@@ -820,9 +832,9 @@ async function poll(forceRequest = false) {
   busy = true;
   try {
     const state = await readState();
-    const forceFirstVisualPass = forceRequest || !state._visualStudioPassV3;
-    if (!state._visualStudioPassV3) {
-      state._visualStudioPassV3 = new Date().toISOString();
+    const forceFirstVisualPass = forceRequest || !state._visualStudioPassV4;
+    if (!state._visualStudioPassV4) {
+      state._visualStudioPassV4 = new Date().toISOString();
       await writeState(state);
     }
     for (const target of targets) await pollTarget(target, state, forceFirstVisualPass);

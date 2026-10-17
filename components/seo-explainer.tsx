@@ -230,8 +230,69 @@ const copy: Record<
 
 export function SeoExplainer({ slug }: { slug: SeoExplainerKey }) {
   const item = copy[slug];
+  const canonicalUrl = `https://www.uretir.com/${slug}`;
+
+  const structuredData = [
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Üretir", item: "https://www.uretir.com" },
+        { "@type": "ListItem", position: 2, name: item.title.split("·")[0].trim(), item: canonicalUrl },
+      ],
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      name: item.title,
+      url: canonicalUrl,
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "All",
+      inLanguage: "tr-TR",
+      description: item.lead,
+      featureList: item.points,
+      keywords: item.keywords.join(", "),
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "TRY",
+      },
+      publisher: {
+        "@type": "Organization",
+        name: "Üretir",
+        url: "https://www.uretir.com",
+      },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: [
+        {
+          "@type": "Question",
+          name: item.title.split("·")[0].trim(),
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: `${item.lead} ${item.body}`,
+          },
+        },
+        {
+          "@type": "Question",
+          name: `${slug.toUpperCase()} verileri hangi kaynaklardan ve hangi sıklıkla güncellenir?`,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: `${item.points.join(". ")}. Veriler her gün 09:00, 12:00, 15:00 ve 20:00 saatlerinde uretir.com, Instagram (@uretirai), WhatsApp kanalları ve Telegram (@uretirbot) üzerinde senkronize güncellenir.`,
+          },
+        },
+      ],
+    },
+  ];
+
   return (
     <section className="section-wrap seo-explainer" aria-labelledby={"seo-" + slug}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
+      />
       <p className="rule-label">Nasıl çalışır? · Rehber ve Referans Ağı</p>
       <h2 id={"seo-" + slug}>{item.title}</h2>
       <div className="seo-explainer-copy">

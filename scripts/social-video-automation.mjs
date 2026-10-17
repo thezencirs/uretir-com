@@ -174,32 +174,55 @@ async function gatherLiveSlotData(slot) {
     ? `${String(puan.items[0].bank).toUpperCase()} Resmî Kart Kampanyası`
     : "Axess, Bonus ve World 10.000 TL'ye Varan Puan";
 
+  const shortHeadline =
+    topHeadline.length > 72 ? `${topHeadline.slice(0, 70).replace(/\s+\S*$/, "")}...` : topHeadline;
+  const shortDealTitle =
+    dealTitle.length > 52 ? `${dealTitle.slice(0, 50).replace(/\s+\S*$/, "")}` : dealTitle;
+
   const slotMap = {
     "09": {
-      label: "09:00 SABAH GÜNDEMİ & PİYASA RAPORU",
+      label: "09:00 SABAH HOOK · İNDİRİMAI & HABERAI RAPORU",
       targetUrl: "https://www.uretir.com/haber-ai",
       voice: "tr-TR-AhmetNeural",
       scenes: [
         {
-          kicker: "09:00 · TÜRKİYE GÜNDEMİ & 81 İL AKIŞI",
+          kicker: "GÜNÜN KANCASI · İNDİRİMAI DİP FİYAT",
+          title: dealTitle,
+          sub: `${topPuan} ve 360 Günlük Mağaza Fiyat Geçmişi`,
+          highlight: dealPrice,
+          statLeft: dealDrop,
+          statRight: "uretir.com/indirim-ai",
+          accent: "#f6ad55",
+          bg1: "#29190d",
+          bg2: "#120a05",
+          photoUrl: "https://images.unsplash.com/photo-1585771724684-38269d6639fd?auto=format&fit=crop&w=1200&q=85",
+          photoTag: "İNDİRİMAI · GERÇEK DİP FİYAT",
+          graphLabel: "SON 90 GÜN FİYAT HAREKETİ (DÖNEM DİBİ)",
+          graphStartLabel: "Liste Tepe Fiyatı",
+          graphEndLabel: `Kampanya: ${dealPrice}`,
+          graphTrend: "down",
+          speech: `Bu fırsat kaçmaz! İndirim A İ'de günün lideri: ${shortDealTitle}, ${dealPrice}.`,
+        },
+        {
+          kicker: "81 İL HARİTASI · HABERAI SICAK GÜNDEM",
           title: topHeadline,
-          sub: "Resmî Ajanslar ve Doğrulanmış Yerel Kaynaklardan Günün Özeti",
-          highlight: "81 İL DOĞRULANMIŞ GÜNDEM",
+          sub: "81 İl İnteraktif Türkiye Haritasında Doğrulanmış Gündem",
+          highlight: "81 İL CANLI HARİTA",
           statLeft: "Kaynak: AA & TRT Haber",
           statRight: "uretir.com/haber-ai",
           accent: "#c8f560",
           bg1: "#0f2419",
           bg2: "#07100b",
           photoUrl: "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=1200&q=85",
-          photoTag: "TÜRKİYE GÜNDEM RAPORU · 81 İL",
-          graphLabel: "GÜNLÜK HABER DOĞRULAMA AKIŞI (81 İL)",
-          graphStartLabel: "06:00 Açılış",
-          graphEndLabel: "09:00 Yoğunluk Zirvesi",
+          photoTag: "HABERAI · 81 İL HARİTASI",
+          graphLabel: "81 İL GÜNDEM YOĞUNLUK GRAFİĞİ",
+          graphStartLabel: "Sabah Açılış",
+          graphEndLabel: "81 İl Aktif",
           graphTrend: "up",
-          speech: `Günaydın Türkiye! Saat dokuz sabah gündem ve piyasa raporundayız. Günün öne çıkan gelişmesi: ${topHeadline}.`,
+          speech: `Haber A İ Türkiye haritasında sıcak başlık: ${shortHeadline}.`,
         },
         {
-          kicker: "09:00 · PİYASA AÇILIŞ TABLOSU",
+          kicker: "CANLI PİYASA · FİNANSAI AÇILIŞ",
           title: `Dolar ${usd} TL · Euro ${eur} TL · Gram Altın ${gram} TL`,
           sub: `Borsa İstanbul BIST 100: ${bist} Puan · Bitcoin: ${btc} USD`,
           highlight: `GRAM ALTIN: ${gram} TL`,
@@ -209,42 +232,24 @@ async function gatherLiveSlotData(slot) {
           bg1: "#0d2426",
           bg2: "#061112",
           photoUrl: "https://images.unsplash.com/photo-1610375461246-83df859d849d?auto=format&fit=crop&w=1200&q=85",
-          photoTag: "KAPALIÇARŞI & SERBEST PİYASA VERİSİ",
-          graphLabel: "GRAM ALTIN & DÖVİZ 30 GÜNLÜK EĞİLİM",
-          graphStartLabel: "30 Gün Önce",
-          graphEndLabel: `Bugün: ${gram} TL`,
+          photoTag: "FİNANSAI · SERBEST PİYASA",
+          graphLabel: "GRAM ALTIN & DÖVİZ TREND EĞRİSİ",
+          graphStartLabel: "Önceki Kapanış",
+          graphEndLabel: `Altın: ${gram} TL`,
           graphTrend: "up",
-          speech: `Sabah piyasa açılışında Dolar ${usd} lira, Euro ${eur} lira, gram altın ${gram} lira ve Borsa İstanbul ${bist} puanda işlem görüyor.`,
-        },
-        {
-          kicker: "09:00 · DOĞRULANMIŞ MAĞAZA FIRSATI",
-          title: dealTitle,
-          sub: `${topPuan} ve Mağaza Fiyat Geçmişi Karşılaştırması`,
-          highlight: dealPrice,
-          statLeft: dealDrop,
-          statRight: "uretir.com/indirim-ai",
-          accent: "#f6ad55",
-          bg1: "#29190d",
-          bg2: "#120a05",
-          photoUrl: "https://images.unsplash.com/photo-1585771724684-38269d6639fd?auto=format&fit=crop&w=1200&q=85",
-          photoTag: "DOĞRULANMIŞ MAĞAZA FİYAT GEÇMİŞİ",
-          graphLabel: "SON 90 GÜN FİYAT HAREKETİ (DÖNEM DİBİ)",
-          graphStartLabel: "Liste Tepe Fiyatı",
-          graphEndLabel: `Kampanya: ${dealPrice}`,
-          graphTrend: "down",
-          speech: `Mağaza fiyat incelememizde ise ${dealTitle}, ${dealPrice} dip fiyatıyla öne çıkıyor. Tüm güncel veriler için üretir nokta com adresini ziyaret edebilirsiniz.`,
+          speech: `Finans A İ'de Dolar ${usd}, gram altın ${gram} lira. Detaylar üretir nokta com'da.`,
         },
       ],
     },
     "12": {
-      label: "12:00 ÖĞLE FİYAT & KAMPANYA RAPORU",
+      label: "12:00 ÖĞLE HOOK · İNDİRİMAI & HABERAI ÖZETİ",
       targetUrl: "https://www.uretir.com/indirim-ai",
       voice: "tr-TR-EmelNeural",
       scenes: [
         {
-          kicker: "12:00 · GÜNÜN DOĞRULANMIŞ FIRSATI",
+          kicker: "ÖĞLE KANCASI · İNDİRİMAI FIRSAT RADARI",
           title: dealTitle,
-          sub: "30, 90 ve 360 Günlük Fiyat Gözlemiyle Gerçek İndirim Analizi",
+          sub: "30, 90 ve 360 Günlük Fiyat Gözlemiyle Doğrulanmış İndirim",
           highlight: dealPrice,
           statLeft: dealDrop,
           statRight: "uretir.com/indirim-ai",
@@ -252,58 +257,58 @@ async function gatherLiveSlotData(slot) {
           bg1: "#2b190c",
           bg2: "#120a04",
           photoUrl: "https://images.unsplash.com/photo-1585771724684-38269d6639fd?auto=format&fit=crop&w=1200&q=85",
-          photoTag: "DOĞRULANMIŞ ÜRÜN & KAMPANYA GÖRSELİ",
+          photoTag: "İNDİRİMAI · DÖNEM DİBİ FIRSAT",
           graphLabel: "FİYAT DÜŞÜŞ GRAFİĞİ (GERÇEK KAMPANYA)",
           graphStartLabel: "Önceki Liste Fiyatı",
           graphEndLabel: `Net Fiyat: ${dealPrice}`,
           graphTrend: "down",
-          speech: `Öğle bültenimizden merhaba! Mağaza fiyat geçmişini inceledik; günün lider fırsatı ${dealTitle}, ${dealPrice} seviyesine geriledi.`,
+          speech: `Fiyatı yarıya düşen fırsat! İndirim A İ'de ${shortDealTitle}, ${dealPrice}.`,
         },
         {
-          kicker: "12:00 · BANKA & KART KAMPANYALARI",
-          title: "Alışveriş Öncesi Kart Kampanyanı ve Taksitini Doğrula",
-          sub: "Axess · Bonus · World · Maximum · Bankkart Resmî Koşullar",
-          highlight: "10.000 TL'YE VARAN PUAN",
-          statLeft: "Resmî Banka Koşulları",
+          kicker: "TÜRKİYE GÜNDEMİ · HABERAI 81 İL HARİTASI",
+          title: topHeadline,
+          sub: "Şehir Şehir Doğrulanmış Gündem ve Kaynak Haritası",
+          highlight: "81 İL GÜNDEM HARİTASI",
+          statLeft: "Canlı Harita",
+          statRight: "uretir.com/haber-ai",
+          accent: "#c8f560",
+          bg1: "#102418",
+          bg2: "#07100a",
+          photoUrl: "https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?auto=format&fit=crop&w=1200&q=85",
+          photoTag: "HABERAI · ŞEHİR GÜNDEMİ",
+          graphLabel: "81 İL HABER AKIŞ EĞRİSİ",
+          graphStartLabel: "Sabah",
+          graphEndLabel: "Öğle Zirvesi",
+          graphTrend: "up",
+          speech: `Haber A İ'de gün ortası başlığı: ${shortHeadline}.`,
+        },
+        {
+          kicker: "KART & PİYASA · PUANAI & FİNANSAI",
+          title: `10.000 TL Kart Puanı · Dolar ${usd} TL · Altın ${gram} TL`,
+          sub: "Axess · Bonus · World · Maximum Resmî Kampanya & Kur Ekranı",
+          highlight: "+10.000 TL KART PUANI",
+          statLeft: `Gram Altın: ${gram} TL`,
           statRight: "uretir.com/puan-ai",
           accent: "#b794f4",
           bg1: "#1e1533",
           bg2: "#0c0817",
           photoUrl: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=85",
-          photoTag: "BANKA KAMPANYA KARŞILAŞTIRMASI",
-          graphLabel: "KART PUAN & TAKSİT AVANTAJ EĞRİSİ",
+          photoTag: "PUANAI & FİNANSAI · AVANTAJ MASASI",
+          graphLabel: "KART PUAN & PİYASA AVANTAJ EĞRİSİ",
           graphStartLabel: "Standart Ödeme",
-          graphEndLabel: "+10.000 TL Puan Avantajı",
+          graphEndLabel: "+10.000 TL Puan",
           graphTrend: "up",
-          speech: `Harcama yapmadan önce bankaların resmî kampanyalarıyla peşin fiyatına taksit ve puan ödüllerini karşılaştırarak alışverişinizi tamamlayın.`,
-        },
-        {
-          kicker: "12:00 · GÜN ORTASI PİYASA EKRANI",
-          title: `Dolar ${usd} TL · Gram Altın ${gram} TL · Bitcoin ${btc} USD`,
-          sub: "Canlı Döviz, Altın, BIST 100 ve Emtia Karşılaştırma Masası",
-          highlight: `USD/TRY: ${usd} TL`,
-          statLeft: `Gram Altın: ${gram} TL`,
-          statRight: "uretir.com/finans-ai",
-          accent: "#4fd1c5",
-          bg1: "#0e2426",
-          bg2: "#061012",
-          photoUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&q=85",
-          photoTag: "CANLI PİYASA & BORSA VERİSİ",
-          graphLabel: "GÜN İÇİ PİYASA ENDEKS HAREKETİ",
-          graphStartLabel: `USD: ${usd} TL`,
-          graphEndLabel: `BIST: ${bist}`,
-          graphTrend: "up",
-          speech: `Öğle saatlerinde Dolar ${usd} lira, gram altın ise ${gram} lira. Tüm canlı indirim ve piyasa listeleri için üretir nokta com adresini ziyaret edin.`,
+          speech: `Puan A İ'de on bin liraya varan kart ödülü. Hepsi üretir nokta com'da.`,
         },
       ],
     },
     "15": {
-      label: "15:00 OTOMOTİV & GAYRİMENKUL RAPORU",
+      label: "15:00 HOOK · ARABAAI, EVAI & HABERAI RAPORU",
       targetUrl: "https://www.uretir.com/araba-ai",
       voice: "tr-TR-AhmetNeural",
       scenes: [
         {
-          kicker: "15:00 · SIFIR & 2. EL OTOMOTİV RAPORU",
+          kicker: "OTOMOTİV KANCASI · ARABAAI KAMPANYA",
           title: carTitle,
           sub: "Resmî Sıfır Araç Liste Fiyatı ve Haritalı 2. El Kıyaslaması",
           highlight: carPrice,
@@ -313,15 +318,15 @@ async function gatherLiveSlotData(slot) {
           bg1: "#0e1f33",
           bg2: "#060e17",
           photoUrl: "https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=1200&q=85",
-          photoTag: "DOĞRULANMIŞ OTOMOTİV FİYAT LİSTESİ",
+          photoTag: "ARABAAI · SIFIR & 2. EL KIYASLAMA",
           graphLabel: "SIFIR LİSTE FİYATI VE 2. EL PİYASA MAKASI",
           graphStartLabel: "Liste Ortalaması",
           graphEndLabel: `Kampanya: ${carPrice}`,
           graphTrend: "down",
-          speech: `Saat on beş otomotiv ve konut piyasa raporuna hoş geldiniz! Sıfır araç listelerinde ${carTitle}, ${carPrice} resmî fiyat referansıyla öne çıkıyor.`,
+          speech: `Araç alacaklar dikkat! Araba A İ'de ${carTitle}, ${carPrice} liste fiyatıyla vitrinde.`,
         },
         {
-          kicker: "15:00 · KONUT & TAŞINMAZ DEĞERLEME",
+          kicker: "EMLAK & İHALE · EVAI HARİTALI ANALİZ",
           title: evTitle,
           sub: "Haritalı Konut, Arsa ve Kamu İhale Taşınmaz Değerleme Masası",
           highlight: evBadge,
@@ -331,17 +336,17 @@ async function gatherLiveSlotData(slot) {
           bg1: "#2b1422",
           bg2: "#13080e",
           photoUrl: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=85",
-          photoTag: "KONUT & KAMU İHALE PORTFÖYÜ",
+          photoTag: "EVAI · KONUT & KAMU İHALE",
           graphLabel: "BÖLGESEL M² EMSAL DEĞER KARŞILAŞTIRMASI",
           graphStartLabel: "Bölge m² Ortalaması",
           graphEndLabel: "Emsal Altı Fırsat",
           graphTrend: "down",
-          speech: `Taşınmaz ekranında ise bölge metrekare ortalamasının altındaki konutlar ve kamu ihale ilanları haritada listelendi: ${evTitle}.`,
+          speech: `Ev A İ haritasında bölge ortalamasının altındaki konut ve ihale fırsatları yayında.`,
         },
         {
-          kicker: "15:00 · VERİ MERKEZİ ÖZETİ",
-          title: "Otomotiv, Konut, Finans ve Mağaza Fiyat Geçmişi Tek Ekranda",
-          sub: "Kanıt Odaklı Veri ve Piyasa Karşılaştırma Platformu",
+          kicker: "GÜNÜN ÖZETİ · İNDİRİMAI & HABERAI",
+          title: `${shortDealTitle} · 81 İl Gündem Haritası`,
+          sub: "Tüm Doğrulanmış Kampanya, Haber ve Haritalar Tek Merkezde",
           highlight: "WWW.URETIR.COM",
           statLeft: "Instagram: @uretirai",
           statRight: "youtube.com/@Uretir",
@@ -349,58 +354,22 @@ async function gatherLiveSlotData(slot) {
           bg1: "#122417",
           bg2: "#08110a",
           photoUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=85",
-          photoTag: "DOĞRULANMIŞ VERİ MERKEZİ · URETIR.COM",
-          graphLabel: "GERÇEK ZAMANLI VERİ AKTARIM GRAFİĞİ",
+          photoTag: "URETIR.COM · 6 ARAÇ TEK MERKEZ",
+          graphLabel: "CANLI VERİ AKTARIM GRAFİĞİ",
           graphStartLabel: "Resmî Kaynaklar",
-          graphEndLabel: "Canlı Yayın",
+          graphEndLabel: "uretir.com",
           graphTrend: "up",
-          speech: `Araç ve konut alırken sürpriz yaşamamak için haritalı fiyat referanslarımızı üretir nokta com adresinde ücretsiz inceleyebilirsiniz.`,
+          speech: `İndirim A İ ve Haber A İ dahil tüm canlı veriler üretir nokta com'da.`,
         },
       ],
     },
     "20": {
-      label: "20:00 AKŞAM ÖZETİ & EKONOMİ RAPORU",
+      label: "20:00 AKŞAM HOOK · İNDİRİMAI, HABERAI & FİNANSAI",
       targetUrl: "https://www.uretir.com/finans-ai",
       voice: "tr-TR-EmelNeural",
       scenes: [
         {
-          kicker: "20:00 · GÜN SONU TÜRKİYE GÜNDEMİ",
-          title: topHeadline,
-          sub: "81 İlde Günün Öne Çıkan Doğrulanmış Gündem Başlıkları",
-          highlight: "GÜN SONU RAPORU",
-          statLeft: "81 İl Haritası",
-          statRight: "uretir.com/haber-ai",
-          accent: "#c8f560",
-          bg1: "#112418",
-          bg2: "#07100a",
-          photoUrl: "https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?auto=format&fit=crop&w=1200&q=85",
-          photoTag: "GÜN SONU GÜNDEM ÖZETİ",
-          graphLabel: "GÜN BOYU GÜNDEM ETKİ GRAFİĞİ",
-          graphStartLabel: "Sabah Açılış",
-          graphEndLabel: "Akşam Özeti",
-          graphTrend: "up",
-          speech: `İyi akşamlar Türkiye! Saat yirmi gün sonu bültenindeyiz. Bugün Türkiye gündeminde öne çıkan gelişme: ${topHeadline}.`,
-        },
-        {
-          kicker: "20:00 · PİYASA KAPANIŞ TABLOSU",
-          title: `Dolar ${usd} TL · Euro ${eur} TL · Gram Altın ${gram} TL`,
-          sub: `BIST 100 Kapanış: ${bist} Puan · Bitcoin: ${btc} USD`,
-          highlight: `BIST 100: ${bist}`,
-          statLeft: `Gram Altın: ${gram} TL`,
-          statRight: "uretir.com/finans-ai",
-          accent: "#4fd1c5",
-          bg1: "#0d2426",
-          bg2: "#061112",
-          photoUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&q=85",
-          photoTag: "BORSA İSTANBUL & DÖVİZ KAPANIŞ VERİSİ",
-          graphLabel: "BIST 100 & ALTIN GÜN SONU EĞRİSİ",
-          graphStartLabel: `USD: ${usd} TL`,
-          graphEndLabel: `Altın: ${gram} TL`,
-          graphTrend: "up",
-          speech: `Gün sonu kapanış tablosunda Dolar ${usd} lira, Euro ${eur} lira, gram altın ${gram} lira ve Borsa İstanbul ${bist} puanda günü tamamladı.`,
-        },
-        {
-          kicker: "20:00 · AKŞAM FIRSAT & KAMPANYA ÖZETİ",
+          kicker: "AKŞAM KANCASI · İNDİRİMAI GÜNÜN FIRSATI",
           title: dealTitle,
           sub: "Doğrulanmış Dönem Dibi Fiyatı + Kredi Kartı Ödül Kombinasyonu",
           highlight: dealPrice,
@@ -410,12 +379,48 @@ async function gatherLiveSlotData(slot) {
           bg1: "#29190d",
           bg2: "#120a05",
           photoUrl: "https://images.unsplash.com/photo-1585771724684-38269d6639fd?auto=format&fit=crop&w=1200&q=85",
-          photoTag: "DOĞRULANMIŞ MAĞAZA KAMPANYASI",
+          photoTag: "İNDİRİMAI · AKŞAM FIRSATI",
           graphLabel: "MAĞAZA FİYAT DÜŞÜŞ EĞRİSİ",
           graphStartLabel: "Liste Fiyatı",
           graphEndLabel: `Fırsat: ${dealPrice}`,
           graphTrend: "down",
-          speech: `Akşam alışverişinde ${dealTitle}, ${dealPrice} dip fiyatıyla ilk sırada yer alıyor. Türkiye üretir, gençler yetişir! Doğrulanmış verilerin merkezi üretir nokta com adresini hemen ziyaret edin.`,
+          speech: `Günün en çok konuşulan fırsatı! İndirim A İ'de ${shortDealTitle}, ${dealPrice}.`,
+        },
+        {
+          kicker: "81 İL ÖZETİ · HABERAI TÜRKİYE HARİTASI",
+          title: topHeadline,
+          sub: "81 İlde Günün Öne Çıkan Doğrulanmış Gündem Başlıkları",
+          highlight: "GÜN SONU HARİTASI",
+          statLeft: "81 İl Haritası",
+          statRight: "uretir.com/haber-ai",
+          accent: "#c8f560",
+          bg1: "#112418",
+          bg2: "#07100a",
+          photoUrl: "https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?auto=format&fit=crop&w=1200&q=85",
+          photoTag: "HABERAI · GÜN SONU ÖZETİ",
+          graphLabel: "GÜN BOYU GÜNDEM ETKİ GRAFİĞİ",
+          graphStartLabel: "Sabah Açılış",
+          graphEndLabel: "Akşam Özeti",
+          graphTrend: "up",
+          speech: `Haber A İ'de günün manşeti: ${shortHeadline}.`,
+        },
+        {
+          kicker: "KAPANIŞ TABLOSU · FİNANSAI PİYASA",
+          title: `Dolar ${usd} TL · Euro ${eur} TL · Gram Altın ${gram} TL`,
+          sub: `BIST 100 Kapanış: ${bist} Puan · Bitcoin: ${btc} USD`,
+          highlight: `BIST 100: ${bist}`,
+          statLeft: `Gram Altın: ${gram} TL`,
+          statRight: "uretir.com/finans-ai",
+          accent: "#4fd1c5",
+          bg1: "#0d2426",
+          bg2: "#061112",
+          photoUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&q=85",
+          photoTag: "FİNANSAI · KAPANIŞ VERİSİ",
+          graphLabel: "BIST 100 & ALTIN GÜN SONU EĞRİSİ",
+          graphStartLabel: `USD: ${usd} TL`,
+          graphEndLabel: `Altın: ${gram} TL`,
+          graphTrend: "up",
+          speech: `Finans A İ kapanışında Dolar ${usd}, altın ${gram} lira. Hepsi üretir nokta com'da.`,
         },
       ],
     },
@@ -978,7 +983,7 @@ async function renderAndPublishSlotData(slotData) {
     }
   }
 
-  const framesPerScene = 15;
+  const framesPerScene = 18;
   const totalScenes = slotData.scenes.length;
   let frameCounter = 0;
 
@@ -996,12 +1001,97 @@ async function renderAndPublishSlotData(slotData) {
   const coverPngPath = path.join(outDir, `uretir-cover-${slotData.slot}.png`);
   await fs.copyFile(path.join(framesDir, "frame-0006.png"), coverPngPath);
 
-  const fullSpeech = slotData.scenes.map((s) => s.speech).join(" ");
-  const audioPath = path.join(outDir, `uretir-voice-${slotData.slot}.mp3`);
-  const hasVoice = await synthesizeNaturalTurkishVoice(fullSpeech, slotData.voice || "tr-TR-AhmetNeural", audioPath);
-  console.log(`[2/4] [Seslendirme] Doğal Türkçe Ses (${slotData.voice || "tr-TR-AhmetNeural"}): ${hasVoice ? "BAŞARILI" : "YEDEK MOD"}`);
-
   const ffmpegBin = resolveFfmpegBinary();
+  const fullSpeech = slotData.scenes.map((s) => s.speech).join(" · [FON] · ");
+  const audioPath = path.join(outDir, `uretir-voice-${slotData.slot}.mp3`);
+  let hasVoice = false;
+
+  // Synthesize each headline separately and interleave with 2.2s Broadcast Fon Music swells
+  // ("İndirimAI başlık -> Fon Müziği -> HaberAI başlık -> Fon Müziği -> Kapanış -> Fon Müziği")
+  try {
+    const sceneVoicePaths = [];
+    for (let i = 0; i < slotData.scenes.length; i++) {
+      const sp = path.join(outDir, `scene-voice-${i}.mp3`);
+      const ok = await synthesizeNaturalTurkishVoice(
+        slotData.scenes[i].speech,
+        slotData.voice || "tr-TR-AhmetNeural",
+        sp
+      );
+      if (ok && existsSync(sp)) {
+        sceneVoicePaths.push(sp);
+      }
+    }
+
+    if (sceneVoicePaths.length > 0) {
+      const inputs = [];
+      const padFilters = [];
+      const concatLabels = [];
+      for (let i = 0; i < sceneVoicePaths.length; i++) {
+        inputs.push("-i", sceneVoicePaths[i]);
+        // 2.2s musical "fon" break after each headline
+        const padSec = i === sceneVoicePaths.length - 1 ? "2.4" : "2.2";
+        padFilters.push(`[${i}:a]aformat=sample_rates=44100:channel_layouts=stereo,apad=pad_dur=${padSec}[v${i}]`);
+        concatLabels.push(`[v${i}]`);
+      }
+
+      const bgmIdx = sceneVoicePaths.length;
+      // Warm Broadcast Lo-Fi / Newsroom Chord Progression + 108 BPM gentle pulse + transition harmonic shimmer
+      const bgmExpr = [
+        "0.16*sin(2*PI*220*t)*(0.65+0.35*sin(2*PI*1.8*t))",
+        "0.13*sin(2*PI*261.63*t)",
+        "0.12*sin(2*PI*329.63*t)",
+        "0.10*sin(2*PI*392.00*t)*(0.5+0.5*cos(2*PI*0.45*t))",
+        "0.14*sin(2*PI*110*t)*(0.55+0.45*sin(2*PI*1.8*t))",
+        "0.07*sin(2*PI*523.25*t)*exp(-mod(t,3.6)*2.2)",
+      ].join("+");
+
+      inputs.push("-f", "lavfi", "-i", `aevalsrc='${bgmExpr}|${bgmExpr}':s=44100:d=32`);
+
+      const filterComplex = [
+        ...padFilters,
+        `${concatLabels.join("")}concat=n=${sceneVoicePaths.length}:v=0:a=1,asplit=2[voice_main][voice_sc]`,
+        `[${bgmIdx}:a]lowpass=f=2100,highpass=f=60,volume=0.82[bgm_raw]`,
+        `[bgm_raw][voice_sc]sidechaincompress=threshold=0.025:ratio=5.5:attack=35:release=420:makeup=1.25[bgm_ducked]`,
+        `[voice_main][bgm_ducked]amix=inputs=2:duration=first:dropout_transition=0:weights='1.35 0.95',alimiter=limit=0.95[outa]`,
+      ].join(";");
+
+      await execFileAsync(
+        ffmpegBin,
+        ["-y", ...inputs, "-filter_complex", filterComplex, "-map", "[outa]", "-c:a", "libmp3lame", "-b:a", "192k", audioPath],
+        { timeout: 60_000 }
+      );
+      hasVoice = existsSync(audioPath);
+    }
+  } catch (mixErr) {
+    console.warn("[Fon Müzikli Miks Uyarısı, yedek miks deneniyor]:", mixErr?.message || mixErr);
+  }
+
+  if (!hasVoice) {
+    hasVoice = await synthesizeNaturalTurkishVoice(
+      slotData.scenes.map((s) => s.speech).join(" ... "),
+      slotData.voice || "tr-TR-AhmetNeural",
+      audioPath
+    );
+  }
+  console.log(
+    `[2/4] [Başlık + Fon Müziği Miks] (${slotData.voice || "tr-TR-AhmetNeural"} + Broadcast Fon): ${hasVoice ? "BAŞARILI" : "YEDEK MOD"}`
+  );
+
+  // Compute exact framerate so total frames match the master audio duration (headline + fon intervals)
+  let inputFramerate = "2.2";
+  if (hasVoice && existsSync(audioPath)) {
+    try {
+      const { stderr } = await execFileAsync(ffmpegBin, ["-i", audioPath], { timeout: 10_000 }).catch((e) => e);
+      const m = String(stderr || "").match(/Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)/);
+      if (m) {
+        const durSec = Number(m[1]) * 3600 + Number(m[2]) * 60 + Number(m[3]);
+        if (durSec > 4) {
+          inputFramerate = Math.max(1.4, Math.min(4.0, frameCounter / durSec)).toFixed(3);
+        }
+      }
+    } catch {}
+  }
+
   const videoPath = path.join(outDir, `uretir-reel-${slotData.slot}.mp4`);
   let videoBuilt = false;
   try {
@@ -1009,7 +1099,7 @@ async function renderAndPublishSlotData(slotData) {
       ? [
           "-y",
           "-framerate",
-          "2",
+          inputFramerate,
           "-i",
           path.join(framesDir, "frame-%04d.png"),
           "-i",
@@ -1051,7 +1141,7 @@ async function renderAndPublishSlotData(slotData) {
         ];
     await execFileAsync(ffmpegBin, ffmpegArgs, { timeout: 120_000 });
     videoBuilt = existsSync(videoPath);
-    console.log(`[3/4] [Graph-Motion Video] 1080x1920 Fotoğraflı & Grafikli MP4 üretildi: ${videoPath}`);
+    console.log(`[3/4] [Graph-Motion Video] 1080x1920 Fotoğraflı, Grafikli & Fon Müzikli MP4 üretildi: ${videoPath}`);
   } catch (err) {
     console.warn("[FFmpeg Uyarısı]:", err?.message || err);
   }
@@ -1111,8 +1201,8 @@ async function runSlot(slot) {
 }
 
 /**
- * Dyson 360° Combi HEPA+K-Karbon Filter (COMBI360 2 Al 1 Öde) Special Campaign Publisher
- * Uses the real Dyson product photograph cropped from the user's Telegram screenshot
+ * Dyson 360° Combi HEPA+K-Karbon Filter (COMBI360 2 Al 1 Öde) + HaberAI + Piyasa Hook & Fon Publisher
+ * Uses short headline voiceover + 2.2s musical fon interludes ("İndirimAI okudun fon -> HaberAI okudun fon")
  */
 async function runDysonCampaignSpecial(customPhotoPath = null) {
   const uploadedScreenshot =
@@ -1125,7 +1215,6 @@ async function runDysonCampaignSpecial(customPhotoPath = null) {
     try {
       const meta = await sharp(uploadedScreenshot).metadata();
       if (meta.width && meta.height) {
-        // If it's the full phone chat screenshot, crop the Dyson white product card on the right
         const isChatScreenshot = meta.height / meta.width > 1.8 && !customPhotoPath;
         const extractBox = isChatScreenshot
           ? {
@@ -1153,79 +1242,75 @@ async function runDysonCampaignSpecial(customPhotoPath = null) {
 
   const dysonSlotData = {
     slot: "dyson-combi360",
-    label: "DYSON RESMÎ MAĞAZA · 2 AL 1 ÖDE FIRSAT RAPORU",
+    label: "GÜNÜN KANCASI · İNDİRİMAI DYSON & HABERAI 81 İL HARİTASI",
     targetUrl: "https://www.uretir.com/indirim-ai",
     whatsappTargetKey: "indirimai",
     voice: "tr-TR-AhmetNeural",
     customCaption: [
-      `🔥 Dyson Resmî Mağaza'da 2 Al 1 Öde Fırsatı! (COMBI360 Kupon Kodu)`,
+      `🔥 Bu Fırsatı Kaçıran Üzülür! Dyson'da 2 Al 1 Öde + 81 İl Gündem Haritası`,
       ``,
-      `📌 Ürün: Dyson 360° Combi HEPA + K-Karbon Hava Temizleyici Filtre`,
-      `🏷️ Liste Fiyatı: 3.899,00 TL`,
-      `✅ COMBI360 Koduyla 2 Al 1 Öde Adet Fiyatı: 1.949,50 TL (-%50 Net Avantaj)`,
-      `🎟️ Kupon Kodu: COMBI360 (Sepette 2 adet eklendiğinde 1 adet bedava)`,
+      `📌 İndirimAI: Dyson 360° Combi HEPA + K-Karbon Filtre · COMBI360 Koduyla Adet 1.949,50 TL (-%50)`,
+      `🗺️ HaberAI: 81 İl İnteraktif Türkiye Haritasında Sıcak Gündem`,
+      `📊 FinansAI & PuanAI: Canlı Piyasa ve 10.000 TL'ye Varan Kart Kampanyaları`,
       ``,
-      `📊 Mağaza fiyat geçmişi, doğrulanmış kupon kodları ve anlık indirim listesi için: www.uretir.com/indirim-ai (Profildeki bağlantıda)`,
+      `🌐 Doğrulanmış veriler ve haritalar: www.uretir.com (Profildeki bağlantıda)`,
       ``,
-      `#Dyson #DysonTürkiye #İndirim #Kampanya #KuponKodu #COMBI360 #Fırsat #Alışveriş #Teknoloji #Üretir #Keşfet`,
+      `#Dyson #İndirimAI #HaberAI #Kampanya #COMBI360 #Fırsat #TürkiyeHaritası #Üretir #Keşfet`,
     ].join("\n"),
     scenes: [
       {
-        kicker: "DOĞRULANMIŞ KAMPANYA · DYSON TÜRKİYE",
+        kicker: "GÜNÜN KANCASI · İNDİRİMAI FIRSATI",
         title: "Dyson 360° Combi HEPA+K-Karbon Filtrede 2 Al 1 Öde Fırsatı",
-        sub: "Sepette COMBI360 Kupon Koduyla 2 Adet Alımda 1 Adet Bedava",
+        sub: "Sepette COMBI360 Kupon Koduyla Adet Başına 1.949,50 TL (-%50)",
         highlight: "ADET: 1.949,50 TL (-%50)",
         statLeft: "Kupon Kodu: COMBI360",
         statRight: "Liste: 3.899,00 TL",
-        accent: "#c8f560",
-        bg1: "#102118",
-        bg2: "#070e0a",
-        localPhotoPath: existsSync(publicDealImgPath) ? publicDealImgPath : uploadedScreenshot,
-        photoTag: "GERÇEK ÜRÜN GÖRSELİ · DYSON COMBI360",
-        graphLabel: "DYSON FİLTRE BİRİM FİYAT DÜŞÜŞ GRAFİĞİ (TL)",
-        graphStartLabel: "Tekli Liste: 3.899 TL",
-        graphEndLabel: "2 Al 1 Öde Adet: 1.949,50 TL",
-        graphTrend: "down",
-        speech:
-          "Dyson resmî mağazasında 360 derece Combi HEPA artı Karbon hava temizleyici filtre için sepette iki al bir öde kampanyası başladı.",
-      },
-      {
-        kicker: "KUPON KODU ANALİZİ · COMBI360",
-        title: "3.899 TL Yerine Adet Başına 1.949,50 TL Net Maliyet",
-        sub: "Sepete 2 Adet Ekleyip COMBI360 Kodunu Girdiğinizde %50 İndirim",
-        highlight: "KUPON: COMBI360",
-        statLeft: "Toplam Kazanç: 3.899 TL",
-        statRight: "uretir.com/indirim-ai",
         accent: "#f6ad55",
         bg1: "#26170b",
         bg2: "#0f0904",
         localPhotoPath: existsSync(publicDealImgPath) ? publicDealImgPath : uploadedScreenshot,
-        photoTag: "SEPETTE KUPON DOĞRULAMASI · -%50",
-        graphLabel: "360 GÜNLÜK FİYAT GEÇMİŞİ VE DÖNEM DİBİ",
-        graphStartLabel: "360 Gün Tepe: 3.899 TL",
+        photoTag: "İNDİRİMAI · GERÇEK ÜRÜN GÖRSELİ",
+        graphLabel: "DYSON FİLTRE BİRİM FİYAT DÜŞÜŞ GRAFİĞİ (TL)",
+        graphStartLabel: "Tekli Liste: 3.899 TL",
         graphEndLabel: "COMBI360: 1.949,50 TL",
         graphTrend: "down",
-        speech:
-          "Normal liste fiyatı 3 bin 899 lira olan filtrede, sepete iki adet ekleyip COMBI360 kupon kodunu uyguladığınızda birim maliyet 1.949 lira 50 kuruşa düşüyor.",
+        speech: "Bu fiyatı kaçıran üzülür! İndirim A İ'de Dyson filtrede iki al bir öde fırsatı!",
       },
       {
-        kicker: "CANLI FİYAT RADARI · URETIR.COM",
-        title: "Tüm Doğrulanmış İndirimler ve Kupon Kodları uretir.com'da",
-        sub: "Mağaza Fiyat Geçmişi ve Banka Kart Puan Kombinasyonu",
-        highlight: "URETIR.COM/INDIRIM-AI",
+        kicker: "81 İL HARİTASI · HABERAI GÜNDEM",
+        title: "Türkiye'nin 81 İlinde Sıcak Gündem ve Ekonomi Haritası",
+        sub: "Şehir Şehir Doğrulanmış Haberler İnteraktif Türkiye Haritasında",
+        highlight: "81 İL CANLI HARİTA",
+        statLeft: "Kaynak: AA & TRT Haber",
+        statRight: "uretir.com/haber-ai",
+        accent: "#c8f560",
+        bg1: "#102118",
+        bg2: "#070e0a",
+        photoUrl: "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=1200&q=85",
+        photoTag: "HABERAI · 81 İL TÜRKİYE HARİTASI",
+        graphLabel: "81 İL CANLI HABER YOĞUNLUK EĞRİSİ",
+        graphStartLabel: "Bölgesel Akış",
+        graphEndLabel: "81 İl Tam Kapsam",
+        graphTrend: "up",
+        speech: "Haber A İ haritasında seksen bir ilin tamamında sıcak gündem yayında!",
+      },
+      {
+        kicker: "CANLI VERİ MERKEZİ · URETIR.COM",
+        title: "İndirim, Haber Haritası, Finans, Araç ve Konut Tek Ekranda",
+        sub: "COMBI360 Kupon Kodu ve 81 İl Haritası İçin Hemen Ziyaret Edin",
+        highlight: "WWW.URETIR.COM",
         statLeft: "Instagram: @uretirai",
-        statRight: "WhatsApp: İndirimAI",
+        statRight: "WhatsApp: 6 Kanal",
         accent: "#4fd1c5",
         bg1: "#0c2224",
         bg2: "#050f10",
         localPhotoPath: existsSync(publicDealImgPath) ? publicDealImgPath : uploadedScreenshot,
-        photoTag: "DOĞRULANMIŞ KAMPANYA MERKEZİ",
-        graphLabel: "NET KULLANICI TASARRUF ORANI (%50)",
+        photoTag: "DOĞRULANMIŞ VERİ MERKEZİ · URETIR.COM",
+        graphLabel: "NET KULLANICI TASARRUF VE VERİ AKIŞI",
         graphStartLabel: "Standart Sepet",
-        graphEndLabel: "%50 Net Tasarruf",
+        graphEndLabel: "%50 Net Avantaj",
         graphTrend: "up",
-        speech:
-          "Kampanya bağlantısı, kupon kodu detayları ve mağaza fiyat geçmişi için hemen üretir nokta com bölü indirim tire a i sayfasını ziyaret edin.",
+        speech: "Kupon kodları ve seksen bir il haritası için adres: üretir nokta com.",
       },
     ],
   };

@@ -3,13 +3,18 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { createRequire } from "node:module";
 import sharp from "sharp";
 import dotenv from "dotenv";
+import { publishToInstagramNode } from "./instagram-publisher-node.mjs";
 
 dotenv.config({ path: ".env.local", quiet: true });
 dotenv.config({ quiet: true });
 
 const execFileAsync = promisify(execFile);
+const requireOpenSource = createRequire(
+  path.resolve(".local", "open-source-stack", "package.json")
+);
 
 const SITE_URL = (process.env.SITE_URL || "https://www.uretir.com").replace(/\/$/, "");
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "";
@@ -452,7 +457,24 @@ function renderVerticalFrameSvg(scene, slotLabel, sceneIdx, totalScenes, progres
 }
 
 async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path) {
-  // 1. Try open-source rany2/edge-tts (Microsoft Neural Turkish Voice)
+  // 1. Try Node.js msedge-tts (Microsoft Edge Neural Turkish Voice: tr-TR-AhmetNeural / tr-TR-EmelNeural)
+  try {
+    const { MsEdgeTTS, OUTPUT_FORMAT } = requireOpenSource("msedge-tts");
+    const tts = new MsEdgeTTS();
+    await tts.setMetadata(voice, OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3);
+    const { audioFilePath } = await tts.toFile(path.dirname(outMp3Path), text);
+    if (audioFilePath && existsSync(audioFilePath)) {
+      if (path.resolve(audioFilePath) !== path.resolve(outMp3Path)) {
+        await fs.copyFile(audioFilePath, outMp3Path);
+        await fs.unlink(audioFilePath).catch(() => {});
+      }
+      if (existsSync(outMp3Path)) return true;
+    }
+  } catch {
+    // Fallback to CLI or HTTPS TTS
+  }
+
+  // 2. Try open-source rany2/edge-tts CLI (Microsoft Neural Turkish Voice)
   for (const bin of ["edge-tts", "python", "python3"]) {
     try {
       const args =
@@ -466,7 +488,7 @@ async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path) {
     }
   }
 
-  // 2. Fallback: Fetch Google Translate Turkish TTS segments over HTTPS
+  // 3. Fallback: Fetch Google Translate Turkish TTS segments over HTTPS
   try {
     const chunks = text
       .match(/.{1,160}(?:\s|$)/g)
@@ -645,8 +667,8 @@ async function sendToTelegram(videoPath, coverPngPath, slotData) {
 }
 
 async function publishToInstagramReels(videoPath, coverPngPath, slotData) {
-  if (!IG_PASSWORD || !videoPath || !existsSync(videoPath)) {
-    console.log("IG_PASSWORD veya MP4 bulunamadı; Instagram (@uretirai) paketi hazırlandı.");
+  if (!IG_PASSWORD) {
+    console.log("IG_PASSWORD bulunamadı; Instagram (@uretirai) paketi hazırlandı.");
     return false;
   }
   const caption = [
@@ -663,11 +685,25 @@ async function publishToInstagramReels(videoPath, coverPngPath, slotData) {
     `#Üretir #UretirAI #YapayZeka #HaberAI #FinansAI #İndirimAI #PuanAI #ArabaAI #EvAI #Teknoloji #Ekonomi #Keşfet #ReelsTürkiye`,
   ].join("\n");
 
+  // 1. Native Node.js publisher using high-star dilame/instagram-private-api
+  try {
+    const nodeRes = await publishToInstagramNode({
+      videoPath,
+      coverPngPath,
+      caption,
+      slot: slotData.slot,
+    });
+    if (nodeRes?.ok) return true;
+  } catch (err) {
+    console.warn("[Instagram Node Bilgi]:", err?.message || err);
+  }
+
+  // 2. Python instagrapi fallback (used on Linux / GitHub Actions runners)
   for (const py of ["python", "python3"]) {
     try {
       const { stdout, stderr } = await execFileAsync(
         py,
-        ["scripts/instagram-reels-publisher.py", videoPath, coverPngPath, caption],
+        ["scripts/instagram-reels-publisher.py", videoPath || "", coverPngPath, caption],
         {
           timeout: 180_000,
           env: { ...process.env, IG_USERNAME, IG_PASSWORD, PYTHONIOENCODING: "utf-8" },
@@ -676,8 +712,8 @@ async function publishToInstagramReels(videoPath, coverPngPath, slotData) {
       if (stdout) console.log("Instagram (@uretirai) yanıtı:\n" + stdout.trim());
       if (stderr && !stdout?.includes("PUBLISHED_OK")) console.log("Instagram bilgi:", stderr.trim());
       if (stdout && stdout.includes("PUBLISHED_OK")) return true;
-    } catch (err) {
-      console.warn(`Instagram (${py}) bilgi:`, err?.message || err);
+    } catch {
+      // ignore if python not in path
     }
   }
   return false;
@@ -779,10 +815,7 @@ async function runSlot(slot) {
   // Publish to Telegram & Instagram
   console.log(`[4/4] Sosyal medya kanallarında (@uretirai & @uretirbot) yayınlanıyor...`);
   const tgPublished = await sendToTelegram(videoBuilt ? videoPath : null, coverPngPath, slotData);
-  let igPublished = false;
-  if (videoBuilt) {
-    igPublished = await publishToInstagramReels(videoPath, coverPngPath, slotData);
-  }
+  const igPublished = await publishToInstagramReels(videoBuilt ? videoPath : null, coverPngPath, slotData);
 
   // Save manifest
   const manifestPath = path.join(outDir, "publish-manifest.json");

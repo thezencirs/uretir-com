@@ -56,6 +56,10 @@ jobs:
         run: |
           corepack enable
           pnpm install --frozen-lockfile
+          mkdir -p .local/open-source-stack
+          cd .local/open-source-stack
+          echo '{"name":"uretir-open-source-stack","private":true}' > package.json
+          npm install instagram-private-api msedge-tts --no-audit --no-fund
 
       - name: Refresh 6 AI tools before video generation
         run: |

@@ -17,6 +17,17 @@ const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || process.env.TELEGRAM_AD
 const IG_USERNAME = process.env.IG_USERNAME || "uretirai";
 const IG_PASSWORD = process.env.IG_PASSWORD || "";
 
+function resolveFfmpegBinary() {
+  const candidates = [
+    path.resolve(".local", "open-source-stack", "node_modules", "ffmpeg-static", process.platform === "win32" ? "ffmpeg.exe" : "ffmpeg"),
+    path.resolve("node_modules", "ffmpeg-static", process.platform === "win32" ? "ffmpeg.exe" : "ffmpeg"),
+  ];
+  for (const c of candidates) {
+    if (existsSync(c)) return c;
+  }
+  return "ffmpeg";
+}
+
 function escapeXml(str) {
   return String(str || "")
     .replace(/&/g, "&amp;")
@@ -41,7 +52,7 @@ function wrapLines(text, maxChars, maxLines) {
     }
   }
   if (current && lines.length < maxLines) lines.push(current);
-  return lines.length ? lines : ["Üretir AI Canlı Veri"];
+  return lines.length ? lines : ["Üretir AI Canlı Veri Merkezi"];
 }
 
 function detectSlot() {
@@ -63,8 +74,11 @@ function detectSlot() {
 async function fetchJsonSafe(url) {
   try {
     const res = await fetch(url, {
-      headers: { "User-Agent": "Uretir-Social-Video-Engine/1.0" },
-      signal: AbortSignal.timeout(20_000),
+      headers: {
+        "User-Agent": "Uretir-Social-Video-Engine/2.0 (+https://www.uretir.com)",
+        "Cache-Control": "no-cache",
+      },
+      signal: AbortSignal.timeout(25_000),
     });
     if (!res.ok) return null;
     return await res.json();
@@ -73,7 +87,31 @@ async function fetchJsonSafe(url) {
   }
 }
 
+/**
+ * Step 1: Synchronize & warm up primary data hub on uretir.com across all 6 AI tools
+ */
+async function syncUretirPrimaryDataHub() {
+  console.log(`[1/4] Asıl veri merkezi (${SITE_URL}) 6 AI aracıyla senkronize ediliyor...`);
+  const endpoints = [
+    `${SITE_URL}/api/haber-ai`,
+    `${SITE_URL}/api/finans-ai`,
+    `${SITE_URL}/api/indirim-ai`,
+    `${SITE_URL}/api/puan-ai`,
+    `${SITE_URL}/api/araba-ai`,
+    `${SITE_URL}/api/ev-ai`,
+    `${SITE_URL}/api/channel-feed/haber-ai`,
+    `${SITE_URL}/api/channel-feed/finans-ai`,
+    `${SITE_URL}/api/channel-feed/indirim-ai`,
+    `${SITE_URL}/api/channel-feed/puan-ai`,
+    `${SITE_URL}/api/channel-feed/araba-ai`,
+    `${SITE_URL}/api/channel-feed/ev-ai`,
+  ];
+  await Promise.allSettled(endpoints.map((u) => fetchJsonSafe(u)));
+}
+
 async function gatherLiveSlotData(slot) {
+  await syncUretirPrimaryDataHub();
+
   const [haber, finans, indirim, araba, ev, puan] = await Promise.all([
     fetchJsonSafe(`${SITE_URL}/api/channel-feed/haber-ai`),
     fetchJsonSafe(`${SITE_URL}/api/finans-ai`),
@@ -84,25 +122,32 @@ async function gatherLiveSlotData(slot) {
   ]);
 
   const itemsFin = finans?.items || [];
-  const usd = itemsFin.find((i) => i.id === "USD")?.price?.toFixed(2) || "49.45";
-  const eur = itemsFin.find((i) => i.id === "EUR")?.price?.toFixed(2) || "55.62";
-  const gram = Math.round(itemsFin.find((i) => i.id === "GRAM")?.price || 6623).toLocaleString("tr-TR");
-  const bist = Math.round(itemsFin.find((i) => i.id === "XU100")?.price || 11721).toLocaleString("tr-TR");
-  const btc = Math.round(itemsFin.find((i) => i.id === "BTC")?.price || 81600).toLocaleString("tr-TR");
+  const usd = itemsFin.find((i) => i.id === "USD")?.price?.toFixed(2) || "44.82";
+  const eur = itemsFin.find((i) => i.id === "EUR")?.price?.toFixed(2) || "52.66";
+  const gram = Math.round(itemsFin.find((i) => i.id === "GRAM")?.price || 6913).toLocaleString("tr-TR");
+  const bist = Math.round(itemsFin.find((i) => i.id === "XU100")?.price || 14056).toLocaleString("tr-TR");
+  const btc = Math.round(itemsFin.find((i) => i.id === "BTC")?.price || 74919).toLocaleString("tr-TR");
 
   const haberLines = String(haber?.body || "")
     .split("\n")
-    .map((l) => l.trim())
+    .map((l) => l.trim().replace(/^[•\-*]\s*/, ""))
     .filter(Boolean);
   const topHeadline =
-    haberLines.find((l) => l.length > 22 && !l.startsWith("#") && !l.startsWith("http") && !l.startsWith("Türkiye") && !l.startsWith("Şehirlerden") && !l.startsWith("Kaynak:")) ||
-    "81 ilde kaynaklı ekonomi, teknoloji ve şehir gündemi uretir.com'da";
+    haberLines.find(
+      (l) =>
+        l.length > 22 &&
+        !l.startsWith("#") &&
+        !l.startsWith("http") &&
+        !l.startsWith("Türkiye") &&
+        !l.startsWith("Şehirlerden") &&
+        !l.startsWith("Kaynak:")
+    ) || "81 ilde doğrulanmış ekonomi, teknoloji ve şehir gündemi uretir.com'da";
 
   const deal360 = indirim?.lows?.["360"]?.[0] || indirim?.lows?.["90"]?.[0] || indirim?.lows?.["30"]?.[0];
-  const dealTitle = deal360?.productName || "Apple MacBook Air M3 & Dyson V15 Dönem Dibi Fiyat Analizi";
+  const dealTitle = deal360?.productName || "Apple iPhone 16 128 GB & Samsung S24 FE Dönem Dibi Analizi";
   const dealPrice = deal360?.currentPrice
     ? `${Number(deal360.currentPrice).toLocaleString("tr-TR")} TL`
-    : "42.999 TL";
+    : "56.499 TL";
   const dealDrop = deal360?.dropFromHighPct
     ? `-%${Number(deal360.dropFromHighPct).toFixed(1)} Dönem Dibi`
     : "360 Gün Dip Fiyat";
@@ -115,13 +160,16 @@ async function gatherLiveSlotData(slot) {
 
   const topEv = ev?.items?.[0];
   const evTitle = topEv?.title || "Ankara, İstanbul ve Eskişehir Kamu İhale & Konut Fırsatları";
-  const evBadge = topEv?.score ? `EvAI Skoru ${topEv.score}/100` : "EvAI Skoru 78/100";
+  const evBadge = topEv?.score ? `EvAI Skoru ${topEv.score}/100` : "EvAI Skoru 82/100";
 
-  const topPuan = puan?.items?.[0]?.bank ? `${String(puan.items[0].bank).toUpperCase()} Resmi Kart Kampanyası` : "Axess, Bonus ve World 10.000 TL'ye Varan Puan";
+  const topPuan = puan?.items?.[0]?.bank
+    ? `${String(puan.items[0].bank).toUpperCase()} Resmî Kart Kampanyası`
+    : "Axess, Bonus ve World 10.000 TL'ye Varan Puan";
 
   const slotMap = {
     "09": {
       label: "09:00 SABAH GÜNDEMİ & PİYASA AÇILIŞI",
+      targetUrl: "https://www.uretir.com/haber-ai",
       voice: "tr-TR-AhmetNeural",
       scenes: [
         {
@@ -142,7 +190,7 @@ async function gatherLiveSlotData(slot) {
           sub: `Borsa İstanbul BIST 100: ${bist} Puan · Bitcoin: ${btc} USD`,
           highlight: `ALTIN: ${gram} TL`,
           statLeft: `USD: ${usd} TL`,
-          statRight: `BIST: ${bist}`,
+          statRight: "uretir.com/finans-ai",
           accent: "#4fd1c5",
           bg1: "#0d2426",
           bg2: "#061112",
@@ -158,12 +206,13 @@ async function gatherLiveSlotData(slot) {
           accent: "#f6ad55",
           bg1: "#29190d",
           bg2: "#120a05",
-          speech: `İndirim A İ fiyat geçmişi radarında ise ${dealTitle}, ${dealPrice} dip fiyatıyla öne çıkıyor. Türkiye üretir, gençler yetişir! Tüm detaylar üretir nokta com adresinde.`,
+          speech: `İndirim A İ fiyat geçmişi radarında ise ${dealTitle}, ${dealPrice} dip fiyatıyla öne çıkıyor. Türkiye üretir, gençler yetişir! Tüm canlı veriler için hemen üretir nokta com adresine girin.`,
         },
       ],
     },
     "12": {
       label: "12:00 ÖĞLE İNDİRİM & KAMPANYA RADARI",
+      targetUrl: "https://www.uretir.com/indirim-ai",
       voice: "tr-TR-EmelNeural",
       scenes: [
         {
@@ -200,12 +249,13 @@ async function gatherLiveSlotData(slot) {
           accent: "#4fd1c5",
           bg1: "#0e2426",
           bg2: "#061012",
-          speech: `Öğle saatlerinde Dolar ${usd} lira, gram altın ise ${gram} lira. Altı yapay zeka aracımız ve WhatsApp kanallarımız için üretir nokta com adresini ziyaret edin.`,
+          speech: `Öğle saatlerinde Dolar ${usd} lira, gram altın ise ${gram} lira. Altı ücretsiz yapay zeka aracımız ve canlı indirim listeleri için hemen üretir nokta com adresini ziyaret edin.`,
         },
       ],
     },
     "15": {
       label: "15:00 OTOMOTİV & KONUT PİYASA ANALİZİ",
+      targetUrl: "https://www.uretir.com/araba-ai",
       voice: "tr-TR-AhmetNeural",
       scenes: [
         {
@@ -248,6 +298,7 @@ async function gatherLiveSlotData(slot) {
     },
     "20": {
       label: "20:00 AKŞAM ÖZETİ & EKONOMİ RAPORU",
+      targetUrl: "https://www.uretir.com/finans-ai",
       voice: "tr-TR-EmelNeural",
       scenes: [
         {
@@ -268,7 +319,7 @@ async function gatherLiveSlotData(slot) {
           sub: `BIST 100 Kapanış: ${bist} Puan · Bitcoin: ${btc} USD`,
           highlight: `BIST 100: ${bist}`,
           statLeft: `Altın: ${gram} TL`,
-          statRight: `BTC: ${btc} $`,
+          statRight: "uretir.com/finans-ai",
           accent: "#4fd1c5",
           bg1: "#0d2426",
           bg2: "#061112",
@@ -280,11 +331,11 @@ async function gatherLiveSlotData(slot) {
           sub: "İndirimAI Dönem Dibi + PuanAI Kredi Kartı Ödül Kombinasyonu",
           highlight: dealPrice,
           statLeft: dealDrop,
-          statRight: "uretir.com",
+          statRight: "uretir.com/indirim-ai",
           accent: "#f6ad55",
           bg1: "#29190d",
           bg2: "#120a05",
-          speech: `Akşam alışverişinde ${dealTitle}, ${dealPrice} dip fiyatıyla ilk sırada. Türkiye üretir, gençler yetişir! Üretir nokta com ve sosyal medya kanallarımızı takip etmeyi unutmayın.`,
+          speech: `Akşam alışverişinde ${dealTitle}, ${dealPrice} dip fiyatıyla ilk sırada. Türkiye üretir, gençler yetişir! Canlı verilerin merkezi üretir nokta com adresini hemen ziyaret edin.`,
         },
       ],
     },
@@ -298,15 +349,16 @@ function renderVerticalFrameSvg(scene, slotLabel, sceneIdx, totalScenes, progres
   const subLines = wrapLines(scene.sub, 38, 2);
   const speechLines = wrapLines(scene.speech, 36, 3);
   const barWidth = Math.max(40, Math.round(920 * progressRatio));
-  const pulseRadius = 10 + Math.round(Math.sin(progressRatio * Math.PI * 6) * 4);
+  const pulseRadius = 10 + Math.round(Math.sin(progressRatio * Math.PI * 8) * 4);
   const cardOffsetY = Math.round((1 - Math.min(1, progressRatio * 3.5)) * 45);
+  const ctaGlowOpacity = (0.22 + Math.abs(Math.sin(progressRatio * Math.PI * 6)) * 0.25).toFixed(2);
 
   const waveBars = Array.from({ length: 28 }, (_, i) => {
-    const phase = progressRatio * Math.PI * 10 + i * 0.55;
-    const h = 16 + Math.round(Math.abs(Math.sin(phase)) * 54);
+    const phase = progressRatio * Math.PI * 12 + i * 0.55;
+    const h = 16 + Math.round(Math.abs(Math.sin(phase)) * 56);
     const x = 140 + i * 29;
-    const y = 1490 - Math.round(h / 2);
-    return `<rect x="${x}" y="${y}" width="16" height="${h}" rx="8" fill="${scene.accent}" fill-opacity="${0.45 + (i % 3) * 0.18}" />`;
+    const y = 1480 - Math.round(h / 2);
+    return `<rect x="${x}" y="${y}" width="16" height="${h}" rx="8" fill="${scene.accent}" fill-opacity="${(0.45 + (i % 3) * 0.18).toFixed(2)}" />`;
   }).join("\n  ");
 
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -340,43 +392,43 @@ function renderVerticalFrameSvg(scene, slotLabel, sceneIdx, totalScenes, progres
   <text x="712" y="132" fill="#ffffff" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="26" font-weight="800">CANLI AI YAYINI</text>
 
   <!-- Slot Header Pill -->
-  <rect x="80" y="260" width="920" height="72" rx="18" fill="${scene.accent}" fill-opacity="0.16" stroke="${scene.accent}" stroke-opacity="0.45" />
-  <text x="112" y="306" fill="${scene.accent}" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="28" font-weight="800" letter-spacing="1.5">${escapeXml(scene.kicker)}</text>
-  <text x="968" y="306" text-anchor="end" fill="#ffffff" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="26" font-weight="700">${sceneIdx + 1}/${totalScenes}</text>
+  <rect x="80" y="250" width="920" height="72" rx="18" fill="${scene.accent}" fill-opacity="0.16" stroke="${scene.accent}" stroke-opacity="0.45" />
+  <text x="112" y="296" fill="${scene.accent}" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="28" font-weight="800" letter-spacing="1.5">${escapeXml(scene.kicker)}</text>
+  <text x="968" y="296" text-anchor="end" fill="#ffffff" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="26" font-weight="700">${sceneIdx + 1}/${totalScenes}</text>
 
   <!-- Main Animated Content Card -->
   <g transform="translate(0, ${cardOffsetY})">
-    <rect x="80" y="370" width="920" height="820" rx="36" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.14" stroke-width="2" />
+    <rect x="80" y="355" width="920" height="820" rx="36" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.14" stroke-width="2" />
 
     ${titleLines
       .map(
         (line, idx) =>
-          `<text x="128" y="${490 + idx * 82}" fill="#ffffff" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="62" font-weight="900">${escapeXml(line)}</text>`
+          `<text x="128" y="${475 + idx * 82}" fill="#ffffff" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="62" font-weight="900">${escapeXml(line)}</text>`
       )
       .join("\n    ")}
 
     ${subLines
       .map(
         (line, idx) =>
-          `<text x="128" y="${840 + idx * 46}" fill="#cbd5e1" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="32" font-weight="500">${escapeXml(line)}</text>`
+          `<text x="128" y="${825 + idx * 46}" fill="#cbd5e1" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="32" font-weight="500">${escapeXml(line)}</text>`
       )
       .join("\n    ")}
 
     <!-- Highlight Metric Pill -->
-    <rect x="128" y="955" width="824" height="110" rx="24" fill="${scene.accent}" />
-    <text x="540" y="1028" text-anchor="middle" fill="#09120c" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="52" font-weight="900">${escapeXml(scene.highlight)}</text>
+    <rect x="128" y="940" width="824" height="110" rx="24" fill="${scene.accent}" />
+    <text x="540" y="1013" text-anchor="middle" fill="#09120c" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="52" font-weight="900">${escapeXml(scene.highlight)}</text>
 
     <!-- Bottom Stats Inside Card -->
-    <text x="136" y="1135" fill="#94a3b8" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="28" font-weight="700">${escapeXml(scene.statLeft)}</text>
-    <text x="944" y="1135" text-anchor="end" fill="${scene.accent}" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="28" font-weight="800">${escapeXml(scene.statRight)}</text>
+    <text x="136" y="1120" fill="#94a3b8" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="28" font-weight="700">${escapeXml(scene.statLeft)}</text>
+    <text x="944" y="1120" text-anchor="end" fill="${scene.accent}" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="28" font-weight="800">${escapeXml(scene.statRight)}</text>
   </g>
 
   <!-- Voiceover Caption Box -->
-  <rect x="80" y="1235" width="920" height="190" rx="24" fill="#000000" fill-opacity="0.45" stroke="#ffffff" stroke-opacity="0.1" />
+  <rect x="80" y="1220" width="920" height="185" rx="24" fill="#000000" fill-opacity="0.45" stroke="#ffffff" stroke-opacity="0.1" />
   ${speechLines
     .map(
       (line, idx) =>
-        `<text x="540" y="${1295 + idx * 48}" text-anchor="middle" fill="#f8fafc" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="33" font-weight="700">${escapeXml(line)}</text>`
+        `<text x="540" y="${1280 + idx * 48}" text-anchor="middle" fill="#f8fafc" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="33" font-weight="700">${escapeXml(line)}</text>`
     )
     .join("\n  ")}
 
@@ -384,8 +436,12 @@ function renderVerticalFrameSvg(scene, slotLabel, sceneIdx, totalScenes, progres
   ${waveBars}
 
   <!-- Progress Bar -->
-  <rect x="80" y="1560" width="920" height="16" rx="8" fill="#ffffff" fill-opacity="0.14" />
-  <rect x="80" y="1560" width="${barWidth}" height="16" rx="8" fill="${scene.accent}" />
+  <rect x="80" y="1540" width="920" height="16" rx="8" fill="#ffffff" fill-opacity="0.14" />
+  <rect x="80" y="1540" width="${barWidth}" height="16" rx="8" fill="${scene.accent}" />
+
+  <!-- Traffic Funnel CTA Banner to uretir.com -->
+  <rect x="80" y="1585" width="920" height="84" rx="20" fill="${scene.accent}" fill-opacity="${ctaGlowOpacity}" stroke="${scene.accent}" stroke-width="2" />
+  <text x="540" y="1638" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="31" font-weight="900">CANLI VERİ MERKEZİ: WWW.URETIR.COM</text>
 
   <!-- Corporate Footer -->
   <text x="80" y="1755" fill="#ffffff" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="38" font-weight="900">uretir.com</text>
@@ -396,7 +452,7 @@ function renderVerticalFrameSvg(scene, slotLabel, sceneIdx, totalScenes, progres
 }
 
 async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path) {
-  // 1. Try edge-tts CLI (Microsoft Neural Turkish Voice)
+  // 1. Try open-source rany2/edge-tts (Microsoft Neural Turkish Voice)
   for (const bin of ["edge-tts", "python", "python3"]) {
     try {
       const args =
@@ -410,7 +466,7 @@ async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path) {
     }
   }
 
-  // 2. Fallback: Fetch Google Translate Turkish TTS segments over HTTPS so audio is always generated even without Python edge-tts
+  // 2. Fallback: Fetch Google Translate Turkish TTS segments over HTTPS
   try {
     const chunks = text
       .match(/.{1,160}(?:\s|$)/g)
@@ -434,20 +490,72 @@ async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path) {
   return false;
 }
 
-async function resolveTelegramChatId() {
-  if (TELEGRAM_CHAT_ID) return TELEGRAM_CHAT_ID;
-  if (!TELEGRAM_BOT_TOKEN) return null;
-  try {
-    const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates?limit=10`);
-    const data = await res.json();
-    for (const upd of (data?.result || []).reverse()) {
-      const cid = upd?.message?.chat?.id || upd?.callback_query?.message?.chat?.id || upd?.channel_post?.chat?.id;
-      if (cid) return String(cid);
+async function resolveTelegramTargets() {
+  const targets = new Set();
+  if (TELEGRAM_CHAT_ID) targets.add(String(TELEGRAM_CHAT_ID));
+
+  const savedChatsPath = path.resolve("reports", "social-media", "telegram_chats.json");
+  if (existsSync(savedChatsPath)) {
+    try {
+      const parsed = JSON.parse(await fs.readFile(savedChatsPath, "utf8"));
+      for (const id of parsed?.chatIds || []) {
+        if (id) targets.add(String(id));
+      }
+    } catch {
+      // ignore
     }
-  } catch {
-    return null;
   }
-  return null;
+
+  if (!TELEGRAM_BOT_TOKEN) return Array.from(targets);
+
+  // If no saved chatIds yet, briefly inspect getUpdates (temporarily clearing webhook if needed, then restoring it)
+  if (targets.size === 0) {
+    try {
+      const whRes = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getWebhookInfo`);
+      const whInfo = await whRes.json();
+      const currentWhUrl = whInfo?.result?.url || "";
+
+      if (currentWhUrl) {
+        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/deleteWebhook?drop_pending_updates=false`);
+      }
+
+      const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates?limit=25`);
+      const data = await res.json();
+      for (const upd of (data?.result || []).reverse()) {
+        const cid =
+          upd?.message?.chat?.id ||
+          upd?.callback_query?.message?.chat?.id ||
+          upd?.channel_post?.chat?.id ||
+          upd?.my_chat_member?.chat?.id;
+        if (cid) targets.add(String(cid));
+      }
+
+      if (currentWhUrl) {
+        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/setWebhook`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: currentWhUrl }),
+        });
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  if (targets.size > 0) {
+    try {
+      await fs.mkdir(path.dirname(savedChatsPath), { recursive: true });
+      await fs.writeFile(
+        savedChatsPath,
+        JSON.stringify({ chatIds: Array.from(targets), updatedAt: new Date().toISOString() }, null, 2),
+        "utf8"
+      );
+    } catch {
+      // ignore
+    }
+  }
+
+  return Array.from(targets);
 }
 
 async function sendToTelegram(videoPath, coverPngPath, slotData) {
@@ -455,9 +563,9 @@ async function sendToTelegram(videoPath, coverPngPath, slotData) {
     console.log("TELEGRAM_BOT_TOKEN tanımlı değil, Telegram gönderimi atlandı.");
     return false;
   }
-  const chatId = await resolveTelegramChatId();
-  if (!chatId) {
-    console.log("Telegram chat_id henüz bulunamadı (@uretirbot'a /start yazıldığında otomatik algılanır).");
+  const chatIds = await resolveTelegramTargets();
+  if (chatIds.length === 0) {
+    console.log("Telegram aktif abone/chat_id bekleniyor (@uretirbot webhook https://www.uretir.com/api/telegram/webhook üzerinde 7/24 hazır).");
     return false;
   }
 
@@ -469,52 +577,71 @@ async function sendToTelegram(videoPath, coverPngPath, slotData) {
     `📌 2) ${slotData.scenes[1].title}`,
     `📌 3) ${slotData.scenes[2].title}`,
     "",
-    `🌐 https://www.uretir.com`,
+    `🌐 *Canlı Veri Merkezi:* https://www.uretir.com`,
     `📸 Instagram: @uretirai | ▶️ YouTube: @Uretir`,
     `#Üretir #UretirAI #HaberAI #FinansAI #İndirimAI #PuanAI #ArabaAI #EvAI`,
   ].join("\n");
 
-  try {
-    if (videoPath && existsSync(videoPath)) {
-      const videoBytes = await fs.readFile(videoPath);
-      const form = new FormData();
-      form.append("chat_id", String(chatId));
-      form.append("caption", caption.slice(0, 1020));
-      form.append("parse_mode", "Markdown");
-      form.append("supports_streaming", "true");
-      form.append("video", new Blob([videoBytes], { type: "video/mp4" }), `uretir-${slotData.slot}.mp4`);
+  const replyMarkup = JSON.stringify({
+    inline_keyboard: [
+      [
+        { text: "🌐 uretir.com Canlı Veriler", url: "https://www.uretir.com" },
+        { text: "🔥 Günün Aracına Git", url: slotData.targetUrl || "https://www.uretir.com" },
+      ],
+      [
+        { text: "📸 Instagram @uretirai", url: "https://www.instagram.com/uretirai/" },
+        { text: "▶️ YouTube @Uretir", url: "https://www.youtube.com/@Uretir" },
+      ],
+    ],
+  });
 
-      const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendVideo`, {
-        method: "POST",
-        body: form,
-        signal: AbortSignal.timeout(60_000),
-      });
-      const json = await res.json();
-      if (json.ok) {
-        console.log("Telegram'a (@uretirbot) dikey MP4 video başarıyla gönderildi!");
-        return true;
+  let anySent = false;
+  for (const chatId of chatIds) {
+    try {
+      if (videoPath && existsSync(videoPath)) {
+        const videoBytes = await fs.readFile(videoPath);
+        const form = new FormData();
+        form.append("chat_id", String(chatId));
+        form.append("caption", caption.slice(0, 1020));
+        form.append("parse_mode", "Markdown");
+        form.append("supports_streaming", "true");
+        form.append("reply_markup", replyMarkup);
+        form.append("video", new Blob([videoBytes], { type: "video/mp4" }), `uretir-${slotData.slot}.mp4`);
+
+        const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendVideo`, {
+          method: "POST",
+          body: form,
+          signal: AbortSignal.timeout(60_000),
+        });
+        const json = await res.json();
+        if (json.ok) {
+          console.log(`Telegram'a (@uretirbot -> ${chatId}) dikey MP4 video başarıyla gönderildi!`);
+          anySent = true;
+          continue;
+        }
       }
-    }
 
-    if (coverPngPath && existsSync(coverPngPath)) {
-      const imgBytes = await fs.readFile(coverPngPath);
-      const form = new FormData();
-      form.append("chat_id", String(chatId));
-      form.append("caption", caption.slice(0, 1020));
-      form.append("parse_mode", "Markdown");
-      form.append("photo", new Blob([imgBytes], { type: "image/png" }), `uretir-${slotData.slot}.png`);
-      const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
-        method: "POST",
-        body: form,
-        signal: AbortSignal.timeout(30_000),
-      });
-      const json = await res.json();
-      return Boolean(json.ok);
+      if (coverPngPath && existsSync(coverPngPath)) {
+        const imgBytes = await fs.readFile(coverPngPath);
+        const form = new FormData();
+        form.append("chat_id", String(chatId));
+        form.append("caption", caption.slice(0, 1020));
+        form.append("parse_mode", "Markdown");
+        form.append("reply_markup", replyMarkup);
+        form.append("photo", new Blob([imgBytes], { type: "image/png" }), `uretir-${slotData.slot}.png`);
+        const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
+          method: "POST",
+          body: form,
+          signal: AbortSignal.timeout(30_000),
+        });
+        const json = await res.json();
+        if (json.ok) anySent = true;
+      }
+    } catch (err) {
+      console.warn(`Telegram (${chatId}) gönderim uyarısı:`, err);
     }
-  } catch (err) {
-    console.warn("Telegram gönderim uyarısı:", err);
   }
-  return false;
+  return anySent;
 }
 
 async function publishToInstagramReels(videoPath, coverPngPath, slotData) {
@@ -529,7 +656,8 @@ async function publishToInstagramReels(videoPath, coverPngPath, slotData) {
     `2️⃣ ${slotData.scenes[1].title}`,
     `3️⃣ ${slotData.scenes[2].title}`,
     "",
-    `🔗 Canlı veriler ve 6 ücretsiz yapay zekâ aracı için: uretir.com (Biografideki linkte!)`,
+    `🔗 Canlı veriler ve 6 ücretsiz yapay zekâ aracı için: www.uretir.com (Biografideki linke tıklayın!)`,
+    `📍 Doğrudan erişim: ${(slotData.targetUrl || "https://www.uretir.com").replace("https://www.", "")}`,
     `▶️ YouTube: @Uretir | 🤖 Telegram: @uretirbot`,
     "",
     `#Üretir #UretirAI #YapayZeka #HaberAI #FinansAI #İndirimAI #PuanAI #ArabaAI #EvAI #Teknoloji #Ekonomi #Keşfet #ReelsTürkiye`,
@@ -537,16 +665,17 @@ async function publishToInstagramReels(videoPath, coverPngPath, slotData) {
 
   for (const py of ["python", "python3"]) {
     try {
-      const { stdout } = await execFileAsync(
+      const { stdout, stderr } = await execFileAsync(
         py,
         ["scripts/instagram-reels-publisher.py", videoPath, coverPngPath, caption],
         {
-          timeout: 120_000,
-          env: { ...process.env, IG_USERNAME, IG_PASSWORD },
+          timeout: 180_000,
+          env: { ...process.env, IG_USERNAME, IG_PASSWORD, PYTHONIOENCODING: "utf-8" },
         }
       );
-      console.log("Instagram (@uretirai) yanıtı:", stdout.trim());
-      if (stdout.includes("PUBLISHED_OK")) return true;
+      if (stdout) console.log("Instagram (@uretirai) yanıtı:\n" + stdout.trim());
+      if (stderr && !stdout?.includes("PUBLISHED_OK")) console.log("Instagram bilgi:", stderr.trim());
+      if (stdout && stdout.includes("PUBLISHED_OK")) return true;
     } catch (err) {
       console.warn(`Instagram (${py}) bilgi:`, err?.message || err);
     }
@@ -554,19 +683,20 @@ async function publishToInstagramReels(videoPath, coverPngPath, slotData) {
   return false;
 }
 
-async function main() {
-  const slot = detectSlot();
+async function runSlot(slot) {
   const outDir = path.resolve("reports", "social-media", `slot-${slot}`);
   await fs.mkdir(outDir, { recursive: true });
 
+  console.log(`\n======================================================`);
   console.log(`[Üretir Sosyal Otomasyon] Saat ${slot}:00 kuşağı hazırlanıyor...`);
+  console.log(`======================================================`);
   const slotData = await gatherLiveSlotData(slot);
 
   const framesDir = path.join(outDir, "frames");
   await fs.mkdir(framesDir, { recursive: true });
 
-  // Render 10 frames per scene (30 frames total @ 2 fps = 15s smooth motion-graphic animation, or muxed with exact audio duration)
-  const framesPerScene = 12;
+  // Render 15 frames per scene (45 frames total @ 2 fps = 22.5s smooth motion-graphic animation muxed with natural voiceover)
+  const framesPerScene = 15;
   const totalScenes = slotData.scenes.length;
   let frameCounter = 0;
 
@@ -584,13 +714,14 @@ async function main() {
   const coverPngPath = path.join(outDir, `uretir-cover-${slot}.png`);
   await fs.copyFile(path.join(framesDir, "frame-0005.png"), coverPngPath);
 
-  // Synthesize natural Turkish voiceover per scene & full audio
+  // Synthesize natural Turkish voiceover (rany2/edge-tts Neural voice)
   const fullSpeech = slotData.scenes.map((s) => s.speech).join(" ");
   const audioPath = path.join(outDir, `uretir-voice-${slot}.mp3`);
   const hasVoice = await synthesizeNaturalTurkishVoice(fullSpeech, slotData.voice, audioPath);
-  console.log(`[Seslendirme] Doğal Türkçe TTS (${slotData.voice}): ${hasVoice ? "BAŞARILI" : "YEDEK MOD"}`);
+  console.log(`[2/4] [Seslendirme] Doğal Türkçe TTS (${slotData.voice}): ${hasVoice ? "BAŞARILI" : "YEDEK MOD"}`);
 
-  // Check if ffmpeg is available to mux frames + natural voiceover into 1080x1920 H.264 MP4
+  // Encode 1080x1920 H.264 MP4 using local ffmpeg-static or system ffmpeg
+  const ffmpegBin = resolveFfmpegBinary();
   const videoPath = path.join(outDir, `uretir-reel-${slot}.mp4`);
   let videoBuilt = false;
   try {
@@ -605,6 +736,10 @@ async function main() {
           audioPath,
           "-c:v",
           "libx264",
+          "-preset",
+          "medium",
+          "-profile:v",
+          "high",
           "-r",
           "30",
           "-pix_fmt",
@@ -634,14 +769,22 @@ async function main() {
           "+faststart",
           videoPath,
         ];
-    await execFileAsync("ffmpeg", ffmpegArgs, { timeout: 90_000 });
+    await execFileAsync(ffmpegBin, ffmpegArgs, { timeout: 120_000 });
     videoBuilt = existsSync(videoPath);
-    console.log(`[Motion-Graphic Video] 1080x1920 9:16 Dikey MP4 üretildi: ${videoPath}`);
+    console.log(`[3/4] [Motion-Graphic Video] 1080x1920 9:16 Dikey MP4 üretildi: ${videoPath}`);
   } catch (err) {
-    console.warn("[FFmpeg Bilgi] Sistemde FFmpeg bulunamadıysa GitHub Actions bulut hattında MP4 üretilir:", err?.message || err);
+    console.warn("[FFmpeg Uyarısı]:", err?.message || err);
   }
 
-  // Save YouTube Shorts & Instagram metadata manifest
+  // Publish to Telegram & Instagram
+  console.log(`[4/4] Sosyal medya kanallarında (@uretirai & @uretirbot) yayınlanıyor...`);
+  const tgPublished = await sendToTelegram(videoBuilt ? videoPath : null, coverPngPath, slotData);
+  let igPublished = false;
+  if (videoBuilt) {
+    igPublished = await publishToInstagramReels(videoPath, coverPngPath, slotData);
+  }
+
+  // Save manifest
   const manifestPath = path.join(outDir, "publish-manifest.json");
   await fs.writeFile(
     manifestPath,
@@ -650,12 +793,16 @@ async function main() {
         slot: slotData.slot,
         label: slotData.label,
         generatedAt: new Date().toISOString(),
+        primaryDataHub: SITE_URL,
+        targetTrafficUrl: slotData.targetUrl,
         videoPath: videoBuilt ? videoPath : null,
         audioPath: hasVoice ? audioPath : null,
         coverPngPath,
         instagramAccount: "@uretirai",
+        instagramPublished: igPublished,
         youtubeChannel: "https://www.youtube.com/@Uretir",
         telegramBot: "@uretirbot",
+        telegramPublished: tgPublished,
         speechScript: fullSpeech,
         scenes: slotData.scenes,
       },
@@ -665,9 +812,47 @@ async function main() {
     "utf8"
   );
 
-  await sendToTelegram(videoBuilt ? videoPath : null, coverPngPath, slotData);
-  if (videoBuilt) {
-    await publishToInstagramReels(videoPath, coverPngPath, slotData);
+  return { slot, videoBuilt, igPublished, tgPublished, videoPath, audioPath, coverPngPath };
+}
+
+async function main() {
+  if (process.argv.includes("--all-slots")) {
+    for (const s of ["09", "12", "15", "20"]) {
+      await runSlot(s);
+    }
+    return;
+  }
+
+  const slot = detectSlot();
+  await runSlot(slot);
+
+  if (process.argv.includes("--daemon")) {
+    console.log("[Üretir 7/24 Otomasyon Daemon] 09:00, 12:00, 15:00 ve 20:00 (Europe/Istanbul) zamanlayıcısı aktif...");
+    let lastTriggeredKey = "";
+    setInterval(async () => {
+      try {
+        const now = new Date();
+        const parts = new Intl.DateTimeFormat("en-CA", {
+          timeZone: "Europe/Istanbul",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        }).formatToParts(now);
+        const map = Object.fromEntries(parts.map((p) => [p.type, p.value]));
+        const hh = map.hour;
+        const mm = map.minute;
+        const key = `${map.year}-${map.month}-${map.day}-${hh}`;
+        if (["09", "12", "15", "20"].includes(hh) && Number(mm) <= 4 && lastTriggeredKey !== key) {
+          lastTriggeredKey = key;
+          await runSlot(hh);
+        }
+      } catch (e) {
+        console.warn("Daemon tick uyarısı:", e);
+      }
+    }, 60_000);
   }
 }
 

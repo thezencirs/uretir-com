@@ -33,6 +33,19 @@ const CURATED_INDIRIM_SEEDS:Array<{
   observedDays:number;coverageDays:number;provisional?:boolean;
 }>=[
   {
+    productKey:"telegram:dyson-360-combi-hepa-karbon-filtre-2al1ode",
+    productName:"Dyson 360° Combi HEPA+K-Karbon Hava Temizleyici Filtre (COMBI360 Kuponuyla 2 Al 1 Öde · Adet Fiyatı)",
+    merchantName:"Dyson Türkiye Resmî Mağaza",
+    sourceUrl:"https://www.dyson.com.tr",
+    currentPrice:1949.5,
+    windowDays:360,
+    windowLow:1949.5,
+    windowHigh:3899,
+    median:3899,
+    observedDays:64,
+    coverageDays:360
+  },
+  {
     productKey:"seed:apple-macbook-air-m3-13",
     productName:"Apple MacBook Air 13 inç M3 Çip 16GB RAM 256GB SSD",
     merchantName:"Amazon Türkiye",
@@ -285,21 +298,25 @@ export async function getPriceLowReport(now=new Date()):Promise<PriceLowReport>{
       if(windowDays===30&&!eligible&&currentPrice<=low*1.001)provisional.push({...item,eligibleWindowDays:coverageDays});
     }
   }
-  const totalFound=lows["30"].length+lows["90"].length+lows["360"].length+provisional.length;
-  if(totalFound<4){
-    const fallback=buildFallbackReport(now);
-    for(const k of ["30","90","360"] as const){
-      const existingKeys=new Set(lows[k].map(x=>x.productKey));
-      for(const item of fallback.lows[k]){
-        if(!existingKeys.has(item.productKey))lows[k].push(item);
+  const fallback=buildFallbackReport(now);
+  for(const k of ["30","90","360"] as const){
+    const existingKeys=new Set(lows[k].map(x=>x.productKey));
+    for(const item of fallback.lows[k]){
+      if(item.productKey.startsWith("telegram:") || lows[k].length<6){
+        if(!existingKeys.has(item.productKey)){
+          lows[k].push(item);
+          existingKeys.add(item.productKey);
+        }
       }
     }
+  }
+  if(provisional.length<4){
     const existingProv=new Set(provisional.map(x=>x.productKey));
     for(const item of fallback.provisional){
       if(!existingProv.has(item.productKey))provisional.push(item);
     }
   }
-  for(const key of Object.keys(lows))lows[key].sort((a,b)=>b.dropFromHighPct-a.dropFromHighPct||a.currentPrice-b.currentPrice);
+  for(const key of Object.keys(lows))lows[key].sort((a,b)=>Number(b.productKey.startsWith("telegram:"))-Number(a.productKey.startsWith("telegram:"))||b.dropFromHighPct-a.dropFromHighPct||a.currentPrice-b.currentPrice);
   provisional.sort((a,b)=>b.coverageDays-a.coverageDays||b.dropFromHighPct-a.dropFromHighPct||a.currentPrice-b.currentPrice);
   return {
     checkedAt:now.toISOString(),

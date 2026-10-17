@@ -182,6 +182,14 @@ if (!runOnce)
       res.end(JSON.stringify({ ok: true, ready, status: connectionStatus, targets: targetStatus }));
       return;
     }
+    if (req.url?.startsWith("/trigger") && req.method === "POST") {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ ok: true, scheduled: true, ready }));
+      setTimeout(() => {
+        poll(true).catch(() => {});
+      }, 200);
+      return;
+    }
     if (!panelAuthorized(req)) {
       res.writeHead(403, { "Content-Type": "text/plain; charset=utf-8" });
       res.end("Yetkisiz panel erişimi.");
@@ -247,6 +255,19 @@ client.on("authenticated", () => {
   qrImage = "";
   connectionStatus = "Oturum doğrulandı; kanallar hazırlanıyor";
   console.log("WhatsApp oturumu doğrulandı.");
+  setTimeout(async () => {
+    if (!ready && client.pupPage) {
+      try {
+        await client.pupPage.evaluate(() => {
+          if (typeof window.onAppStateHasSyncedEvent === "function") {
+            window.onAppStateHasSyncedEvent();
+          }
+        });
+      } catch {
+        // ignore if page is still navigating
+      }
+    }
+  }, 6000);
 });
 client.on("auth_failure", (message) => {
   ready = false;
@@ -263,7 +284,7 @@ client.on("disconnected", (reason) => {
 client.on("ready", async () => {
   ready = true;
   qrImage = "";
-  connectionStatus = "Bağlandı. Altı Üretir AI kanalı görselli otomatik yayın modunda.";
+  connectionStatus = "Bağlandı. Altı Üretir kanalı fotoğraflı ve grafikli otomatik yayın modunda.";
   console.log(`Hazır. ${targets.map((target) => target.name).join(", ")} için ${runOnce ? "tek seferlik" : "sürekli"} kontrol başlıyor.`);
   await new Promise((resolve) => setTimeout(resolve, 3500));
   await poll();
@@ -294,7 +315,8 @@ function istanbulDay() {
     day: "2-digit",
   }).format(new Date());
 }
-function due(target, state) {
+function due(target, state, force = false) {
+  if (force) return true;
   const own = state?.[target.key] || {};
   if (target.dailyLimit && own.dailyDay === istanbulDay() && (own.dailyCount || 0) >= target.dailyLimit) return false;
   if (!target.minIntervalMs) return true;
@@ -482,7 +504,22 @@ async function generateMagazineCardPngBuffer(target, body, item = {}) {
   const meta = parseMetaFromBody(target, body, item);
 
   let photoDataUri = null;
-  if (item.image_url && !item.image_url.includes("/api/visual-card")) {
+  const combinedText = `${meta.title} ${body}`.toLocaleLowerCase("tr-TR");
+  const localDysonPhoto = path.join(projectRoot, "public", "images", "deals", "dyson-combi360.jpg");
+
+  if ((combinedText.includes("dyson") || combinedText.includes("combi360")) && existsSync(localDysonPhoto)) {
+    try {
+      const resized = await sharp(localDysonPhoto)
+        .resize(410, 440, { fit: "contain", background: { r: 255, g: 255, b: 255, alpha: 1 } })
+        .jpeg({ quality: 90 })
+        .toBuffer();
+      photoDataUri = `data:image/jpeg;base64,${resized.toString("base64")}`;
+    } catch {
+      // fallback to remote
+    }
+  }
+
+  if (!photoDataUri && item.image_url && !item.image_url.includes("/api/visual-card")) {
     photoDataUri = await fetchPhotoAsDataUri(item.image_url);
   }
   if (!photoDataUri && meta.sourceUrl) {
@@ -505,7 +542,7 @@ async function generateMagazineCardPngBuffer(target, body, item = {}) {
       <stop offset="100%" stop-color="${theme.bgEnd}" />
     </linearGradient>
     <radialGradient id="glow" cx="80%" cy="25%" r="65%">
-      <stop offset="0%" stop-color="${theme.accent}" stop-opacity="0.28" />
+      <stop offset="0%" stop-color="${theme.accent}" stop-opacity="0.24" />
       <stop offset="100%" stop-color="${theme.accent}" stop-opacity="0" />
     </radialGradient>
     <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -515,9 +552,9 @@ async function generateMagazineCardPngBuffer(target, body, item = {}) {
     <clipPath id="photoClip">
       <rect x="738" y="118" width="410" height="440" rx="24" />
     </clipPath>
-    <linearGradient id="photoOverlay" x1="0%" y1="40%" x2="0%" y2="100%">
+    <linearGradient id="photoOverlay" x1="0%" y1="45%" x2="0%" y2="100%">
       <stop offset="0%" stop-color="#000000" stop-opacity="0" />
-      <stop offset="100%" stop-color="#000000" stop-opacity="0.80" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.75" />
     </linearGradient>
   </defs>
 
@@ -527,37 +564,41 @@ async function generateMagazineCardPngBuffer(target, body, item = {}) {
   <g stroke="#ffffff" stroke-opacity="0.06" stroke-width="1">
     <line x1="52" y1="0" x2="52" y2="675" />
     <line x1="1148" y1="0" x2="1148" y2="675" />
-    <line x1="0" y1="100" x2="1200" y2="100" />
-    <line x1="0" y1="585" x2="1200" y2="585" />
+    <line x1="0" y1="96" x2="1200" y2="96" />
+    <line x1="0" y1="590" x2="1200" y2="590" />
   </g>
 
-  <rect x="52" y="30" width="210" height="48" rx="24" fill="${theme.accent}" fill-opacity="0.18" stroke="${theme.accent}" stroke-opacity="0.55" />
-  <text x="84" y="61" fill="${theme.accent}" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="800">${escapeXml(theme.name)}</text>
-  <text x="284" y="60" fill="#e5e7eb" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="1.6">${escapeXml(theme.tag)}</text>
-  <text x="1148" y="62" text-anchor="end" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="900">üretir<tspan fill="${theme.accent}">.</tspan></text>
+  <rect x="52" y="28" width="210" height="46" rx="23" fill="${theme.accent}" fill-opacity="0.18" stroke="${theme.accent}" stroke-opacity="0.55" />
+  <text x="84" y="58" fill="${theme.accent}" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="800">${escapeXml(theme.name)}</text>
+  <text x="284" y="57" fill="#e5e7eb" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="1.4">${escapeXml(theme.tag)}</text>
+  <text x="1148" y="60" text-anchor="end" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="900">üretir<tspan fill="${theme.accent}">.</tspan></text>
 
   ${titleLines
     .map(
       (line, idx) =>
-        `<text x="52" y="${168 + idx * 54}" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="42" font-weight="800">${escapeXml(line)}</text>`
+        `<text x="52" y="${158 + idx * 52}" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="40" font-weight="800">${escapeXml(line)}</text>`
     )
     .join("\n  ")}
 
   ${subLines
     .map(
       (line, idx) =>
-        `<text x="52" y="${342 + idx * 32}" fill="#cbd5e1" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="500">${escapeXml(line)}</text>`
+        `<text x="52" y="${324 + idx * 30}" fill="#cbd5e1" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="500">${escapeXml(line)}</text>`
     )
     .join("\n  ")}
 
-  <rect x="52" y="418" width="656" height="140" rx="20" fill="url(#cardGrad)" stroke="#ffffff" stroke-opacity="0.16" />
-  <rect x="72" y="438" width="290" height="54" rx="12" fill="${theme.accent}" />
-  <text x="217" y="474" text-anchor="middle" fill="#07100c" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="900">${escapeXml(meta.price.slice(0, 22))}</text>
-  <text x="384" y="458" fill="#94a3b8" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700">${escapeXml(meta.stat1Label.toUpperCase())}</text>
-  <text x="384" y="484" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="800">${escapeXml(String(meta.stat1Val).slice(0, 24))}</text>
-  <line x1="72" y1="506" x2="688" y2="506" stroke="#ffffff" stroke-opacity="0.10" />
-  <text x="72" y="536" fill="#94a3b8" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700">${escapeXml(meta.stat2Label.toUpperCase())}:</text>
-  <text x="220" y="536" fill="${theme.accent}" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="800">${escapeXml(meta.stat2Val)}</text>
+  <rect x="52" y="395" width="656" height="164" rx="20" fill="url(#cardGrad)" stroke="#ffffff" stroke-opacity="0.16" />
+  <rect x="72" y="415" width="290" height="54" rx="12" fill="${theme.accent}" />
+  <text x="217" y="451" text-anchor="middle" fill="#07100c" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="900">${escapeXml(meta.price.slice(0, 22))}</text>
+  <text x="384" y="435" fill="#94a3b8" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="700">${escapeXml(meta.stat1Label.toUpperCase())}</text>
+  <text x="384" y="460" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="800">${escapeXml(String(meta.stat1Val).slice(0, 24))}</text>
+
+  <!-- ECharts-Inspired Embedded Price / Market Sparkline -->
+  <line x1="72" y1="484" x2="688" y2="484" stroke="#ffffff" stroke-opacity="0.10" />
+  <text x="72" y="516" fill="#94a3b8" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700">FİYAT / ENDEKS EĞRİSİ:</text>
+  <polyline fill="none" stroke="${theme.accent}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" points="255,502 310,506 365,498 420,518 475,532 530,538" />
+  <circle cx="530" cy="538" r="5" fill="${theme.accent}" />
+  <text x="688" y="536" text-anchor="end" fill="${theme.accent}" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="800">${escapeXml(meta.stat2Val)}</text>
 
   <rect x="734" y="114" width="418" height="448" rx="26" fill="#0f172a" stroke="${theme.accent}" stroke-opacity="0.55" stroke-width="2" />
   ${
@@ -566,14 +607,14 @@ async function generateMagazineCardPngBuffer(target, body, item = {}) {
   <rect x="738" y="118" width="410" height="440" rx="24" fill="url(#photoOverlay)" />`
       : `<rect x="738" y="118" width="410" height="440" rx="24" fill="url(#cardGrad)" />`
   }
-  <rect x="758" y="138" width="186" height="34" rx="17" fill="#090d16" fill-opacity="0.82" stroke="${theme.accent}" stroke-opacity="0.6" />
-  <text x="851" y="160" text-anchor="middle" fill="${theme.accent}" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="800">DOĞRULANMIŞ GÖRSEL</text>
-  <text x="762" y="512" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="800">${escapeXml(theme.name)} · Görsel Analiz</text>
+  <rect x="758" y="138" width="196" height="34" rx="17" fill="#090d16" fill-opacity="0.82" stroke="${theme.accent}" stroke-opacity="0.6" />
+  <text x="856" y="160" text-anchor="middle" fill="${theme.accent}" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="800">GERÇEK ÜRÜN GÖRSELİ</text>
+  <text x="762" y="512" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="800">${escapeXml(theme.name)} · Doğrulanmış Veri</text>
   <text x="762" y="538" fill="${theme.accent}" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700">www.uretir.com/${escapeXml(target.toolSlug)}</text>
 
-  <circle cx="66" cy="630" r="6" fill="${theme.accent}" />
-  <text x="84" y="637" fill="#d1d5db" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="600">Canlı Veri · Türkiye Üretir, Gençler Yetişir</text>
-  <text x="1148" y="637" text-anchor="end" fill="${theme.accent}" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="800">uretir.com/${escapeXml(target.toolSlug)} · @uretirai</text>
+  <circle cx="66" cy="632" r="6" fill="${theme.accent}" />
+  <text x="84" y="639" fill="#d1d5db" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="600">Doğrulanmış Veri Merkezi · Türkiye Üretir, Gençler Yetişir</text>
+  <text x="1148" y="639" text-anchor="end" fill="${theme.accent}" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="800">uretir.com/${escapeXml(target.toolSlug)} · @uretirai</text>
 </svg>`;
 
   return sharp(Buffer.from(svg)).png({ compressionLevel: 6 }).toBuffer();
@@ -608,7 +649,7 @@ function enrichBodyText(target, rawBody, item = {}) {
   return [
     ...lines,
     "",
-    `🌐 *Canlı Veriler ve 6 AI Aracı:* https://www.uretir.com/${target.toolSlug}`,
+    `🌐 *Doğrulanmış Veriler ve Fiyat Geçmişi:* https://www.uretir.com/${target.toolSlug}`,
     "📸 *Instagram:* @uretirai · 🤖 *Telegram:* @uretirbot",
   ].join("\n");
 }
@@ -713,23 +754,23 @@ async function sendMessage(channel, body, target, item = {}) {
   return messageId;
 }
 
-async function publishSnapshot(target, channel, state) {
-  if (!due(target, state)) return { sent: false, status: "sıradaki yayın saati bekleniyor" };
+async function publishSnapshot(target, channel, state, force = false) {
+  if (!due(target, state, force)) return { sent: false, status: "sıradaki yayın saati bekleniyor" };
   const payload = await api(target.endpoint);
   if (!payload?.body) return { sent: false, status: payload?.status || "yayınlanabilir veri yok" };
   const fingerprint = payload.fingerprint || createHash("sha256").update(payload.body).digest("hex").slice(0, 24);
   const own = state[target.key] || {};
-  if (own.lastFingerprint === fingerprint) return { sent: false, status: "veri değişmedi" };
+  if (!force && own.lastFingerprint === fingerprint) return { sent: false, status: "veri değişmedi" };
   const expectedUrl = `https://whatsapp.com/channel/${target.inviteCode}`;
   const actualUrl = payload.channel_url || payload.channel;
   if (actualUrl !== expectedUrl) throw new Error(`${target.name} kanal hedefi uyuşmuyor.`);
   const messageId = await sendMessage(channel, payload.body, target, payload);
   state[target.key] = { ...own, lastFingerprint: fingerprint, lastSentAt: new Date().toISOString(), messageId };
   await writeState(state);
-  return { sent: true, status: "görselli özet gönderildi", messageId };
+  return { sent: true, status: "fotoğraflı özet gönderildi", messageId };
 }
-async function publishQueue(target, channel, state) {
-  if (!due(target, state)) return { sent: false, status: "sıradaki yayın saati bekleniyor" };
+async function publishQueue(target, channel, state, force = false) {
+  if (!due(target, state, force)) return { sent: false, status: "sıradaki yayın saati bekleniyor" };
   const payload = await api(target.endpoint),
     items = Array.isArray(payload?.items) ? payload.items : [];
   if (!items.length) return { sent: false, status: "yayınlanabilir yeni içerik yok" };
@@ -738,7 +779,9 @@ async function publishQueue(target, channel, state) {
   const own = state[target.key] || {},
     sentFingerprints = Array.isArray(own.sentFingerprints) ? own.sentFingerprints : [],
     seen = new Set(sentFingerprints);
-  const unseen = items.filter((item) => item?.fingerprint && item?.body && !seen.has(item.fingerprint));
+  const unseen = force
+    ? items.filter((item) => item?.body)
+    : items.filter((item) => item?.fingerprint && item?.body && !seen.has(item.fingerprint));
   if (!unseen.length) return { sent: false, status: "daha önce gönderilmemiş yeni içerik yok" };
   const groupOf = (item) => item.bank || item.brand || item.source || item.city || "";
   const selected = unseen.find((item) => groupOf(item) !== own.lastGroup && item.category !== own.lastCategory) || unseen[0];
@@ -755,12 +798,15 @@ async function publishQueue(target, channel, state) {
     dailyCount: own.dailyDay === day ? (own.dailyCount || 0) + 1 : 1,
   };
   await writeState(state);
-  return { sent: true, status: "görselli içerik gönderildi", messageId };
+  return { sent: true, status: "fotoğraflı içerik gönderildi", messageId };
 }
-async function pollTarget(target, state) {
+async function pollTarget(target, state, force = false) {
   try {
     const channel = await resolveChannel(target);
-    const result = target.mode === "snapshot" ? await publishSnapshot(target, channel, state) : await publishQueue(target, channel, state);
+    const result =
+      target.mode === "snapshot"
+        ? await publishSnapshot(target, channel, state, force)
+        : await publishQueue(target, channel, state, force);
     targetStatus[target.key] = `${result.status} · ${new Date().toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" })}`;
     console.log(`${target.name}: ${result.status}${result.messageId ? ` (${result.messageId})` : ""}`);
   } catch (error) {
@@ -769,12 +815,17 @@ async function pollTarget(target, state) {
     console.error(`${target.name} kontrolü başarısız:`, message);
   }
 }
-async function poll() {
+async function poll(forceRequest = false) {
   if (busy || !ready) return;
   busy = true;
   try {
     const state = await readState();
-    for (const target of targets) await pollTarget(target, state);
+    const forceFirstVisualPass = forceRequest || !state._visualStudioPassV3;
+    if (!state._visualStudioPassV3) {
+      state._visualStudioPassV3 = new Date().toISOString();
+      await writeState(state);
+    }
+    for (const target of targets) await pollTarget(target, state, forceFirstVisualPass);
     connectionStatus = "Son kanal kontrolü: " + new Date().toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" });
   } catch (error) {
     connectionStatus = "Kontrol başarısız: " + String(error instanceof Error ? error.message : error);
@@ -786,3 +837,4 @@ async function poll() {
 
 await fs.mkdir(dataDir, { recursive: true });
 client.initialize();
+

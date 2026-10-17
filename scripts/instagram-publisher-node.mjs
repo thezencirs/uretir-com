@@ -105,6 +105,25 @@ async function publishViaPlaywrightWeb({ username, password, videoPath, feedJpgP
       await page.waitForTimeout(9000);
     }
 
+    // If Meta reCAPTCHA checkbox appears on first new-device login, click it automatically
+    const recaptchaFrames = page.locator('iframe[src*="recaptcha"], iframe[title*="reCAPTCHA"]');
+    if ((await recaptchaFrames.count()) > 0) {
+      try {
+        const anchor = page.frameLocator('iframe[src*="recaptcha"], iframe[title*="reCAPTCHA"]').first().locator("#recaptcha-anchor, .recaptcha-checkbox-border");
+        if ((await anchor.count()) > 0) {
+          await anchor.first().click({ delay: 120 }).catch(() => {});
+          await page.waitForTimeout(6000);
+        }
+        const contBtn = page.locator('button:has-text("Devam"), button:has-text("Continue"), div[role="button"]:has-text("Devam")');
+        if ((await contBtn.count()) > 0) {
+          await contBtn.first().click().catch(() => {});
+          await page.waitForTimeout(6000);
+        }
+      } catch {
+        // ignore recaptcha frame notice
+      }
+    }
+
     // Extract sessionid cookie if logged in so instagrapi can also use it natively
     const cookies = await context.cookies("https://www.instagram.com");
     const sidCookie = cookies.find((c) => c.name === "sessionid" && c.value);

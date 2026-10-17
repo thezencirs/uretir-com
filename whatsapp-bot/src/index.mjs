@@ -1,22 +1,49 @@
 import dotenv from "dotenv";
-dotenv.config({ path: "../.env.production.local", quiet: true });
-dotenv.config({ quiet: true });
 import qrcode from "qrcode-terminal";
 import QRCode from "qrcode";
 import { createHash } from "node:crypto";
 import { createServer } from "node:http";
 import fs from "node:fs/promises";
+import { existsSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
+import sharp from "sharp";
 import pkg from "whatsapp-web.js";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const botRoot = path.resolve(__dirname, "..");
+const projectRoot = path.resolve(botRoot, "..");
+
+dotenv.config({ path: path.join(projectRoot, ".env.local"), quiet: true });
+dotenv.config({ path: path.join(projectRoot, ".env.production.local"), quiet: true });
+dotenv.config({ path: path.join(botRoot, ".env"), quiet: true });
 
 const { Client, LocalAuth, MessageMedia } = pkg;
 const siteUrl = (process.env.SITE_URL || "https://www.uretir.com").replace(/\/$/, "");
 const pollMs = Math.max(5, Number(process.env.POLL_MINUTES || 10)) * 60_000;
-const dataDir = process.env.BOT_DATA_DIR || "./data";
+const dataDir = process.env.BOT_DATA_DIR || path.join(botRoot, "data");
 const statePath = path.join(dataDir, "channel-state.json");
 const panelToken = process.env.PANEL_TOKEN || "";
 const port = Number(process.env.PORT || 3217);
 const runOnce = process.env.RUN_ONCE === "1";
+const tgBotToken = process.env.TELEGRAM_BOT_TOKEN || "";
+const tgChatId = process.env.TELEGRAM_CHAT_ID || "995164733";
+
+function resolveBrowserExecutable() {
+  if (process.env.PUPPETEER_EXECUTABLE_PATH && existsSync(process.env.PUPPETEER_EXECUTABLE_PATH)) {
+    return process.env.PUPPETEER_EXECUTABLE_PATH;
+  }
+  const winPaths = [
+    "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+    "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+    "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",
+  ];
+  for (const p of winPaths) {
+    if (existsSync(p)) return p;
+  }
+  return undefined;
+}
 
 const targets = [
   { key:"haberai", name:"HaberAI", inviteCode:"0029VbDk4gHGpLHXkGseaf3Y", endpoint:"/api/channel-feed/haber-ai", mode:"snapshot", minIntervalMs:0 },
@@ -31,6 +58,7 @@ let busy=false;
 let qrImage="";
 let ready=false;
 let connectionStatus="WhatsApp bağlantısı hazırlanıyor";
+let lastTgQrSentAt=0;
 const targetStatus=Object.fromEntries(targets.map(target=>[target.key,"bekleniyor"]));
 
 function escapeHtml(value){
@@ -61,7 +89,7 @@ const client=new Client({
   authStrategy:new LocalAuth({dataPath:path.join(dataDir,"auth")}),
   puppeteer:{
     headless:true,
-    executablePath:process.env.PUPPETEER_EXECUTABLE_PATH||undefined,
+    executablePath:resolveBrowserExecutable(),
     args:["--no-sandbox","--disable-setuid-sandbox","--disable-dev-shm-usage","--disable-gpu"],
   },
 });
@@ -72,6 +100,35 @@ client.on("qr",async value=>{
   connectionStatus="Kanal yöneticisi hesabınızla QR kodunu bir kez okutun";
   console.log("WhatsApp Web QR kodu üretildi.");
   qrcode.generate(value,{small:true});
+
+  try {
+    const qrPngPath = path.join(projectRoot, "reports", "social-media", "whatsapp-qr.png");
+    await fs.mkdir(path.dirname(qrPngPath), { recursive: true });
+    const qrBuffer = await QRCode.toBuffer(value, { width: 520, margin: 3 });
+    await fs.writeFile(qrPngPath, qrBuffer);
+    if (process.env.QR_ARTIFACT_PATH) {
+      await fs.mkdir(path.dirname(process.env.QR_ARTIFACT_PATH), { recursive: true });
+      await fs.writeFile(process.env.QR_ARTIFACT_PATH, qrBuffer);
+    }
+
+    if (tgBotToken && tgChatId && Date.now() - lastTgQrSentAt > 45_000) {
+      lastTgQrSentAt = Date.now();
+      const form = new FormData();
+      form.append("chat_id", String(tgChatId));
+      form.append(
+        "caption",
+        "📱 *ÜRETİR WHATSAPP 6 AI KANAL MOTORU QR KODU*\n\nHaberAI · FinansAI · PuanAI · İndirimAI · ArabaAI · EvAI kanallarının `uretir.com` üzerinden otomatik paylaşım yapması için bu QR kodunu telefonunuzdan *(WhatsApp → Bağlı Cihazlar → Cihaz Bağla)* bir kez okutun."
+      );
+      form.append("parse_mode", "Markdown");
+      form.append("photo", new Blob([qrBuffer], { type: "image/png" }), "whatsapp-qr.png");
+      await fetch(`https://api.telegram.org/bot${tgBotToken}/sendPhoto`, {
+        method: "POST",
+        body: form,
+      }).catch(() => {});
+    }
+  } catch (qrErr) {
+    console.warn("QR kayıt/Telegram uyarısı:", qrErr);
+  }
 });
 client.on("authenticated",()=>{
   qrImage="";
@@ -95,6 +152,17 @@ client.on("ready",async()=>{
   qrImage="";
   connectionStatus="Bağlandı. Altı Üretir AI kanalı otomatik yayın modunda.";
   console.log(`Hazır. ${targets.map(target=>target.name).join(", ")} için ${runOnce?"tek seferlik":"sürekli"} kontrol başlıyor.`);
+  if (tgBotToken && tgChatId) {
+    fetch(`https://api.telegram.org/bot${tgBotToken}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: tgChatId,
+        text: "✅ *WhatsApp 6 AI Kanal Motoru (HaberAI, FinansAI, PuanAI, İndirimAI, ArabaAI, EvAI) bağlandı!* `uretir.com` üzerinden otomatik kanal paylaşımları başladı.",
+        parse_mode: "Markdown",
+      }),
+    }).catch(() => {});
+  }
   await poll();
   if(runOnce){
     await new Promise(resolve=>setTimeout(resolve,2500));
@@ -188,6 +256,16 @@ async function api(endpoint){
   }
   throw lastError||new Error("uretir.com bağlantı hatası");
 }
+function buildFallbackVisualCardUrl(target, body) {
+  const toolSlug = target.endpoint.replace("/api/channel-feed/", "");
+  const firstLine =
+    String(body || "")
+      .split("\n")
+      .map((l) => l.replace(/[*_~`•#]/g, "").trim())
+      .find((l) => l.length > 10 && !l.startsWith("http")) || `${target.name} Güncel Analiz`;
+  return `${siteUrl}/api/visual-card?tool=${encodeURIComponent(toolSlug)}&title=${encodeURIComponent(firstLine.slice(0, 90))}&subtitle=${encodeURIComponent(target.name + " Resmî WhatsApp Kanalı · uretir.com")}`;
+}
+
 async function sendMessage(channel,body,mediaUrl=null){
   if(mediaUrl){
     try{
@@ -195,11 +273,15 @@ async function sendMessage(channel,body,mediaUrl=null){
       if(url.protocol!=="https:")throw new Error("yalnız HTTPS görsel kabul edilir");
       const response=await fetch(url,{signal:AbortSignal.timeout(20_000),headers:{"User-Agent":"Uretir-WhatsApp-Publisher/1.0"}});
       if(!response.ok)throw new Error("HTTP "+response.status);
-      const mime=(response.headers.get("content-type")||"").split(";")[0].trim();
+      let mime=(response.headers.get("content-type")||"").split(";")[0].trim();
       if(!mime.startsWith("image/"))throw new Error("görsel MIME türü alınamadı");
-      const bytes=Buffer.from(await response.arrayBuffer());
+      let bytes=Buffer.from(await response.arrayBuffer());
+      if(mime==="image/svg+xml"){
+        bytes=await sharp(bytes).png({compressionLevel:6}).toBuffer();
+        mime="image/png";
+      }
       if(bytes.length>8_000_000)throw new Error("görsel 8 MB sınırını aşıyor");
-      const media=new MessageMedia(mime,bytes.toString("base64"),"indirimai."+((mime.split("/")[1]||"jpg").replace("jpeg","jpg")));
+      const media=new MessageMedia(mime,bytes.toString("base64"),"uretir-card."+((mime.split("/")[1]||"png").replace("jpeg","jpg")));
       const message=await client.sendMessage(channel.id,media,{caption:body,sendMediaAsHd:false});
       if(message?.id?._serialized){
         console.log("Görselli kanal gönderimi WhatsApp tarafından kabul edildi.");
@@ -274,7 +356,8 @@ async function publishSnapshot(target,channel,state){
   const expectedUrl=`https://whatsapp.com/channel/${target.inviteCode}`;
   const actualUrl=payload.channel_url||payload.channel;
   if(actualUrl!==expectedUrl)throw new Error(`${target.name} kanal hedefi uyuşmuyor.`);
-  const messageId=await sendMessage(channel,payload.body,payload.image_url||null);
+  const visualUrl=payload.image_url||buildFallbackVisualCardUrl(target,payload.body);
+  const messageId=await sendMessage(channel,payload.body,visualUrl);
   state[target.key]={...own,lastFingerprint:fingerprint,lastSentAt:new Date().toISOString(),messageId};
   await writeState(state);
   return {sent:true,status:"özet gönderildi",messageId};
@@ -290,7 +373,8 @@ async function publishQueue(target,channel,state){
   if(!unseen.length)return {sent:false,status:"daha önce gönderilmemiş yeni içerik yok"};
   const groupOf=item=>item.bank||item.brand||item.source||item.city||"";
   const selected=unseen.find(item=>groupOf(item)!==own.lastGroup&&item.category!==own.lastCategory)||unseen[0];
-  const messageId=await sendMessage(channel,selected.body),day=istanbulDay();
+  const visualUrl=selected.image_url||payload.image_url||buildFallbackVisualCardUrl(target,selected.body);
+  const messageId=await sendMessage(channel,selected.body,visualUrl),day=istanbulDay();
   state[target.key]={...own,sentFingerprints:[...sentFingerprints,selected.fingerprint].slice(-500),lastGroup:groupOf(selected),lastCategory:selected.category,lastSentAt:new Date().toISOString(),messageId,dailyDay:day,dailyCount:own.dailyDay===day?(own.dailyCount||0)+1:1};
   await writeState(state);
   return {sent:true,status:"içerik gönderildi",messageId};

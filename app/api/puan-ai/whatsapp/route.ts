@@ -92,11 +92,26 @@ function toItem(campaign: CampaignView) {
     "*PuanAI • uretir.com*",
   ].filter((line): line is string => line !== null);
 
+  const cardParams = new URLSearchParams({
+    tool: "puan-ai",
+    format: "png",
+    title: `${campaign.bank.shortName || campaign.bank.name} · ${campaign.title}`.slice(0, 80),
+    subtitle: campaign.benefitSummary.slice(0, 100),
+    price: reward ? `${reward} Kazanım` : "Kart Kampanyası",
+    badge: `PUANAI · ${(campaign.bank.shortName || campaign.bank.name).toUpperCase()}`,
+    s1l: "Alt Limit",
+    s1v: min || "Koşulları İncele",
+    s2l: "Son Gün",
+    s2v: dateTR(campaign.endDate),
+  });
+
   return {
-    fingerprint,
+    fingerprint: createHash("sha256").update(fingerprint + ":v2").digest("hex").slice(0, 24),
     campaignId: campaign.id,
     bank: campaign.bank.slug,
     category: campaign.category.slug,
+    source_url: source.url,
+    image_url: `https://www.uretir.com/api/visual-card?${cardParams.toString()}`,
     body: lines.join("\n"),
   };
 }
@@ -126,27 +141,48 @@ function submissionItem(input: {id:string;sourceUrl:string|null;normalizedDraft:
   const installments=Array.isArray(facts.installmentCounts)?facts.installmentCounts.filter(v=>Number.isFinite(v)&&v>1):[];
   if(!programs.length || (!amounts.length&&!installments.length)) return null;
   const title=draft.sourceTitle?.trim() || programs.join(" / ")+" kampanyası";
-  const fingerprint=createHash("sha256").update(JSON.stringify([input.id,input.sourceUrl,draft.validUntil,input.verification])).digest("hex").slice(0,24);
+  const fingerprint=createHash("sha256").update(JSON.stringify([input.id,input.sourceUrl,draft.validUntil,input.verification,"v2"])).digest("hex").slice(0,24);
   const amountText=amounts.length ? amounts.slice(0,5).map(v=>money(v)).filter(Boolean).join(" · ") : null;
   const installmentText=installments.length ? installments.slice(0,5).join(", ")+" taksit" : null;
   const body=[
-    "💳 *PUANAI | RESMÎ KAMPANYA*",
-    "*"+title+"*",
-    "💳 Kart programı: *"+programs.join(" / ")+"*",
-    amountText ? "💰 Kaynakta geçen tutarlar: *"+amountText+"*" : null,
-    installmentText ? "🧾 Taksit: *"+installmentText+"*" : null,
-    facts.participationRequired ? "📲 Katılım: *Kampanyaya katılım gerekiyor*" : null,
-    "📅 Son gün: *"+dateTR(validUntil.toISOString())+"*",
+    "💳 *PUANAI | DOĞRULANMIŞ BANKA & KART KAMPANYASI*",
     "",
-    "🔗 Resmî kaynak:",
+    "📌 *"+title+"*",
+    "💳 *Kart Programı:* *"+programs.join(" / ")+"*",
+    amountText ? "💰 *Kampanya Tutarları / Kazanım:* *"+amountText+"*" : null,
+    installmentText ? "🧾 *Taksit Avantajı:* *"+installmentText+"*" : null,
+    facts.participationRequired ? "📲 *Katılım:* Harcama öncesi mobil uygulamadan katılım gereklidir" : null,
+    "📅 *Son Geçerlilik Tarihi:* *"+dateTR(validUntil.toISOString())+"*",
+    "",
+    "🔗 *Resmî Banka Kampanya Kaynağı:*",
     input.sourceUrl,
     "",
-    "🔎 Kartları karşılaştır:",
+    "🔎 *Tüm Banka Kampanyalarını Karşılaştır:*",
     "https://www.uretir.com/puan-ai",
     "",
-    "*PuanAI • uretir.com*",
+    "*PuanAI • uretir.com | Türkiye Üretir, Gençler Yetişir*",
   ].filter((line):line is string=>line!==null).join("\n");
-  return {fingerprint,campaignId:"submission:"+input.id,bank:programs[0].toLocaleLowerCase("tr-TR"),category:"official-campaign",body};
+  const cardParams = new URLSearchParams({
+    tool: "puan-ai",
+    format: "png",
+    title: title.slice(0, 80),
+    subtitle: `${programs.join(" / ")} · Resmî Banka Kampanya Analizi`,
+    price: amounts.length ? `${money(Math.max(...amounts))} Avantaj` : (installmentText || "Resmî Kampanya"),
+    badge: `PUANAI · ${programs[0].toUpperCase()} KAMPANYASI`,
+    s1l: "Kart Programı",
+    s1v: programs.join(" / "),
+    s2l: "Son Gün",
+    s2v: dateTR(validUntil.toISOString()),
+  });
+  return {
+    fingerprint,
+    campaignId:"submission:"+input.id,
+    bank:programs[0].toLocaleLowerCase("tr-TR"),
+    category:"official-campaign",
+    source_url: input.sourceUrl,
+    image_url: `https://www.uretir.com/api/visual-card?${cardParams.toString()}`,
+    body
+  };
 }
 
 export async function GET(request: NextRequest) {

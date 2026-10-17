@@ -23,7 +23,25 @@ async function readBulletinRows(){
 }
 export async function GET(request: NextRequest) {
  if (!authorized(request)) return json({error:"Yetkisiz erişim."},401);
- try { const r=await readBulletinRows(); return json({channel:whatsappChannel,body:buildBulletin(r.rows.map(a=>a.payload),newsDay()),count:r.rowCount}); }
+ try {
+  const r=await readBulletinRows();
+  const articles=r.rows.map(a=>a.payload);
+  const body=buildBulletin(articles,newsDay());
+  const lead=articles[0];
+  const cardParams=new URLSearchParams({
+   tool:"haber-ai",
+   format:"png",
+   title:(lead?.title||"81 İl Doğrulanmış Gündem Bülteni").slice(0,80),
+   subtitle:`HaberAI · ${articles.length||5} Doğrulanmış Haber & İl Haritası Özeti`,
+   price:`${articles.length||5} Manşet`,
+   badge:"HABERAI · 81 İL GÜNDEM RADARI",
+   s1l:"Kapsam",
+   s1v:"81 İl Haritalı",
+   s2l:"Doğrulama",
+   s2v:"Çoklu Resmî Kaynak",
+  });
+  return json({channel:whatsappChannel,body,image_url:`https://www.uretir.com/api/visual-card?${cardParams.toString()}`,count:r.rowCount});
+ }
  catch { return json({error:"Bülten okunamadı."},503); }
 }
 export async function POST(request: NextRequest) {

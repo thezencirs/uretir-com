@@ -688,7 +688,45 @@ async function publishToInstagramReels(videoPath, coverPngPath, slotData) {
     `#Üretir #UretirAI #YapayZeka #HaberAI #FinansAI #İndirimAI #PuanAI #ArabaAI #EvAI #Teknoloji #Ekonomi #Keşfet #ReelsTürkiye`,
   ].join("\n");
 
-  // 1. Native Node.js publisher using high-star dilame/instagram-private-api
+  // 1. Try uv + cloned subzeroid/instagrapi (449.0.0.52.84 Bloks CAA Login)
+  const localUv = path.resolve(".local", "open-source-stack", "bin", process.platform === "win32" ? "uv.exe" : "uv");
+  if (existsSync(localUv)) {
+    try {
+      const { stdout, stderr } = await execFileAsync(
+        localUv,
+        [
+          "run",
+          "--python",
+          "3.12",
+          "--with",
+          "pillow",
+          "--with",
+          "pydantic<3",
+          "--with",
+          "requests",
+          "--with",
+          "pycryptodomex",
+          "--with",
+          "moviepy",
+          "scripts/instagram-reels-publisher.py",
+          videoPath || "",
+          coverPngPath,
+          caption,
+        ],
+        {
+          timeout: 240_000,
+          env: { ...process.env, IG_USERNAME, IG_PASSWORD, PYTHONIOENCODING: "utf-8" },
+        }
+      );
+      if (stdout) console.log("Instagram (instagrapi @uretirai) yanıtı:\n" + stdout.trim());
+      if (stderr && !stdout?.includes("PUBLISHED_OK")) console.log("Instagram instagrapi bilgi:", stderr.trim());
+      if (stdout && stdout.includes("PUBLISHED_OK")) return true;
+    } catch (uvErr) {
+      console.warn("[Instagram instagrapi/uv Bilgi]:", uvErr?.message || uvErr);
+    }
+  }
+
+  // 2. Native Node.js publisher using high-star dilame/instagram-private-api + Playwright
   try {
     const nodeRes = await publishToInstagramNode({
       videoPath,
@@ -701,7 +739,7 @@ async function publishToInstagramReels(videoPath, coverPngPath, slotData) {
     console.warn("[Instagram Node Bilgi]:", err?.message || err);
   }
 
-  // 2. Python instagrapi fallback (used on Linux / GitHub Actions runners)
+  // 3. Python instagrapi fallback (used on Linux / GitHub Actions runners)
   for (const py of ["python", "python3"]) {
     try {
       const { stdout, stderr } = await execFileAsync(

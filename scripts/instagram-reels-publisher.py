@@ -9,6 +9,10 @@ import os
 import sys
 from pathlib import Path
 
+local_instagrapi = Path(".local/open-source-stack/repos/instagrapi").resolve()
+if local_instagrapi.exists():
+    sys.path.insert(0, str(local_instagrapi))
+
 
 def main():
     if len(sys.argv) < 4:

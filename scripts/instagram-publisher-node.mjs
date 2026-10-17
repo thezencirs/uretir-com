@@ -26,8 +26,12 @@ async function patchInstagramPrivateApiConstants() {
   try {
     let content = await fs.readFile(constantsPath, "utf8");
     const updated = content
-      .replace(/APP_VERSION\s*=\s*['"][^'"]+['"]/, "APP_VERSION = '349.2.0.42.104'")
-      .replace(/APP_VERSION_CODE\s*=\s*['"][^'"]+['"]/, "APP_VERSION_CODE = '374764246'");
+      .replace(/APP_VERSION\s*=\s*['"][^'"]+['"]/, "APP_VERSION = '449.0.0.52.84'")
+      .replace(/APP_VERSION_CODE\s*=\s*['"][^'"]+['"]/, "APP_VERSION_CODE = '1079242191'")
+      .replace(
+        /BLOKS_VERSION_ID\s*=\s*['"][^'"]+['"]/,
+        "BLOKS_VERSION_ID = '799db3e387d7a21a19c72918b8698b6cd28a1516ade363792c100ed45a0f9f0b'"
+      );
     if (updated !== content) {
       await fs.writeFile(constantsPath, updated, "utf8");
     }

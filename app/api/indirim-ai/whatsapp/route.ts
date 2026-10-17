@@ -20,7 +20,7 @@ function row(entry: RankedPriceDeal, index: number) {
   return [
     `${medals[index]} *${index + 1}. FIRSAT · ${i.merchantName.toUpperCase()}*`,
     `📌 *${i.productName}*`,
-    `💰 Güncel Dip Fiyat: *${tl(i.currentPrice)}* _(Zirve: ~${tl(i.windowHighPrice)}~)_`,
+    `💰 Güncel Dip Fiyat: *${tl(i.currentPrice)}* _(Zirve: ~${tl(i.windowHigh)}~)_`,
     `📊 Analiz: ${why}`,
     `🔗 Doğrudan Ürün: ${i.sourceUrl}`,
   ].join("\n");
@@ -68,7 +68,7 @@ export async function GET(r: NextRequest) {
       price: tl(lead.currentPrice),
       badge: `İNDİRİMAI · -%${lead.dropFromHighPct.toFixed(1)} GERÇEK DÜŞÜŞ`,
       s1l: "Zirve Fiyat",
-      s1v: tl(lead.windowHighPrice),
+      s1v: tl(lead.windowHigh),
       s2l: "Fiyat Avantajı",
       s2v: `%${lead.dropFromHighPct.toFixed(1)} İndirim`,
     });

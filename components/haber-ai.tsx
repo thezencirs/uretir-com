@@ -1,7 +1,6 @@
 "use client";
 import {useEffect,useMemo,useState} from "react";
 import Link from "next/link";
-import Image from "next/image";
 import mapData from "@/lib/haber-ai/map.json";
 import provinces from "@/lib/haber-ai/provinces.json";
 import type {Article,Run} from "@/lib/haber-ai/model";
@@ -10,6 +9,26 @@ import {whatsappChannel} from "@/lib/haber-ai/bulletin";
 import {FinanceStrip} from "./finance-strip";
 type Snapshot={articles:Article[];run:Run|null;available:boolean};
 const dayOf=newsDay;
+
+function buildHaberCardImage(a:Article){
+ if(a.imageUrl&&a.rights?.imageAllowed)return a.imageUrl;
+ const cityNames=a.provinceCodes.length
+  ? a.provinceCodes.map(code=>provinces.find(p=>p.code===code)?.name).filter(Boolean).join(" · ")
+  : "Türkiye Geneli";
+ const dateStr=new Date(a.publishedAt).toLocaleDateString("tr-TR",{timeZone:"Europe/Istanbul"});
+ const params=new URLSearchParams({
+  tool:"haber-ai",
+  title:a.title.slice(0,85),
+  subtitle:`${cityNames} · ${a.source} Doğrulanmış Gündem Kaydı`,
+  badge:`HABERAI · ${(a.category||"GÜNDEM").toUpperCase()}`,
+  s1l:"Şehir / Bölge",
+  s1v:cityNames,
+  s2l:"Kaynak & Tarih",
+  s2v:`${a.source} · ${dateStr}`
+ });
+ return `/api/visual-card?${params.toString()}`;
+}
+
 export function HaberAI({initial}:{initial:Snapshot}){
  const [data,setData]=useState(initial),[city,setCity]=useState(""),[day,setDay]=useState(()=>newsDay()),[query,setQuery]=useState(""),[limit,setLimit]=useState(30),[error,setError]=useState(""),[hover,setHover]=useState("");
  useEffect(()=>{const params=new URLSearchParams(window.location.search);const d=params.get("day");if(d&&/^\d{4}-\d{2}-\d{2}$/.test(d))setDay(d);const c=params.get("city");if(c&&provinces.some(p=>p.code===c))setCity(c);let active=true;const refresh=async()=>{if(document.hidden)return;try{const r=await fetch("/api/haber-ai",{cache:"no-store"});if(!r.ok)throw Error();const next=await r.json();if(active){setData(next);setError("");}}catch{if(active)setError("Yeni veriye ulaşılamadı. Son alınan akış gösteriliyor.");}};void refresh();const t=setInterval(refresh,60000);return()=>{active=false;clearInterval(t);};},[]);
@@ -20,16 +39,16 @@ export function HaberAI({initial}:{initial:Snapshot}){
  const select=(code:string)=>{setCity(code===city?"":code);setLimit(30);};
  const stamp=data.run?.finishedAt;
  return <div className="haber-ai-shell">
- <header className="haber-ai-top"><Link href="/" className="haber-ai-back">← Üretir</Link><div><span className="eyebrow">HABERAI / TÜRKİYE</span><h1>Ne olup bitiyor?</h1><p>Şehir şehir gelişmeler. Tek harita, kaynaklı gündem.</p></div><div className="haber-ai-live">{data.available?"KAYNAK AKIŞI":"BAĞLANTI BEKLENİYOR"}<small>{stamp?"Son tarama: "+new Date(stamp).toLocaleString("tr-TR",{timeZone:"Europe/Istanbul"}):"Henüz tamamlanan tarama yok"}</small><small>{data.run?.status==="partial"?"Bazı kaynaklara ulaşılamadı":data.run?.status==="failed"?"Son tarama başarısız":""}</small><Link href="/yonetici">Haber editörü ↗</Link></div></header>
- <section className="haber-whatsapp-cta" aria-label="WhatsApp gündem kanalı"><div><span className="eyebrow">GÜNDEMİ KAÇIRMA</span><h2>Türkiye’nin şehir gündemini WhatsApp’tan takip et.</h2><p>HaberAI, doğrulanmış kaynak bağlantılarını ve şehir etiketlerini kısa bültenlerle paylaşır.</p></div><a href={whatsappChannel} target="_blank" rel="noreferrer">Kanalı takip et <span aria-hidden="true">↗</span></a></section><FinanceStrip/>
+ <header className="haber-ai-top"><Link href="/" className="haber-ai-back">← Üretir</Link><div><span className="eyebrow">HABERAI / TÜRKİYE</span><h1>Ne olup bitiyor?</h1><p>Şehir şehir gelişmeler. Tek harita, kaynaklı ve görsel gündem.</p></div><div className="haber-ai-live">{data.available?"KAYNAK AKIŞI":"BAĞLANTI BEKLENİYOR"}<small>{stamp?"Son tarama: "+new Date(stamp).toLocaleString("tr-TR",{timeZone:"Europe/Istanbul"}):"Henüz tamamlanan tarama yok"}</small><small>{data.run?.status==="partial"?"Bazı kaynaklara ulaşılamadı":data.run?.status==="failed"?"Son tarama başarısız":""}</small><Link href="/yonetici">Haber editörü ↗</Link></div></header>
+ <section className="haber-whatsapp-cta" aria-label="WhatsApp gündem kanalı"><div><span className="eyebrow">GÜNDEMİ KAÇIRMA</span><h2>Türkiye’nin şehir gündemini WhatsApp’tan takip et.</h2><p>HaberAI, doğrulanmış kaynak bağlantılarını, şehir etiketlerini ve görsel özet kartlarını kısa bültenlerle paylaşır.</p></div><a href={whatsappChannel} target="_blank" rel="noreferrer">Kanalı takip et <span aria-hidden="true">↗</span></a></section><FinanceStrip/>
  <section className="haber-ai-controls"><label>Şehir<select aria-label="Şehir seç" value={city} onChange={e=>{setCity(e.target.value);setLimit(30);}}><option value="">Türkiye · tüm kayıtlar</option>{provinces.map(p=><option key={p.code} value={p.code}>{p.name} ({counts[p.code]??0})</option>)}</select></label><button onClick={()=>{setDay(newsDay());setLimit(30);}}>Bugün</button><button onClick={()=>{setDay("");setLimit(30);}}>Tüm arşiv</button><label>Yayın tarihi<input aria-label="Yayın tarihi" type="date" value={day} onChange={e=>{setDay(e.target.value);setLimit(30);}}/></label><label className="haber-ai-search">Haber ara<input value={query} onChange={e=>{setQuery(e.target.value);setLimit(30);}} placeholder="Konu veya kurum"/></label><button onClick={()=>{setCity("");setDay(newsDay());setQuery("");setLimit(30);}}>Filtreleri temizle</button></section>
  {error&&<p role="status">{error}</p>}
  <section className="haber-ai-grid"><div className="haber-ai-map-panel"><div className="haber-ai-panel-head"><div><span className="eyebrow">81 il / Gündem haritası</span><h2>{hover||selected||"Türkiye"}</h2></div><span>{Object.keys(counts).length} ilde haber</span></div>
  <div className="haber-ai-map"><svg viewBox="0 0 1007.478 527.323" aria-label="Türkiye haber haritası">{mapData.map(c=><g key={c.code} role="button" tabIndex={0} aria-label={c.name} aria-pressed={city===c.code} data-city={c.code} className={"haber-province"+(city===c.code?" is-selected":"")+(counts[c.code]?" has-news":"")} onClick={()=>select(c.code)} onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();select(c.code);}}} onMouseEnter={()=>setHover(c.name+" · "+(counts[c.code]??0)+" haber")} onMouseLeave={()=>setHover("")}><title>{c.name+": "+(counts[c.code]??0)+" haber"}</title>{c.paths.map((path,i)=><path key={i} d={path}/>)}</g>)}</svg></div>
- <div className="haber-ai-map-legend"><span>Yeşil: filtreye uygun haber</span><span>{selected||"Bir şehri seçin"}</span></div><p className="haber-map-note">Şehirler kaynak başlığı ve özetindeki açık yer adlarından eşleştirilir. Eşleşme editörden düzeltilebilir.</p><div className="haber-source-status"><span className="eyebrow">Kaynak durumu</span>{data.run?.sources.map(source=><div key={source.name}><span>{source.name}</span><strong>{source.error?"Bağlantı hatası":source.count+" kayıt işlendi"}</strong></div>)}<small>Günlük otomatik tarama Türkiye saatiyle 09.00–10.00 aralığında çalışır. Açık ekran, kaydedilen akışı dakikada bir yeniler.</small></div></div>
+ <div className="haber-ai-map-legend"><span>Yeşil: filtreye uygun haber</span><span>{selected||"Bir şehri seçin"}</span></div><p className="haber-map-note">Şehirler kaynak başlığı ve özetindeki açık yer adlarından eşleştirilir. Eşleşme editörden düzeltilebilir.</p><div className="haber-source-status"><span className="eyebrow">Kaynak durumu</span>{data.run?.sources.map(source=><div key={source.name}><span>{source.name}</span><strong>{source.error?"Bağlantı hatası":source.count+" kayıt işlendi"}</strong></div>)}<small>Günlük otomatik tarama Türkiye saatiyle 09.00, 12.00, 15.00 ve 20.00 yayınlarıyla senkron çalışır. Açık ekran, kaydedilen akışı dakikada bir yeniler.</small></div></div>
  <div className="haber-ai-feed"><div className="haber-ai-panel-head"><div><span className="eyebrow">{day||"Biriken haber arşivi"}</span><h2>{selected?selected+" gündemi":"Son gelişmeler"}</h2></div><span aria-live="polite">{filtered.length} kayıt</span></div>
- <div className="haber-ai-articles">{filtered.slice(0,limit).map(a=><article className="haber-ai-article" key={a.id}><div className="haber-card-body"><div className="haber-ai-meta"><span>{a.category}</span><time dateTime={a.publishedAt}>{new Date(a.publishedAt).toLocaleString("tr-TR",{timeZone:"Europe/Istanbul"})}</time></div>{a.imageUrl&&a.rights?.imageAllowed&&<Image unoptimized width={640} height={360} className="haber-ai-thumb" src={a.imageUrl} alt="" onError={e=>{e.currentTarget.style.display="none";}}/>}<h3>{a.title}</h3><p>{a.summary}</p><p>{a.provinceCodes.length?a.provinceCodes.map(code=>provinces.find(p=>p.code===code)?.name).join(" · "):"Şehir eşleşmesi yok"}</p><a href={a.url} target="_blank" rel="noreferrer">{a.source} · Kaynağı oku ↗</a></div></article>)}
- {!filtered.length&&<div className="haber-ai-empty"><h3>{data.available?"Bu seçimde kayıt yok.":"Haber bağlantısına ulaşılamadı."}</h3><p>Tarih veya şehir filtresini değiştirebilirsiniz. Arşiv, kaynaklardan toplama başladığından itibaren birikir.</p></div>}
+ <div className="haber-ai-articles">{filtered.slice(0,limit).map(a=><article className="haber-ai-article" key={a.id}><div className="haber-card-body"><div className="haber-ai-meta"><span>{a.category}</span><time dateTime={a.publishedAt}>{new Date(a.publishedAt).toLocaleString("tr-TR",{timeZone:"Europe/Istanbul"})}</time></div><img loading="lazy" width={640} height={360} className="haber-ai-thumb" src={buildHaberCardImage(a)} alt={a.title}/><h3>{a.title}</h3><p>{a.summary}</p><p>{a.provinceCodes.length?a.provinceCodes.map(code=>provinces.find(p=>p.code===code)?.name).join(" · "):"Türkiye Geneli"}</p><a href={a.url} target="_blank" rel="noreferrer">{a.source} · Kaynağı oku ↗</a></div></article>)}
+ {!filtered.length&&<div className="haber-ai-empty"><h3>{data.available?"Bu seçimde kayıt yok.":"Haber bağlantısına ulaşılamadı."}</h3><p>Tarih veya şehir filtresini değiştirebilirsiniz. Tüm arşiv düğmesiyle önceki günlerin haberlerini inceleyebilirsiniz.</p></div>}
  {filtered.length>limit&&<button className="haber-load" onClick={()=>setLimit(limit+30)}>30 haber daha göster · {filtered.length-limit} kayıt kaldı</button>}</div></div></section>
  <footer className="haber-ai-footer"><span>{data.articles.length} arşiv kaydı · Kaynak bağlantıları · Haber ve görsel hakları yayıncılarına aittir</span><Link href="/yonetici">Yönetici / HaberAI editörü ↗</Link><a href="/licenses/turkey-map.txt">Harita lisansı</a></footer></div>;
 }

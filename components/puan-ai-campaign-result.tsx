@@ -16,13 +16,34 @@ type CampaignResultProps = {
   compact?: boolean;
 };
 
+function buildPuanVisualUrl(campaign: CampaignView | CampaignMatch, reward: number | null) {
+  const rewardText = reward !== null ? `${reward.toLocaleString("tr-TR")} ${campaign.rewardType?.unit ?? "TL"}` : "Kampanya Avantajı";
+  const installmentText = campaign.installments.length > 0 ? campaign.installments.map((item) => item.count).join(", ") + " taksit" : "Peşin / Standart";
+  const params = new URLSearchParams({
+    tool: "puan-ai",
+    title: campaign.title.slice(0, 80),
+    subtitle: `${campaign.bank.name} · ${campaign.merchant?.name ?? campaign.category.name}`,
+    price: rewardText,
+    badge: `PUANAI · ${campaign.bank.shortName.toUpperCase()} RESMÎ KAMPANYA`,
+    s1l: "Banka / Kart",
+    s1v: campaign.bank.name,
+    s2l: "Taksit",
+    s2v: installmentText,
+  });
+  return `/api/visual-card?${params.toString()}`;
+}
+
 export function PuanAICampaignResult({ campaign, compact = false }: CampaignResultProps) {
   const reward = getRuleValue(campaign, ["MAX_REWARD", "REWARD_AMOUNT"]);
   const minSpend = getRuleValue(campaign, ["MIN_SPEND"]);
   const verification = campaign.verification;
   const source = campaign.sources.find((item) => item.id === verification?.officialSourceId);
+  const visualUrl = buildPuanVisualUrl(campaign, reward);
 
   return <article className={`pa-campaign-card ${compact ? "pa-campaign-card--compact" : ""}`}>
+    {!compact && <div className="mb-4 overflow-hidden rounded-xl border border-black/10 dark:border-white/10">
+      <img loading="lazy" width={640} height={360} src={visualUrl} alt={campaign.title} className="h-auto w-full object-cover" />
+    </div>}
     <div className="pa-campaign-card__top">
       <div className="pa-bank">
         <span className="pa-bank__mark" style={{ "--pa-bank": campaign.bank.color } as React.CSSProperties}>{campaign.bank.shortName}</span>

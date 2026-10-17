@@ -19,6 +19,52 @@ const ecosystemCards = [
   { number: "04", icon: Rocket, title: "Startup Vizyonu", description: "Türkiye'nin üretim teknolojileri platformu", color: "#d97835", href: "/startup" },
 ];
 
+const openSourceEngines = [
+  {
+    name: "Next.js & React 19",
+    repo: "https://github.com/vercel/next.js",
+    stars: "130K+ ★",
+    role: "Üretir Web & OG Görsel Kart Motoru",
+    desc: "Milisaniyelik sayfa açılışı, dinamik görsel kart üretimi ve Google SEO yapılandırılmış veri mimarisi.",
+  },
+  {
+    name: "FFmpeg & Sharp",
+    repo: "https://github.com/lovell/sharp",
+    stars: "30K+ ★",
+    role: "9:16 Dikey Motion-Graphic Video Hattı",
+    desc: "09:00, 12:00, 15:00 ve 20:00 yayınlarında yüksek kare hızlı 1080x1920 dikey Reels ve Shorts video işleme.",
+  },
+  {
+    name: "Edge-TTS Neural Voice",
+    repo: "https://github.com/rany2/edge-tts",
+    stars: "8K+ ★",
+    role: "Doğal Türkçe Seslendirme & Altyazı",
+    desc: "Canlı veri bültenlerini doğal Türkçe ses tonu ve kelime senkronlu altyazılarla güçlendiren ses motoru.",
+  },
+  {
+    name: "Instagrapi & Telegram Bot API",
+    repo: "https://github.com/subzeroid/instagrapi",
+    stars: "5K+ ★",
+    role: "Çok Kanallı Sosyal Medya Otomasyonu",
+    desc: "@uretirbot üzerinden tek tuşla tetiklenen Instagram (@uretirai), YouTube (@Uretir) ve WhatsApp dağıtımı.",
+  },
+];
+
+const seoReferenceClusters = [
+  { href: "/haber-ai", label: "81 İl Son Dakika Türkiye Haber Haritası", tag: "HaberAI" },
+  { href: "/finans-ai", label: "Canlı Döviz, Gram Altın, BIST 100 ve Kripto Takibi", tag: "FinansAI" },
+  { href: "/puan-ai", label: "Doğrulanmış Kredi Kartı Kampanya ve Taksit Karşılaştırma", tag: "PuanAI" },
+  { href: "/indirim-ai", label: "30-90-360 Günlük E-Ticaret Fiyat Geçmişi ve Dip Fiyat Radarı", tag: "İndirimAI" },
+  { href: "/araba-ai", label: "Resmî Sıfır Araç Fiyat Listesi ve Haritalı 2. El Kıyaslama", tag: "ArabaAI" },
+  { href: "/ev-ai", label: "Haritalı Konut, Arsa ve Kamu İhale Taşınmaz Değerleme", tag: "EvAI" },
+  { href: "/cozumler", label: "Yapay Zekâ Karar Destek Araçları ve Üretir Çözümleri", tag: "Çözümler" },
+  { href: "/ekosistem/harita", label: "Türkiye Girişim, Teknoloji ve Üretici Ekosistem Haritası", tag: "Harita" },
+  { href: "/ekosistem/marketplace", label: "Kanıt Odaklı Güvenli İlan ve Pazar Yeri Altyapısı", tag: "Marketplace" },
+  { href: "/kesfet", label: "Yerli Mobil Uygulama, Oyun ve Dijital Ürün Kataloğu", tag: "Keşfet" },
+  { href: "/kaynaklar/topluluk", label: "Üretir Topluluk, Üretim Hikâyeleri ve Paylaşım Ağı", tag: "Topluluk" },
+  { href: "/iletisim", label: "Kurumsal İletişim, Sponsorluk ve Reklam İş Birlikleri", tag: "Reklam & İletişim" },
+];
+
 const visiblePosts = posts.filter((post) => isVisibleReference(createArticleDocument(post)));
 const visibleCategories = categories.filter((category) => visiblePosts.some((post) => post.category === category.name));
 
@@ -80,7 +126,45 @@ export default async function HomePage() {
 
     <div className="border-y hairline"><div className="section-wrap flex flex-wrap items-center justify-between gap-4 py-4 text-[10px] font-bold uppercase tracking-[.17em] text-muted"><span className="transition duration-200 hover:text-[color:var(--foreground)]">Kim üretir?</span><span className="hidden opacity-40 sm:inline">—</span><span className="transition duration-200 hover:text-[color:var(--foreground)]">Ne üretir?</span><span className="hidden opacity-40 sm:inline">—</span><span className="transition duration-200 hover:text-[color:var(--foreground)]">Nasıl üretir?</span><span className="hidden opacity-40 sm:inline">—</span><span className="transition duration-200 hover:text-[color:var(--foreground)]">Neden üretir?</span></div></div>
 
-    <section id="manifesto" className="border-b hairline bg-surface"><div className="section-wrap grid gap-10 py-20 md:grid-cols-[.65fr_1.35fr] md:py-28"><p className="eyebrow">Manifesto / 001</p><div><p className="max-w-4xl font-display text-4xl leading-[1.02] md:text-6xl md:leading-[.98]">{content.home.manifesto}</p><div className="mt-12 grid gap-8 border-t hairline pt-8 text-sm leading-7 text-muted md:grid-cols-2"><p>Üretir, merakın peşinden gidenlerin buluşma noktası. Bir makinenin nasıl çalıştığından bir fikrin nasıl hayata geçtiğine kadar, üretmenin her halini inceliyoruz.</p><p>Gürültüyü azaltıyor, iyi fikirlere alan açıyoruz. Çünkü gelecek, onu bekleyenlerin değil; onu özenle üretenlerin.</p></div></div></div></section>
+    <section id="manifesto" className="border-b hairline bg-surface"><div className="section-wrap grid gap-10 py-20 md:grid-cols-[.65fr_1.35fr] md:py-28"><p className="eyebrow">Manifesto / 001 · Üretir&apos;in Amacı</p><div><p className="max-w-4xl font-display text-4xl leading-[1.02] md:text-6xl md:leading-[.98]">{content.home.manifesto}</p><div className="mt-12 grid gap-8 border-t hairline pt-8 text-sm leading-7 text-muted md:grid-cols-2"><p>Üretir, merakın peşinden gidenlerin buluşma noktası. Türkiye&apos;de yaşayan her gencin, girişimcinin ve tüketicinin manipülasyondan uzak, <strong>kaynaklı veriyle</strong> karar vermesini sağlıyoruz: gerçek indirim geçmişi (İndirimAI), doğrulanmış kart kampanyaları (PuanAI), şeffaf piyasa verisi (FinansAI), 81 il gündemi (HaberAI), resmî sıfır araç referansı (ArabaAI) ve bölgesel konut analizi (EvAI).</p><p>Her gün Türkiye saatiyle <strong>09:00, 12:00, 15:00 ve 20:00</strong> kuşaklarında canlı verilerimiz doğal Türkçe seslendirmeli dikey motion-graphic kısa videolara dönüştürülerek <a href="https://www.instagram.com/uretirai" target="_blank" rel="noopener noreferrer" className="underline">Instagram (@uretirai)</a>, <a href="https://www.youtube.com/@Uretir" target="_blank" rel="noopener noreferrer" className="underline">YouTube (@Uretir)</a>, <a href="https://t.me/uretirbot" target="_blank" rel="noopener noreferrer" className="underline">Telegram (@uretirbot)</a> ve 6 WhatsApp kanalımızda eşzamanlı yayımlanır.</p></div></div></div></section>
+
+    <section className="border-b hairline py-20 md:py-24" aria-label="Açık Kaynak Teknoloji Altyapısı">
+      <div className="section-wrap">
+        <p className="eyebrow">Açık Kaynak Gücü · GitHub Ekosistemi</p>
+        <h2 className="mt-4 font-display text-3xl md:text-5xl">Kendini ispatlamış açık kaynak motorlarla çalışır.</h2>
+        <p className="mt-4 max-w-2xl text-sm leading-7 text-muted">Üretir; veri doğrulama, görsel kart üretimi, doğal sesli motion-graphic video sentezi ve çok kanallı sosyal medya otomasyonu için dünyada en çok yıldız alan açık kaynak teknolojileri bir araya getirir.</p>
+        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {openSourceEngines.map((eng) => (
+            <a key={eng.name} href={eng.repo} target="_blank" rel="noopener noreferrer" className="group block border hairline bg-[color:var(--background)] p-6 transition hover:border-[#769d32]">
+              <div className="flex items-center justify-between text-xs font-bold text-[#769d32]">
+                <span>{eng.role}</span>
+                <span>{eng.stars}</span>
+              </div>
+              <h3 className="mt-4 font-display text-2xl group-hover:underline">{eng.name} ↗</h3>
+              <p className="mt-3 text-xs leading-6 text-muted">{eng.desc}</p>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section className="border-b hairline bg-surface py-16 md:py-20" aria-label="Kurumsal Referans ve Konu Ağı">
+      <div className="section-wrap">
+        <p className="eyebrow">Üretir Dizin &amp; Referans Bağlantıları</p>
+        <h2 className="mt-4 font-display text-3xl md:text-4xl">Hızlı erişim ve araştırma rehberi.</h2>
+        <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {seoReferenceClusters.map((ref) => (
+            <Link key={ref.href} href={ref.href} className="group flex items-center justify-between rounded-xl border hairline bg-[color:var(--background)] px-4 py-3.5 text-sm transition hover:border-[#769d32]">
+              <div>
+                <span className="block text-[10px] font-bold uppercase tracking-wider text-[#769d32]">{ref.tag}</span>
+                <strong className="mt-0.5 block font-semibold group-hover:underline">{ref.label}</strong>
+              </div>
+              <ArrowUpRight size={15} className="shrink-0 text-muted group-hover:text-[#769d32]" />
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
 
     {visiblePosts.length > 0 ? <>
       <section className="section-wrap py-20 md:py-32"><SectionHeading eyebrow="Editörün seçkisi" title="Şimdi okuyun." link="/blog" /><PostCard post={visiblePosts[0]} featured reviewMode={!isIndexableReference(createArticleDocument(visiblePosts[0]))} /></section>

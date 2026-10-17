@@ -1,0 +1,77 @@
+name: Social Motion-Graphic Video & Multi-Channel Automation (09-12-15-20)
+
+on:
+  schedule:
+    # 09:00, 12:00, 15:00, 20:00 Europe/Istanbul (UTC+3 -> 06:00, 09:00, 12:00, 17:00 UTC)
+    - cron: "0 6,9,12,17 * * *"
+  workflow_dispatch:
+    inputs:
+      slot:
+        description: "Yayın kuşağı (09, 12, 15, 20)"
+        required: false
+        default: ""
+      telegram_chat_id:
+        description: "Telegram hedef Chat ID (opsiyonel)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: uretir-social-motion-video
+  cancel-in-progress: false
+
+jobs:
+  generate-and-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SITE_URL: https://www.uretir.com
+      SLOT: ${{ github.event.inputs.slot }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ github.event.inputs.telegram_chat_id || secrets.TELEGRAM_CHAT_ID }}
+      IG_USERNAME: ${{ secrets.IG_USERNAME || 'uretirai' }}
+      IG_PASSWORD: ${{ secrets.IG_PASSWORD }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install FFmpeg, Edge-TTS (Natural Turkish Voice) & Instagrapi
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
+          pip install --upgrade pip
+          pip install edge-tts instagrapi pillow moviepy
+
+      - name: Install project dependencies
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
+
+      - name: Refresh 6 AI tools before video generation
+        run: |
+          if [ -n "$CRON_SECRET" ]; then
+            for route in /api/cron/haber-ai /api/cron/indirim-ai /api/cron/araba-ai /api/cron/ev-ai; do
+              curl -sS --max-time 45 -H "Authorization: Bearer $CRON_SECRET" "$SITE_URL$route" || true
+            done
+          fi
+
+      - name: Generate 9:16 Motion-Graphic Video with Natural Turkish Voice & Publish
+        run: |
+          node scripts/social-video-automation.mjs
+
+      - name: Upload Generated Motion-Graphic Video & Assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: uretir-motion-video-${{ github.run_id }}
+          path: reports/social-media/
+          retention-days: 14

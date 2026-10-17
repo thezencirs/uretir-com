@@ -4,7 +4,21 @@ import { ToolExplorer } from "@/components/tool-explorer";
 import { getPriceLowReport } from "@/lib/indirim-ai/analysis";
 import { discountExplorer, unavailableExplorer } from "@/lib/tool-explorer-data";
 import { SeoExplainer } from "@/components/seo-explainer";
-export const metadata: Metadata = { title: "İndirimAI · Fiyat geçmişini karşılaştır", description: "30, 90 ve 360 günlük fiyat gözlemlerini mağaza ve bütçeye göre inceleyin. Dönem diplerini karşılaştırın, İndirimAI WhatsApp kanalını takip edin.", alternates: { canonical: "/indirim-ai" }, openGraph: { title: "İndirimAI — Üretir", description: "Fiyat geçmişine dayalı indirim ve dönem dibi analizi.", url: "/indirim-ai", type: "website" } };
+export const metadata: Metadata = {
+  title: "İndirimAI · Fiyat geçmişini karşılaştır",
+  description: "30, 90 ve 360 günlük fiyat gözlemlerini mağaza ve bütçeye göre inceleyin. Dönem diplerini karşılaştırın, İndirimAI WhatsApp kanalını takip edin.",
+  keywords: [
+    "fiyat geçmişi takip",
+    "gerçek indirim bulucu",
+    "son 30 günün en düşük fiyatı",
+    "e-ticaret fiyat karşılaştırma",
+    "dönem dibi fırsatlar",
+    "Amazon Trendyol Hepsiburada Teknosa indirim takibi",
+    "İndirimAI",
+  ],
+  alternates: { canonical: "/indirim-ai" },
+  openGraph: { title: "İndirimAI — Üretir", description: "Fiyat geçmişine dayalı indirim ve dönem dibi analizi.", url: "/indirim-ai", type: "website" },
+};
 export const dynamic = "force-dynamic";
 export default async function Page() {
   let data = unavailableExplorer;

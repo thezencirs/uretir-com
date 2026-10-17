@@ -5,10 +5,22 @@ import { absoluteUrl } from "@/lib/seo";
 import { PuanAIQuickCompare } from "@/components/puan-ai-quick-compare";
 import { ChannelToolNavigation } from "@/components/channel-tool-navigation";
 import { getChannelTool } from "@/lib/channel-tools";
+import { SeoExplainer } from "@/components/seo-explainer";
 
 export const metadata: Metadata = {
   title: "PuanAI — Güncel kredi kartı kampanya asistanı",
   description: "Türkiye'deki doğrulanmış banka ve kredi kartı kampanyalarını mağaza, tutar, ödül ve taksit koşullarına göre karşılaştır.",
+  keywords: [
+    "güncel kredi kartı kampanyaları",
+    "banka kampanya karşılaştırma",
+    "Axess chip-para kampanyaları",
+    "Garanti Bonus kampanyaları",
+    "Yapı Kredi Worldpuan fırsatları",
+    "Maximum kart kampanyaları",
+    "Bankkart lira kampanyaları",
+    "peşin fiyatına taksit yapan kartlar",
+    "PuanAI",
+  ],
   alternates: { canonical: "/puan-ai" },
   openGraph: {
     title: "PuanAI — Harcamadan önce kampanyanı doğrula",
@@ -40,5 +52,6 @@ export default function PuanAIPage() {
       <a href={getChannelTool("puan-ai").channelUrl} target="_blank" rel="noopener noreferrer">PuanAI kanalına katıl <span aria-hidden="true">↗</span></a>
     </section>
     <div className="section-wrap"><PuanAICampaignExplorer /></div>
+    <SeoExplainer slug="puan-ai" />
   </div>;
 }

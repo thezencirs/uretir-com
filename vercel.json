@@ -20,6 +20,22 @@
     {
       "path": "/api/cron/puanai-refresh/20",
       "schedule": "17 20 * * *"
+    },
+    {
+      "path": "/api/cron/social-automation?slot=09",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/social-automation?slot=12",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/social-automation?slot=15",
+      "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/cron/social-automation?slot=20",
+      "schedule": "0 17 * * *"
     }
   ],
   "buildCommand": "pnpm run vercel-build"

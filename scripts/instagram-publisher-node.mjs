@@ -57,10 +57,15 @@ async function publishViaPlaywrightWeb({ username, password, videoPath, feedJpgP
       context = await chromium.launchPersistentContext(userDataDir, {
         channel,
         headless: true,
+        args: ["--disable-blink-features=AutomationControlled"],
+        ignoreDefaultArgs: ["--enable-automation"],
         viewport: { width: 1280, height: 900 },
         locale: "tr-TR",
         userAgent:
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0",
+      });
+      await context.addInitScript(() => {
+        Object.defineProperty(navigator, "webdriver", { get: () => undefined });
       });
       break;
     } catch {
@@ -74,8 +79,8 @@ async function publishViaPlaywrightWeb({ username, password, videoPath, feedJpgP
 
   try {
     const page = context.pages()[0] || (await context.newPage());
-    await page.goto("https://www.instagram.com/", { waitUntil: "domcontentloaded", timeout: 45_000 });
-    await page.waitForTimeout(3500);
+    await page.goto("https://www.instagram.com/accounts/login/", { waitUntil: "domcontentloaded", timeout: 45_000 });
+    await page.waitForTimeout(4000);
 
     // Dismiss cookie banners if any
     for (const label of ["Allow all cookies", "Tüm çerezlere izin ver", "Kabul Et"]) {
@@ -90,12 +95,26 @@ async function publishViaPlaywrightWeb({ username, password, videoPath, feedJpgP
     const userInp = page.locator('input[name="username"], input[name="email"]');
     if ((await userInp.count()) > 0) {
       console.log(`[Instagram Playwright Web] @${username} girişi yapılıyor...`);
-      await userInp.first().fill(username);
+      await userInp.first().click();
+      await userInp.first().type(username, { delay: 65 });
       const passInp = page.locator('input[name="password"], input[name="pass"]');
-      await passInp.first().fill(password);
+      await passInp.first().click();
+      await passInp.first().type(password, { delay: 75 });
       const submitBtn = page.locator('button[type="submit"], div[role="button"]:has-text("Giriş yap"), div[role="button"]:has-text("Log in")');
       await submitBtn.first().click();
-      await page.waitForTimeout(8000);
+      await page.waitForTimeout(9000);
+    }
+
+    // Extract sessionid cookie if logged in so instagrapi can also use it natively
+    const cookies = await context.cookies("https://www.instagram.com");
+    const sidCookie = cookies.find((c) => c.name === "sessionid" && c.value);
+    if (sidCookie?.value) {
+      await fs.writeFile(
+        path.resolve("reports", "social-media", "ig_sessionid.txt"),
+        decodeURIComponent(sidCookie.value),
+        "utf8"
+      );
+      console.log("[Instagram Playwright Web] Oturum anahtarı (sessionid) yakalandı ve kaydedildi.");
     }
 
     const afterLoginShot = path.resolve("reports", "social-media", "ig_web_status.png");

@@ -19,16 +19,17 @@ def main():
         print("Kullanım: instagram-reels-publisher.py <video_mp4> <cover_png> <caption>")
         return 0
 
-    video_path = Path(sys.argv[1])
+    video_path = Path(sys.argv[1]) if sys.argv[1] else None
     cover_path = Path(sys.argv[2])
     caption = sys.argv[3]
 
     username = os.environ.get("IG_USERNAME", "uretirai").strip().lstrip("@")
     password = os.environ.get("IG_PASSWORD", "").strip()
     session_file = Path("reports/social-media/ig_session.json")
+    sessionid_file = Path("reports/social-media/ig_sessionid.txt")
     result_file = Path("reports/social-media/ig_last_publish.json")
 
-    if not password:
+    if not password and not sessionid_file.exists():
         print("IG_PASSWORD ortam değişkeni tanımlı değil; yükleme atlandı.")
         return 0
 
@@ -39,7 +40,6 @@ def main():
         print(f"instagrapi veya Pillow kurulu değil: {exc}")
         return 0
 
-    # Ensure JPEG versions of cover exist (Instagram API prefers RGB JPEG for thumbnails/photos)
     jpg_cover_path = cover_path.with_suffix(".jpg")
     if cover_path.exists():
         try:
@@ -54,17 +54,47 @@ def main():
         cl.delay_range = [2, 4]
         logged_in = False
 
+        # 1. Try existing instagrapi session file
         if session_file.exists():
             try:
                 cl.load_settings(session_file)
-                cl.login(username, password)
+                cl.account_info()
                 logged_in = True
+                print("SESSION_REUSED_OK")
             except Exception:
                 cl = Client()
                 cl.delay_range = [2, 4]
 
+        # 2. Try sessionid captured from browser if available
+        if not logged_in and sessionid_file.exists():
+            sid = sessionid_file.read_text(encoding="utf-8").strip()
+            if len(sid) > 20:
+                try:
+                    logged_in = bool(cl.login_by_sessionid(sid))
+                    if logged_in:
+                        print("SESSIONID_LOGIN_OK")
+                except Exception as sid_exc:
+                    print(f"SESSIONID_NOTICE: {sid_exc}")
+
+        # 3. Try Bloks CAA Login and inspect outcome directly
+        if not logged_in and password:
+            cl.username = username
+            cl.password = password
+            try:
+                outcome = cl.bloks_caa_login()
+                if outcome.get("logged_in"):
+                    cl.login_flow()
+                    logged_in = True
+                    print("CAA_BLOKS_LOGIN_OK")
+                else:
+                    markers = cl._caa_result_action_markers(outcome)
+                    print(f"CAA_LOGIN_MARKERS: {markers} reason={outcome.get('reason')}")
+            except Exception as caa_exc:
+                print(f"CAA_LOGIN_NOTICE: {caa_exc}")
+
         if not logged_in:
-            cl.login(username, password)
+            print("IG_LOGIN_PENDING: Browser sessionid or challenge resolution needed.")
+            return 0
 
         session_file.parent.mkdir(parents=True, exist_ok=True)
         cl.dump_settings(session_file)
@@ -89,7 +119,7 @@ def main():
         published_items = []
 
         # 1. Publish 9:16 Vertical Motion-Graphic Reel (with natural Turkish voiceover)
-        if video_path.exists():
+        if video_path and video_path.exists():
             try:
                 thumb = str(jpg_cover_path) if jpg_cover_path.exists() else None
                 media = cl.clip_upload(
@@ -105,7 +135,7 @@ def main():
             except Exception as reel_exc:
                 print(f"REEL_UPLOAD_NOTICE: {reel_exc}")
 
-        # 2. If Reel upload encountered a transient transcode issue or as a Story/Feed booster, publish visual card
+        # 2. Fallback / Companion Photo Post
         if not published_items and jpg_cover_path.exists():
             try:
                 media = cl.photo_upload(
@@ -120,7 +150,7 @@ def main():
             except Exception as photo_exc:
                 print(f"PHOTO_UPLOAD_NOTICE: {photo_exc}")
 
-        # 3. Also publish to Instagram Story with uretir.com link sticker if possible
+        # 3. Also publish to Instagram Story with uretir.com link sticker
         if jpg_cover_path.exists():
             try:
                 from instagrapi.types import StoryLink

@@ -3,30 +3,26 @@ import fs from "node:fs/promises";
 const SITE_URL = (process.env.SITE_URL || "https://www.uretir.com").replace(/\/$/, "");
 
 const API_ENDPOINTS = [
-  { name: "HaberAI (81 İl Canlı Gündem)", path: "/api/haber-ai" },
-  { name: "FinansAI (Canlı Piyasa & Döviz)", path: "/api/finans-ai" },
-  { name: "İndirimAI (30/90/360 Gün Dip Fiyat)", path: "/api/indirim-ai" },
-  { name: "PuanAI (Kart Kampanya & İade)", path: "/api/puan-ai" },
-  { name: "ArabaAI (Sıfır & 2. El Haritası)", path: "/api/araba-ai" },
-  { name: "EvAI (Konut & Kamu İhale)", path: "/api/ev-ai" },
+  { name: "HaberAI · 81 İl Canlı Gündem API", path: "/api/haber-ai" },
+  { name: "FinansAI · Canlı Piyasa & Döviz API", path: "/api/haber-ai?view=finance" },
   { name: "WhatsApp Feed · HaberAI", path: "/api/channel-feed/haber-ai" },
   { name: "WhatsApp Feed · FinansAI", path: "/api/channel-feed/finans-ai" },
   { name: "WhatsApp Feed · İndirimAI", path: "/api/channel-feed/indirim-ai" },
   { name: "WhatsApp Feed · PuanAI", path: "/api/channel-feed/puan-ai" },
   { name: "WhatsApp Feed · ArabaAI", path: "/api/channel-feed/araba-ai" },
   { name: "WhatsApp Feed · EvAI", path: "/api/channel-feed/ev-ai" },
+  { name: "Web Sayfası · HaberAI (81 İl Haritası)", path: "/haber-ai" },
+  { name: "Web Sayfası · İndirimAI (Dip Fiyat)", path: "/indirim-ai" },
+  { name: "Web Sayfası · FinansAI (Canlı Piyasa)", path: "/finans-ai" },
+  { name: "Web Sayfası · PuanAI (Kart Kampanya)", path: "/puan-ai" },
+  { name: "Web Sayfası · ArabaAI (Sıfır & 2. El)", path: "/araba-ai" },
+  { name: "Web Sayfası · EvAI (Konut & İhale)", path: "/ev-ai" },
 ];
 
 const SEO_ENDPOINTS = [
   "/sitemap.xml",
   "/robots.txt",
   "/",
-  "/haber-ai",
-  "/indirim-ai",
-  "/finans-ai",
-  "/puan-ai",
-  "/araba-ai",
-  "/ev-ai",
   "/haber-ai?city=34",
   "/haber-ai?city=06",
   "/haber-ai?city=35",

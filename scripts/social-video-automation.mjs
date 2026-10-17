@@ -103,10 +103,7 @@ async function syncUretirPrimaryDataHub() {
   console.log(`[1/4] Asıl veri merkezi (${SITE_URL}) 6 AI aracıyla senkronize ediliyor...`);
   const endpoints = [
     `${SITE_URL}/api/haber-ai`,
-    `${SITE_URL}/api/finans-ai`,
-    `${SITE_URL}/api/indirim-ai`,
-    `${SITE_URL}/api/puan-ai`,
-    `${SITE_URL}/api/araba-ai`,
+    `${SITE_URL}/api/haber-ai?view=finance`,
     `${SITE_URL}/api/ev-ai`,
     `${SITE_URL}/api/channel-feed/haber-ai`,
     `${SITE_URL}/api/channel-feed/finans-ai`,

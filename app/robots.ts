@@ -7,7 +7,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: ["Googlebot", "Googlebot-Image", "Googlebot-News", "Bingbot", "*"],
         allow: ["/", "/api/visual-card", "/api/og", "/feed.xml"],
-        disallow: ["/api/cron/", "/api/admin/", "/yonetici"],
+        disallow: ["/api/"],
       },
     ],
     sitemap: absoluteUrl("/sitemap.xml"),

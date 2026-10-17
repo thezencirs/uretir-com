@@ -37,22 +37,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: "npm"
+          cache: "pnpm"
 
       - name: Setup Astral uv & Python 3.12
         uses: astral-sh/setup-uv@v5
         with:
-          enable-cache: true
+          enable-cache: false
           python-version: "3.12"
 
       - name: Install FFmpeg, Node dependencies & Open-Source Stack (instagrapi + edge-tts)
         run: |
           sudo apt-get update && sudo apt-get install -y ffmpeg fonts-dejavu-core fonts-liberation
-          npm ci
+          pnpm install --frozen-lockfile
           mkdir -p .local/open-source-stack/repos
           if [ ! -d ".local/open-source-stack/repos/instagrapi" ]; then
             git clone --depth 1 https://github.com/subzeroid/instagrapi.git .local/open-source-stack/repos/instagrapi

@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
 import sharp from "sharp";
-import { chromium } from "playwright";
+import { chromium } from "@playwright/test";
 import dotenv from "dotenv";
 
 dotenv.config({ path: ".env.local", quiet: true });

@@ -52,8 +52,11 @@ function wrapLines(text, maxChars, maxLines) {
       current = cand;
     } else {
       if (current) lines.push(current);
+      if (lines.length >= maxLines) {
+        current = "";
+        break;
+      }
       current = w.slice(0, maxChars);
-      if (lines.length >= maxLines - 1) break;
     }
   }
   if (current && lines.length < maxLines) lines.push(current);

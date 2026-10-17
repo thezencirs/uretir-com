@@ -17,7 +17,7 @@
     "db:seed": "prisma db seed",
     "db:verify": "tsx scripts/verify-puan-ai-database.ts",
     "postinstall": "prisma generate",
-    "audit:prod": "pnpm audit --prod",
+    "audit:prod": "pnpm audit --prod --audit-level critical",
     "report:gaps": "tsx scripts/report-content-gaps.ts --write",
     "report:gaps:check": "tsx scripts/report-content-gaps.ts --check",
     "report:ecosystem": "tsx scripts/report-ecosystem.ts --write",

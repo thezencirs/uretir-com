@@ -1,0 +1,39 @@
+name: "Üretir Saatlik Canlı Veri, 81 İl Harita & Google SEO Nabzı"
+
+on:
+  schedule:
+    # Her 2 saatte bir uretir.com 6 AI aracını, 6 WhatsApp kanal beslemesini ve 81 il SEO önbelleğini sıcak tutar
+    - cron: "15 */2 * * *"
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  seo-and-data-pulse:
+    name: "6 AI Aracı + 81 İl Harita + Sitemap SEO Senkronizasyonu"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Warm & Verify uretir.com 6 AI Tools, 81-Province Map & SEO Sitemap
+        env:
+          SITE_URL: ${{ secrets.SITE_URL || 'https://www.uretir.com' }}
+        run: node scripts/github-seo-data-pulse.mjs
+
+      - name: Upload SEO & Data Health Report Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: uretir-seo-data-pulse-${{ github.run_number }}
+          path: reports/seo-pulse/latest-pulse.json
+          retention-days: 7

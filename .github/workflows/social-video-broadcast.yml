@@ -15,10 +15,18 @@ on:
       slot:
         description: "Yayın kuşağı (09, 12, 15, 20 veya dyson)"
         required: false
-        default: "auto"
+        default: "09"
+      mode:
+        description: "Çalışma modu (publish: canlı yayınla, render-only: sadece MP4/kapak üret)"
+        required: false
+        default: "publish"
 
 permissions:
   contents: read
+
+concurrency:
+  group: uretir-social-video-broadcast
+  cancel-in-progress: false
 
 jobs:
   uretir-broadcast:
@@ -35,29 +43,55 @@ jobs:
           node-version: "22"
           cache: "npm"
 
-      - name: Setup Python 3.11 & FFmpeg
-        uses: actions/setup-python@v5
+      - name: Setup Astral uv & Python 3.12
+        uses: astral-sh/setup-uv@v5
         with:
-          python-version: "3.11"
+          enable-cache: true
+          python-version: "3.12"
 
-      - name: Install dependencies & Edge-TTS + Instagrapi
+      - name: Install FFmpeg, Node dependencies & Open-Source Stack (instagrapi + edge-tts)
         run: |
-          sudo apt-get update && sudo apt-get install -y ffmpeg
+          sudo apt-get update && sudo apt-get install -y ffmpeg fonts-dejavu-core fonts-liberation
           npm ci
-          pip install edge-tts instagrapi Pillow
+          mkdir -p .local/open-source-stack/repos
+          if [ ! -d ".local/open-source-stack/repos/instagrapi" ]; then
+            git clone --depth 1 https://github.com/subzeroid/instagrapi.git .local/open-source-stack/repos/instagrapi
+          fi
+          uv tool install edge-tts || true
 
       - name: Run Üretir Data Sync & Social Video Broadcast
         env:
-          SITE_URL: "https://www.uretir.com"
+          SITE_URL: ${{ secrets.SITE_URL || 'https://www.uretir.com' }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          IG_USERNAME: ${{ secrets.IG_USERNAME }}
+          IG_USERNAME: ${{ secrets.IG_USERNAME || 'uretirai' }}
           IG_PASSWORD: ${{ secrets.IG_PASSWORD }}
           IG_SESSIONID: ${{ secrets.IG_SESSIONID }}
+          SKIP_PUBLISH: ${{ github.event.inputs.mode == 'render-only' && '1' || '0' }}
         run: |
-          if [ "${{ github.event.inputs.slot }}" = "dyson" ]; then
-            node scripts/social-video-automation.mjs --dyson-special
-          else
-            node scripts/social-video-automation.mjs
+          EXTRA_ARGS=""
+          if [ "${{ github.event.inputs.mode }}" = "render-only" ]; then
+            EXTRA_ARGS="--render-only"
           fi
+          if [ "${{ github.event.inputs.slot }}" = "dyson" ]; then
+            node scripts/social-video-automation.mjs --dyson-special $EXTRA_ARGS
+          elif [ -n "${{ github.event.inputs.slot }}" ] && [ "${{ github.event.inputs.slot }}" != "auto" ]; then
+            node scripts/social-video-automation.mjs --slot=${{ github.event.inputs.slot }} $EXTRA_ARGS
+          else
+            node scripts/social-video-automation.mjs $EXTRA_ARGS
+          fi
+
+      - name: Upload Generated 9:16 Reels MP4, Covers & Manifest as Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: uretir-social-media-package-${{ github.run_number }}
+          path: |
+            reports/social-media/**/*.mp4
+            reports/social-media/**/*.png
+            reports/social-media/**/*.jpg
+            reports/social-media/**/*.mp3
+            reports/social-media/**/publish-manifest.json
+          if-no-files-found: ignore
+          retention-days: 14

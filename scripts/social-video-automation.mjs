@@ -12,8 +12,9 @@ dotenv.config({ path: ".env.local", quiet: true });
 dotenv.config({ quiet: true });
 
 const execFileAsync = promisify(execFile);
+const localStackPkg = path.resolve(".local", "open-source-stack", "package.json");
 const requireOpenSource = createRequire(
-  path.resolve(".local", "open-source-stack", "package.json")
+  existsSync(localStackPkg) ? localStackPkg : path.resolve("package.json")
 );
 
 const SITE_URL = (process.env.SITE_URL || "https://www.uretir.com").replace(/\/$/, "");
@@ -886,7 +887,12 @@ async function sendToTelegram(videoPath, coverPngPath, slotData) {
 }
 
 async function publishToInstagramReels(videoPath, coverPngPath, slotData) {
-  if (!IG_PASSWORD && !existsSync(path.resolve(".local", "open-source-stack", "ig_sessionid.txt"))) {
+  if (
+    !IG_PASSWORD &&
+    !process.env.IG_SESSIONID &&
+    !existsSync(path.resolve(".local", "open-source-stack", "ig_sessionid.txt")) &&
+    !existsSync(path.resolve("reports", "social-media", "ig_sessionid.txt"))
+  ) {
     console.log("IG kimlik bilgisi bulunamadı; Instagram (@uretirai) paketi hazırlandı.");
     return false;
   }
@@ -906,12 +912,13 @@ async function publishToInstagramReels(videoPath, coverPngPath, slotData) {
       `#Üretir #Ekonomi #İndirim #Kampanya #FiyatAnalizi #Otomotiv #Gayrimenkul #Finans #Alışveriş #Keşfet #ReelsTürkiye`,
     ].join("\n");
 
-  // 1. Try uv + cloned subzeroid/instagrapi v3.0.25 (uses saved sessionid cookie directly)
+  // 1. Try uv (local or GitHub Actions astral-sh/setup-uv) + cloned subzeroid/instagrapi v3.0.25
   const localUv = path.resolve(".local", "open-source-stack", "bin", process.platform === "win32" ? "uv.exe" : "uv");
-  if (existsSync(localUv)) {
+  const uvCandidates = existsSync(localUv) ? [localUv, "uv"] : ["uv"];
+  for (const uvBin of uvCandidates) {
     try {
       const { stdout, stderr } = await execFileAsync(
-        localUv,
+        uvBin,
         [
           "run",
           "--python",
@@ -944,11 +951,30 @@ async function publishToInstagramReels(videoPath, coverPngPath, slotData) {
       if (stderr && !stdout?.includes("PUBLISHED_OK")) console.log("Instagram instagrapi bilgi:", stderr.trim());
       if (stdout && stdout.includes("PUBLISHED_OK")) return { ok: true, stdout };
     } catch (uvErr) {
-      console.warn("[Instagram instagrapi/uv Bilgi]:", uvErr?.message || uvErr);
+      if (uvBin === localUv) {
+        console.warn("[Instagram instagrapi/uv Bilgi]:", uvErr?.message || uvErr);
+      }
     }
   }
 
-  // 2. Fallback: Native Node.js publisher
+  // 2. Try direct python3/python if instagrapi is installed via pip in GitHub Actions
+  for (const pyBin of ["python3", "python"]) {
+    try {
+      const { stdout } = await execFileAsync(
+        pyBin,
+        ["scripts/instagram-reels-publisher.py", videoPath || "", coverPngPath, caption],
+        {
+          timeout: 180_000,
+          env: { ...process.env, IG_USERNAME, IG_PASSWORD, PYTHONIOENCODING: "utf-8" },
+        }
+      );
+      if (stdout && stdout.includes("PUBLISHED_OK")) return { ok: true, stdout };
+    } catch {
+      // fallback to Node publisher
+    }
+  }
+
+  // 3. Fallback: Native Node.js publisher
   try {
     const nodeRes = await publishToInstagramNode({
       videoPath,
@@ -1146,23 +1172,31 @@ async function renderAndPublishSlotData(slotData) {
     console.warn("[FFmpeg Uyarısı]:", err?.message || err);
   }
 
-  console.log(`[4/4] Sosyal medya kanallarında (@uretirai, WhatsApp & @uretirbot) yayınlanıyor...`);
-  const tgPublished = await sendToTelegram(videoBuilt ? videoPath : null, coverPngPath, slotData);
-  const igPublished = await publishToInstagramReels(videoBuilt ? videoPath : null, coverPngPath, slotData);
+  const skipPublish = process.argv.includes("--render-only") || process.env.SKIP_PUBLISH === "1";
+  let tgPublished = false;
+  let igPublished = false;
 
-  // Trigger WhatsApp channel bot if running on 127.0.0.1:3217
-  try {
-    await fetch("http://127.0.0.1:3217/trigger", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        targetKey: slotData.whatsappTargetKey || "indirimai",
-        force: true,
-      }),
-      signal: AbortSignal.timeout(8_000),
-    });
-  } catch {
-    // WhatsApp bot will also pick it up on its own poll cycle
+  if (skipPublish) {
+    console.log(`[4/4] [--render-only / Ön Hazırlık Modu] MP4 video ve kapak paketleri hazırlandı (canlı yayın saatinde paylaşılacak).`);
+  } else {
+    console.log(`[4/4] Sosyal medya kanallarında (@uretirai, WhatsApp & @uretirbot) yayınlanıyor...`);
+    tgPublished = await sendToTelegram(videoBuilt ? videoPath : null, coverPngPath, slotData);
+    igPublished = await publishToInstagramReels(videoBuilt ? videoPath : null, coverPngPath, slotData);
+
+    // Trigger WhatsApp channel bot if running on 127.0.0.1:3217
+    try {
+      await fetch("http://127.0.0.1:3217/trigger", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          targetKey: slotData.whatsappTargetKey || "indirimai",
+          force: true,
+        }),
+        signal: AbortSignal.timeout(8_000),
+      });
+    } catch {
+      // WhatsApp bot will also pick it up on its own poll cycle
+    }
   }
 
   const manifestPath = path.join(outDir, "publish-manifest.json");
@@ -1191,6 +1225,29 @@ async function renderAndPublishSlotData(slotData) {
     ),
     "utf8"
   );
+
+  if (process.env.GITHUB_STEP_SUMMARY) {
+    try {
+      const summaryMd = [
+        `## 🎬 Üretir Sosyal Video & Veri Senkronizasyon Raporu (\`Slot ${slotData.slot}\`)`,
+        `- **Kuşak Başlığı:** ${slotData.label}`,
+        `- **Veri Merkezi:** [${SITE_URL}](${SITE_URL})`,
+        `- **Hedef Araç:** [${slotData.targetUrl}](${slotData.targetUrl})`,
+        `- **Ses & Fon Müziği (${slotData.voice || "tr-TR-AhmetNeural"} + Broadcast Fon):** ${hasVoice ? "✅ Başarılı" : "⚠️ Yedek Mod"}`,
+        `- **9:16 Dikey MP4 Video (1080x1920):** ${videoBuilt ? "✅ Üretildi" : "❌ Hata"}`,
+        `- **Mod:** ${skipPublish ? "📦 Ön Hazırlık & Artifact Üretimi (Gece Sessiz Mod)" : "🚀 Canlı Çok Kanallı Yayın"}`,
+        `- **Telegram (@uretirbot):** ${skipPublish ? "⏳ Sabah 09:00 Kuşağında" : tgPublished ? "✅ Gönderildi" : "⚠️ Atlandı"}`,
+        `- **Instagram (@uretirai):** ${skipPublish ? "⏳ Sabah 09:00 Kuşağında" : igPublished ? "✅ Yayınlandı" : "⚠️ Paket Hazır"}`,
+        ``,
+        `### 📌 Sahne Başlıkları ve Hook Kurgusu`,
+        ...slotData.scenes.map(
+          (s, idx) => `${idx + 1}. **${s.kicker}:** ${s.title} — *(${s.highlight})* · 🎙️ _"${s.speech}"_`
+        ),
+        ``,
+      ].join("\n");
+      await fs.appendFile(process.env.GITHUB_STEP_SUMMARY, summaryMd + "\n", "utf8");
+    } catch {}
+  }
 
   return { slot: slotData.slot, videoBuilt, igPublished, tgPublished, videoPath, audioPath, coverPngPath };
 }

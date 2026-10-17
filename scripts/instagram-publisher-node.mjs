@@ -8,8 +8,9 @@ import dotenv from "dotenv";
 dotenv.config({ path: ".env.local", quiet: true });
 dotenv.config({ quiet: true });
 
+const localStackPkg = path.resolve(".local", "open-source-stack", "package.json");
 const requireStack = createRequire(
-  path.resolve(".local", "open-source-stack", "package.json")
+  existsSync(localStackPkg) ? localStackPkg : path.resolve("package.json")
 );
 
 async function patchInstagramPrivateApiConstants() {

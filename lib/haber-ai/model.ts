@@ -136,17 +136,6 @@ export function parseFeed(xml: string, feed: (typeof feeds)[number], now = new D
   return (Array.isArray(items) ? items : [items]).slice(0, 200).flatMap((item): Article[] => {
     const title = clean(item.title);
     const locationText = clean(item.description);
-    const summary = locationText && locationText !== title ? locationText.slice(0, 240) : "";
-    const rawImg = item.enclosure?.["@url"] ?? item["media:content"]?.["@url"] ?? null;
-    let validImg: string | null = null;
-    if (typeof rawImg === "string" && rawImg.startsWith("https://")) {
-      try {
-        const imgUrl = new URL(rawImg);
-        if (imgUrl.protocol === "https:") validImg = imgUrl.href;
-      } catch {
-        validImg = null;
-      }
-    }
     let url: URL;
     try {
       url = new URL(clean(item.link));
@@ -169,8 +158,8 @@ export function parseFeed(xml: string, feed: (typeof feeds)[number], now = new D
       {
         id: createHash("sha256").update(url.href).digest("hex"),
         title,
-        summary,
-        imageUrl: validImg,
+        summary: "",
+        imageUrl: null,
         url: url.href,
         source: feed.name.startsWith("AA") ? "Anadolu Ajansı" : "TRT Haber",
         category: feed.category,
@@ -183,7 +172,7 @@ export function parseFeed(xml: string, feed: (typeof feeds)[number], now = new D
           policyUrl: feed.name.startsWith("AA")
             ? "https://www.aa.com.tr/tr/teyithatti/p/rss-linkleri"
             : "https://www.trthaber.com/sitene_ekle.html",
-          imageAllowed: Boolean(validImg),
+          imageAllowed: false,
           checkedAt: now.toISOString(),
         },
       },

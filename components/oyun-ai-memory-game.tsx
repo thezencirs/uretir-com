@@ -59,7 +59,7 @@ export function OyunAIMemoryGame() {
   const score = Math.max(0, matched.length * 160 - Math.max(0, moves - matched.length) * 20 - seconds);
 
   return <div className="oyun-shell">
-    <section className="oyun-intro section-wrap"><div><p className="oyun-kicker"><Sparkles size={14} /> ÜRETİR / OYUNAI</p><h1>Memo</h1><p>Kartları ezberle. İngilizce kelimeleri görselleriyle eşleştir.</p></div>
+    <section className="oyun-intro section-wrap"><div><p className="oyun-kicker"><Sparkles size={14} /> ÜRETİR / OYUNAI · İNTERAKTİF HAFIZA OYUNU</p><h2>Memo · İngilizce Kelime Eşleştirme</h2><p>Kartları ezberle. İngilizce kelimeleri görselleriyle eşleştir.</p></div>
       <div className="oyun-category-picker" aria-label="Kelime kategorisi">{categories.map((item) => <button key={item.id} className={item.id === categoryId ? "is-active" : ""} onClick={() => chooseCategory(item.id)} aria-pressed={item.id === categoryId}><span>{item.icon}</span>{item.name}</button>)}</div>
     </section>
     <section className="oyun-board-wrap section-wrap" aria-label="Memo hafıza oyunu">

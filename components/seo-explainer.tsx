@@ -5,6 +5,8 @@ export type SeoExplainerKey =
   | "finans-ai"
   | "puan-ai"
   | "indirim-ai"
+  | "spor-ai"
+  | "oyun-ai"
   | "araba-ai"
   | "ev-ai"
   | "harita"
@@ -51,7 +53,7 @@ const copy: Record<
       { href: "/finans-ai", anchor: "FinansAI canlı döviz, altın ve Borsa İstanbul piyasa takibi", context: "Ekonomi haberlerini anlık piyasa verileriyle karşılaştırın" },
       { href: "/indirim-ai", anchor: "İndirimAI 30-90-360 günlük gerçek fiyat geçmişi analizi", context: "Tüketici enflasyonu ve e-ticaret dip fiyat gözlemleri" },
       { href: "/puan-ai", anchor: "PuanAI doğrulanmış banka ve kredi kartı kampanyaları", context: "Güncel alışveriş ödül, puan ve taksit karşılaştırması" },
-      { href: "/gelismeler", anchor: "Türkiye teknoloji, üretim ve girişim gelişmeleri arşivi", context: "Sektörel analizler ve üretim ekosistemi" },
+      { href: "/spor-ai", anchor: "SporAI Süper Lig xG tablosu ve UEFA ülke puanı radarı", context: "Doğrulanmış spor istatistikleri ve spor ekonomisi" },
     ],
   },
   "finans-ai": {
@@ -127,58 +129,104 @@ const copy: Record<
     ],
     references: [
       { href: "/puan-ai", anchor: "PuanAI kredi kartı kampanya ve taksit karşılaştırma motoru", context: "Dip fiyattaki ürünü en yüksek kart puanı ve taksitle alın" },
-      { href: "/finans-ai", anchor: "FinansAI canlı dolar, euro ve altın kuru ekranı", context: "İthal ürün fiyatlarını döviz kuru eğilimiyle kıyaslayın" },
+      { href: "/oyun-ai", anchor: "OyunAI Steam MENA-USD, Epic Games ve konsol indirim radarı", context: "Oyun ve oyuncu donanımı dönem dibi fırsatları" },
       { href: "/araba-ai", anchor: "ArabaAI sıfır araç kampanya ve fiyat değişimi analizi", context: "Otomotiv sektöründeki liste ve kampanya indirimleri" },
       { href: "/ev-ai", anchor: "EvAI bölgesel metrekare medyanı altı konut ve ihale fırsatları", context: "Gayrimenkulde bölge ortalamasının altındaki kayıtlar" },
     ],
   },
+  "spor-ai": {
+    title: "SporAI nasıl çalışır? · Süper Lig xG Beklentisi, UEFA Ülke Puanı ve Spor Ekonomisi",
+    lead: "SporAI; Trendyol Süper Lig maç istatistiklerini, beklenen gol (xG) farklarını, UEFA ülke puanı katsayı hesaplamalarını, EuroLeague/Sultanlar Ligi verimlilik metriklerini ve Borsa İstanbul spor kulüplerinin mali tablolarını tek merkezde birleştirir.",
+    body: "TFF, UEFA, TBF, TVF ve KAP bildirimlerine dayanan verilerle spekülatif transfer söylentileri yerine sahadaki ve bilançodaki ölçülebilir performansı fotoğraflı veri kartlarıyla sunar.",
+    points: [
+      "Süper Lig 90 dakika beklenen gol (xG) ve fikstür zorluk projeksiyonu",
+      "UEFA ülke puanı sıralaması ve Şampiyonlar Ligi doğrudan katılım takibi",
+      "EuroLeague, Voleybol Şampiyonlar Ligi ve BIST XSPOR spor ekonomisi verileri",
+    ],
+    keywords: [
+      "Süper Lig puan durumu ve xG analizi",
+      "UEFA ülke puanı Türkiye sıralaması",
+      "EuroLeague Türk takımları istatistikleri",
+      "BIST spor hisseleri bilanço analizi",
+      "SporAI canlı spor veri merkezi",
+    ],
+    references: [
+      { href: "/haber-ai", anchor: "HaberAI 81 il spor ve şehir gündemi haritası", context: "Şehir bazlı spor tesisleri ve yerel gelişmeler" },
+      { href: "/finans-ai", anchor: "FinansAI Borsa İstanbul ve döviz kuru ekranı", context: "Kulüp bilançolarını etkileyen Euro kuru ve piyasa verisi" },
+      { href: "/oyun-ai", anchor: "OyunAI espor turnuvaları ve spor oyunları indirim radarı", context: "EA Sports FC, NBA 2K ve espor gündemi" },
+      { href: "/puan-ai", anchor: "PuanAI spor giyim ve yayıncı platform kart kampanyaları", context: "Forma, bilet ve abonelik harcamalarında kart puanları" },
+    ],
+  },
+  "oyun-ai": {
+    title: "OyunAI ne sunar? · PC/Konsol Oyun İndirim Radarı, Türk Stüdyoları ve Hafıza Oyunu",
+    lead: "OyunAI; Steam MENA-USD bölgesel fiyat fırsatlarını, Epic Games haftalık ücretsiz oyunlarını, Game Pass/PlayStation Plus katalog analizlerini, Türk oyun stüdyolarının küresel başarılarını ve tarayıcı içi reklamsız zihin egzersizini tek kategoride buluşturur.",
+    body: "Oyuncular ve geliştiriciler için doğrulanan mağaza indirimlerinin yanı sıra sayfa içinde doğrudan oynanabilen Memo kelime-hafıza oyunuyla görsel hafıza ve İngilizce kelime pratiği sağlar.",
+    points: [
+      "Steam MENA-USD, Epic Games, PlayStation ve Xbox gerçek indirim radarı",
+      "Türkiye'nin küresel başarı yakalayan oyun stüdyoları ve espor takibi",
+      "Kurulum gerektirmeyen, reklamsız İngilizce kelime ve görsel hafıza oyunu",
+    ],
+    keywords: [
+      "Steam MENA USD oyun indirimleri",
+      "Epic Games haftanın ücretsiz oyunları",
+      "Türk oyun stüdyoları ve yerli oyunlar",
+      "espor Türkiye turnuva takvimi",
+      "OyunAI kelime hafıza oyunu",
+    ],
+    references: [
+      { href: "/indirim-ai", anchor: "İndirimAI oyuncu donanımı, monitör ve ekran kartı dip fiyat takibi", context: "30-90-360 günlük donanım fiyat geçmişi" },
+      { href: "/spor-ai", anchor: "SporAI Süper Lig xG ve Avrupa kupaları veri merkezi", context: "Canlı spor istatistikleri ve puan tabloları" },
+      { href: "/kesfet", anchor: "Üretir Keşfet yerli oyun ve dijital uygulama kataloğu", context: "Türkiye'de geliştirilen oyun ve yazılımları keşfedin" },
+      { href: "/puan-ai", anchor: "PuanAI dijital oyun mağazası ve elektronik kart kampanyaları", context: "Steam, PlayStation ve teknoloji alışverişlerinde nakit iade" },
+    ],
+  },
   "araba-ai": {
-    title: "ArabaAI araştırmayı nasıl kolaylaştırır? · Sıfır Araç Liste Fiyatı ve Haritalı 2. El Kıyaslama",
-    lead: "ArabaAI, otomobil ilanlarını Türkiye haritası ve karşılaştırma tablosu üzerinde incelerken ilan fiyatını markaların resmî sıfır araç liste/kampanya fiyatı ve benzer ikinci el araç ortalamasıyla yan yana gösterir.",
-    body: "BYD, Renault, Toyota, Nissan, Peugeot, Ford, Volkswagen, Škoda ve SEAT gibi markaların resmî Türkiye fiyat listeleri ile aktif finansman/ÖTV kampanyaları düzenli taranır. Üretir ID kullanan satıcılar doğrulanmış ilan yayınlayabilir; alıcılar harita üzerinden fiyat sapmasını anında görür.",
+    title: "ArabaAI araştırmayı nasıl kolaylaştırır? · Sıfır Araç Liste Fiyatı ve Çoklu Platform 2. El Kıyaslama",
+    lead: "ArabaAI, otomobil ilanlarını Türkiye haritası, fotoğraflı vitrin kartları ve karşılaştırma tablosu üzerinde incelerken Sahibinden, Arabam.com, Letgo ve resmî marka kaynaklı piyasa referanslarını markaların sıfır araç liste fiyatlarıyla yan yana gösterir.",
+    body: "BYD, Renault, Toyota, Nissan, Peugeot, Ford, Volkswagen, Škoda, SEAT ve Togg gibi markaların resmî Türkiye fiyat listeleri ile Sahibinden, Arabam.com ve Letgo piyasa referans aralıkları telifsiz ve şeffaf biçimde karşılaştırılır.",
     points: [
       "Resmî sıfır araç liste fiyatları ve aylık marka kampanyaları takibi",
-      "Haritalı ikinci el araç keşfi ve sıfır/2. el fiyat sapması hesaplama",
-      "Üretir ID ile güvenli ilan verme, favori takibi ve özel mesajlaşma",
+      "Sahibinden, Arabam.com ve Letgo referanslı fotoğraflı 2. el araç vitrini",
+      "Haritalı şehir filtreleme ve sıfır/2. el fiyat sapması hesaplama",
     ],
     keywords: [
       "sıfır araç fiyatları 2026 güncel liste",
       "otomobil kampanyaları ve faizsiz taşıt kredisi",
       "ikinci el araba fiyat karşılaştırma haritası",
-      "elektrikli ve hibrit araç fiyatları Türkiye",
+      "Sahibinden Arabam Letgo araç fiyat kıyaslama",
       "BYD Renault Toyota Volkswagen Peugeot fiyat listesi",
       "sıfır ve 2. el araç fiyat farkı analizi",
-      "güvenli sahibinden araç ilanı",
+      "fotoğraflı otomobil ilan karşılaştırma",
       "ÖTV indirimli sıfır otomobil kampanyaları",
     ],
     references: [
-      { href: "/ev-ai", anchor: "EvAI haritalı konut, arsa ve kamu ihale taşınmaz araştırması", context: "Konut ve taşınmaz piyasasındaki bölgesel fiyat referansları" },
+      { href: "/ev-ai", anchor: "EvAI haritalı konut, arsa ve çoklu platform emlak analizi", context: "Konut ve taşınmaz piyasasındaki bölgesel fiyat referansları" },
       { href: "/finans-ai", anchor: "FinansAI döviz, altın ve piyasa göstergeleri takibi", context: "Otomotiv fiyatlarını etkileyen kur ve piyasa verileri" },
       { href: "/puan-ai", anchor: "PuanAI akaryakıt, şarj, bakım ve ekspertiz kart kampanyaları", context: "Araç sahiplerine özel banka bonus ve indirim fırsatları" },
       { href: "/ekosistem/marketplace", anchor: "Üretir Marketplace doğrulanmış ilan ve ticaret ekosistemi", context: "Haritalı ve kanıt odaklı pazar yeri altyapısı" },
     ],
   },
   "ev-ai": {
-    title: "EvAI ilanları nasıl değerlendirir? · Haritalı Konut, Arsa ve Kamu İhale Taşınmaz Analizi",
-    lead: "EvAI; satılık/kiralık konut, arsa ve ilan.gov.tr kaynaklı kamu/icra taşınmaz kayıtlarını interaktif Türkiye haritası ile karşılaştırma tablosunu birleştirerek keşfetmeyi sağlar.",
-    body: "Her taşınmaz kaydı; il, ilçe, oda sayısı, brüt metrekare, birim m² bedeli ve bölgesel metrekare medyanına göre hesaplanan EvAI skoruyla değerlendirilir. Kamu ve ihale ilanları açıkça ayrıştırılır; muhammen bedel ile piyasa referansı şeffaf biçimde sunulur.",
+    title: "EvAI ilanları nasıl değerlendirir? · Çoklu Platform (Sahibinden, Emlakjet, Hepsiemlak, Letgo, Kamu) Konut Analizi",
+    lead: "EvAI; Sahibinden, Emlakjet, Hepsiemlak, Letgo, TOKİ/Emlak Konut ve ilan.gov.tr kaynaklı telifsiz piyasa referans kayıtlarını fotoğraflı vitrin kartları, interaktif Türkiye haritası ve karşılaştırma tablosu üzerinde birleştirir.",
+    body: "Her taşınmaz kaydı; il, ilçe, oda sayısı, brüt metrekare, birim m² bedeli, fotoğraf önizlemesi ve bölgesel metrekare medyanına göre hesaplanan EvAI skoruyla değerlendirilir. Satış komisyonu olmadan tüm platformlardaki fırsatları tek ekranda kıyaslamanızı sağlar.",
     points: [
-      "Harita ve tablo üzerinde eşzamanlı şehir, bütçe ve m² filtreleme",
+      "Sahibinden, Emlakjet, Hepsiemlak, Letgo ve Kamu İhale referanslı fotoğraflı vitrin",
+      "Harita ve tablo üzerinde eşzamanlı şehir, platform, bütçe ve m² filtreleme",
       "Bölgesel metrekare (m²) medyan referansı ve EvAI değerleme skoru",
-      "Resmî kamu/ihale taşınmaz duyuruları ile Üretir ID konut ilanları bir arada",
     ],
     keywords: [
       "konut metrekare fiyatları ve bölge analizi",
+      "Sahibinden Emlakjet Hepsiemlak Letgo konut karşılaştırma",
       "kamu ihale ve icradan satılık daire arsa duyuruları",
-      "haritalı satılık ev ve emlak karşılaştırma",
+      "haritalı satılık ev ve fotoğraflı emlak vitrini",
       "İstanbul Ankara İzmir Bursa konut fiyat endeksi",
       "EvAI taşınmaz değerleme ve skorlama",
-      "sahibinden güvenli konut ilanı",
       "bölgesel emlak m2 birim fiyat hesaplama",
       "yatırımlık konut ve arsa fırsat radarı",
     ],
     references: [
-      { href: "/araba-ai", anchor: "ArabaAI haritalı otomobil ilanları ve sıfır araç fiyat referansı", context: "Araç piyasasında sıfır ve ikinci el fiyat karşılaştırması" },
+      { href: "/araba-ai", anchor: "ArabaAI fotoğraflı otomobil vitrini ve sıfır araç fiyat referansı", context: "Araç piyasasında sıfır ve ikinci el fiyat karşılaştırması" },
       { href: "/finans-ai", anchor: "FinansAI altın, döviz ve Borsa İstanbul yatırım göstergeleri", context: "Gayrimenkul bütçesini finansal piyasalarla kıyaslayın" },
       { href: "/indirim-ai", anchor: "İndirimAI beyaz eşya, mobilya ve ev yaşam dip fiyat takibi", context: "Ev kurarken IKEA, Koçtaş ve teknoloji mağazası fırsatları" },
       { href: "/haber-ai", anchor: "HaberAI 81 il şehir gündemi ve yerel gelişmeler haritası", context: "İlgilendiğiniz şehirdeki güncel altyapı ve yerel haberler" },
@@ -223,7 +271,7 @@ const copy: Record<
     references: [
       { href: "/harita", anchor: "Üretir Harita üzerinde şehir şehir yerli ürünleri görün", context: "Coğrafi dağılım ve yerel teknoloji merkezleri" },
       { href: "/uygulamalar", anchor: "Üretir Uygulamalar ve AI çözümleri dizini", context: "Günlük hayatı kolaylaştıran araçlar" },
-      { href: "/araclar", anchor: "Üretir 6 ana AI aracı ve WhatsApp kanalları", context: "HaberAI, FinansAI, PuanAI, İndirimAI, ArabaAI ve EvAI" },
+      { href: "/araclar", anchor: "Üretir 8 ana AI kategorisi ve WhatsApp kanalları", context: "HaberAI, PuanAI, İndirimAI, FinansAI, SporAI, OyunAI, ArabaAI ve EvAI" },
     ],
   },
 };

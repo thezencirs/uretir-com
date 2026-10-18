@@ -1,0 +1,259 @@
+{
+  "checkedAt": "2026-10-17T20:52:32.224Z",
+  "siteUrl": "https://www.uretir.com",
+  "sitemapUrlCount": 31,
+  "apiSuccessCount": 14,
+  "apiTotalCount": 14,
+  "seoSuccessCount": 15,
+  "seoTotalCount": 15,
+  "apiResults": [
+    {
+      "name": "HaberAI · 81 İl Canlı Gündem API",
+      "path": "/api/haber-ai",
+      "url": "https://www.uretir.com/api/haber-ai",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 1479,
+      "bytes": 990442
+    },
+    {
+      "name": "FinansAI · Canlı Piyasa & Döviz API",
+      "path": "/api/haber-ai?view=finance",
+      "url": "https://www.uretir.com/api/haber-ai?view=finance",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 303,
+      "bytes": 817
+    },
+    {
+      "name": "WhatsApp Feed · HaberAI",
+      "path": "/api/channel-feed/haber-ai",
+      "url": "https://www.uretir.com/api/channel-feed/haber-ai",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 873,
+      "bytes": 1850
+    },
+    {
+      "name": "WhatsApp Feed · FinansAI",
+      "path": "/api/channel-feed/finans-ai",
+      "url": "https://www.uretir.com/api/channel-feed/finans-ai",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 287,
+      "bytes": 488
+    },
+    {
+      "name": "WhatsApp Feed · İndirimAI",
+      "path": "/api/channel-feed/indirim-ai",
+      "url": "https://www.uretir.com/api/channel-feed/indirim-ai",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 1601,
+      "bytes": 4090
+    },
+    {
+      "name": "WhatsApp Feed · PuanAI",
+      "path": "/api/channel-feed/puan-ai",
+      "url": "https://www.uretir.com/api/channel-feed/puan-ai",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 2689,
+      "bytes": 15266
+    },
+    {
+      "name": "WhatsApp Feed · ArabaAI",
+      "path": "/api/channel-feed/araba-ai",
+      "url": "https://www.uretir.com/api/channel-feed/araba-ai",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 1466,
+      "bytes": 5065
+    },
+    {
+      "name": "WhatsApp Feed · EvAI",
+      "path": "/api/channel-feed/ev-ai",
+      "url": "https://www.uretir.com/api/channel-feed/ev-ai",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 1140,
+      "bytes": 2334
+    },
+    {
+      "name": "Web Sayfası · HaberAI (81 İl Haritası)",
+      "path": "/haber-ai",
+      "url": "https://www.uretir.com/haber-ai",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 248,
+      "bytes": 1485153
+    },
+    {
+      "name": "Web Sayfası · İndirimAI (Dip Fiyat)",
+      "path": "/indirim-ai",
+      "url": "https://www.uretir.com/indirim-ai",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 277,
+      "bytes": 111820
+    },
+    {
+      "name": "Web Sayfası · FinansAI (Canlı Piyasa)",
+      "path": "/finans-ai",
+      "url": "https://www.uretir.com/finans-ai",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 81,
+      "bytes": 64698
+    },
+    {
+      "name": "Web Sayfası · PuanAI (Kart Kampanya)",
+      "path": "/puan-ai",
+      "url": "https://www.uretir.com/puan-ai",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 85,
+      "bytes": 74472
+    },
+    {
+      "name": "Web Sayfası · ArabaAI (Sıfır & 2. El)",
+      "path": "/araba-ai",
+      "url": "https://www.uretir.com/araba-ai",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 239,
+      "bytes": 124431
+    },
+    {
+      "name": "Web Sayfası · EvAI (Konut & İhale)",
+      "path": "/ev-ai",
+      "url": "https://www.uretir.com/ev-ai",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 280,
+      "bytes": 99375
+    }
+  ],
+  "seoResults": [
+    {
+      "path": "/sitemap.xml",
+      "url": "https://www.uretir.com/sitemap.xml",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 184,
+      "bytes": 5109
+    },
+    {
+      "path": "/robots.txt",
+      "url": "https://www.uretir.com/robots.txt",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 68,
+      "bytes": 113
+    },
+    {
+      "path": "/",
+      "url": "https://www.uretir.com/",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 354,
+      "bytes": 167832
+    },
+    {
+      "path": "/haber-ai?city=34",
+      "url": "https://www.uretir.com/haber-ai?city=34",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 272,
+      "bytes": 1485153
+    },
+    {
+      "path": "/haber-ai?city=06",
+      "url": "https://www.uretir.com/haber-ai?city=06",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 87,
+      "bytes": 1485153
+    },
+    {
+      "path": "/haber-ai?city=35",
+      "url": "https://www.uretir.com/haber-ai?city=35",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 83,
+      "bytes": 1485153
+    },
+    {
+      "path": "/haber-ai?city=16",
+      "url": "https://www.uretir.com/haber-ai?city=16",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 98,
+      "bytes": 1485153
+    },
+    {
+      "path": "/haber-ai?city=07",
+      "url": "https://www.uretir.com/haber-ai?city=07",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 82,
+      "bytes": 1485153
+    },
+    {
+      "path": "/haber-ai?city=01",
+      "url": "https://www.uretir.com/haber-ai?city=01",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 93,
+      "bytes": 1485153
+    },
+    {
+      "path": "/haber-ai?city=42",
+      "url": "https://www.uretir.com/haber-ai?city=42",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 85,
+      "bytes": 1485153
+    },
+    {
+      "path": "/haber-ai?city=27",
+      "url": "https://www.uretir.com/haber-ai?city=27",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 74,
+      "bytes": 1485153
+    },
+    {
+      "path": "/haber-ai?city=61",
+      "url": "https://www.uretir.com/haber-ai?city=61",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 86,
+      "bytes": 1485153
+    },
+    {
+      "path": "/haber-ai?city=25",
+      "url": "https://www.uretir.com/haber-ai?city=25",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 72,
+      "bytes": 1485153
+    },
+    {
+      "path": "/haber-ai?city=21",
+      "url": "https://www.uretir.com/haber-ai?city=21",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 74,
+      "bytes": 1485153
+    },
+    {
+      "path": "/haber-ai?city=55",
+      "url": "https://www.uretir.com/haber-ai?city=55",
+      "ok": true,
+      "status": 200,
+      "elapsedMs": 86,
+      "bytes": 1485153
+    }
+  ]
+}

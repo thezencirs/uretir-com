@@ -3,7 +3,7 @@ import { ToolShortcuts } from "@/components/tool-shortcuts";
 import { FinanceStrip } from "@/components/finance-strip";
 import { getPublishedContent } from "@/lib/site-content-store";
 import { publicNews } from "@/lib/site-content-model";
-import { ArrowDownRight, ArrowUpRight, CarFront, ChartNoAxesCombined, ChevronRight, House, Layers, MapPinned, Rocket, Search, Sparkles, Tags, WalletCards, Zap } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, CarFront, ChartNoAxesCombined, ChevronRight, Gamepad2, House, Layers, MapPinned, Rocket, Search, Sparkles, Tags, Trophy, WalletCards, Zap } from "lucide-react";
 import { HeroArt } from "@/components/hero-art";
 import { NewsletterForm } from "@/components/newsletter-form";
 import { PostCard } from "@/components/post-card";
@@ -15,11 +15,13 @@ import { isIndexableReference, isVisibleReference } from "@/lib/publication";
 
 const ecosystemCards = [
   { number: "01", icon: MapPinned, title: "HaberAI · 81 İl Haritası", description: "81 ilin tamamında resmi ajans ve kurum kaynaklı sıcak gündemi interaktif haritada takip et", color: "#769d32", href: "/haber-ai" },
-  { number: "02", icon: Tags, title: "İndirimAI · Dip Fiyat", description: "30/90/360 günlük gerçek fiyat geçmişi, kupon kodları ve sahte indirim filtresiyle fırsatları yakala", color: "#f6ad55", href: "/indirim-ai" },
-  { number: "03", icon: ChartNoAxesCombined, title: "FinansAI · Canlı Piyasa", description: "Dolar, Euro, Gram Altın, BIST 100, Bitcoin ve Brent Petrol verilerini tek ekranda izle", color: "#4fd1c5", href: "/finans-ai" },
-  { number: "04", icon: WalletCards, title: "PuanAI · Kart Kampanya", description: "Bankaların resmi kredi kartı puan, nakit iade ve taksit kampanyalarını net kazanca göre kıyasla", color: "#78a5b6", href: "/puan-ai" },
-  { number: "05", icon: CarFront, title: "ArabaAI · Sıfır & 2. El", description: "Resmi distribütör sıfır araç liste fiyatlarıyla 81 il haritalı 2. el ilanlarını karşılaştır", color: "#63b3ed", href: "/araba-ai" },
-  { number: "06", icon: House, title: "EvAI · Konut & İhale", description: "Harita üzerinde konut m² fiyatları, kira çarpanı ve resmi kamu ihale taşınmaz ilanlarını incele", color: "#f687b3", href: "/ev-ai" },
+  { number: "02", icon: WalletCards, title: "PuanAI · Kart Kampanya", description: "Bankaların resmi kredi kartı puan, nakit iade ve taksit kampanyalarını net kazanca göre kıyasla", color: "#78a5b6", href: "/puan-ai" },
+  { number: "03", icon: Tags, title: "İndirimAI · Dip Fiyat", description: "30/90/360 günlük gerçek fiyat geçmişi, kupon kodları ve sahte indirim filtresiyle fırsatları yakala", color: "#f6ad55", href: "/indirim-ai" },
+  { number: "04", icon: ChartNoAxesCombined, title: "FinansAI · Canlı Piyasa", description: "Dolar, Euro, Gram Altın, BIST 100, Bitcoin ve Brent Petrol verilerini tek ekranda izle", color: "#4fd1c5", href: "/finans-ai" },
+  { number: "05", icon: Trophy, title: "SporAI · Süper Lig & UEFA", description: "Süper Lig xG beklentisi, UEFA ülke puanı sıralaması, EuroLeague ve spor ekonomisi verilerini incele", color: "#2d8a62", href: "/spor-ai" },
+  { number: "06", icon: Gamepad2, title: "OyunAI · Gaming & Hafıza", description: "Steam MENA-USD, Epic Games ve konsol indirimlerini takip et; reklamsız kelime hafıza oyununu oyna", color: "#8a5cf6", href: "/oyun-ai" },
+  { number: "07", icon: CarFront, title: "ArabaAI · Çoklu Platform Araç", description: "Sahibinden, Arabam.com, Letgo ve resmi distribütör sıfır liste fiyatlarını fotoğraflı vitrinde kıyasla", color: "#63b3ed", href: "/araba-ai" },
+  { number: "08", icon: House, title: "EvAI · Çoklu Platform Emlak", description: "Sahibinden, Emlakjet, Hepsiemlak, Letgo ve kamu ihale konut/arsa ilanlarını m² medyanıyla karşılaştır", color: "#f687b3", href: "/ev-ai" },
 ];
 
 const quickMapCities = [
@@ -49,15 +51,15 @@ const openSourceEngines = [
     name: "FFmpeg & Sharp",
     repo: "https://github.com/lovell/sharp",
     stars: "30K+ ★",
-    role: "9:16 Dikey Motion-Graphic Video Hattı",
-    desc: "09:00, 12:00, 15:00 ve 20:00 yayınlarında yüksek kare hızlı 1080x1920 dikey Reels ve Shorts video işleme.",
+    role: "9:16 Akıcı 30 FPS Fon Müzikli Video Hattı",
+    desc: "09:00, 12:00, 15:00 ve 20:00 yayınlarında 30 FPS akıcı fon müzikli 1080x1920 dikey Reels ve Shorts video işleme.",
   },
   {
     name: "Edge-TTS Neural Voice",
     repo: "https://github.com/rany2/edge-tts",
     stars: "8K+ ★",
-    role: "Doğal Türkçe Seslendirme & Altyazı",
-    desc: "Canlı veri bültenlerini doğal Türkçe ses tonu ve kelime senkronlu altyazılarla güçlendiren ses motoru.",
+    role: "Stereo Broadcast Fon & Ses Motoru",
+    desc: "8 AI kategorisini sinematik stereo fon müziği ve görsel veri grafikleriyle sunan stüdyo motoru.",
   },
   {
     name: "Instagrapi & Telegram Bot API",
@@ -70,16 +72,16 @@ const openSourceEngines = [
 
 const seoReferenceClusters = [
   { href: "/haber-ai", label: "81 İl Son Dakika Türkiye Haber Haritası", tag: "HaberAI" },
-  { href: "/finans-ai", label: "Canlı Döviz, Gram Altın, BIST 100 ve Kripto Takibi", tag: "FinansAI" },
   { href: "/puan-ai", label: "Doğrulanmış Kredi Kartı Kampanya ve Taksit Karşılaştırma", tag: "PuanAI" },
   { href: "/indirim-ai", label: "30-90-360 Günlük E-Ticaret Fiyat Geçmişi ve Dip Fiyat Radarı", tag: "İndirimAI" },
-  { href: "/araba-ai", label: "Resmî Sıfır Araç Fiyat Listesi ve Haritalı 2. El Kıyaslama", tag: "ArabaAI" },
-  { href: "/ev-ai", label: "Haritalı Konut, Arsa ve Kamu İhale Taşınmaz Değerleme", tag: "EvAI" },
+  { href: "/finans-ai", label: "Canlı Döviz, Gram Altın, BIST 100 ve Kripto Takibi", tag: "FinansAI" },
+  { href: "/spor-ai", label: "Süper Lig xG Beklentisi, UEFA Ülke Puanı ve Spor Ekonomisi", tag: "SporAI" },
+  { href: "/oyun-ai", label: "Steam & Epic Oyun İndirimleri, Türk Stüdyoları ve Hafıza Oyunu", tag: "OyunAI" },
+  { href: "/araba-ai", label: "Sahibinden, Arabam.com, Letgo ve Sıfır Araç Fiyat Kıyaslama", tag: "ArabaAI" },
+  { href: "/ev-ai", label: "Sahibinden, Emlakjet, Hepsiemlak, Letgo ve Kamu İhale Konut Analizi", tag: "EvAI" },
   { href: "/cozumler", label: "Yapay Zekâ Karar Destek Araçları ve Üretir Çözümleri", tag: "Çözümler" },
   { href: "/ekosistem/harita", label: "Türkiye Girişim, Teknoloji ve Üretici Ekosistem Haritası", tag: "Harita" },
   { href: "/ekosistem/marketplace", label: "Kanıt Odaklı Güvenli İlan ve Pazar Yeri Altyapısı", tag: "Marketplace" },
-  { href: "/kesfet", label: "Yerli Mobil Uygulama, Oyun ve Dijital Ürün Kataloğu", tag: "Keşfet" },
-  { href: "/kaynaklar/topluluk", label: "Üretir Topluluk, Üretim Hikâyeleri ve Paylaşım Ağı", tag: "Topluluk" },
   { href: "/iletisim", label: "Kurumsal İletişim, Sponsorluk ve Reklam İş Birlikleri", tag: "Reklam & İletişim" },
 ];
 

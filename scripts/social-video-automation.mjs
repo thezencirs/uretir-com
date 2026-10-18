@@ -1006,17 +1006,25 @@ async function renderAndPublishSlotData(slotData) {
     }
   }
 
-  const framesPerScene = 18;
+  const framesPerScene = slotData.scenes.length >= 6 ? 24 : 36;
   const totalScenes = slotData.scenes.length;
   let frameCounter = 0;
+
+  // Clean old frames to avoid leftover frame count mismatches
+  try {
+    const oldFiles = await fs.readdir(framesDir);
+    for (const f of oldFiles) {
+      if (f.startsWith("frame-")) await fs.unlink(path.join(framesDir, f)).catch(() => {});
+    }
+  } catch {}
 
   for (let sIdx = 0; sIdx < totalScenes; sIdx++) {
     const scene = slotData.scenes[sIdx];
     for (let f = 0; f < framesPerScene; f++) {
-      const progressRatio = (sIdx * framesPerScene + f) / Math.max(1, totalScenes * framesPerScene - 1);
-      const svg = renderVerticalFrameSvg(scene, slotData.label, sIdx, totalScenes, progressRatio);
+      const sceneProgress = f / Math.max(1, framesPerScene - 1);
+      const svg = renderVerticalFrameSvg(scene, slotData.label, sIdx, totalScenes, sceneProgress);
       const framePath = path.join(framesDir, `frame-${String(frameCounter).padStart(4, "0")}.png`);
-      await sharp(Buffer.from(svg)).png({ compressionLevel: 6 }).toFile(framePath);
+      await sharp(Buffer.from(svg)).png({ compressionLevel: 5 }).toFile(framePath);
       frameCounter++;
     }
   }
@@ -1028,80 +1036,118 @@ async function renderAndPublishSlotData(slotData) {
   const fullSpeech = slotData.scenes.map((s) => s.speech).join(" · [FON] · ");
   const audioPath = path.join(outDir, `uretir-voice-${slotData.slot}.mp3`);
   let hasVoice = false;
+  const useTts = process.argv.includes("--with-tts");
+  const targetVideoDurationSec = totalScenes >= 6 ? totalScenes * 2.5 : totalScenes * 3.6;
 
-  // Synthesize each headline separately and interleave with 2.2s Broadcast Fon Music swells
-  // ("İndirimAI başlık -> Fon Müziği -> HaberAI başlık -> Fon Müziği -> Kapanış -> Fon Müziği")
-  try {
-    const sceneVoicePaths = [];
-    for (let i = 0; i < slotData.scenes.length; i++) {
-      const sp = path.join(outDir, `scene-voice-${i}.mp3`);
-      const ok = await synthesizeNaturalTurkishVoice(
-        slotData.scenes[i].speech,
-        slotData.voice || "tr-TR-AhmetNeural",
-        sp
-      );
-      if (ok && existsSync(sp)) {
-        sceneVoicePaths.push(sp);
-      }
-    }
-
-    if (sceneVoicePaths.length > 0) {
-      const inputs = [];
-      const padFilters = [];
-      const concatLabels = [];
-      for (let i = 0; i < sceneVoicePaths.length; i++) {
-        inputs.push("-i", sceneVoicePaths[i]);
-        // 2.2s musical "fon" break after each headline
-        const padSec = i === sceneVoicePaths.length - 1 ? "2.4" : "2.2";
-        padFilters.push(`[${i}:a]aformat=sample_rates=44100:channel_layouts=stereo,apad=pad_dur=${padSec}[v${i}]`);
-        concatLabels.push(`[v${i}]`);
-      }
-
-      const bgmIdx = sceneVoicePaths.length;
-      // Warm Broadcast Lo-Fi / Newsroom Chord Progression + 108 BPM gentle pulse + transition harmonic shimmer
-      const bgmExpr = [
-        "0.16*sin(2*PI*220*t)*(0.65+0.35*sin(2*PI*1.8*t))",
-        "0.13*sin(2*PI*261.63*t)",
-        "0.12*sin(2*PI*329.63*t)",
-        "0.10*sin(2*PI*392.00*t)*(0.5+0.5*cos(2*PI*0.45*t))",
-        "0.14*sin(2*PI*110*t)*(0.55+0.45*sin(2*PI*1.8*t))",
-        "0.07*sin(2*PI*523.25*t)*exp(-mod(t,3.6)*2.2)",
+  // Default: Pure Studio Stereo Broadcast Fon Music ("şimdilik fon ile — daha akıcı video")
+  if (!useTts) {
+    try {
+      const bgmExprL = [
+        "0.20*sin(2*PI*220*t)*(0.68+0.32*sin(2*PI*2.0*t))",
+        "0.16*sin(2*PI*261.63*t)*(0.75+0.25*cos(2*PI*0.5*t))",
+        "0.15*sin(2*PI*329.63*t)",
+        "0.12*sin(2*PI*392.00*t)*(0.6+0.4*sin(2*PI*0.25*t))",
+        "0.18*sin(2*PI*110*t)*(0.60+0.40*sin(2*PI*2.0*t))",
+        "0.09*sin(2*PI*523.25*t)*exp(-mod(t,2.5)*2.4)",
+        "0.06*sin(2*PI*659.25*t)*exp(-mod(t+1.25,2.5)*3.0)",
+      ].join("+");
+      const bgmExprR = [
+        "0.20*sin(2*PI*220.4*t)*(0.68+0.32*sin(2*PI*2.0*t))",
+        "0.16*sin(2*PI*261.9*t)*(0.75+0.25*sin(2*PI*0.5*t))",
+        "0.15*sin(2*PI*329.9*t)",
+        "0.12*sin(2*PI*392.3*t)*(0.6+0.4*cos(2*PI*0.25*t))",
+        "0.18*sin(2*PI*110*t)*(0.60+0.40*sin(2*PI*2.0*t))",
+        "0.09*sin(2*PI*523.25*t)*exp(-mod(t,2.5)*2.4)",
+        "0.06*sin(2*PI*783.99*t)*exp(-mod(t+1.25,2.5)*3.0)",
       ].join("+");
 
-      inputs.push("-f", "lavfi", "-i", `aevalsrc='${bgmExpr}|${bgmExpr}':s=44100:d=32`);
-
-      const filterComplex = [
-        ...padFilters,
-        `${concatLabels.join("")}concat=n=${sceneVoicePaths.length}:v=0:a=1,asplit=2[voice_main][voice_sc]`,
-        `[${bgmIdx}:a]lowpass=f=2100,highpass=f=60,volume=0.82[bgm_raw]`,
-        `[bgm_raw][voice_sc]sidechaincompress=threshold=0.025:ratio=5.5:attack=35:release=420:makeup=1.25[bgm_ducked]`,
-        `[voice_main][bgm_ducked]amix=inputs=2:duration=first:dropout_transition=0:weights='1.35 0.95',alimiter=limit=0.95[outa]`,
-      ].join(";");
-
+      const fadeOutStart = Math.max(1, targetVideoDurationSec - 1.5).toFixed(2);
       await execFileAsync(
         ffmpegBin,
-        ["-y", ...inputs, "-filter_complex", filterComplex, "-map", "[outa]", "-c:a", "libmp3lame", "-b:a", "192k", audioPath],
+        [
+          "-y",
+          "-f",
+          "lavfi",
+          "-i",
+          `aevalsrc='${bgmExprL}|${bgmExprR}':s=44100:d=${targetVideoDurationSec}`,
+          "-af",
+          `lowpass=f=3200,highpass=f=55,afade=t=in:st=0:d=0.6,afade=t=out:st=${fadeOutStart}:d=1.4,alimiter=limit=0.92`,
+          "-c:a",
+          "libmp3lame",
+          "-b:a",
+          "192k",
+          audioPath,
+        ],
         { timeout: 60_000 }
       );
       hasVoice = existsSync(audioPath);
+    } catch (fonErr) {
+      console.warn("[Stereo Fon Müziği Uyarısı]:", fonErr?.message || fonErr);
     }
-  } catch (mixErr) {
-    console.warn("[Fon Müzikli Miks Uyarısı, yedek miks deneniyor]:", mixErr?.message || mixErr);
+  } else {
+    // Optional TTS + Fon interleave mode (--with-tts)
+    try {
+      const sceneVoicePaths = [];
+      for (let i = 0; i < slotData.scenes.length; i++) {
+        const sp = path.join(outDir, `scene-voice-${i}.mp3`);
+        const ok = await synthesizeNaturalTurkishVoice(
+          slotData.scenes[i].speech,
+          slotData.voice || "tr-TR-AhmetNeural",
+          sp
+        );
+        if (ok && existsSync(sp)) {
+          sceneVoicePaths.push(sp);
+        }
+      }
+
+      if (sceneVoicePaths.length > 0) {
+        const inputs = [];
+        const padFilters = [];
+        const concatLabels = [];
+        for (let i = 0; i < sceneVoicePaths.length; i++) {
+          inputs.push("-i", sceneVoicePaths[i]);
+          const padSec = i === sceneVoicePaths.length - 1 ? "2.4" : "2.2";
+          padFilters.push(`[${i}:a]aformat=sample_rates=44100:channel_layouts=stereo,apad=pad_dur=${padSec}[v${i}]`);
+          concatLabels.push(`[v${i}]`);
+        }
+
+        const bgmIdx = sceneVoicePaths.length;
+        const bgmExpr = [
+          "0.16*sin(2*PI*220*t)*(0.65+0.35*sin(2*PI*1.8*t))",
+          "0.13*sin(2*PI*261.63*t)",
+          "0.12*sin(2*PI*329.63*t)",
+          "0.10*sin(2*PI*392.00*t)*(0.5+0.5*cos(2*PI*0.45*t))",
+          "0.14*sin(2*PI*110*t)*(0.55+0.45*sin(2*PI*1.8*t))",
+          "0.07*sin(2*PI*523.25*t)*exp(-mod(t,3.6)*2.2)",
+        ].join("+");
+
+        inputs.push("-f", "lavfi", "-i", `aevalsrc='${bgmExpr}|${bgmExpr}':s=44100:d=32`);
+
+        const filterComplex = [
+          ...padFilters,
+          `${concatLabels.join("")}concat=n=${sceneVoicePaths.length}:v=0:a=1,asplit=2[voice_main][voice_sc]`,
+          `[${bgmIdx}:a]lowpass=f=2100,highpass=f=60,volume=0.82[bgm_raw]`,
+          `[bgm_raw][voice_sc]sidechaincompress=threshold=0.025:ratio=5.5:attack=35:release=420:makeup=1.25[bgm_ducked]`,
+          `[voice_main][bgm_ducked]amix=inputs=2:duration=first:dropout_transition=0:weights='1.35 0.95',alimiter=limit=0.95[outa]`,
+        ].join(";");
+
+        await execFileAsync(
+          ffmpegBin,
+          ["-y", ...inputs, "-filter_complex", filterComplex, "-map", "[outa]", "-c:a", "libmp3lame", "-b:a", "192k", audioPath],
+          { timeout: 60_000 }
+        );
+        hasVoice = existsSync(audioPath);
+      }
+    } catch (mixErr) {
+      console.warn("[Fon Müzikli Miks Uyarısı]:", mixErr?.message || mixErr);
+    }
   }
 
-  if (!hasVoice) {
-    hasVoice = await synthesizeNaturalTurkishVoice(
-      slotData.scenes.map((s) => s.speech).join(" ... "),
-      slotData.voice || "tr-TR-AhmetNeural",
-      audioPath
-    );
-  }
   console.log(
-    `[2/4] [Başlık + Fon Müziği Miks] (${slotData.voice || "tr-TR-AhmetNeural"} + Broadcast Fon): ${hasVoice ? "BAŞARILI" : "YEDEK MOD"}`
+    `[2/4] [Stereo Broadcast Fon Müziği & Akıcı Ses Kanalı]: ${hasVoice ? "BAŞARILI" : "YEDEK MOD"}`
   );
 
-  // Compute exact framerate so total frames match the master audio duration (headline + fon intervals)
-  let inputFramerate = "2.2";
+  let inputFramerate = (frameCounter / targetVideoDurationSec).toFixed(3);
   if (hasVoice && existsSync(audioPath)) {
     try {
       const { stderr } = await execFileAsync(ffmpegBin, ["-i", audioPath], { timeout: 10_000 }).catch((e) => e);
@@ -1109,7 +1155,7 @@ async function renderAndPublishSlotData(slotData) {
       if (m) {
         const durSec = Number(m[1]) * 3600 + Number(m[2]) * 60 + Number(m[3]);
         if (durSec > 4) {
-          inputFramerate = Math.max(1.4, Math.min(4.0, frameCounter / durSec)).toFixed(3);
+          inputFramerate = Math.max(4.0, Math.min(15.0, frameCounter / durSec)).toFixed(3);
         }
       }
     } catch {}
@@ -1127,6 +1173,8 @@ async function renderAndPublishSlotData(slotData) {
           path.join(framesDir, "frame-%04d.png"),
           "-i",
           audioPath,
+          "-vf",
+          "minterpolate=fps=30:mi_mode=blend",
           "-c:v",
           "libx264",
           "-preset",
@@ -1149,9 +1197,11 @@ async function renderAndPublishSlotData(slotData) {
       : [
           "-y",
           "-framerate",
-          "2",
+          "10",
           "-i",
           path.join(framesDir, "frame-%04d.png"),
+          "-vf",
+          "minterpolate=fps=30:mi_mode=blend",
           "-c:v",
           "libx264",
           "-r",
@@ -1162,9 +1212,9 @@ async function renderAndPublishSlotData(slotData) {
           "+faststart",
           videoPath,
         ];
-    await execFileAsync(ffmpegBin, ffmpegArgs, { timeout: 120_000 });
+    await execFileAsync(ffmpegBin, ffmpegArgs, { timeout: 150_000 });
     videoBuilt = existsSync(videoPath);
-    console.log(`[3/4] [Graph-Motion Video] 1080x1920 Fotoğraflı, Grafikli & Fon Müzikli MP4 üretildi: ${videoPath}`);
+    console.log(`[3/4] [Akıcı 30 FPS Fon-Motion Video] 1080x1920 Fotoğraflı, Grafikli & Stereo Fon Müzikli MP4 üretildi: ${videoPath}`);
   } catch (err) {
     console.warn("[FFmpeg Uyarısı]:", err?.message || err);
   }
@@ -1540,7 +1590,188 @@ async function pollTelegramBotInteractive(state) {
   }
 }
 
+async function runEightCategoriesFonShowcase() {
+  const publicDealImgPath = path.resolve("public", "images", "deals", "dyson-combi360.jpg");
+  const eightCatSlotData = {
+    slot: "8kategori-fon",
+    label: "8 BAĞIMSIZ KATEGORİ · HABERAI, PUANAI, İNDİRİMAI, FİNANSAI, SPORAI, OYUNAI, ARABAAI, EVAI",
+    targetUrl: "https://www.uretir.com",
+    whatsappTargetKey: "indirimai",
+    voice: "tr-TR-AhmetNeural",
+    customCaption: [
+      `🚀 Üretir.com Büyüdü: 8 Ayrı AI Kategorisi, Fotoğraflı İlan Önizlemeleri ve Çoklu Platform Radarı!`,
+      ``,
+      `🗺️ 1) HaberAI: 81 İl İnteraktif Türkiye Gündem Haritası (uretir.com/haber-ai)`,
+      `💳 2) PuanAI: Bankaların Resmî Kredi Kartı Puan & Taksit Karşılaştırması (uretir.com/puan-ai)`,
+      `🔥 3) İndirimAI: 30/90/360 Gün Fiyat Geçmişi & Dyson 2 Al 1 Öde Fırsatı (uretir.com/indirim-ai)`,
+      `📈 4) FinansAI: Canlı Dolar, Euro, Gram Altın, BIST 100 & Kripto (uretir.com/finans-ai)`,
+      `🏆 5) SporAI: Süper Lig xG Analizi, UEFA Ülke Puanı & Spor Ekonomisi (uretir.com/spor-ai)`,
+      `🎮 6) OyunAI: Steam MENA-USD, Epic İndirimleri, Türk Stüdyoları & Hafıza Oyunu (uretir.com/oyun-ai)`,
+      `🚗 7) ArabaAI: Sahibinden, Arabam.com, Letgo & Sıfır Araç Liste Kıyaslama (uretir.com/araba-ai)`,
+      `🏠 8) EvAI: Sahibinden, Emlakjet, Hepsiemlak, Letgo & Kamu İhale Konut Vitrini (uretir.com/ev-ai)`,
+      ``,
+      `🌐 Tüm fotoğraflı önizlemeler ve canlı veriler: www.uretir.com`,
+      ``,
+      `#Üretir #HaberAI #PuanAI #İndirimAI #FinansAI #SporAI #OyunAI #ArabaAI #EvAI #Keşfet #ReelsTürkiye`,
+    ].join("\n"),
+    scenes: [
+      {
+        kicker: "01 / 08 · HABERAI · 81 İL GÜNDEM HARİTASI",
+        title: "81 İlin Tamamında Kaynaklı Sıcak Gündem ve Ekonomi Haritası",
+        sub: "Anadolu Ajansı ve TRT Haber Doğrulanmış Şehir Bazlı Bültenler",
+        highlight: "URETIR.COM/HABER-AI",
+        statLeft: "81 İl Canlı Harita",
+        statRight: "Fotoğraflı Önizleme",
+        accent: "#c8f560",
+        bg1: "#102118",
+        bg2: "#070e0a",
+        photoUrl: "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=1200&q=85",
+        photoTag: "HABERAI · 81 İL TÜRKİYE HARİTASI",
+        graphLabel: "81 İL CANLI HABER VE GÜNDEM YOĞUNLUĞU",
+        graphStartLabel: "Bölgesel Akış",
+        graphEndLabel: "81 İl Tam Kapsam",
+        graphTrend: "up",
+        speech: "HaberAI seksen bir il gündem haritası.",
+      },
+      {
+        kicker: "02 / 08 · PUANAI · KREDİ KARTI KAMPANYALARI",
+        title: "Axess, Bonus, World, Maximum ve Bankkart Kampanya Karşılaştırma",
+        sub: "Alışveriş Öncesi En Yüksek Puan, Chip-Para ve Taksit Hesaplama",
+        highlight: "URETIR.COM/PUAN-AI",
+        statLeft: "Resmî Banka Kaynaklı",
+        statRight: "Net Kazanç Analizi",
+        accent: "#78a5b6",
+        bg1: "#0f2027",
+        bg2: "#071014",
+        photoUrl: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=85",
+        photoTag: "PUANAI · BANKA KAMPANYA RADARI",
+        graphLabel: "KART PUANI VE NAKİT İADE KAZANÇ EĞRİSİ",
+        graphStartLabel: "Standart Harcama",
+        graphEndLabel: "+10.000 TL Puan",
+        graphTrend: "up",
+        speech: "PuanAI kredi kartı kampanya karşılaştırması.",
+      },
+      {
+        kicker: "03 / 08 · İNDİRİMAI · GERÇEK DİP FİYAT RADARI",
+        title: "30 / 90 / 360 Gün Fiyat Geçmişi ve Dyson COMBI360 2 Al 1 Öde",
+        sub: "Sahte İndirimleri Eleyen Mağaza Fiyat Gözlemleri ve Kupon Kodları",
+        highlight: "URETIR.COM/INDIRIM-AI",
+        statLeft: "Kupon: COMBI360",
+        statRight: "Adet: 1.949,50 TL",
+        accent: "#f6ad55",
+        bg1: "#26170b",
+        bg2: "#0f0904",
+        localPhotoPath: existsSync(publicDealImgPath) ? publicDealImgPath : undefined,
+        photoUrl: "https://images.unsplash.com/photo-1585771724684-38269d6639fd?auto=format&fit=crop&w=1200&q=85",
+        photoTag: "İNDİRİMAI · DÖNEM DİBİ FIRSAT",
+        graphLabel: "360 GÜNLÜK FİYAT GEÇMİŞİ VE DİP NOKTASI",
+        graphStartLabel: "Liste: 3.899 TL",
+        graphEndLabel: "Dip: 1.949,50 TL",
+        graphTrend: "down",
+        speech: "İndirimAI gerçek dönem dibi fırsatları.",
+      },
+      {
+        kicker: "04 / 08 · FİNANSAI · CANLI PİYASA MASASI",
+        title: "TCMB Döviz Kurları, 24 Ayar Gram Altın, BIST 100 ve Kripto",
+        sub: "1 Aylık Eğilim Grafikleri ve Doğrulanmış Piyasa Referans Ekranı",
+        highlight: "URETIR.COM/FINANS-AI",
+        statLeft: "Dolar · Euro · Altın",
+        statRight: "BIST 100 · BTC",
+        accent: "#4fd1c5",
+        bg1: "#0d2426",
+        bg2: "#061112",
+        photoUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&q=85",
+        photoTag: "FİNANSAI · CANLI PİYASA EKRANI",
+        graphLabel: "30 GÜNLÜK PİYASA VE EMİSYON EĞİLİMİ",
+        graphStartLabel: "Aylık Baz",
+        graphEndLabel: "Canlı Kapanış",
+        graphTrend: "up",
+        speech: "FinansAI canlı döviz, altın ve borsa ekranı.",
+      },
+      {
+        kicker: "05 / 08 · SPORAI · SÜPER LİG xG & UEFA ÜLKE PUANI",
+        title: "Süper Lig Beklenen Gol (xG) Matrisi, UEFA Katsayısı ve Spor Ekonomisi",
+        sub: "TFF, UEFA, EuroLeague ve BIST XSPOR Doğrulanmış Performans Verileri",
+        highlight: "URETIR.COM/SPOR-AI",
+        statLeft: "UEFA 9. Sıra Türkiye",
+        statRight: "Canlı xG Tablosu",
+        accent: "#34d399",
+        bg1: "#062c22",
+        bg2: "#031410",
+        photoUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1200&q=85",
+        photoTag: "SPORAI · CANLI PERFORMANS MERKEZİ",
+        graphLabel: "SÜPER LİG XG BEKLENTİSİ VE UEFA ÜLKE PUANI",
+        graphStartLabel: "Sezon Başlangıcı",
+        graphEndLabel: "+7.800 Katsayı",
+        graphTrend: "up",
+        speech: "SporAI Süper Lig xG ve UEFA ülke puanı.",
+      },
+      {
+        kicker: "06 / 08 · OYUNAI · STEAM/EPIC RADARI & HAFIZA OYUNU",
+        title: "Steam MENA-USD, Epic Games İndirimleri, Türk Stüdyoları & Memo",
+        sub: "PC/Konsol Dönem Dibi Oyun Fırsatları ve Reklamsız Kelime Hafıza Oyunu",
+        highlight: "URETIR.COM/OYUN-AI",
+        statLeft: "Steam & Epic & PS5",
+        statRight: "Türk Stüdyoları",
+        accent: "#a78bfa",
+        bg1: "#21123b",
+        bg2: "#0d0719",
+        photoUrl: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=85",
+        photoTag: "OYUNAI · GAMING & ZİHİN EGZERSİZİ",
+        graphLabel: "STEAM MENA-USD BÖLGESEL FİYAT AVANTAJI",
+        graphStartLabel: "Küresel: $59.99",
+        graphEndLabel: "MENA: -$65 Avantaj",
+        graphTrend: "down",
+        speech: "OyunAI oyun indirimleri ve hafıza oyunu.",
+      },
+      {
+        kicker: "07 / 08 · ARABAAI · SAHİBİNDEN, ARABAM, LETGO & SIFIR",
+        title: "Çoklu Platform 2. El Araç Referansı ve Resmî Sıfır Liste Kıyaslama",
+        sub: "Sahibinden, Arabam.com, Letgo ve Resmî Marka Fiyatları Fotoğraflı Vitrinde",
+        highlight: "URETIR.COM/ARABA-AI",
+        statLeft: "Sahibinden · Arabam",
+        statRight: "Letgo · Resmî Marka",
+        accent: "#63b3ed",
+        bg1: "#0e1f33",
+        bg2: "#060e17",
+        photoUrl: "https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=1200&q=85",
+        photoTag: "ARABAAI · FOTOĞRAFLI ARAÇ VİTRİNİ",
+        graphLabel: "SIFIR LİSTE FİYATI VE 2. EL PİYASA KIYASLAMASI",
+        graphStartLabel: "Sıfır Liste Fiyatı",
+        graphEndLabel: "Çoklu Platform Kıyas",
+        graphTrend: "down",
+        speech: "ArabaAI çoklu platform araç karşılaştırması.",
+      },
+      {
+        kicker: "08 / 08 · EVAI · SAHİBİNDEN, EMLAKJET, LETGO & KAMU",
+        title: "Çoklu Platform Konut Vitrini, Bölge m² Medyanı ve Kamu İhale Kayıtları",
+        sub: "Sahibinden, Emlakjet, Hepsiemlak, Letgo ve TOKİ/İhale Fotoğraflı Önizleme",
+        highlight: "URETIR.COM/EV-AI",
+        statLeft: "Sahibinden · Emlakjet",
+        statRight: "Letgo · Kamu İhale",
+        accent: "#f687b3",
+        bg1: "#2b1422",
+        bg2: "#13080e",
+        photoUrl: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=85",
+        photoTag: "EVAI · FOTOĞRAFLI KONUT VİTRİNİ",
+        graphLabel: "BÖLGESEL M² MEDYANI VE PLATFORM KIYASLAMASI",
+        graphStartLabel: "Bölge m² Ortalaması",
+        graphEndLabel: "Emsal Altı Fırsatlar",
+        graphTrend: "down",
+        speech: "EvAI çoklu platform konut ve ihale vitrini.",
+      },
+    ],
+  };
+
+  return renderAndPublishSlotData(eightCatSlotData);
+}
+
 async function main() {
+  if (process.argv.includes("--eight-categories")) {
+    await runEightCategoriesFonShowcase();
+    process.exit(0);
+  }
+
   if (process.argv.includes("--dyson-special")) {
     await runDysonCampaignSpecial();
     process.exit(0);

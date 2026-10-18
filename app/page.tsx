@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ToolShortcuts } from "@/components/tool-shortcuts";
 import { FinanceStrip } from "@/components/finance-strip";
+import { WhatsAppGrowthBanner } from "@/components/whatsapp-growth-banner";
 import { getPublishedContent } from "@/lib/site-content-store";
 import { publicNews } from "@/lib/site-content-model";
 import { ArrowDownRight, ArrowUpRight, CarFront, ChartNoAxesCombined, ChevronRight, Gamepad2, House, Layers, MapPinned, Rocket, Search, Sparkles, Tags, Trophy, WalletCards, Zap } from "lucide-react";
@@ -96,6 +97,7 @@ export default async function HomePage() {
     <div className="section-wrap py-4">
       <FinanceStrip />
     </div>
+    <WhatsAppGrowthBanner />
 
     <section className="section-wrap py-6" aria-label="Canlı Komuta ve Hızlı Etkileşim Merkezi">
       <div className="grid gap-5 lg:grid-cols-[1.15fr_.85fr]">

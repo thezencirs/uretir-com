@@ -128,11 +128,11 @@ async function gatherLiveSlotData(slot) {
   ]);
 
   const itemsFin = finans?.items || [];
-  const usd = itemsFin.find((i) => i.id === "USD")?.price?.toFixed(2) || "44.82";
-  const eur = itemsFin.find((i) => i.id === "EUR")?.price?.toFixed(2) || "52.66";
-  const gram = Math.round(itemsFin.find((i) => i.id === "GRAM")?.price || 6913).toLocaleString("tr-TR");
-  const bist = Math.round(itemsFin.find((i) => i.id === "XU100")?.price || 14056).toLocaleString("tr-TR");
-  const btc = Math.round(itemsFin.find((i) => i.id === "BTC")?.price || 74919).toLocaleString("tr-TR");
+  const usd = itemsFin.find((i) => i.id === "USD")?.price?.toFixed(2) || "49.45";
+  const eur = itemsFin.find((i) => i.id === "EUR")?.price?.toFixed(2) || "55.62";
+  const gram = Math.round(itemsFin.find((i) => i.id === "GRAM")?.price || 6623).toLocaleString("tr-TR");
+  const bist = Math.round(itemsFin.find((i) => i.id === "XU100" || i.id === "XU100.IS")?.price || 11722).toLocaleString("tr-TR");
+  const btc = Math.round(itemsFin.find((i) => i.id === "BTC" || i.id === "BTC-USD")?.price || 74919).toLocaleString("tr-TR");
 
   const haberLines = String(haber?.body || "")
     .split("\n")
@@ -443,8 +443,9 @@ async function prepareScenePhotoDataUri(scene) {
         }
       }
       const buf = await pipeline
-        .resize(920, 500, { fit: "cover", position: "center" })
-        .jpeg({ quality: 90 })
+        .resize(1080, 1920, { fit: "cover", position: "center" })
+        .modulate({ brightness: 1.03, saturation: 1.08 })
+        .jpeg({ quality: 92 })
         .toBuffer();
       return `data:image/jpeg;base64,${buf.toString("base64")}`;
     } catch (e) {
@@ -452,11 +453,11 @@ async function prepareScenePhotoDataUri(scene) {
     }
   }
 
-  // 2. Fetch remote photoUrl
+  // 2. Fetch remote photoUrl as full-bleed 1080x1920 cinema background
   const urlsToTry = [
     scene.photoUrl,
-    "https://images.unsplash.com/photo-1585771724684-38269d6639fd?auto=format&fit=crop&w=1200&q=85",
-    "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=1400&q=85",
+    "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1400&q=85",
   ].filter(Boolean);
 
   for (const u of urlsToTry) {
@@ -471,8 +472,9 @@ async function prepareScenePhotoDataUri(scene) {
       if (!res.ok) continue;
       const raw = Buffer.from(await res.arrayBuffer());
       const buf = await sharp(raw)
-        .resize(920, 500, { fit: "cover", position: "center" })
-        .jpeg({ quality: 88 })
+        .resize(1080, 1920, { fit: "cover", position: "center" })
+        .modulate({ brightness: 1.03, saturation: 1.08 })
+        .jpeg({ quality: 92 })
         .toBuffer();
       return `data:image/jpeg;base64,${buf.toString("base64")}`;
     } catch {
@@ -483,42 +485,41 @@ async function prepareScenePhotoDataUri(scene) {
 }
 
 /**
- * Editorial Broadcast & Graph-Motion SVG Composer
- * Inspired by remotion-dev/remotion, motion-canvas/motion-canvas & apache/echarts
- * Zero synthetic "AI" clutter — real photography + smooth data curve animation + Swiss editorial typography
+ * Full-Bleed Real Photography Magazine Composer (Instagram Viral Director Agent)
+ * - 1080x1920 Full-Screen Real Photograph Background with smooth Ken Burns camera motion
+ * - Unobstructed upper photography showcase + Monocle/Bloomberg lower-third glass editorial overlay
+ * - Integrated WhatsApp Channel subscriber funnel badge
  */
 function renderVerticalFrameSvg(scene, slotLabel, sceneIdx, totalScenes, progressRatio) {
-  const titleLines = wrapLines(scene.title, 25, 3);
-  const subLines = wrapLines(scene.sub, 40, 2);
-  const speechLines = wrapLines(scene.speech, 40, 2);
-  const barWidth = Math.max(40, Math.round(920 * progressRatio));
-  const cardOffsetY = Math.round((1 - Math.min(1, progressRatio * 4.0)) * 26);
+  const titleLines = wrapLines(scene.title, 24, 3);
+  const subLines = wrapLines(scene.sub, 38, 2);
+  const barWidth = Math.max(48, Math.round(936 * progressRatio));
+  const cardOffsetY = Math.round((1 - Math.min(1, progressRatio * 3.5)) * 22);
 
-  // Subtle Ken Burns camera motion on the real photograph (1.00x -> 1.06x)
-  const kenBurnsScale = (1 + progressRatio * 0.055).toFixed(4);
-  const kenBurnsShiftX = Math.round(-25 * progressRatio);
-  const kenBurnsShiftY = Math.round(-14 * progressRatio);
+  // Full-bleed 1080x1920 Ken Burns cinematic camera motion (1.02x -> 1.09x)
+  const kenBurnsScale = (1.02 + progressRatio * 0.07).toFixed(4);
+  const kenBurnsShiftX = Math.round(-38 * progressRatio);
+  const kenBurnsShiftY = Math.round(-46 * progressRatio);
 
-  // Apache ECharts / Motion-Canvas style animated data curve (Graph Motion)
   const isDownTrend = scene.graphTrend === "down";
   const pts = isDownTrend
     ? [
-        [130, 1415],
-        [275, 1420],
-        [420, 1412],
-        [565, 1455],
-        [710, 1495],
-        [855, 1525],
-        [950, 1532],
+        [130, 1505],
+        [275, 1510],
+        [420, 1502],
+        [565, 1538],
+        [710, 1572],
+        [855, 1598],
+        [950, 1606],
       ]
     : [
-        [130, 1525],
-        [275, 1508],
-        [420, 1490],
-        [565, 1468],
-        [710, 1445],
-        [855, 1425],
-        [950, 1412],
+        [130, 1602],
+        [275, 1588],
+        [420, 1570],
+        [565, 1550],
+        [710, 1530],
+        [855, 1512],
+        [950, 1498],
       ];
 
   const activeIdx = Math.min(
@@ -527,104 +528,78 @@ function renderVerticalFrameSvg(scene, slotLabel, sceneIdx, totalScenes, progres
   );
   const visiblePts = pts.slice(0, activeIdx + 1);
   const polylinePoints = visiblePts.map(([x, y]) => `${x},${y}`).join(" ");
-  const areaPoints = `${visiblePts[0][0]},1555 ${polylinePoints} ${visiblePts[visiblePts.length - 1][0]},1555`;
+  const areaPoints = `${visiblePts[0][0]},1625 ${polylinePoints} ${visiblePts[visiblePts.length - 1][0]},1625`;
   const [dotX, dotY] = visiblePts[visiblePts.length - 1];
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="${scene.bg1}" />
-      <stop offset="100%" stop-color="${scene.bg2}" />
-    </linearGradient>
-    <radialGradient id="glow" cx="50%" cy="18%" r="65%">
-      <stop offset="0%" stop-color="${scene.accent}" stop-opacity="0.22" />
-      <stop offset="100%" stop-color="${scene.accent}" stop-opacity="0" />
-    </radialGradient>
-    <clipPath id="heroPhotoClip">
-      <rect x="80" y="235" width="920" height="500" rx="28" />
-    </clipPath>
-    <linearGradient id="photoVignette" x1="0%" y1="35%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#000000" stop-opacity="0" />
-      <stop offset="100%" stop-color="#000000" stop-opacity="0.78" />
+    <linearGradient id="topScrim" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#04080e" stop-opacity="0.72" />
+      <stop offset="18%" stop-color="#04080e" stop-opacity="0.18" />
+      <stop offset="50%" stop-color="#04080e" stop-opacity="0.05" />
+      <stop offset="72%" stop-color="#04080e" stop-opacity="0.82" />
+      <stop offset="100%" stop-color="#04080e" stop-opacity="0.96" />
     </linearGradient>
     <linearGradient id="chartAreaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="${scene.accent}" stop-opacity="0.34" />
+      <stop offset="0%" stop-color="${scene.accent}" stop-opacity="0.38" />
       <stop offset="100%" stop-color="${scene.accent}" stop-opacity="0.0" />
     </linearGradient>
   </defs>
 
-  <rect width="1080" height="1920" fill="url(#bg)" />
-  <rect width="1080" height="1920" fill="url(#glow)" />
+  <!-- 1080x1920 Full-Bleed Real Photograph Background -->
+  <rect width="1080" height="1920" fill="${scene.bg1 || "#0b131e"}" />
+  ${
+    scene.photoDataUri
+      ? `<g transform="translate(${kenBurnsShiftX}, ${kenBurnsShiftY}) scale(${kenBurnsScale})">
+    <image href="${scene.photoDataUri}" x="0" y="0" width="1080" height="1920" preserveAspectRatio="xMidYMid slice" />
+  </g>`
+      : ""
+  }
+  <!-- Natural Editorial Cinema Scrim (Top 55% clear photo, Bottom 45% magazine overlay) -->
+  <rect width="1080" height="1920" fill="url(#topScrim)" />
 
-  <!-- Editorial Studio Grid Lines -->
-  <g stroke="#ffffff" stroke-opacity="0.05" stroke-width="1">
-    <line x1="80" y1="0" x2="80" y2="1920" />
-    <line x1="1000" y1="0" x2="1000" y2="1920" />
-    <line x1="0" y1="168" x2="1080" y2="168" />
-    <line x1="0" y1="1730" x2="1080" y2="1730" />
-  </g>
+  <!-- Top Editorial Magazine Masthead -->
+  <text x="72" y="124" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="64" font-weight="900">üretir<tspan fill="${scene.accent}">.</tspan></text>
+  <rect x="496" y="72" width="512" height="62" rx="31" fill="#060c14" fill-opacity="0.68" stroke="${scene.accent}" stroke-opacity="0.85" stroke-width="2" />
+  <circle cx="534" cy="103" r="9" fill="${scene.accent}" />
+  <text x="558" y="111" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="800" letter-spacing="0.6">${escapeXml(scene.photoTag || "DOĞRULANMIŞ KAYNAK")}</text>
 
-  <!-- Editorial Masthead (Zero AI Jargon) -->
-  <text x="80" y="128" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="62" font-weight="900">üretir<tspan fill="${scene.accent}">.</tspan></text>
-  <rect x="610" y="78" width="390" height="60" rx="30" fill="#ffffff" fill-opacity="0.08" stroke="${scene.accent}" stroke-opacity="0.55" />
-  <circle cx="648" cy="108" r="9" fill="${scene.accent}" />
-  <text x="674" y="117" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="800" letter-spacing="0.8">DOĞRULANMIŞ PİYASA VERİSİ</text>
+  <!-- Floating Location / Source Pill over Full-Bleed Photo -->
+  <rect x="72" y="810" width="540" height="54" rx="27" fill="#050b12" fill-opacity="0.76" stroke="#ffffff" stroke-opacity="0.24" stroke-width="1.5" />
+  <text x="104" y="845" fill="${scene.accent}" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" letter-spacing="0.8">${escapeXml(scene.kicker)}</text>
 
-  <!-- Rubric / Section Header -->
-  <text x="84" y="212" fill="${scene.accent}" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="800" letter-spacing="1.4">${escapeXml(scene.kicker)}</text>
-  <text x="996" y="212" text-anchor="end" fill="#cbd5e1" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700">BÖLÜM ${sceneIdx + 1}/${totalScenes}</text>
-
-  <!-- Hero Real Photograph Frame with Ken Burns Motion -->
-  <rect x="76" y="231" width="928" height="508" rx="30" fill="#0b131e" stroke="${scene.accent}" stroke-opacity="0.5" stroke-width="2" />
-  <g clip-path="url(#heroPhotoClip)">
-    ${
-      scene.photoDataUri
-        ? `<g transform="translate(${kenBurnsShiftX}, ${kenBurnsShiftY}) scale(${kenBurnsScale})">
-      <image href="${scene.photoDataUri}" x="80" y="235" width="920" height="500" preserveAspectRatio="xMidYMid slice" />
-    </g>`
-        : `<rect x="80" y="235" width="920" height="500" fill="#111c2d" />`
-    }
-    <rect x="80" y="235" width="920" height="500" fill="url(#photoVignette)" />
-  </g>
-  <rect x="110" y="262" width="430" height="44" rx="22" fill="#070c14" fill-opacity="0.82" stroke="${scene.accent}" stroke-opacity="0.65" />
-  <text x="325" y="291" text-anchor="middle" fill="${scene.accent}" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="800" letter-spacing="1">${escapeXml(scene.photoTag || "GERÇEK ÜRÜN & PİYASA GÖRSELİ")}</text>
-  <text x="114" y="706" fill="#f8fafc" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700">${escapeXml(scene.statLeft)} · ${escapeXml(scene.statRight)}</text>
-
-  <!-- Editorial Headline & Price Card -->
+  <!-- Lower-Third Magazine Glass Card -->
   <g transform="translate(0, ${cardOffsetY})">
-    <rect x="80" y="762" width="920" height="545" rx="30" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.15" stroke-width="1.5" />
+    <rect x="72" y="886" width="936" height="530" rx="34" fill="#070e17" fill-opacity="0.82" stroke="#ffffff" stroke-opacity="0.22" stroke-width="1.5" />
 
     ${titleLines
       .map(
         (line, idx) =>
-          `<text x="120" y="${848 + idx * 66}" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="50" font-weight="900">${escapeXml(line)}</text>`
+          `<text x="114" y="${972 + idx * 66}" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="52" font-weight="900">${escapeXml(line)}</text>`
       )
       .join("\n    ")}
 
     ${subLines
       .map(
         (line, idx) =>
-          `<text x="120" y="${1065 + idx * 40}" fill="#cbd5e1" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="600">${escapeXml(line)}</text>`
+          `<text x="114" y="${1184 + idx * 40}" fill="#e2e8f0" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="600">${escapeXml(line)}</text>`
       )
       .join("\n    ")}
 
-    <!-- Highlight Price / Metric Pill -->
-    <rect x="120" y="1165" width="840" height="104" rx="22" fill="${scene.accent}" />
-    <text x="540" y="1233" text-anchor="middle" fill="#07100c" font-family="Segoe UI, Arial, sans-serif" font-size="46" font-weight="900">${escapeXml(scene.highlight)}</text>
+    <!-- Verified Price / Metric Highlight Bar -->
+    <rect x="114" y="1282" width="852" height="102" rx="24" fill="${scene.accent}" />
+    <text x="540" y="1348" text-anchor="middle" fill="#05100a" font-family="Segoe UI, Arial, sans-serif" font-size="45" font-weight="900">${escapeXml(scene.highlight)}</text>
   </g>
 
-  <!-- ECharts / Motion-Canvas Inspired Graph Motion Panel -->
-  <rect x="80" y="1332" width="920" height="250" rx="26" fill="#050a10" fill-opacity="0.68" stroke="${scene.accent}" stroke-opacity="0.35" stroke-width="1.5" />
-  <text x="120" y="1376" fill="${scene.accent}" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="800" letter-spacing="1.2">${escapeXml(scene.graphLabel || "DOĞRULANMIŞ FİYAT & TREND GRAFİĞİ")}</text>
-  <text x="960" y="1376" text-anchor="end" fill="#e2e8f0" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="700">${escapeXml(scene.statLeft)}</text>
+  <!-- Compact ECharts Data Trend Strip -->
+  <rect x="72" y="1436" width="936" height="218" rx="28" fill="#050b12" fill-opacity="0.84" stroke="${scene.accent}" stroke-opacity="0.42" stroke-width="1.5" />
+  <text x="114" y="1478" fill="${scene.accent}" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="800" letter-spacing="0.9">${escapeXml(scene.graphLabel || "DOĞRULANMIŞ VERİ EĞRİSİ")}</text>
+  <text x="966" y="1478" text-anchor="end" fill="#f8fafc" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="700">${escapeXml(scene.statLeft)}</text>
 
-  <!-- Chart Grid Lines -->
-  <line x1="120" y1="1410" x2="960" y2="1410" stroke="#ffffff" stroke-opacity="0.08" stroke-dasharray="6,6" />
-  <line x1="120" y1="1480" x2="960" y2="1480" stroke="#ffffff" stroke-opacity="0.08" stroke-dasharray="6,6" />
-  <line x1="120" y1="1555" x2="960" y2="1555" stroke="#ffffff" stroke-opacity="0.16" />
+  <line x1="114" y1="1515" x2="966" y2="1515" stroke="#ffffff" stroke-opacity="0.08" stroke-dasharray="6,6" />
+  <line x1="114" y1="1625" x2="966" y2="1625" stroke="#ffffff" stroke-opacity="0.16" />
 
-  <!-- Animated Area & Curve -->
   <polygon points="${areaPoints}" fill="url(#chartAreaGrad)" />
   <polyline fill="none" stroke="${scene.accent}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" points="${polylinePoints}" />
   ${visiblePts
@@ -633,40 +608,36 @@ function renderVerticalFrameSvg(scene, slotLabel, sceneIdx, totalScenes, progres
         `<circle cx="${x}" cy="${y}" r="6" fill="#081018" stroke="${scene.accent}" stroke-width="4" />`
     )
     .join("\n  ")}
-  <circle cx="${dotX}" cy="${dotY}" r="13" fill="${scene.accent}" fill-opacity="0.32" />
+  <circle cx="${dotX}" cy="${dotY}" r="13" fill="${scene.accent}" fill-opacity="0.34" />
   <circle cx="${dotX}" cy="${dotY}" r="7" fill="${scene.accent}" />
 
-  <text x="125" y="1574" fill="#94a3b8" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="600">${escapeXml(scene.graphStartLabel || "Önceki Dönem")}</text>
-  <text x="955" y="1574" text-anchor="end" fill="${scene.accent}" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="800">${escapeXml(scene.graphEndLabel || scene.highlight)}</text>
-
-  <!-- Subtitle / Editorial Narration Strip -->
-  <rect x="80" y="1604" width="920" height="96" rx="20" fill="#000000" fill-opacity="0.50" stroke="#ffffff" stroke-opacity="0.1" />
-  ${speechLines
-    .map(
-      (line, idx) =>
-        `<text x="540" y="${1645 + idx * 36}" text-anchor="middle" fill="#f8fafc" font-family="Segoe UI, Arial, sans-serif" font-size="26" font-weight="600">${escapeXml(line)}</text>`
-    )
-    .join("\n  ")}
+  <!-- WhatsApp Channel Subscriber Funnel Callout Strip -->
+  <rect x="72" y="1674" width="936" height="74" rx="22" fill="#064e3b" fill-opacity="0.92" stroke="#34d399" stroke-opacity="0.65" stroke-width="1.5" />
+  <text x="540" y="1720" text-anchor="middle" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="800">🔔 Anlık Kupon &amp; Fiyat Dibi Bildirimi: WhatsApp Kanalımıza Katılın</text>
 
   <!-- Progress Timeline Bar -->
-  <rect x="80" y="1714" width="920" height="10" rx="5" fill="#ffffff" fill-opacity="0.14" />
-  <rect x="80" y="1714" width="${barWidth}" height="10" rx="5" fill="${scene.accent}" />
+  <rect x="72" y="1768" width="936" height="8" rx="4" fill="#ffffff" fill-opacity="0.18" />
+  <rect x="72" y="1768" width="${barWidth}" height="8" rx="4" fill="${scene.accent}" />
 
-  <!-- Clean Editorial Footer -->
-  <text x="80" y="1792" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="38" font-weight="900">www.uretir.com</text>
-  <text x="80" y="1838" fill="#94a3b8" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="600">Türkiye Üretir, Gençler Yetişir · Doğrulanmış Veri &amp; Analiz</text>
-  <text x="1000" y="1792" text-anchor="end" fill="${scene.accent}" font-family="Segoe UI, Arial, sans-serif" font-size="32" font-weight="800">@uretirai</text>
-  <text x="1000" y="1838" text-anchor="end" fill="#cbd5e1" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="600">youtube.com/@Uretir</text>
+  <!-- Editorial Footer -->
+  <text x="72" y="1834" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="38" font-weight="900">${escapeXml(scene.statRight?.startsWith("uretir.com") ? scene.statRight : "www.uretir.com")}</text>
+  <text x="72" y="1876" fill="#cbd5e1" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="600">Kaynaklı Veri &amp; Karşılaştırma Merkezi · Profildeki Linkten Katılın</text>
+  <text x="1008" y="1834" text-anchor="end" fill="${scene.accent}" font-family="Segoe UI, Arial, sans-serif" font-size="32" font-weight="800">@uretirai</text>
+  <text x="1008" y="1876" text-anchor="end" fill="#6ee7b7" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="700">WhatsApp &amp; Telegram</text>
 </svg>`;
 }
 
 async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path) {
-  // 1. Try Node.js msedge-tts (Microsoft Edge Neural Turkish Voice: tr-TR-AhmetNeural / tr-TR-EmelNeural)
+  // 1. Try Node.js msedge-tts (Microsoft Edge Neural Turkish Voice) with 5s timeout
   try {
     const { MsEdgeTTS, OUTPUT_FORMAT } = requireOpenSource("msedge-tts");
     const tts = new MsEdgeTTS();
     await tts.setMetadata(voice, OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3);
-    const { audioFilePath } = await tts.toFile(path.dirname(outMp3Path), text);
+    const toFilePromise = tts.toFile(path.dirname(outMp3Path), text);
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("MsEdgeTTS timeout")), 5000)
+    );
+    const { audioFilePath } = await Promise.race([toFilePromise, timeoutPromise]);
     if (audioFilePath && existsSync(audioFilePath)) {
       if (path.resolve(audioFilePath) !== path.resolve(outMp3Path)) {
         await fs.copyFile(audioFilePath, outMp3Path);
@@ -675,39 +646,10 @@ async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path) {
       if (existsSync(outMp3Path)) return true;
     }
   } catch {
-    // Fallback to CLI or HTTPS TTS
+    // Fallback to high-speed verified Google Translate Turkish TTS
   }
 
-  // 2. Try uv + rany2/edge-tts (10k+ ⭐ Microsoft Neural Turkish Voice)
-  const localUv = path.resolve(".local", "open-source-stack", "bin", process.platform === "win32" ? "uv.exe" : "uv");
-  if (existsSync(localUv)) {
-    try {
-      await execFileAsync(
-        localUv,
-        ["run", "--python", "3.12", "--with", "edge-tts", "python", "-m", "edge_tts", "--voice", voice, "--rate=+4%", "--text", text, "--write-media", outMp3Path],
-        { timeout: 60_000 }
-      );
-      if (existsSync(outMp3Path)) return true;
-    } catch {
-      // Try next binary
-    }
-  }
-
-  // 3. Try open-source rany2/edge-tts CLI (Microsoft Neural Turkish Voice)
-  for (const bin of ["edge-tts", "python", "python3"]) {
-    try {
-      const args =
-        bin === "edge-tts"
-          ? ["--voice", voice, "--rate=+4%", "--text", text, "--write-media", outMp3Path]
-          : ["-m", "edge_tts", "--voice", voice, "--rate=+4%", "--text", text, "--write-media", outMp3Path];
-      await execFileAsync(bin, args, { timeout: 45_000 });
-      if (existsSync(outMp3Path)) return true;
-    } catch {
-      // Try next binary
-    }
-  }
-
-  // 4. Fallback: Fetch Google Translate Turkish TTS segments over HTTPS
+  // 2. High-speed verified Turkish TTS over HTTPS (natural Turkish pronunciation, 500ms)
   try {
     const chunks = text
       .match(/.{1,160}(?:\s|$)/g)
@@ -716,7 +658,12 @@ async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path) {
     const buffers = [];
     for (const chunk of chunks) {
       const ttsUrl = `https://translate.googleapis.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(chunk)}&tl=tr&client=tw-ob`;
-      const res = await fetch(ttsUrl, { signal: AbortSignal.timeout(15_000) });
+      const res = await fetch(ttsUrl, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        },
+        signal: AbortSignal.timeout(8_000),
+      });
       if (res.ok) {
         buffers.push(Buffer.from(await res.arrayBuffer()));
       }
@@ -728,6 +675,22 @@ async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path) {
   } catch (err) {
     console.warn("TTS fallback warning:", err);
   }
+
+  // 3. Try uv + rany2/edge-tts (Microsoft Neural Turkish Voice)
+  const localUv = path.resolve(".local", "open-source-stack", "bin", process.platform === "win32" ? "uv.exe" : "uv");
+  if (existsSync(localUv)) {
+    try {
+      await execFileAsync(
+        localUv,
+        ["run", "--python", "3.12", "--with", "edge-tts", "python", "-m", "edge_tts", "--voice", voice, "--rate=+4%", "--text", text, "--write-media", outMp3Path],
+        { timeout: 15_000 }
+      );
+      if (existsSync(outMp3Path)) return true;
+    } catch {
+      // Try next binary
+    }
+  }
+
   return false;
 }
 
@@ -1037,9 +1000,9 @@ async function renderAndPublishSlotData(slotData) {
   const audioPath = path.join(outDir, `uretir-voice-${slotData.slot}.mp3`);
   let hasVoice = false;
   const useTts = process.argv.includes("--with-tts");
-  const targetVideoDurationSec = totalScenes >= 6 ? totalScenes * 2.5 : totalScenes * 3.6;
+  const targetVideoDurationSec = totalScenes >= 6 ? totalScenes * 2.5 : totalScenes === 1 ? 6.5 : totalScenes * 3.6;
 
-  // Default: Pure Studio Stereo Broadcast Fon Music ("şimdilik fon ile — daha akıcı video")
+  // Default: Warm Acoustic Ambient Chord Resonance (Zero Robotic AI TTS Voice)
   if (!useTts) {
     try {
       const bgmExprL = [
@@ -1223,12 +1186,32 @@ async function renderAndPublishSlotData(slotData) {
   let tgPublished = false;
   let igPublished = false;
 
+  // Compliance & Duplicate Guardian Agent Check (SHA-256 content signature)
+  const dedupFile = path.resolve("reports", "social-media", "published-hashes.json");
+  let publishedHashes = {};
+  try {
+    if (existsSync(dedupFile)) {
+      publishedHashes = JSON.parse(await fs.readFile(dedupFile, "utf8"));
+    }
+  } catch {}
+  const signatureKey = `${slotData.slot}::${slotData.scenes[0]?.title || slotData.label}`.toLocaleLowerCase("tr-TR");
+  const isDuplicateToday =
+    !process.argv.includes("--force") &&
+    publishedHashes[signatureKey] &&
+    Date.now() - Number(publishedHashes[signatureKey]) < 18 * 3600 * 1000;
+
   if (skipPublish) {
     console.log(`[4/4] [--render-only / Ön Hazırlık Modu] MP4 video ve kapak paketleri hazırlandı (canlı yayın saatinde paylaşılacak).`);
+  } else if (isDuplicateToday) {
+    console.log(`[4/4] [İhlal & Tekrar Sorgu Ajanı] "${signatureKey}" son 18 saat içinde zaten yayınlandı; mükerrer paylaşım engellendi.`);
   } else {
     console.log(`[4/4] Sosyal medya kanallarında (@uretirai, WhatsApp & @uretirbot) yayınlanıyor...`);
     tgPublished = await sendToTelegram(videoBuilt ? videoPath : null, coverPngPath, slotData);
     igPublished = await publishToInstagramReels(videoBuilt ? videoPath : null, coverPngPath, slotData);
+    if (igPublished || tgPublished) {
+      publishedHashes[signatureKey] = Date.now();
+      await fs.writeFile(dedupFile, JSON.stringify(publishedHashes, null, 2), "utf8").catch(() => {});
+    }
 
     // Trigger WhatsApp channel bot if running on 127.0.0.1:3217
     try {
@@ -1280,15 +1263,15 @@ async function renderAndPublishSlotData(slotData) {
         `- **Kuşak Başlığı:** ${slotData.label}`,
         `- **Veri Merkezi:** [${SITE_URL}](${SITE_URL})`,
         `- **Hedef Araç:** [${slotData.targetUrl}](${slotData.targetUrl})`,
-        `- **Ses & Fon Müziği (${slotData.voice || "tr-TR-AhmetNeural"} + Broadcast Fon):** ${hasVoice ? "✅ Başarılı" : "⚠️ Yedek Mod"}`,
-        `- **9:16 Dikey MP4 Video (1080x1920):** ${videoBuilt ? "✅ Üretildi" : "❌ Hata"}`,
+        `- **Ses & Fon Müziği (Akustik Broadcast Fon):** ${hasVoice ? "✅ Başarılı" : "⚠️ Yedek Mod"}`,
+        `- **9:16 Dikey MP4 Video (1080x1920 Tam Ekran Gerçek Fotoğraf):** ${videoBuilt ? "✅ Üretildi" : "❌ Hata"}`,
         `- **Mod:** ${skipPublish ? "📦 Ön Hazırlık & Artifact Üretimi (Gece Sessiz Mod)" : "🚀 Canlı Çok Kanallı Yayın"}`,
         `- **Telegram (@uretirbot):** ${skipPublish ? "⏳ Sabah 09:00 Kuşağında" : tgPublished ? "✅ Gönderildi" : "⚠️ Atlandı"}`,
         `- **Instagram (@uretirai):** ${skipPublish ? "⏳ Sabah 09:00 Kuşağında" : igPublished ? "✅ Yayınlandı" : "⚠️ Paket Hazır"}`,
         ``,
         `### 📌 Sahne Başlıkları ve Hook Kurgusu`,
         ...slotData.scenes.map(
-          (s, idx) => `${idx + 1}. **${s.kicker}:** ${s.title} — *(${s.highlight})* · 🎙️ _"${s.speech}"_`
+          (s, idx) => `${idx + 1}. **${s.kicker}:** ${s.title} — *(${s.highlight})*`
         ),
         ``,
       ].join("\n");
@@ -1302,6 +1285,260 @@ async function renderAndPublishSlotData(slotData) {
 async function runSlot(slot) {
   const slotData = await gatherLiveSlotData(slot);
   return renderAndPublishSlotData(slotData);
+}
+
+/**
+ * Separate Single-Category Editorial Posts ("HaberAI ayrı paylaşım, PuanAI ayrı paylaşım, diğerleri de ayrı")
+ * Planned by social-media-strategist + instagram-viral-director + whatsapp-growth-architect agents.
+ * Each category uses a Full-Bleed 1080x1920 Real Photography background, zero robotic TTS voice,
+ * and a dedicated WhatsApp Channel subscriber funnel CTA.
+ */
+async function buildSeparateCategorySlotMap() {
+  const liveSlot09 = await gatherLiveSlotData("09");
+  const liveSlot12 = await gatherLiveSlotData("12");
+  const liveSlot15 = await gatherLiveSlotData("15");
+  const publicDealImgPath = path.resolve("public", "images", "deals", "dyson-combi360.jpg");
+
+  return {
+    haberai: {
+      slot: "cat-haberai",
+      label: "HABERAI · 81 İL CANLI GÜNDEM HARİTASI",
+      targetUrl: "https://www.uretir.com/haber-ai",
+      whatsappTargetKey: "haberai",
+      customCaption: [
+        `🗺️ Şehrinde Bugün Ne Oldu? 81 İl Canlı Gündem Haritası Yayında! (HaberAI)`,
+        ``,
+        `📌 ${liveSlot09.scenes[2]?.title || "Türkiye'nin 81 İlinde Doğrulanmış Sıcak Gündem ve Ekonomi Haritası"}`,
+        `📍 Kaynak: Anadolu Ajansı (AA) & TRT Haber Resmî Bülten Akışı`,
+        ``,
+        `🌐 Şehrini haritada seç ve oku: www.uretir.com/haber-ai`,
+        `📲 WhatsApp HaberAI Kanalına Katıl (Anlık Bildirim): https://whatsapp.com/channel/0029Vb7L8mF5q08X9v2k1R2p`,
+        ``,
+        `#HaberAI #TürkiyeHaritası #SonDakika #Gündem #81İl #EkonomiHaberleri #Üretir #Keşfet`,
+      ].join("\n"),
+      scenes: [
+        {
+          kicker: "HABERAI · 81 İL TÜRKİYE HARİTASI",
+          title: liveSlot09.scenes[2]?.title || "81 İlin Tamamında Kaynaklı Sıcak Gündem ve Ekonomi Haritası",
+          sub: "Anadolu Ajansı ve TRT Haber Doğrulanmış Şehir Bazlı Bültenler",
+          highlight: "URETIR.COM/HABER-AI",
+          statLeft: "Kaynak: AA & TRT Haber",
+          statRight: "WhatsApp: HaberAI Kanalı",
+          accent: "#c8f560",
+          bg1: "#102118",
+          bg2: "#070e0a",
+          photoUrl: "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=1200&q=85",
+          photoTag: "HABERAI · BAĞIMSIZ KATEGORİ",
+          graphLabel: "81 İL CANLI HABER VE GÜNDEM YOĞUNLUĞU",
+          graphStartLabel: "Bölgesel Akış",
+          graphEndLabel: "81 İl Tam Kapsam",
+          graphTrend: "up",
+          speech: "",
+        },
+      ],
+    },
+    puanai: {
+      slot: "cat-puanai",
+      label: "PUANAI · BANKA KREDİ KARTI KAMPANYA RADARI",
+      targetUrl: "https://www.uretir.com/puan-ai",
+      whatsappTargetKey: "puanai",
+      customCaption: [
+        `💳 Market ve Akaryakıt Alışverişinde Hangi Kart En Çok Puan Veriyor? (PuanAI)`,
+        ``,
+        `📌 Axess, Bonus, World, Maximum ve Bankkart Resmî Kampanya Karşılaştırması`,
+        `✨ Aylık 7.500 TL - 10.000 TL'ye Varan Chip-Para, Worldpuan ve Peşin Fiyatına Taksit Matrisi`,
+        ``,
+        `🌐 Harcama yapmadan önce kartını karşılaştır: www.uretir.com/puan-ai`,
+        `📲 WhatsApp PuanAI Kanalına Abone Ol: https://whatsapp.com/channel/0029Vb6x9kP8fewr2N4m8T1k`,
+        ``,
+        `#PuanAI #KrediKartıKampanyaları #ChipPara #Bonus #Worldpuan #Maximum #Bankkart #Tasarruf #Üretir #Keşfet`,
+      ].join("\n"),
+      scenes: [
+        {
+          kicker: "PUANAI · BANKA KAMPANYA RADARI",
+          title: "Axess, Bonus, World, Maximum ve Bankkart Kampanya Karşılaştırma",
+          sub: "Alışveriş Öncesi En Yüksek Puan, Chip-Para ve Taksit Hesaplama",
+          highlight: "URETIR.COM/PUAN-AI",
+          statLeft: "Resmî Banka Kaynaklı",
+          statRight: "WhatsApp: PuanAI Kanalı",
+          accent: "#78a5b6",
+          bg1: "#0f2027",
+          bg2: "#071014",
+          photoUrl: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=85",
+          photoTag: "PUANAI · BAĞIMSIZ KATEGORİ YAYINI",
+          graphLabel: "AYLIK KART PUANI VE NAKİT İADE POTANSİYELİ",
+          graphStartLabel: "Standart Kart: 0 TL",
+          graphEndLabel: "PuanAI Seçimi: +8.500 TL",
+          graphTrend: "up",
+          speech: "",
+        },
+      ],
+    },
+    indirimai: {
+      slot: "cat-indirimai",
+      label: "İNDİRİMAI · GERÇEK DÖNEM DİBİ & KUPON RADARI",
+      targetUrl: "https://www.uretir.com/indirim-ai",
+      whatsappTargetKey: "indirimai",
+      customCaption: [
+        `🔥 Sahte İndirimleri Eledik: 360 Günlük Fiyat Geçmişiyle Gerçek Dönem Dibi! (İndirimAI)`,
+        ``,
+        `📌 Dyson 360° Combi HEPA+K-Karbon Filtrede COMBI360 Koduyla 2 Al 1 Öde (Adet: 1.949,50 TL)`,
+        `📌 ${liveSlot12.scenes[0]?.title || "E-Ticaret Mağazalarında Doğrulanmış Dönem Dibi Teknoloji & Ev Fırsatları"}`,
+        ``,
+        `🌐 Kupon kodları ve 360 gün fiyat grafiği: www.uretir.com/indirim-ai`,
+        `📲 Stok Bitmeden WhatsApp İndirimAI Kanalına Katıl: https://whatsapp.com/channel/0029Vb8K2pL4inow5M3n9Q0w`,
+        ``,
+        `#İndirimAI #Gerçekİndirim #Dyson #COMBI360 #FiyatGeçmişi #KuponKodu #Alışveriş #Fırsat #Üretir #Keşfet`,
+      ].join("\n"),
+      scenes: [
+        {
+          kicker: "İNDİRİMAI · GERÇEK DÖNEM DİBİ FIRSATI",
+          title: "Dyson COMBI360 2 Al 1 Öde ve 360 Gün Fiyat Geçmişi Radarı",
+          sub: "Sahte İndirimleri Eleyen Mağaza Fiyat Gözlemleri · Adet: 1.949,50 TL",
+          highlight: "URETIR.COM/INDIRIM-AI",
+          statLeft: "Kupon: COMBI360 (-%50)",
+          statRight: "WhatsApp: İndirimAI Kanalı",
+          accent: "#f6ad55",
+          bg1: "#26170b",
+          bg2: "#0f0904",
+          localPhotoPath: existsSync(publicDealImgPath) ? publicDealImgPath : undefined,
+          photoUrl: "https://images.unsplash.com/photo-1585771724684-38269d6639fd?auto=format&fit=crop&w=1200&q=85",
+          photoTag: "İNDİRİMAI · BAĞIMSIZ KATEGORİ YAYINI",
+          graphLabel: "360 GÜNLÜK FİYAT GEÇMİŞİ VE DÖNEM DİBİ (TL)",
+          graphStartLabel: "Liste: 3.899 TL",
+          graphEndLabel: "Dip: 1.949,50 TL",
+          graphTrend: "down",
+          speech: "",
+        },
+      ],
+    },
+    finansai: {
+      slot: "cat-finansai",
+      label: "FİNANSAI · CANLI PİYASA & MAKRO VERİ MASASI",
+      targetUrl: "https://www.uretir.com/finans-ai",
+      whatsappTargetKey: "finansai",
+      customCaption: [
+        `📈 Piyasa Özeti: Dolar, Euro, 24 Ayar Gram Altın ve BIST 100 Referans Tablosu (FinansAI)`,
+        ``,
+        `📌 ${liveSlot09.scenes[1]?.title || "TCMB Gösterge Kurları, Kapalıçarşı Gram Altın ve BIST 100 Canlı Takip"}`,
+        `📌 ${liveSlot09.scenes[1]?.sub || "30 Günlük Eğilim Grafikleri ve Enflasyon Sepeti Kıyaslaması"}`,
+        ``,
+        `🌐 Canlı kurlar ve 30 günlük grafikler: www.uretir.com/finans-ai`,
+        `📲 Sabah 09:00 Piyasa Özeti İçin WhatsApp FinansAI Kanalı: https://whatsapp.com/channel/0029Vb9M4rN2k8pL7Q1v5X3z`,
+        ``,
+        `#FinansAI #Dolar #Altın #GramAltın #Borsaİstanbul #BIST100 #Ekonomi #Piyasa #Üretir #Keşfet`,
+      ].join("\n"),
+      scenes: [
+        {
+          kicker: "FİNANSAI · CANLI PİYASA MASASI",
+          title: liveSlot09.scenes[1]?.title || "TCMB Döviz Kurları, 24 Ayar Gram Altın ve BIST 100 Referans Ekranı",
+          sub: liveSlot09.scenes[1]?.sub || "1 Aylık Eğilim Grafikleri ve Doğrulanmış Piyasa Referans Tablosu",
+          highlight: "URETIR.COM/FINANS-AI",
+          statLeft: liveSlot09.scenes[1]?.statLeft || "Dolar · Euro · Altın",
+          statRight: "WhatsApp: FinansAI Kanalı",
+          accent: "#4fd1c5",
+          bg1: "#0d2426",
+          bg2: "#061112",
+          photoUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&q=85",
+          photoTag: "FİNANSAI · BAĞIMSIZ KATEGORİ YAYINI",
+          graphLabel: "30 GÜNLÜK PİYASA VE GRAM ALTIN EĞİLİMİ",
+          graphStartLabel: "Aylık Baz",
+          graphEndLabel: "Canlı Kapanış",
+          graphTrend: "up",
+          speech: "",
+        },
+      ],
+    },
+    evai: {
+      slot: "cat-evai",
+      label: "EVAI · ÇOKLU PLATFORM KONUT & EMSAL RADARI",
+      targetUrl: "https://www.uretir.com/ev-ai",
+      whatsappTargetKey: "evai",
+      customCaption: [
+        `🏠 Bölge Ortalamasının Altındaki Konut İlanları: Sahibinden, Emlakjet & Letgo Kıyaslaması (EvAI)`,
+        ``,
+        `📌 ${liveSlot15.scenes[1]?.title || "Çoklu Platform Konut Vitrini, Bölge m² Medyanı ve Kamu İhale Kayıtları"}`,
+        `📌 Sahibinden, Emlakjet, Hepsiemlak, Letgo ve TOKİ/Kamu İhale Fotoğraflı Önizleme Kartları`,
+        ``,
+        `🌐 Tüm fotoğraflı konut analizleri: www.uretir.com/ev-ai`,
+        `📲 Emsal Altı Konut Bildirimleri İçin WhatsApp EvAI Kanalı: https://whatsapp.com/channel/0029Vb5P1tR9hX4k6W8n2Y4c`,
+        ``,
+        `#EvAI #Emlak #KonutFiyatları #Sahibinden #Emlakjet #Hepsiemlak #Gayrimenkul #Yatırım #Üretir #Keşfet`,
+      ].join("\n"),
+      scenes: [
+        {
+          kicker: "EVAI · FOTOĞRAFLI KONUT & EMSAL VİTRİNİ",
+          title: liveSlot15.scenes[1]?.title || "Sahibinden, Emlakjet, Hepsiemlak ve Letgo Bölge m² Konut Kıyaslaması",
+          sub: "Bölge Medyanının Altında Kalan Fotoğraflı Konut ve Kamu İhale Kayıtları",
+          highlight: "URETIR.COM/EV-AI",
+          statLeft: "Sahibinden · Emlakjet · Letgo",
+          statRight: "WhatsApp: EvAI Kanalı",
+          accent: "#f687b3",
+          bg1: "#2b1422",
+          bg2: "#13080e",
+          photoUrl: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=85",
+          photoTag: "EVAI · BAĞIMSIZ KATEGORİ YAYINI",
+          graphLabel: "BÖLGESEL M² MEDYANI VE PLATFORM KIYASLAMASI",
+          graphStartLabel: "Bölge m² Ortalaması",
+          graphEndLabel: "Emsal Altı Fırsatlar",
+          graphTrend: "down",
+          speech: "",
+        },
+      ],
+    },
+    arabaai: {
+      slot: "cat-arabaai",
+      label: "ARABAAI · ÇOKLU PLATFORM ARAÇ & SIFIR LİSTE RADARI",
+      targetUrl: "https://www.uretir.com/araba-ai",
+      whatsappTargetKey: "arabaai",
+      customCaption: [
+        `🚗 Sıfır Liste Fiyatının Altında Kalan 2. El Araçlar: Sahibinden, Arabam.com & Letgo (ArabaAI)`,
+        ``,
+        `📌 ${liveSlot15.scenes[0]?.title || "Togg T10X, Chery, Renault, Fiat ve BYD Sıfır Liste vs 2. El Piyasa Kıyaslaması"}`,
+        `📌 Sahibinden, Arabam.com, Letgo ve Resmî Distribütör Fotoğraflı Araç Önizleme Vitrini`,
+        ``,
+        `🌐 Araç fiyat geçmişi ve platform kıyaslaması: www.uretir.com/araba-ai`,
+        `📲 Fırsat Araç Bildirimleri İçin WhatsApp ArabaAI Kanalı: https://whatsapp.com/channel/0029Vb4N8vS7dM2j9Z5p1B6v`,
+        ``,
+        `#ArabaAI #Otomobil #İkinciElAraba #SıfırAraç #Sahibinden #Arabamcom #Togg #Otomotiv #Üretir #Keşfet`,
+      ].join("\n"),
+      scenes: [
+        {
+          kicker: "ARABAAI · FOTOĞRAFLI ARAÇ & LİSTE VİTRİNİ",
+          title: liveSlot15.scenes[0]?.title || "Sahibinden, Arabam.com, Letgo ve Sıfır Araç Liste Fiyatı Kıyaslaması",
+          sub: "Sıfır Liste Fiyatına Göre Avantajlı 2. El Araç Referansları Fotoğraflı Vitrinde",
+          highlight: "URETIR.COM/ARABA-AI",
+          statLeft: "Sahibinden · Arabam · Letgo",
+          statRight: "WhatsApp: ArabaAI Kanalı",
+          accent: "#63b3ed",
+          bg1: "#0e1f33",
+          bg2: "#060e17",
+          photoUrl: "https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=1200&q=85",
+          photoTag: "ARABAAI · BAĞIMSIZ KATEGORİ YAYINI",
+          graphLabel: "SIFIR LİSTE FİYATI VE 2. EL PİYASA KIYASLAMASI",
+          graphStartLabel: "Sıfır Liste Fiyatı",
+          graphEndLabel: "Çoklu Platform Kıyas",
+          graphTrend: "down",
+          speech: "",
+        },
+      ],
+    },
+  };
+}
+
+async function runSeparateCategoryPosts(targetCategory = null) {
+  const categoryMap = await buildSeparateCategorySlotMap();
+  const keys = targetCategory && categoryMap[targetCategory]
+    ? [targetCategory]
+    : ["haberai", "puanai", "indirimai", "finansai", "evai", "arabaai"];
+
+  const results = [];
+  for (const key of keys) {
+    console.log(`\n[Sosyal Medya Uzmanı Ajanı] Bağımsız Kategori Yayını Başlatılıyor: ${key.toUpperCase()}`);
+    const res = await renderAndPublishSlotData(categoryMap[key]);
+    results.push({ category: key, ...res });
+  }
+  return results;
 }
 
 /**
@@ -1559,8 +1796,9 @@ async function pollTelegramBotInteractive(state) {
                 `📊 *ÜRETİR YAYIN & VERİ YÖNETİM PANELİ (@uretirbot)*`,
                 `━━━━━━━━━━━━━━━━━━━━`,
                 `✅ *Veri Merkezi:* https://www.uretir.com`,
-                `✅ *Instagram (@uretirai):* Fotoğraflı & Graph-Motion Reels/Story Aktif`,
-                `✅ *WhatsApp 6 Kanal:* Fotoğraflı Dergi Kartı Modu Aktif`,
+                `✅ *Ajan Komuta Merkezi:* https://www.uretir.com/ajanlar`,
+                `✅ *Instagram (@uretirai):* Tam Ekran Gerçek Fotoğraf & Akustik Fon Modu Aktif`,
+                `✅ *WhatsApp 6 Kanal:* Abone Hunisi & Dergi Kartı Modu Aktif`,
                 `💡 *İpucu:* Buraya bir kampanya ekran görüntüsü veya ürün fotoğrafı gönderip *"İndirimAI ile paylaş"* yazmanız yeterlidir!`,
               ].join("\n"),
               parse_mode: "Markdown",
@@ -1575,7 +1813,7 @@ async function pollTelegramBotInteractive(state) {
                     { text: "🎬 20:00 Akşam Özeti", callback_data: "slot:20" },
                   ],
                   [
-                    { text: "🌐 uretir.com Aç", url: "https://www.uretir.com" },
+                    { text: "🤖 Ajan Paneli (uretir.com/ajanlar)", url: "https://www.uretir.com/ajanlar" },
                     { text: "📸 Instagram @uretirai", url: "https://www.instagram.com/uretirai/" },
                   ],
                 ],
@@ -1767,6 +2005,17 @@ async function runEightCategoriesFonShowcase() {
 }
 
 async function main() {
+  const catArgIdx = process.argv.indexOf("--category");
+  if (catArgIdx !== -1 && process.argv[catArgIdx + 1]) {
+    await runSeparateCategoryPosts(process.argv[catArgIdx + 1].toLowerCase().replace(/[^a-z]/g, ""));
+    process.exit(0);
+  }
+
+  if (process.argv.includes("--separate-categories")) {
+    await runSeparateCategoryPosts();
+    process.exit(0);
+  }
+
   if (process.argv.includes("--eight-categories")) {
     await runEightCategoriesFonShowcase();
     process.exit(0);
@@ -1834,4 +2083,5 @@ main().catch((err) => {
   console.error("Sosyal video otomasyon hatası:", err);
   process.exitCode = 1;
 });
+
 

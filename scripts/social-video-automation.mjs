@@ -1001,7 +1001,8 @@ async function renderAndPublishSlotData(slotData) {
   const fullSpeech = slotData.scenes.map((s) => s.speech).join(" · [FON] · ");
   const audioPath = path.join(outDir, `uretir-voice-${slotData.slot}.mp3`);
   let hasVoice = false;
-  const useTts = process.argv.includes("--with-tts") || process.env.WITH_TTS === "1";
+  const hasNonEmptySpeech = slotData.scenes.some((s) => s.speech && String(s.speech).trim().length > 0);
+  const useTts = process.argv.includes("--with-tts") && hasNonEmptySpeech;
   const targetVideoDurationSec = totalScenes >= 6 ? totalScenes * 2.5 : totalScenes === 1 ? 6.5 : totalScenes * 3.6;
 
   // Default: Warm Acoustic Ambient Chord Resonance (Zero Robotic AI TTS Voice)

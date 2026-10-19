@@ -1364,6 +1364,8 @@ function pickFreshVisual(categoryKey, candidateImageUrl, usedImagesSet) {
   if (
     candidateImageUrl &&
     candidateImageUrl.startsWith("http") &&
+    !candidateImageUrl.includes("/api/visual-card") &&
+    !candidateImageUrl.includes("opengraph-image") &&
     !usedImagesSet.has(candidateImageUrl.trim())
   ) {
     return candidateImageUrl.trim();

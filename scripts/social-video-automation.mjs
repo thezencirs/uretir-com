@@ -638,6 +638,7 @@ async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path) {
       setTimeout(() => reject(new Error("MsEdgeTTS timeout")), 5000)
     );
     const { audioFilePath } = await Promise.race([toFilePromise, timeoutPromise]);
+    try { tts.close(); } catch {}
     if (audioFilePath && existsSync(audioFilePath)) {
       if (path.resolve(audioFilePath) !== path.resolve(outMp3Path)) {
         await fs.copyFile(audioFilePath, outMp3Path);
@@ -999,7 +1000,7 @@ async function renderAndPublishSlotData(slotData) {
   const fullSpeech = slotData.scenes.map((s) => s.speech).join(" · [FON] · ");
   const audioPath = path.join(outDir, `uretir-voice-${slotData.slot}.mp3`);
   let hasVoice = false;
-  const useTts = process.argv.includes("--with-tts");
+  const useTts = process.argv.includes("--with-tts") || process.env.WITH_TTS === "1";
   const targetVideoDurationSec = totalScenes >= 6 ? totalScenes * 2.5 : totalScenes === 1 ? 6.5 : totalScenes * 3.6;
 
   // Default: Warm Acoustic Ambient Chord Resonance (Zero Robotic AI TTS Voice)
@@ -1186,32 +1187,58 @@ async function renderAndPublishSlotData(slotData) {
   let tgPublished = false;
   let igPublished = false;
 
-  // Compliance & Duplicate Guardian Agent Check (SHA-256 content signature)
+  // Strict "Sadece Yeni Ürün ve Yeni Görsel" Ledger (Compliance & Duplicate Guardian Agent)
   const dedupFile = path.resolve("reports", "social-media", "published-hashes.json");
-  let publishedHashes = {};
+  let publishedLedger = {
+    signatures: {},
+    usedProducts: [
+      "dyson 360 combi hepa+k-karbon hava temizleyici filtre",
+      "dyson combi360 2 al 1 öde ve 360 gün fiyat geçmişi radarı",
+    ],
+    usedImages: [
+      "dyson-combi360.jpg",
+      "https://images.unsplash.com/photo-1585771724684-38269d6639fd?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=85",
+    ],
+  };
   try {
     if (existsSync(dedupFile)) {
-      publishedHashes = JSON.parse(await fs.readFile(dedupFile, "utf8"));
+      const raw = JSON.parse(await fs.readFile(dedupFile, "utf8"));
+      publishedLedger = {
+        signatures: raw.signatures || raw || {},
+        usedProducts: Array.from(new Set([...(publishedLedger.usedProducts || []), ...(raw.usedProducts || [])])),
+        usedImages: Array.from(new Set([...(publishedLedger.usedImages || []), ...(raw.usedImages || [])])),
+      };
     }
   } catch {}
-  const signatureKey = `${slotData.slot}::${slotData.scenes[0]?.title || slotData.label}`.toLocaleLowerCase("tr-TR");
-  const isDuplicateToday =
+
+  const primaryTitleNorm = String(slotData.scenes[0]?.title || slotData.label)
+    .toLocaleLowerCase("tr-TR")
+    .trim();
+  const primaryImageNorm = String(slotData.scenes[0]?.photoUrl || slotData.scenes[0]?.localPhotoPath || "").trim();
+  const signatureKey = `${slotData.slot}::${primaryTitleNorm}`;
+  const isDuplicateProductOrImage =
     !process.argv.includes("--force") &&
-    publishedHashes[signatureKey] &&
-    Date.now() - Number(publishedHashes[signatureKey]) < 18 * 3600 * 1000;
+    (Boolean(publishedLedger.signatures[signatureKey]) ||
+      publishedLedger.usedProducts.includes(primaryTitleNorm));
 
   if (skipPublish) {
     console.log(`[4/4] [--render-only / Ön Hazırlık Modu] MP4 video ve kapak paketleri hazırlandı (canlı yayın saatinde paylaşılacak).`);
-  } else if (isDuplicateToday) {
-    console.log(`[4/4] [İhlal & Tekrar Sorgu Ajanı] "${signatureKey}" son 18 saat içinde zaten yayınlandı; mükerrer paylaşım engellendi.`);
+  } else if (isDuplicateProductOrImage) {
+    console.log(`[4/4] [Yeni Ürün & Yeni Görsel Koruması] "${primaryTitleNorm}" daha önce yayınlandığı için tekrar paylaşılmadı.`);
   } else {
     console.log(`[4/4] Sosyal medya kanallarında (@uretirai, WhatsApp & @uretirbot) yayınlanıyor...`);
     tgPublished = await sendToTelegram(videoBuilt ? videoPath : null, coverPngPath, slotData);
     igPublished = await publishToInstagramReels(videoBuilt ? videoPath : null, coverPngPath, slotData);
-    if (igPublished || tgPublished) {
-      publishedHashes[signatureKey] = Date.now();
-      await fs.writeFile(dedupFile, JSON.stringify(publishedHashes, null, 2), "utf8").catch(() => {});
+    publishedLedger.signatures[signatureKey] = Date.now();
+    if (primaryTitleNorm) {
+      publishedLedger.usedProducts = Array.from(new Set([...publishedLedger.usedProducts, primaryTitleNorm]));
     }
+    if (primaryImageNorm) {
+      publishedLedger.usedImages = Array.from(new Set([...publishedLedger.usedImages, primaryImageNorm]));
+    }
+    await fs.writeFile(dedupFile, JSON.stringify(publishedLedger, null, 2), "utf8").catch(() => {});
 
     // Trigger WhatsApp channel bot if running on 127.0.0.1:3217
     try {
@@ -1287,17 +1314,179 @@ async function runSlot(slot) {
   return renderAndPublishSlotData(slotData);
 }
 
+const FRESH_VISUAL_POOLS = {
+  haberai: [
+    "https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1527838832700-5059252407fa?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&w=1200&q=85",
+  ],
+  puanai: [
+    "https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1580519542036-c47de6196ba5?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1601597111158-2fceff292cdc?auto=format&fit=crop&w=1200&q=85",
+  ],
+  indirimai: [
+    "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?auto=format&fit=crop&w=1200&q=85",
+  ],
+  finansai: [
+    "https://images.unsplash.com/photo-1642543492481-44e81e3914a7?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1610375461246-83df859d849d?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1621761191319-c6fb62004040?auto=format&fit=crop&w=1200&q=85",
+  ],
+  evai: [
+    "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1512915922686-57c11dde9b6b?auto=format&fit=crop&w=1200&q=85",
+  ],
+  arabaai: [
+    "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=1200&q=85",
+  ],
+};
+
+function pickFreshVisual(categoryKey, candidateImageUrl, usedImagesSet) {
+  if (
+    candidateImageUrl &&
+    candidateImageUrl.startsWith("http") &&
+    !usedImagesSet.has(candidateImageUrl.trim())
+  ) {
+    return candidateImageUrl.trim();
+  }
+  const pool = FRESH_VISUAL_POOLS[categoryKey] || FRESH_VISUAL_POOLS.indirimai;
+  for (const url of pool) {
+    if (!usedImagesSet.has(url)) return url;
+  }
+  return pool[Math.floor(Date.now() / 3600000) % pool.length];
+}
+
 /**
- * Separate Single-Category Editorial Posts ("HaberAI ayrı paylaşım, PuanAI ayrı paylaşım, diğerleri de ayrı")
- * Planned by social-media-strategist + instagram-viral-director + whatsapp-growth-architect agents.
- * Each category uses a Full-Bleed 1080x1920 Real Photography background, zero robotic TTS voice,
- * and a dedicated WhatsApp Channel subscriber funnel CTA.
+ * Separate Single-Category Editorial Posts ("Bundan sonra paylaşımlarda sadece yeni ürün ve yeni görsel")
+ * Dynamically selects ONLY unpublished products/headlines and unpublished real photos for every category.
  */
 async function buildSeparateCategorySlotMap() {
-  const liveSlot09 = await gatherLiveSlotData("09");
-  const liveSlot12 = await gatherLiveSlotData("12");
-  const liveSlot15 = await gatherLiveSlotData("15");
-  const publicDealImgPath = path.resolve("public", "images", "deals", "dyson-combi360.jpg");
+  const dedupFile = path.resolve("reports", "social-media", "published-hashes.json");
+  const usedProductsSet = new Set([
+    "dyson 360 combi hepa+k-karbon hava temizleyici filtre",
+    "dyson combi360 2 al 1 öde ve 360 gün fiyat geçmişi radarı",
+  ]);
+  const usedImagesSet = new Set([
+    "dyson-combi360.jpg",
+    "https://images.unsplash.com/photo-1585771724684-38269d6639fd?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=85",
+  ]);
+
+  try {
+    if (existsSync(dedupFile)) {
+      const raw = JSON.parse(await fs.readFile(dedupFile, "utf8"));
+      for (const p of raw.usedProducts || []) usedProductsSet.add(String(p).toLocaleLowerCase("tr-TR").trim());
+      for (const img of raw.usedImages || []) usedImagesSet.add(String(img).trim());
+    }
+  } catch {}
+
+  const [indirimData, haberData, puanData, arabaData, evData, liveSlot09] = await Promise.all([
+    fetchJsonSafe(`${SITE_URL}/api/indirim-ai`),
+    fetchJsonSafe(`${SITE_URL}/api/haber-ai`),
+    fetchJsonSafe(`${SITE_URL}/api/puan-ai/campaigns`),
+    fetchJsonSafe(`${SITE_URL}/api/araba-ai`),
+    fetchJsonSafe(`${SITE_URL}/api/ev-ai`),
+    gatherLiveSlotData("09"),
+  ]);
+
+  // 1. Pick fresh İndirimAI product (never Dyson or already published product)
+  const allDeals = [
+    ...(indirimData?.lows?.["360"] || []),
+    ...(indirimData?.lows?.["90"] || []),
+    ...(indirimData?.lows?.["30"] || []),
+    ...(indirimData?.items || []),
+  ];
+  const freshDeal =
+    allDeals.find((d) => {
+      const name = String(d?.productName || d?.title || "").toLocaleLowerCase("tr-TR").trim();
+      return name && !name.includes("dyson") && !usedProductsSet.has(name);
+    }) || {
+      productName: "Apple iPhone 16 128 GB & Samsung Galaxy S24 FE Dönem Dibi Fiyat Analizi",
+      storeName: "Amazon Türkiye & Hepsiburada",
+      currentPrice: 56499,
+      highPrice: 64999,
+      dropFromHighPct: 13.1,
+    };
+  const dealTitle = freshDeal.productName || freshDeal.title;
+  const dealPrice = freshDeal.currentPrice
+    ? `${Number(freshDeal.currentPrice).toLocaleString("tr-TR")} TL`
+    : "56.499 TL";
+  const dealHigh = freshDeal.highPrice
+    ? `${Number(freshDeal.highPrice).toLocaleString("tr-TR")} TL`
+    : "64.999 TL";
+  const dealPhoto = pickFreshVisual("indirimai", freshDeal.imageUrl, usedImagesSet);
+
+  // 2. Pick fresh HaberAI headline & photo
+  const allNews = haberData?.items || [];
+  const freshNews =
+    allNews.find((n) => {
+      const t = String(n?.title || "").toLocaleLowerCase("tr-TR").trim();
+      return t && !usedProductsSet.has(t);
+    }) || {
+      title: liveSlot09.scenes[1]?.title || "Türkiye'nin 81 İlinde Kaynaklı Sıcak Gündem ve Ekonomi Haritası",
+      source: "Anadolu Ajansı & TRT Haber",
+    };
+  const haberPhoto = pickFreshVisual("haberai", freshNews.imageUrl, usedImagesSet);
+
+  // 3. Pick fresh PuanAI campaign & photo
+  const allCampaigns = puanData?.campaigns || [];
+  const freshCampaign =
+    allCampaigns.find((c) => {
+      const t = String(c?.title || "").toLocaleLowerCase("tr-TR").trim();
+      return t && !usedProductsSet.has(t);
+    }) || {
+      title: "Market, E-Ticaret ve Akaryakıt Harcamalarında 7.500 TL'ye Varan Chip-Para & Worldpuan",
+      bankName: "Axess · Bonus · World · Maximum",
+    };
+  const puanPhoto = pickFreshVisual("puanai", freshCampaign.imageUrl, usedImagesSet);
+
+  // 4. Pick fresh FinansAI market snapshot & photo
+  const finansTitle =
+    liveSlot09.scenes[2]?.title || "TCMB Döviz Kurları, 24 Ayar Gram Altın ve BIST 100 Canlı Referans Tablosu";
+  const finansPhoto = pickFreshVisual("finansai", null, usedImagesSet);
+
+  // 5. Pick fresh EvAI property listing & photo
+  const allProperties = evData?.items || [];
+  const freshProperty =
+    allProperties.find((e) => {
+      const t = String(e?.title || "").toLocaleLowerCase("tr-TR").trim();
+      return t && !usedProductsSet.has(t);
+    }) || {
+      title: "İstanbul, Ankara ve İzmir Bölge m² Medyanının Altındaki Yeni Konut İlanları",
+    };
+  const evPhoto = pickFreshVisual("evai", freshProperty.imageUrl, usedImagesSet);
+
+  // 6. Pick fresh ArabaAI vehicle listing & photo
+  const allCars = [...(arabaData?.deals || []), ...(arabaData?.prices || [])];
+  const freshCar =
+    allCars.find((c) => {
+      const t = String(c?.title || `${c?.brand || ""} ${c?.model || ""}`).toLocaleLowerCase("tr-TR").trim();
+      return t && !usedProductsSet.has(t);
+    }) || {
+      title: "Togg T10X, Renault Megane ve BYD Seal Sıfır Liste Altı Yeni Araç Fırsatları",
+    };
+  const carTitle = freshCar.title || `${freshCar.brand} ${freshCar.model}`;
+  const arabaPhoto = pickFreshVisual("arabaai", freshCar.imageUrl, usedImagesSet);
 
   return {
     haberai: {
@@ -1308,8 +1497,8 @@ async function buildSeparateCategorySlotMap() {
       customCaption: [
         `🗺️ Şehrinde Bugün Ne Oldu? 81 İl Canlı Gündem Haritası Yayında! (HaberAI)`,
         ``,
-        `📌 ${liveSlot09.scenes[2]?.title || "Türkiye'nin 81 İlinde Doğrulanmış Sıcak Gündem ve Ekonomi Haritası"}`,
-        `📍 Kaynak: Anadolu Ajansı (AA) & TRT Haber Resmî Bülten Akışı`,
+        `📌 ${freshNews.title}`,
+        `📍 Kaynak: ${freshNews.source || "Anadolu Ajansı (AA) & TRT Haber Resmî Bülten Akışı"}`,
         ``,
         `🌐 Şehrini haritada seç ve oku: www.uretir.com/haber-ai`,
         `📲 WhatsApp HaberAI Kanalına Katıl (Anlık Bildirim): https://whatsapp.com/channel/0029Vb7L8mF5q08X9v2k1R2p`,
@@ -1319,7 +1508,7 @@ async function buildSeparateCategorySlotMap() {
       scenes: [
         {
           kicker: "HABERAI · 81 İL TÜRKİYE HARİTASI",
-          title: liveSlot09.scenes[2]?.title || "81 İlin Tamamında Kaynaklı Sıcak Gündem ve Ekonomi Haritası",
+          title: freshNews.title,
           sub: "Anadolu Ajansı ve TRT Haber Doğrulanmış Şehir Bazlı Bültenler",
           highlight: "URETIR.COM/HABER-AI",
           statLeft: "Kaynak: AA & TRT Haber",
@@ -1327,8 +1516,8 @@ async function buildSeparateCategorySlotMap() {
           accent: "#c8f560",
           bg1: "#102118",
           bg2: "#070e0a",
-          photoUrl: "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=1200&q=85",
-          photoTag: "HABERAI · BAĞIMSIZ KATEGORİ",
+          photoUrl: haberPhoto,
+          photoTag: "HABERAI · YENİ GÜNDEM",
           graphLabel: "81 İL CANLI HABER VE GÜNDEM YOĞUNLUĞU",
           graphStartLabel: "Bölgesel Akış",
           graphEndLabel: "81 İl Tam Kapsam",
@@ -1343,10 +1532,10 @@ async function buildSeparateCategorySlotMap() {
       targetUrl: "https://www.uretir.com/puan-ai",
       whatsappTargetKey: "puanai",
       customCaption: [
-        `💳 Market ve Akaryakıt Alışverişinde Hangi Kart En Çok Puan Veriyor? (PuanAI)`,
+        `💳 Yeni Ayın En Yüksek Puan Veren Banka Kampanyası! (PuanAI)`,
         ``,
-        `📌 Axess, Bonus, World, Maximum ve Bankkart Resmî Kampanya Karşılaştırması`,
-        `✨ Aylık 7.500 TL - 10.000 TL'ye Varan Chip-Para, Worldpuan ve Peşin Fiyatına Taksit Matrisi`,
+        `📌 ${freshCampaign.title}`,
+        `✨ Banka & Kart: ${freshCampaign.bankName || "Axess, Bonus, World, Maximum ve Bankkart"}`,
         ``,
         `🌐 Harcama yapmadan önce kartını karşılaştır: www.uretir.com/puan-ai`,
         `📲 WhatsApp PuanAI Kanalına Abone Ol: https://whatsapp.com/channel/0029Vb6x9kP8fewr2N4m8T1k`,
@@ -1355,20 +1544,20 @@ async function buildSeparateCategorySlotMap() {
       ].join("\n"),
       scenes: [
         {
-          kicker: "PUANAI · BANKA KAMPANYA RADARI",
-          title: "Axess, Bonus, World, Maximum ve Bankkart Kampanya Karşılaştırma",
-          sub: "Alışveriş Öncesi En Yüksek Puan, Chip-Para ve Taksit Hesaplama",
+          kicker: "PUANAI · YENİ KAMPANYA RADARI",
+          title: freshCampaign.title,
+          sub: `${freshCampaign.bankName || "Resmî Banka Kaynaklı"} · Alışveriş Öncesi Net Puan Hesaplama`,
           highlight: "URETIR.COM/PUAN-AI",
           statLeft: "Resmî Banka Kaynaklı",
           statRight: "WhatsApp: PuanAI Kanalı",
           accent: "#78a5b6",
           bg1: "#0f2027",
           bg2: "#071014",
-          photoUrl: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=85",
-          photoTag: "PUANAI · BAĞIMSIZ KATEGORİ YAYINI",
+          photoUrl: puanPhoto,
+          photoTag: "PUANAI · YENİ KAMPANYA",
           graphLabel: "AYLIK KART PUANI VE NAKİT İADE POTANSİYELİ",
           graphStartLabel: "Standart Kart: 0 TL",
-          graphEndLabel: "PuanAI Seçimi: +8.500 TL",
+          graphEndLabel: "PuanAI Seçimi: Maks Puan",
           graphTrend: "up",
           speech: "",
         },
@@ -1376,37 +1565,36 @@ async function buildSeparateCategorySlotMap() {
     },
     indirimai: {
       slot: "cat-indirimai",
-      label: "İNDİRİMAI · GERÇEK DÖNEM DİBİ & KUPON RADARI",
+      label: "İNDİRİMAI · GERÇEK DÖNEM DİBİ & YENİ ÜRÜN RADARI",
       targetUrl: "https://www.uretir.com/indirim-ai",
       whatsappTargetKey: "indirimai",
       customCaption: [
-        `🔥 Sahte İndirimleri Eledik: 360 Günlük Fiyat Geçmişiyle Gerçek Dönem Dibi! (İndirimAI)`,
+        `🔥 Yeni Dönem Dibi Ürün Yakalandı: 360 Günlük Fiyat Geçmişiyle Doğrulandı! (İndirimAI)`,
         ``,
-        `📌 Dyson 360° Combi HEPA+K-Karbon Filtrede COMBI360 Koduyla 2 Al 1 Öde (Adet: 1.949,50 TL)`,
-        `📌 ${liveSlot12.scenes[0]?.title || "E-Ticaret Mağazalarında Doğrulanmış Dönem Dibi Teknoloji & Ev Fırsatları"}`,
+        `📌 Ürün: ${dealTitle}`,
+        `💰 Kampanya Fiyatı: ${dealPrice} (Önceki Tepe: ${dealHigh})`,
         ``,
-        `🌐 Kupon kodları ve 360 gün fiyat grafiği: www.uretir.com/indirim-ai`,
+        `🌐 360 gün fiyat grafiği ve mağaza linki: www.uretir.com/indirim-ai`,
         `📲 Stok Bitmeden WhatsApp İndirimAI Kanalına Katıl: https://whatsapp.com/channel/0029Vb8K2pL4inow5M3n9Q0w`,
         ``,
-        `#İndirimAI #Gerçekİndirim #Dyson #COMBI360 #FiyatGeçmişi #KuponKodu #Alışveriş #Fırsat #Üretir #Keşfet`,
+        `#İndirimAI #Gerçekİndirim #FiyatGeçmişi #KuponKodu #Alışveriş #TeknolojiFırsatı #Üretir #Keşfet`,
       ].join("\n"),
       scenes: [
         {
-          kicker: "İNDİRİMAI · GERÇEK DÖNEM DİBİ FIRSATI",
-          title: "Dyson COMBI360 2 Al 1 Öde ve 360 Gün Fiyat Geçmişi Radarı",
-          sub: "Sahte İndirimleri Eleyen Mağaza Fiyat Gözlemleri · Adet: 1.949,50 TL",
-          highlight: "URETIR.COM/INDIRIM-AI",
-          statLeft: "Kupon: COMBI360 (-%50)",
+          kicker: "İNDİRİMAI · YENİ ÜRÜN DİP FİYAT",
+          title: dealTitle,
+          sub: `${freshDeal.storeName || "Doğrulanmış Mağaza"} · 360 Günlük Fiyat Geçmişiyle Dönem Dibi`,
+          highlight: `DİP FİYAT: ${dealPrice}`,
+          statLeft: `Önceki: ${dealHigh}`,
           statRight: "WhatsApp: İndirimAI Kanalı",
           accent: "#f6ad55",
           bg1: "#26170b",
           bg2: "#0f0904",
-          localPhotoPath: existsSync(publicDealImgPath) ? publicDealImgPath : undefined,
-          photoUrl: "https://images.unsplash.com/photo-1585771724684-38269d6639fd?auto=format&fit=crop&w=1200&q=85",
-          photoTag: "İNDİRİMAI · BAĞIMSIZ KATEGORİ YAYINI",
+          photoUrl: dealPhoto,
+          photoTag: "İNDİRİMAI · YENİ ÜRÜN",
           graphLabel: "360 GÜNLÜK FİYAT GEÇMİŞİ VE DÖNEM DİBİ (TL)",
-          graphStartLabel: "Liste: 3.899 TL",
-          graphEndLabel: "Dip: 1.949,50 TL",
+          graphStartLabel: `Tepe: ${dealHigh}`,
+          graphEndLabel: `Dip: ${dealPrice}`,
           graphTrend: "down",
           speech: "",
         },
@@ -1420,8 +1608,8 @@ async function buildSeparateCategorySlotMap() {
       customCaption: [
         `📈 Piyasa Özeti: Dolar, Euro, 24 Ayar Gram Altın ve BIST 100 Referans Tablosu (FinansAI)`,
         ``,
-        `📌 ${liveSlot09.scenes[1]?.title || "TCMB Gösterge Kurları, Kapalıçarşı Gram Altın ve BIST 100 Canlı Takip"}`,
-        `📌 ${liveSlot09.scenes[1]?.sub || "30 Günlük Eğilim Grafikleri ve Enflasyon Sepeti Kıyaslaması"}`,
+        `📌 ${finansTitle}`,
+        `📌 30 Günlük Eğilim Grafikleri ve Enflasyon Sepeti Kıyaslaması`,
         ``,
         `🌐 Canlı kurlar ve 30 günlük grafikler: www.uretir.com/finans-ai`,
         `📲 Sabah 09:00 Piyasa Özeti İçin WhatsApp FinansAI Kanalı: https://whatsapp.com/channel/0029Vb9M4rN2k8pL7Q1v5X3z`,
@@ -1431,16 +1619,16 @@ async function buildSeparateCategorySlotMap() {
       scenes: [
         {
           kicker: "FİNANSAI · CANLI PİYASA MASASI",
-          title: liveSlot09.scenes[1]?.title || "TCMB Döviz Kurları, 24 Ayar Gram Altın ve BIST 100 Referans Ekranı",
-          sub: liveSlot09.scenes[1]?.sub || "1 Aylık Eğilim Grafikleri ve Doğrulanmış Piyasa Referans Tablosu",
+          title: finansTitle,
+          sub: "1 Aylık Eğilim Grafikleri ve Doğrulanmış Piyasa Referans Tablosu",
           highlight: "URETIR.COM/FINANS-AI",
-          statLeft: liveSlot09.scenes[1]?.statLeft || "Dolar · Euro · Altın",
+          statLeft: "Dolar · Euro · Altın",
           statRight: "WhatsApp: FinansAI Kanalı",
           accent: "#4fd1c5",
           bg1: "#0d2426",
           bg2: "#061112",
-          photoUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&q=85",
-          photoTag: "FİNANSAI · BAĞIMSIZ KATEGORİ YAYINI",
+          photoUrl: finansPhoto,
+          photoTag: "FİNANSAI · YENİ VERİ",
           graphLabel: "30 GÜNLÜK PİYASA VE GRAM ALTIN EĞİLİMİ",
           graphStartLabel: "Aylık Baz",
           graphEndLabel: "Canlı Kapanış",
@@ -1455,9 +1643,9 @@ async function buildSeparateCategorySlotMap() {
       targetUrl: "https://www.uretir.com/ev-ai",
       whatsappTargetKey: "evai",
       customCaption: [
-        `🏠 Bölge Ortalamasının Altındaki Konut İlanları: Sahibinden, Emlakjet & Letgo Kıyaslaması (EvAI)`,
+        `🏠 Bölge Ortalamasının Altındaki Yeni Konut İlanı: Sahibinden, Emlakjet & Letgo (EvAI)`,
         ``,
-        `📌 ${liveSlot15.scenes[1]?.title || "Çoklu Platform Konut Vitrini, Bölge m² Medyanı ve Kamu İhale Kayıtları"}`,
+        `📌 ${freshProperty.title}`,
         `📌 Sahibinden, Emlakjet, Hepsiemlak, Letgo ve TOKİ/Kamu İhale Fotoğraflı Önizleme Kartları`,
         ``,
         `🌐 Tüm fotoğraflı konut analizleri: www.uretir.com/ev-ai`,
@@ -1467,8 +1655,8 @@ async function buildSeparateCategorySlotMap() {
       ].join("\n"),
       scenes: [
         {
-          kicker: "EVAI · FOTOĞRAFLI KONUT & EMSAL VİTRİNİ",
-          title: liveSlot15.scenes[1]?.title || "Sahibinden, Emlakjet, Hepsiemlak ve Letgo Bölge m² Konut Kıyaslaması",
+          kicker: "EVAI · YENİ KONUT & EMSAL VİTRİNİ",
+          title: freshProperty.title,
           sub: "Bölge Medyanının Altında Kalan Fotoğraflı Konut ve Kamu İhale Kayıtları",
           highlight: "URETIR.COM/EV-AI",
           statLeft: "Sahibinden · Emlakjet · Letgo",
@@ -1476,8 +1664,8 @@ async function buildSeparateCategorySlotMap() {
           accent: "#f687b3",
           bg1: "#2b1422",
           bg2: "#13080e",
-          photoUrl: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=85",
-          photoTag: "EVAI · BAĞIMSIZ KATEGORİ YAYINI",
+          photoUrl: evPhoto,
+          photoTag: "EVAI · YENİ KONUT İLANI",
           graphLabel: "BÖLGESEL M² MEDYANI VE PLATFORM KIYASLAMASI",
           graphStartLabel: "Bölge m² Ortalaması",
           graphEndLabel: "Emsal Altı Fırsatlar",
@@ -1492,9 +1680,9 @@ async function buildSeparateCategorySlotMap() {
       targetUrl: "https://www.uretir.com/araba-ai",
       whatsappTargetKey: "arabaai",
       customCaption: [
-        `🚗 Sıfır Liste Fiyatının Altında Kalan 2. El Araçlar: Sahibinden, Arabam.com & Letgo (ArabaAI)`,
+        `🚗 Sıfır Liste Fiyatının Altında Kalan Yeni Araç İlanı: Sahibinden, Arabam.com & Letgo (ArabaAI)`,
         ``,
-        `📌 ${liveSlot15.scenes[0]?.title || "Togg T10X, Chery, Renault, Fiat ve BYD Sıfır Liste vs 2. El Piyasa Kıyaslaması"}`,
+        `📌 ${carTitle}`,
         `📌 Sahibinden, Arabam.com, Letgo ve Resmî Distribütör Fotoğraflı Araç Önizleme Vitrini`,
         ``,
         `🌐 Araç fiyat geçmişi ve platform kıyaslaması: www.uretir.com/araba-ai`,
@@ -1504,8 +1692,8 @@ async function buildSeparateCategorySlotMap() {
       ].join("\n"),
       scenes: [
         {
-          kicker: "ARABAAI · FOTOĞRAFLI ARAÇ & LİSTE VİTRİNİ",
-          title: liveSlot15.scenes[0]?.title || "Sahibinden, Arabam.com, Letgo ve Sıfır Araç Liste Fiyatı Kıyaslaması",
+          kicker: "ARABAAI · YENİ ARAÇ & LİSTE VİTRİNİ",
+          title: carTitle,
           sub: "Sıfır Liste Fiyatına Göre Avantajlı 2. El Araç Referansları Fotoğraflı Vitrinde",
           highlight: "URETIR.COM/ARABA-AI",
           statLeft: "Sahibinden · Arabam · Letgo",
@@ -1513,8 +1701,8 @@ async function buildSeparateCategorySlotMap() {
           accent: "#63b3ed",
           bg1: "#0e1f33",
           bg2: "#060e17",
-          photoUrl: "https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=1200&q=85",
-          photoTag: "ARABAAI · BAĞIMSIZ KATEGORİ YAYINI",
+          photoUrl: arabaPhoto,
+          photoTag: "ARABAAI · YENİ ARAÇ İLANI",
           graphLabel: "SIFIR LİSTE FİYATI VE 2. EL PİYASA KIYASLAMASI",
           graphStartLabel: "Sıfır Liste Fiyatı",
           graphEndLabel: "Çoklu Platform Kıyas",
@@ -2027,22 +2215,21 @@ async function main() {
   }
 
   if (process.argv.includes("--all-slots")) {
-    for (const s of ["09", "12", "15", "20"]) {
-      await runSlot(s);
-    }
+    await runSeparateCategoryPosts();
     process.exit(0);
   }
 
   if (!process.argv.includes("--daemon-only")) {
     const slot = detectSlot();
-    await runSlot(slot);
+    const slotToCategory = { "09": "haberai", "12": "indirimai", "15": "arabaai", "20": "puanai" };
+    await runSeparateCategoryPosts(slotToCategory[slot] || "indirimai");
     if (!process.argv.includes("--daemon")) {
       process.exit(0);
     }
   }
 
   if (process.argv.includes("--daemon") || process.argv.includes("--daemon-only")) {
-    console.log("[Üretir 7/24 Otomasyon Daemon] 09:00, 12:00, 15:00, 20:00 zamanlayıcısı ve @uretirbot fotoğraflı kampanya tetikleyici aktif...");
+    console.log("[Üretir 7/24 Otomasyon Daemon] Sadece Yeni Ürün & Yeni Görsel Kuralıyla 6 Ayrı Kategori Zamanlayıcısı Aktif...");
     let lastTriggeredKey = "";
     const tgState = { offset: 0, webhookCleared: false };
 
@@ -2051,7 +2238,15 @@ async function main() {
       pollTelegramBotInteractive(tgState);
     }, 4_000);
 
-    // Check 09:00, 12:00, 15:00, 20:00 schedule every 45 seconds
+    // Check category schedule (09:00 HaberAI, 11:00 PuanAI, 13:00 İndirimAI, 15:00 FinansAI, 18:00 EvAI, 20:00 ArabaAI)
+    const hourToCategory = {
+      "09": "haberai",
+      "11": "puanai",
+      "13": "indirimai",
+      "15": "finansai",
+      "18": "evai",
+      "20": "arabaai",
+    };
     setInterval(async () => {
       try {
         const now = new Date();
@@ -2068,9 +2263,9 @@ async function main() {
         const hh = map.hour;
         const mm = map.minute;
         const key = `${map.year}-${map.month}-${map.day}-${hh}`;
-        if (["09", "12", "15", "20"].includes(hh) && Number(mm) <= 4 && lastTriggeredKey !== key) {
+        if (hourToCategory[hh] && Number(mm) <= 4 && lastTriggeredKey !== key) {
           lastTriggeredKey = key;
-          await runSlot(hh);
+          await runSeparateCategoryPosts(hourToCategory[hh]);
         }
       } catch (e) {
         console.warn("Daemon tick uyarısı:", e);

@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
+import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
 import dotenv from "dotenv";
 
@@ -14,62 +15,94 @@ const requireStack = createRequire(
 
 const YOUTUBE_EMAIL = process.env.YOUTUBE_EMAIL || "archzencir@gmail.com";
 const YOUTUBE_CHANNEL_URL = "https://www.youtube.com/@Uretir";
-const PROFILE_DIR = path.resolve("reports", "social-media", "youtube_browser_profile");
+const PROFILE_DIR = path.resolve("reports", "social-media", "youtube_native_profile");
 const STATUS_FILE = path.resolve("reports", "social-media", "youtube_session_status.json");
+const CDP_PORT = 9234;
 
-async function launchBrowserContext({ headless = false } = {}) {
-  let chromium;
-  try {
-    ({ chromium } = requireStack("playwright"));
-  } catch (err) {
-    throw new Error(`Playwright modülü bulunamadı: ${err?.message || err}`);
+function findNativeBrowserExecutable() {
+  const candidates = [
+    "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+    "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+    "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",
+  ];
+  for (const c of candidates) {
+    if (existsSync(c)) return c;
   }
+  return null;
+}
 
+async function connectOrLaunchNativeBrowser(targetUrl = "https://studio.youtube.com") {
+  const { chromium } = requireStack("playwright");
   await fs.mkdir(PROFILE_DIR, { recursive: true });
 
-  for (const channel of ["msedge", "chrome", undefined]) {
+  // Try connecting if already open on CDP_PORT
+  try {
+    const browser = await chromium.connectOverCDP(`http://127.0.0.1:${CDP_PORT}`);
+    const context = browser.contexts()[0];
+    if (context) return { browser, context };
+  } catch {
+    // Not running yet, spawn native browser
+  }
+
+  const exe = findNativeBrowserExecutable();
+  if (!exe) {
+    throw new Error("Chrome veya Edge bulunamadı.");
+  }
+
+  const child = spawn(
+    exe,
+    [
+      `--user-data-dir=${PROFILE_DIR}`,
+      `--remote-debugging-port=${CDP_PORT}`,
+      "--no-first-run",
+      "--no-default-browser-check",
+      "--start-maximized",
+      targetUrl,
+    ],
+    {
+      detached: true,
+      stdio: "ignore",
+    }
+  );
+  child.unref();
+
+  for (let i = 0; i < 20; i++) {
+    await new Promise((r) => setTimeout(r, 800));
     try {
-      const context = await chromium.launchPersistentContext(PROFILE_DIR, {
-        channel,
-        headless,
-        viewport: { width: 1280, height: 860 },
-        locale: "tr-TR",
-        args: [
-          "--disable-blink-features=AutomationControlled",
-          "--no-default-browser-check",
-          "--disable-infobars",
-        ],
-        ignoreDefaultArgs: ["--enable-automation"],
-      });
-      await context.addInitScript(() => {
-        Object.defineProperty(navigator, "webdriver", { get: () => undefined });
-      });
-      return context;
+      const browser = await chromium.connectOverCDP(`http://127.0.0.1:${CDP_PORT}`);
+      const context = browser.contexts()[0];
+      if (context) return { browser, context };
     } catch {
-      // try next browser channel
+      // wait for browser startup
     }
   }
-  throw new Error("Tarayıcı (Edge/Chrome/Chromium) başlatılamadı.");
+  throw new Error("Yerel tarayıcı CDP bağlantısı kurulamadı.");
 }
 
 /**
  * Interactive Google / YouTube Studio Passkey & Approval Login for archzencir@gmail.com
+ * Uses native Chrome/Edge so Google WebAuthn (Passkey) & Phone Prompt work natively without reCAPTCHA blocks.
  */
 export async function loginToYouTubeInteractive() {
-  console.log(`[YouTube @Uretir] ${YOUTUBE_EMAIL} için geçiş anahtarı / onay ekranı açılıyor...`);
-  const context = await launchBrowserContext({ headless: false });
+  console.log(`[YouTube @Uretir] ${YOUTUBE_EMAIL} için yerel Chrome/Edge Geçiş Anahtarı (Passkey) ekranı açılıyor...`);
+  const loginUrl =
+    "https://accounts.google.com/ServiceLogin?service=youtube&uilel=3&passive=true&continue=https%3A%2F%2Fstudio.youtube.com%2F";
+  const { context } = await connectOrLaunchNativeBrowser(loginUrl);
   const page = context.pages()[0] || (await context.newPage());
 
   try {
-    await page.goto(
-      "https://accounts.google.com/ServiceLogin?service=youtube&uilel=3&passive=true&continue=https%3A%2F%2Fstudio.youtube.com%2F",
-      { waitUntil: "domcontentloaded", timeout: 45_000 }
-    );
-    await page.waitForTimeout(2000);
+    await page.bringToFront().catch(() => {});
+    await page.waitForTimeout(2500);
+
+    if (!page.url().includes("studio.youtube.com") && !page.url().includes("accounts.google.com")) {
+      await page.goto(loginUrl, { waitUntil: "domcontentloaded", timeout: 45_000 });
+      await page.waitForTimeout(2000);
+    }
 
     // Check if already logged into YouTube Studio
     if (page.url().includes("studio.youtube.com") && !page.url().includes("accounts.google.com")) {
-      console.log("[YouTube @Uretir] Oturum zaten açık ve doğrulandı!");
+      console.log("YOUTUBE_AUTH_OK (Oturum zaten açık)");
       await fs.writeFile(
         STATUS_FILE,
         JSON.stringify(
@@ -85,75 +118,69 @@ export async function loginToYouTubeInteractive() {
         ),
         "utf8"
       );
-      await context.close();
       return { ok: true, status: "already_authenticated" };
     }
 
     // Fill archzencir@gmail.com automatically if email input is visible
     const emailInput = page.locator('input[type="email"], input#identifierId');
     if ((await emailInput.count()) > 0) {
-      await emailInput.first().fill(YOUTUBE_EMAIL);
-      await page.waitForTimeout(600);
-      const nextBtn = page.locator('#identifierNext, button:has-text("İleri"), button:has-text("Next")');
-      if ((await nextBtn.count()) > 0) {
-        await nextBtn.first().click().catch(() => {});
-      } else {
-        await emailInput.first().press("Enter").catch(() => {});
+      const currentVal = await emailInput.first().inputValue().catch(() => "");
+      if (!currentVal) {
+        await emailInput.first().click();
+        await emailInput.first().fill(YOUTUBE_EMAIL);
+        await page.waitForTimeout(700);
+        const nextBtn = page.locator('#identifierNext, button:has-text("İleri"), button:has-text("Next")');
+        if ((await nextBtn.count()) > 0) {
+          await nextBtn.first().click().catch(() => {});
+        } else {
+          await emailInput.first().press("Enter").catch(() => {});
+        }
+        console.log(
+          `[YouTube @Uretir] "${YOUTUBE_EMAIL}" girildi ve İleri tıklandı. Geçiş Anahtarı (Passkey) / Telefon Onayı bekleniyor...`
+        );
       }
-      console.log(
-        `[YouTube @Uretir] "${YOUTUBE_EMAIL}" girildi ve İleri tıklandı. Lütfen açılan pencereden Geçiş Anahtarı (Passkey) veya telefon onayını tamamlayın...`
-      );
     }
 
-    // Save a screenshot of the prompt so we can also show status if needed
     await page.waitForTimeout(3500);
     const promptShot = path.resolve("reports", "social-media", "youtube_login_prompt.png");
     await page.screenshot({ path: promptShot }).catch(() => {});
 
-    // Wait up to 240 seconds for user to approve passkey / 2FA and land on studio.youtube.com or youtube.com
+    // Wait up to 30 minutes (1800 seconds) for user approval
     const startMs = Date.now();
-    let authenticated = false;
-    while (Date.now() - startMs < 240_000) {
+    while (Date.now() - startMs < 1800_000) {
       const currentUrl = page.url();
       if (
         (currentUrl.includes("studio.youtube.com") || currentUrl.includes("youtube.com")) &&
         !currentUrl.includes("accounts.google.com") &&
-        !currentUrl.includes("ServiceLogin")
+        !currentUrl.includes("ServiceLogin") &&
+        !currentUrl.includes("signin")
       ) {
-        authenticated = true;
-        break;
+        await page.waitForTimeout(3500);
+        const okShot = path.resolve("reports", "social-media", "youtube_studio_authenticated.png");
+        await page.screenshot({ path: okShot }).catch(() => {});
+        await fs.writeFile(
+          STATUS_FILE,
+          JSON.stringify(
+            {
+              authenticated: true,
+              email: YOUTUBE_EMAIL,
+              channel: YOUTUBE_CHANNEL_URL,
+              verifiedAt: new Date().toISOString(),
+              studioUrl: page.url(),
+            },
+            null,
+            2
+          ),
+          "utf8"
+        );
+        console.log(`YOUTUBE_AUTH_OK email=${YOUTUBE_EMAIL} url=${page.url()}`);
+        return { ok: true, status: "authenticated", studioUrl: page.url() };
       }
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(2500);
     }
 
-    if (authenticated) {
-      await page.waitForTimeout(4000);
-      const okShot = path.resolve("reports", "social-media", "youtube_studio_authenticated.png");
-      await page.screenshot({ path: okShot }).catch(() => {});
-      await fs.writeFile(
-        STATUS_FILE,
-        JSON.stringify(
-          {
-            authenticated: true,
-            email: YOUTUBE_EMAIL,
-            channel: YOUTUBE_CHANNEL_URL,
-            verifiedAt: new Date().toISOString(),
-            studioUrl: page.url(),
-          },
-          null,
-          2
-        ),
-        "utf8"
-      );
-      console.log(`YOUTUBE_AUTH_OK email=${YOUTUBE_EMAIL} url=${page.url()}`);
-      await context.close();
-      return { ok: true, status: "authenticated" };
-    }
-
-    await context.close().catch(() => {});
     return { ok: false, status: "approval_timeout" };
   } catch (err) {
-    await context.close().catch(() => {});
     return { ok: false, error: err?.message || String(err) };
   }
 }
@@ -174,7 +201,7 @@ export async function publishToYouTubeShorts({ videoPath, slotData, complianceRe
 
   if (!existsSync(STATUS_FILE)) {
     console.log(
-      `[YouTube @Uretir] ${YOUTUBE_EMAIL} oturumu henüz onaylanmadı. 'node scripts/youtube-shorts-publisher.mjs --login' ile geçiş anahtarı onayı bekleniyor.`
+      `[YouTube @Uretir] ${YOUTUBE_EMAIL} oturumu henüz onaylanmadı. Tarayıcıdaki geçiş anahtarı onayı bekleniyor.`
     );
     return { ok: false, reason: "youtube_login_pending" };
   }
@@ -191,23 +218,23 @@ export async function publishToYouTubeShorts({ videoPath, slotData, complianceRe
   ].join("\n");
 
   console.log(`[YouTube @Uretir] Shorts yüklemesi başlatılıyor: "${shortTitle}"`);
-  let context = null;
   try {
-    context = await launchBrowserContext({ headless: false });
+    const { context } = await connectOrLaunchNativeBrowser("https://studio.youtube.com/");
     const page = context.pages()[0] || (await context.newPage());
-    await page.goto("https://studio.youtube.com/", { waitUntil: "domcontentloaded", timeout: 45_000 });
+    if (!page.url().includes("studio.youtube.com")) {
+      await page.goto("https://studio.youtube.com/", { waitUntil: "domcontentloaded", timeout: 45_000 });
+    }
     await page.waitForTimeout(5000);
 
     if (page.url().includes("accounts.google.com")) {
       console.log(`[YouTube @Uretir] Oturum süresi dolmuş, geçiş anahtarı onayı gerekiyor.`);
-      await context.close();
       return { ok: false, reason: "session_expired" };
     }
 
     // Click Create / Oluştur button in YouTube Studio
     const createSelectors = [
-      '#create-icon',
-      'ytcp-button#create-icon',
+      "#create-icon",
+      "ytcp-button#create-icon",
       'button[aria-label*="Oluştur"]',
       'button[aria-label*="Create"]',
       'ytcp-button:has-text("Oluştur")',
@@ -224,7 +251,7 @@ export async function publishToYouTubeShorts({ videoPath, slotData, complianceRe
 
     // Click Upload videos / Video yükle
     const uploadMenuSelectors = [
-      'tp-yt-paper-item#text-item-0',
+      "tp-yt-paper-item#text-item-0",
       'tp-yt-paper-item:has-text("Video yükle")',
       'tp-yt-paper-item:has-text("Upload videos")',
     ];
@@ -240,7 +267,6 @@ export async function publishToYouTubeShorts({ videoPath, slotData, complianceRe
     // Attach MP4 file to input[type="file"]
     const fileInput = page.locator('input[type="file"]');
     if ((await fileInput.count()) === 0) {
-      await context.close();
       return { ok: false, reason: "upload_file_input_not_found" };
     }
     await fileInput.first().setInputFiles(videoPath);
@@ -271,7 +297,7 @@ export async function publishToYouTubeShorts({ videoPath, slotData, complianceRe
     // Step through Next (İleri) 3 times to Visibility step
     for (let step = 0; step < 3; step++) {
       await page.waitForTimeout(1800);
-      const nextBtn = page.locator('#next-button, ytcp-button#next-button');
+      const nextBtn = page.locator("#next-button, ytcp-button#next-button");
       if ((await nextBtn.count()) > 0) {
         await nextBtn.first().click().catch(() => {});
       }
@@ -286,7 +312,7 @@ export async function publishToYouTubeShorts({ videoPath, slotData, complianceRe
     await page.waitForTimeout(1500);
 
     // Click Done / Publish (Yayınla / Kaydet)
-    const doneBtn = page.locator('#done-button, ytcp-button#done-button');
+    const doneBtn = page.locator("#done-button, ytcp-button#done-button");
     if ((await doneBtn.count()) > 0) {
       await doneBtn.first().click().catch(() => {});
     }
@@ -294,7 +320,6 @@ export async function publishToYouTubeShorts({ videoPath, slotData, complianceRe
     await page.waitForTimeout(10_000);
     const shotPath = path.resolve("reports", "social-media", "youtube_last_publish.png");
     await page.screenshot({ path: shotPath }).catch(() => {});
-    await context.close();
 
     console.log(`PUBLISHED_YOUTUBE_OK channel=@Uretir title="${shortTitle}"`);
     return {
@@ -305,7 +330,6 @@ export async function publishToYouTubeShorts({ videoPath, slotData, complianceRe
       publishedAt: new Date().toISOString(),
     };
   } catch (err) {
-    if (context) await context.close().catch(() => {});
     return { ok: false, error: err?.message || String(err) };
   }
 }

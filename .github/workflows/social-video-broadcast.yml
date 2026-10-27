@@ -1,23 +1,27 @@
-name: "Üretir 7/24 Veri & Sosyal Medya Otomasyonu (09:00, 12:00, 15:00, 20:00)"
+name: "Üretir 7/24 Telegram Stok & Veri Otomasyonu (09:00-11:00-13:00-15:00-18:00-20:00)"
 
 on:
   schedule:
-    # 09:00 Europe/Istanbul (06:00 UTC) - Sabah Gündem & Piyasa Kancası (HaberAI 81 İl + FinansAI)
+    # 09:00 TSİ (06:00 UTC) - HaberAI
     - cron: "0 6 * * *"
-    # 12:00 Europe/Istanbul (09:00 UTC) - Öğle İndirim & Kart Kancası (İndirimAI Dip Fiyat + PuanAI)
-    - cron: "0 9 * * *"
-    # 15:00 Europe/Istanbul (12:00 UTC) - İkindi Otomobil & Konut Kancası (ArabaAI + EvAI Kamu İhale)
+    # 11:00 TSİ (08:00 UTC) - PuanAI
+    - cron: "0 8 * * *"
+    # 13:00 TSİ (10:00 UTC) - İndirimAI
+    - cron: "0 10 * * *"
+    # 15:00 TSİ (12:00 UTC) - FinansAI
     - cron: "0 12 * * *"
-    # 20:00 Europe/Istanbul (17:00 UTC) - Akşam Kapanış Özeti (6 AI Aracı Günün Özeti)
+    # 18:00 TSİ (15:00 UTC) - EvAI
+    - cron: "0 15 * * *"
+    # 20:00 TSİ (17:00 UTC) - ArabaAI
     - cron: "0 17 * * *"
   workflow_dispatch:
     inputs:
-      slot:
-        description: "Yayın kuşağı (09, 12, 15, 20 veya dyson)"
+      category:
+        description: "Kategori (all, haberai, puanai, indirimai, finansai, evai, arabaai)"
         required: false
-        default: "09"
+        default: "all"
       mode:
-        description: "Çalışma modu (publish: canlı yayınla, render-only: sadece MP4/kapak üret)"
+        description: "Çalışma modu (publish: Telegram'a gönder, render-only: sadece MP4/kapak üret)"
         required: false
         default: "publish"
 
@@ -30,7 +34,7 @@ concurrency:
 
 jobs:
   uretir-broadcast:
-    name: "uretir.com Veri Senkronizasyonu + Hook & Fon Video + Çok Kanallı Yayın"
+    name: "uretir.com Veri Senkronizasyonu + %100 İhlal Yoktur Video + Telegram (@uretirbot) Stok"
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -46,50 +50,47 @@ jobs:
           node-version: "22"
           cache: "pnpm"
 
-      - name: Setup Astral uv & Python 3.12
-        uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: false
-          python-version: "3.12"
-
-      - name: Install FFmpeg, Node dependencies & Open-Source Stack (instagrapi + edge-tts)
+      - name: Install FFmpeg & Node dependencies
         run: |
           sudo apt-get update && sudo apt-get install -y ffmpeg fonts-dejavu-core fonts-liberation
           pnpm install --frozen-lockfile
-          mkdir -p .local/open-source-stack/repos
-          if [ ! -d ".local/open-source-stack/repos/instagrapi" ]; then
-            git clone --depth 1 https://github.com/subzeroid/instagrapi.git .local/open-source-stack/repos/instagrapi
-          fi
-          uv tool install edge-tts || true
 
-      - name: Run Üretir Data Sync & Social Video Broadcast
+      - name: Run Üretir Data Sync & Telegram (@uretirbot) Stock Broadcast
         env:
           SITE_URL: ${{ secrets.SITE_URL || 'https://www.uretir.com' }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          IG_USERNAME: ${{ secrets.IG_USERNAME || 'uretirai' }}
-          IG_PASSWORD: ${{ secrets.IG_PASSWORD }}
-          IG_SESSIONID: ${{ secrets.IG_SESSIONID }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || '995164733' }}
           SKIP_PUBLISH: ${{ github.event.inputs.mode == 'render-only' && '1' || '0' }}
         run: |
-          EXTRA_ARGS=""
+          EXTRA_ARGS="--force"
           if [ "${{ github.event.inputs.mode }}" = "render-only" ]; then
-            EXTRA_ARGS="--render-only"
+            EXTRA_ARGS="--render-only --force"
           fi
-          if [ "${{ github.event.inputs.slot }}" = "dyson" ]; then
-            node scripts/social-video-automation.mjs --dyson-special $EXTRA_ARGS
-          elif [ -n "${{ github.event.inputs.slot }}" ] && [ "${{ github.event.inputs.slot }}" != "auto" ]; then
-            node scripts/social-video-automation.mjs --slot=${{ github.event.inputs.slot }} $EXTRA_ARGS
+          CAT_INPUT="${{ github.event.inputs.category }}"
+          if [ "$CAT_INPUT" = "all" ]; then
+            node scripts/social-video-automation.mjs --separate-categories $EXTRA_ARGS
+          elif [ -n "$CAT_INPUT" ]; then
+            node scripts/social-video-automation.mjs --category "$CAT_INPUT" $EXTRA_ARGS
           else
-            node scripts/social-video-automation.mjs $EXTRA_ARGS
+            HOUR_UTC=$(date -u +%H)
+            case "$HOUR_UTC" in
+              06) TARGET_CAT="haberai" ;;
+              08) TARGET_CAT="puanai" ;;
+              10) TARGET_CAT="indirimai" ;;
+              12) TARGET_CAT="finansai" ;;
+              15) TARGET_CAT="evai" ;;
+              17) TARGET_CAT="arabaai" ;;
+              *)  TARGET_CAT="indirimai" ;;
+            esac
+            node scripts/social-video-automation.mjs --category "$TARGET_CAT" $EXTRA_ARGS
           fi
 
       - name: Upload Generated 9:16 Reels MP4, Covers & Manifest as Artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: uretir-social-media-package-${{ github.run_number }}
+          name: uretir-telegram-stock-package-${{ github.run_number }}
           path: |
             reports/social-media/**/*.mp4
             reports/social-media/**/*.png

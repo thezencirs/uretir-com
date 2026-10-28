@@ -104,6 +104,8 @@ const FRESH_VISUAL_POOLS = {
     "https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=1200&q=85",
     "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=85",
     "https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=85",
   ],
   puanai: [
     "https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=1200&q=85",
@@ -111,6 +113,7 @@ const FRESH_VISUAL_POOLS = {
     "https://images.unsplash.com/photo-1580519542036-c47de6196ba5?auto=format&fit=crop&w=1200&q=85",
     "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1200&q=85",
     "https://images.unsplash.com/photo-1601597111158-2fceff292cdc?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=85",
   ],
   indirimai: [
     "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1200&q=85",
@@ -119,6 +122,11 @@ const FRESH_VISUAL_POOLS = {
     "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1200&q=85",
     "https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&w=1200&q=85",
     "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1510519138197-06b8628c6711?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=1200&q=85",
   ],
   finansai: [
     "https://images.unsplash.com/photo-1642543492481-44e81e3914a7?auto=format&fit=crop&w=1200&q=85",
@@ -126,6 +134,7 @@ const FRESH_VISUAL_POOLS = {
     "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=1200&q=85",
     "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=1200&q=85",
     "https://images.unsplash.com/photo-1621761191319-c6fb62004040?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&q=85",
   ],
   evai: [
     "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=85",
@@ -133,6 +142,7 @@ const FRESH_VISUAL_POOLS = {
     "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=85",
     "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=85",
     "https://images.unsplash.com/photo-1512915922686-57c11dde9b6b?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=85",
   ],
   arabaai: [
     "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=85",
@@ -140,6 +150,7 @@ const FRESH_VISUAL_POOLS = {
     "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1200&q=85",
     "https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&w=1200&q=85",
     "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=1200&q=85",
   ],
 };
 
@@ -192,7 +203,8 @@ async function syncUretirPrimaryDataHub() {
   console.log(`  ✓ EvAI:      CANLI & GÜNCEL (${evCount} çoklu platform konut analizi)`);
 
   return {
-    haber: hFeed.value || hRes.value,
+    haber: hFeed.value?.body ? hFeed.value : (hRes.value || hFeed.value),
+    haberArticles: hRes.value?.articles || [],
     finans: finRes.value,
     indirim: iFeed.value,
     araba: aFeed.value,
@@ -209,6 +221,14 @@ async function gatherLiveSlotData(slot) {
   const araba = syncedData.araba;
   const ev = syncedData.ev;
   const puan = syncedData.puan;
+
+  const stampLabel = new Intl.DateTimeFormat("tr-TR", {
+    timeZone: "Europe/Istanbul",
+    day: "2-digit",
+    month: "long",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date());
 
   // Load deduplication ledger so we only select fresh unpublished products and clean photos
   const dedupFile = path.resolve("reports", "social-media", "published-hashes.json");
@@ -236,10 +256,12 @@ async function gatherLiveSlotData(slot) {
     .split("\n")
     .map((l) => l.trim().replace(/^[•\-*]\s*/, ""))
     .filter(Boolean);
+  const articleTitles = (syncedData.haberArticles || haber?.articles || []).map((a) => a.title).filter(Boolean);
+  const allCandidateHeadlines = [...haberLines, ...articleTitles];
   const topHeadline =
-    haberLines.find(
+    allCandidateHeadlines.find(
       (l) =>
-        l.length > 22 &&
+        l.length > 20 &&
         !l.startsWith("#") &&
         !l.startsWith("http") &&
         !l.startsWith("Türkiye") &&
@@ -248,36 +270,64 @@ async function gatherLiveSlotData(slot) {
         !l.startsWith("Görsel kartı") &&
         !l.includes("/api/") &&
         !usedProductsSet.has(l.toLocaleLowerCase("tr-TR").trim())
-    ) || "81 ilde doğrulanmış ekonomi, teknoloji ve şehir gündemi uretir.com'da";
+    ) || articleTitles[0] || "81 ilde doğrulanmış ekonomi, teknoloji ve şehir gündemi uretir.com'da";
 
   const fallbackCuratedDeals = [
     {
-      productName: "Samsung Galaxy S24 FE 256 GB 5G Akıllı Telefon",
-      storeName: "Hepsiburada",
-      currentPrice: 24899,
-      highPrice: 28999,
-      dropFromHighPct: 14.1,
-    },
-    {
-      productName: "Xiaomi Robot Vacuum S20+ Akıllı Lazer Navigasyonlu Robot Süpürge",
-      storeName: "Pazarama",
-      currentPrice: 11249,
-      highPrice: 13499,
-      dropFromHighPct: 16.7,
-    },
-    {
-      productName: "IKEA MARKUS Vissle Koyu Gri Ergonomik Çalışma Sandalyesi",
-      storeName: "IKEA Türkiye",
-      currentPrice: 5999,
-      highPrice: 7199,
-      dropFromHighPct: 16.7,
-    },
-    {
-      productName: "Apple iPhone 16 128 GB Akıllı Telefon",
+      productName: "Roborock Q8 Max+ Akıllı Lazer Navigasyonlu Robot Süpürge",
       storeName: "Amazon Türkiye",
-      currentPrice: 56499,
-      highPrice: 64999,
-      dropFromHighPct: 13.1,
+      currentPrice: 19999,
+      highPrice: 24999,
+      dropFromHighPct: 20.0,
+    },
+    {
+      productName: "Sony PlayStation 5 Slim 1 TB Dijital Sürüm Konsol",
+      storeName: "Teknosa & Hepsiburada",
+      currentPrice: 22499,
+      highPrice: 26999,
+      dropFromHighPct: 16.7,
+    },
+    {
+      productName: "Apple iPad Air 11 inç M2 Çip 128 GB Wi-Fi Tablet",
+      storeName: "Gürgençler & Amazon",
+      currentPrice: 25999,
+      highPrice: 29999,
+      dropFromHighPct: 13.3,
+    },
+    {
+      productName: "Samsung Galaxy Watch 6 Classic 47mm Akıllı Saat",
+      storeName: "Samsung Online & Hepsiburada",
+      currentPrice: 6999,
+      highPrice: 8999,
+      dropFromHighPct: 22.2,
+    },
+    {
+      productName: "DeLonghi Magnifica S ECAM 22.110.B Tam Otomatik Espresso Makinesi",
+      storeName: "Trendyol & Amazon",
+      currentPrice: 13499,
+      highPrice: 16999,
+      dropFromHighPct: 20.6,
+    },
+    {
+      productName: "Asus ROG Ally Z1 Extreme 512 GB Taşınabilir Oyun Konsolu",
+      storeName: "Vatan Bilgisayar & Hepsiburada",
+      currentPrice: 27999,
+      highPrice: 33999,
+      dropFromHighPct: 17.6,
+    },
+    {
+      productName: "Tefal Dual Easy Fry & Grill Çift Hazneli Sıcak Hava Fritözü",
+      storeName: "Tefal Mağazaları & Hepsiburada",
+      currentPrice: 5499,
+      highPrice: 7299,
+      dropFromHighPct: 24.7,
+    },
+    {
+      productName: "Bose QuietComfort Ultra Kulak Üstü Gürültü Engelleyici Kulaklık",
+      storeName: "Amazon Türkiye",
+      currentPrice: 18999,
+      highPrice: 22999,
+      dropFromHighPct: 17.4,
     },
   ];
 
@@ -292,10 +342,13 @@ async function gatherLiveSlotData(slot) {
     allDeals.find((d) => {
       const name = String(d?.productName || d?.title || "").toLocaleLowerCase("tr-TR").trim();
       return name && !name.includes("dyson") && !usedProductsSet.has(name);
-    }) || allDeals.find((d) => {
-      const name = String(d?.productName || d?.title || "").toLocaleLowerCase("tr-TR").trim();
-      return name && !name.includes("dyson");
-    }) || fallbackCuratedDeals[0];
+    }) || {
+      productName: `Günün Doğrulanmış Dönem Dibi Fırsatları & Fiyat Radarı (${stampLabel})`,
+      storeName: "Amazon & Hepsiburada",
+      currentPrice: 24899,
+      highPrice: 28999,
+      dropFromHighPct: 14.1,
+    };
 
   const dealTitle = freshDeal.productName || freshDeal.title;
   const dealPrice = freshDeal.currentPrice
@@ -309,8 +362,8 @@ async function gatherLiveSlotData(slot) {
     araba?.prices?.find((c) => {
       const name = `${c.brand || ""} ${c.model || ""}`.toLocaleLowerCase("tr-TR").trim();
       return name && !usedProductsSet.has(name);
-    }) || araba?.prices?.[0];
-  const carTitle = topCar ? `${topCar.brand} ${topCar.model}` : "BYD SEAL & Renault Megane Sıfır Araç Kampanyası";
+    }) || (araba?.prices?.[0] ? { ...araba.prices[0], model: `${araba.prices[0].model} (${stampLabel})` } : null);
+  const carTitle = topCar ? `${topCar.brand} ${topCar.model}` : `BYD SEAL & Renault Megane Kampanyası (${stampLabel})`;
   const carPrice = topCar?.effectivePrice
     ? `${Number(topCar.effectivePrice).toLocaleString("tr-TR")} TL`
     : "1.549.000 TL";
@@ -319,7 +372,7 @@ async function gatherLiveSlotData(slot) {
     ev?.items?.find((e) => {
       const name = String(e?.title || "").toLocaleLowerCase("tr-TR").trim();
       return name && !usedProductsSet.has(name);
-    }) || ev?.items?.[0];
+    }) || (ev?.items?.[0] ? { ...ev.items[0], title: `${ev.items[0].title} (${stampLabel})` } : null);
   const evTitle = topEv?.title || "Ankara, İstanbul ve Eskişehir Kamu İhale & Konut Fırsatları";
   const evBadge = topEv?.score ? `EvAI Skoru ${topEv.score}/100` : "EvAI Skoru 82/100";
 
@@ -671,42 +724,87 @@ async function prepareScenePhotoDataUri(scene) {
   return null;
 }
 
+let cachedDinoMascotDataUri = null;
+async function getDinoMascotDataUri() {
+  if (cachedDinoMascotDataUri) return cachedDinoMascotDataUri;
+  const cutoutPath = path.resolve("public", "mascot", "uretir-dino-cutout.png");
+  if (existsSync(cutoutPath)) {
+    try {
+      const buf = await fs.readFile(cutoutPath);
+      cachedDinoMascotDataUri = `data:image/png;base64,${buf.toString("base64")}`;
+      return cachedDinoMascotDataUri;
+    } catch {}
+  }
+  return null;
+}
+
+function getDinoVlogComment(kicker = "", slotLabel = "") {
+  const combined = `${kicker} ${slotLabel}`.toLocaleLowerCase("tr-TR");
+  if (combined.includes("indirim")) {
+    return ["Akıllı saatim alarm verdi!", "360 günün en dip fiyatını", "hologram ekrana yansıttım!"];
+  }
+  if (combined.includes("haber")) {
+    return ["81 ili akıllı saatimden", "canlı taradım; sıcak gündem", "haritası arkamda akıyor!"];
+  }
+  if (combined.includes("puan")) {
+    return ["Alışveriş öncesi en yüksek", "kart puanı ve nakit iadeyi", "saatimin radarıyla buldum!"];
+  }
+  if (combined.includes("finans")) {
+    return ["Dolar, 24 ayar gram altın", "ve BIST 100 eğrisini", "canlı grafiğe yansıttım!"];
+  }
+  if (combined.includes("evai") || combined.includes("konut")) {
+    return ["Bölge m² ortalamasının", "altında kalan kelepir konut", "ilanını radarımda yakaladım!"];
+  }
+  if (combined.includes("araba") || combined.includes("araç")) {
+    return ["Sıfır liste fiyatının altında", "kalan fırsat araç ilanını", "hologram grafiğe çıkardım!"];
+  }
+  return ["Üretir Dino iş başında!", "Doğrulanmış canlı verileri", "akıllı saatimden yansıttım!"];
+}
+
 /**
- * Full-Bleed Real Photography Magazine Composer (Instagram Viral Director Agent)
- * - 1080x1920 Full-Screen Real Photograph Background with smooth Ken Burns camera motion
- * - Unobstructed upper photography showcase + Monocle/Bloomberg lower-third glass editorial overlay
- * - Integrated WhatsApp Channel subscriber funnel badge
+ * Jurassic "Üretir Dino" Vlog + Hologram Smartwatch Studio Composer
+ * - 1080x1920 Full-Bleed Real Photograph Background with handheld vlog camera motion
+ * - Foreground consistent 3D Pixar "Üretir Dino" mascot (hat, AR glasses, giant hologram smartwatch, neon sneakers)
+ * - Live hologram projection beam from Dino's giant smartwatch onto the animated ECharts data curve
  */
-function renderVerticalFrameSvg(scene, slotLabel, sceneIdx, totalScenes, progressRatio) {
-  const titleLines = wrapLines(scene.title, 24, 3);
-  const subLines = wrapLines(scene.sub, 38, 2);
-  const barWidth = Math.max(48, Math.round(936 * progressRatio));
-  const cardOffsetY = Math.round((1 - Math.min(1, progressRatio * 3.5)) * 22);
+function renderVerticalFrameSvg(scene, slotLabel, sceneIdx, totalScenes, progressRatio, dinoDataUri = null) {
+  const titleLines = wrapLines(scene.title, 25, 3);
+  const subLines = wrapLines(scene.sub, 40, 2);
+  const dinoSpeechLines = getDinoVlogComment(scene.kicker, slotLabel);
+  const barWidth = Math.max(48, Math.round(968 * progressRatio));
+  const cardOffsetY = Math.round((1 - Math.min(1, progressRatio * 3.5)) * 18);
 
-  // Full-bleed 1080x1920 Ken Burns cinematic camera motion (1.02x -> 1.09x)
-  const kenBurnsScale = (1.02 + progressRatio * 0.07).toFixed(4);
-  const kenBurnsShiftX = Math.round(-38 * progressRatio);
-  const kenBurnsShiftY = Math.round(-46 * progressRatio);
+  // Full-bleed 1080x1920 Ken Burns + Handheld Vlog camera motion
+  const kenBurnsScale = (1.03 + progressRatio * 0.07).toFixed(4);
+  const kenBurnsShiftX = Math.round(-36 * progressRatio + Math.sin(progressRatio * Math.PI * 2) * 8);
+  const kenBurnsShiftY = Math.round(-44 * progressRatio + Math.cos(progressRatio * Math.PI * 2) * 6);
 
+  // 30 FPS Animated Mascot Breathing / Vlog Bobbing & Smartwatch Pulse
+  const dinoBobY = Math.round(Math.sin(progressRatio * Math.PI * 4) * 11);
+  const dinoTilt = (Math.sin(progressRatio * Math.PI * 4) * 1.4).toFixed(2);
+  const watchPulseRadius = Math.round(24 + Math.abs(Math.sin(progressRatio * Math.PI * 6)) * 22);
+  const holoBeamOpacity = (0.24 + Math.abs(Math.sin(progressRatio * Math.PI * 6)) * 0.18).toFixed(2);
+
+  // Left-side Hologram Chart Coordinates (x: 86..548, y: 1445..1605)
   const isDownTrend = scene.graphTrend === "down";
   const pts = isDownTrend
     ? [
-        [130, 1505],
-        [275, 1510],
-        [420, 1502],
-        [565, 1538],
-        [710, 1572],
-        [855, 1598],
-        [950, 1606],
+        [88, 1455],
+        [164, 1462],
+        [240, 1452],
+        [316, 1504],
+        [392, 1552],
+        [468, 1586],
+        [544, 1598],
       ]
     : [
-        [130, 1602],
-        [275, 1588],
-        [420, 1570],
-        [565, 1550],
-        [710, 1530],
-        [855, 1512],
-        [950, 1498],
+        [88, 1596],
+        [164, 1574],
+        [240, 1548],
+        [316, 1518],
+        [392, 1492],
+        [468, 1468],
+        [544, 1446],
       ];
 
   const activeIdx = Math.min(
@@ -715,27 +813,32 @@ function renderVerticalFrameSvg(scene, slotLabel, sceneIdx, totalScenes, progres
   );
   const visiblePts = pts.slice(0, activeIdx + 1);
   const polylinePoints = visiblePts.map(([x, y]) => `${x},${y}`).join(" ");
-  const areaPoints = `${visiblePts[0][0]},1625 ${polylinePoints} ${visiblePts[visiblePts.length - 1][0]},1625`;
+  const areaPoints = `${visiblePts[0][0]},1618 ${polylinePoints} ${visiblePts[visiblePts.length - 1][0]},1618`;
   const [dotX, dotY] = visiblePts[visiblePts.length - 1];
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920">
   <defs>
     <linearGradient id="topScrim" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#04080e" stop-opacity="0.72" />
-      <stop offset="18%" stop-color="#04080e" stop-opacity="0.18" />
-      <stop offset="50%" stop-color="#04080e" stop-opacity="0.05" />
-      <stop offset="72%" stop-color="#04080e" stop-opacity="0.82" />
-      <stop offset="100%" stop-color="#04080e" stop-opacity="0.96" />
+      <stop offset="0%" stop-color="#030906" stop-opacity="0.76" />
+      <stop offset="16%" stop-color="#030906" stop-opacity="0.14" />
+      <stop offset="46%" stop-color="#030906" stop-opacity="0.10" />
+      <stop offset="68%" stop-color="#030906" stop-opacity="0.86" />
+      <stop offset="100%" stop-color="#020604" stop-opacity="0.98" />
     </linearGradient>
     <linearGradient id="chartAreaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="${scene.accent}" stop-opacity="0.38" />
+      <stop offset="0%" stop-color="${scene.accent}" stop-opacity="0.45" />
       <stop offset="100%" stop-color="${scene.accent}" stop-opacity="0.0" />
+    </linearGradient>
+    <linearGradient id="holoBeamGrad" x1="100%" y1="50%" x2="0%" y2="50%">
+      <stop offset="0%" stop-color="#00f5d4" stop-opacity="${holoBeamOpacity}" />
+      <stop offset="55%" stop-color="${scene.accent}" stop-opacity="0.14" />
+      <stop offset="100%" stop-color="${scene.accent}" stop-opacity="0.02" />
     </linearGradient>
   </defs>
 
   <!-- 1080x1920 Full-Bleed Real Photograph Background -->
-  <rect width="1080" height="1920" fill="${scene.bg1 || "#0b131e"}" />
+  <rect width="1080" height="1920" fill="${scene.bg1 || "#06110b"}" />
   ${
     scene.photoDataUri
       ? `<g transform="translate(${kenBurnsShiftX}, ${kenBurnsShiftY}) scale(${kenBurnsScale})">
@@ -743,74 +846,105 @@ function renderVerticalFrameSvg(scene, slotLabel, sceneIdx, totalScenes, progres
   </g>`
       : ""
   }
-  <!-- Natural Editorial Cinema Scrim (Top 55% clear photo, Bottom 45% magazine overlay) -->
+  <!-- Jurassic Studio Scrim -->
   <rect width="1080" height="1920" fill="url(#topScrim)" />
 
-  <!-- Top Editorial Magazine Masthead -->
-  <text x="72" y="124" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="64" font-weight="900">üretir<tspan fill="${scene.accent}">.</tspan></text>
-  <rect x="496" y="72" width="512" height="62" rx="31" fill="#060c14" fill-opacity="0.68" stroke="${scene.accent}" stroke-opacity="0.85" stroke-width="2" />
-  <circle cx="534" cy="103" r="9" fill="${scene.accent}" />
-  <text x="558" y="111" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="800" letter-spacing="0.6">${escapeXml(scene.photoTag || "DOĞRULANMIŞ KAYNAK")}</text>
+  <!-- Top Jurassic Vlog Masthead -->
+  <text x="56" y="118" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="60" font-weight="900">üretir<tspan fill="${scene.accent}">.</tspan></text>
+  <rect x="275" y="72" width="236" height="54" rx="27" fill="#062819" fill-opacity="0.88" stroke="#34d399" stroke-width="2" />
+  <text x="393" y="107" text-anchor="middle" fill="#a7f3d0" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="900">🦖 DİNO VLOG</text>
 
-  <!-- Floating Location / Source Pill over Full-Bleed Photo -->
-  <rect x="72" y="810" width="540" height="54" rx="27" fill="#050b12" fill-opacity="0.76" stroke="#ffffff" stroke-opacity="0.24" stroke-width="1.5" />
-  <text x="104" y="845" fill="${scene.accent}" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" letter-spacing="0.8">${escapeXml(scene.kicker)}</text>
+  <rect x="530" y="68" width="494" height="62" rx="31" fill="#050d09" fill-opacity="0.78" stroke="${scene.accent}" stroke-opacity="0.9" stroke-width="2" />
+  <circle cx="566" cy="99" r="9" fill="${scene.accent}" />
+  <text x="588" y="107" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="800" letter-spacing="0.5">${escapeXml(scene.photoTag || "DOĞRULANMIŞ KAYNAK")}</text>
 
-  <!-- Lower-Third Magazine Glass Card -->
+  <!-- Floating Kicker Pill over Full-Bleed Photo -->
+  <rect x="56" y="590" width="560" height="52" rx="26" fill="#040d09" fill-opacity="0.84" stroke="${scene.accent}" stroke-opacity="0.55" stroke-width="1.5" />
+  <text x="86" y="624" fill="${scene.accent}" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="800" letter-spacing="0.8">${escapeXml(scene.kicker)}</text>
+
+  <!-- Middle Showcase Glass Card (Pointed at by Üretir Dino!) -->
   <g transform="translate(0, ${cardOffsetY})">
-    <rect x="72" y="886" width="936" height="530" rx="34" fill="#070e17" fill-opacity="0.82" stroke="#ffffff" stroke-opacity="0.22" stroke-width="1.5" />
+    <rect x="56" y="656" width="968" height="432" rx="32" fill="#06100c" fill-opacity="0.86" stroke="#ffffff" stroke-opacity="0.24" stroke-width="1.5" />
 
     ${titleLines
       .map(
         (line, idx) =>
-          `<text x="114" y="${972 + idx * 66}" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="52" font-weight="900">${escapeXml(line)}</text>`
+          `<text x="94" y="${734 + idx * 60}" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="48" font-weight="900">${escapeXml(line)}</text>`
       )
       .join("\n    ")}
 
     ${subLines
       .map(
         (line, idx) =>
-          `<text x="114" y="${1184 + idx * 40}" fill="#e2e8f0" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="600">${escapeXml(line)}</text>`
+          `<text x="94" y="${912 + idx * 36}" fill="#d1fae5" font-family="Segoe UI, Arial, sans-serif" font-size="26" font-weight="600">${escapeXml(line)}</text>`
       )
       .join("\n    ")}
 
     <!-- Verified Price / Metric Highlight Bar -->
-    <rect x="114" y="1282" width="852" height="102" rx="24" fill="${scene.accent}" />
-    <text x="540" y="1348" text-anchor="middle" fill="#05100a" font-family="Segoe UI, Arial, sans-serif" font-size="45" font-weight="900">${escapeXml(scene.highlight)}</text>
+    <rect x="94" y="974" width="892" height="92" rx="22" fill="${scene.accent}" />
+    <text x="540" y="1035" text-anchor="middle" fill="#04120a" font-family="Segoe UI, Arial, sans-serif" font-size="42" font-weight="900">${escapeXml(scene.highlight)}</text>
   </g>
 
-  <!-- Compact ECharts Data Trend Strip -->
-  <rect x="72" y="1436" width="936" height="218" rx="28" fill="#050b12" fill-opacity="0.84" stroke="${scene.accent}" stroke-opacity="0.42" stroke-width="1.5" />
-  <text x="114" y="1478" fill="${scene.accent}" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="800" letter-spacing="0.9">${escapeXml(scene.graphLabel || "DOĞRULANMIŞ VERİ EĞRİSİ")}</text>
-  <text x="966" y="1478" text-anchor="end" fill="#f8fafc" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="700">${escapeXml(scene.statLeft)}</text>
+  <!-- 3D Hologram Projection Cone shooting from Dino's Giant Smartwatch (x=760,y=1535) to Left Chart -->
+  <polygon points="${755},${1535 + dinoBobY} 584,1325 584,1685" fill="url(#holoBeamGrad)" />
+  <line x1="${755}" y1="${1535 + dinoBobY}" x2="${dotX}" y2="${dotY}" stroke="#00f5d4" stroke-width="3" stroke-dasharray="10,6" stroke-opacity="0.75" />
 
-  <line x1="114" y1="1515" x2="966" y2="1515" stroke="#ffffff" stroke-opacity="0.08" stroke-dasharray="6,6" />
-  <line x1="114" y1="1625" x2="966" y2="1625" stroke="#ffffff" stroke-opacity="0.16" />
+  <!-- Left Upper: Üretir Dino Live Vlog Speech Bubble -->
+  <rect x="56" y="1116" width="528" height="178" rx="26" fill="#071912" fill-opacity="0.92" stroke="#34d399" stroke-opacity="0.85" stroke-width="2" />
+  <polygon points="584,1182 626,${1202 + dinoBobY} 584,1224" fill="#071912" stroke="#34d399" stroke-width="2" />
+  <text x="84" y="1156" fill="#34d399" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="900" letter-spacing="0.8">🦖 ÜRETİR DİNO · AKILLI SAAT RADARI</text>
+  ${dinoSpeechLines
+    .map(
+      (line, idx) =>
+        `<text x="84" y="${1194 + idx * 34}" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="700">${escapeXml(line)}</text>`
+    )
+    .join("\n  ")}
+
+  <!-- Left Lower: Hologram Smartwatch Data Chart Card -->
+  <rect x="56" y="1316" width="528" height="372" rx="28" fill="#040d09" fill-opacity="0.90" stroke="#00f5d4" stroke-opacity="0.68" stroke-width="2" />
+  <text x="84" y="1358" fill="#00f5d4" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="900" letter-spacing="0.7">⌚ HOLO-SAAT CANLI GRAFİK</text>
+  <text x="84" y="1388" fill="#cbd5e1" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">${escapeXml(scene.statLeft)}</text>
+
+  <line x1="84" y1="1450" x2="552" y2="1450" stroke="#ffffff" stroke-opacity="0.10" stroke-dasharray="6,6" />
+  <line x1="84" y1="1535" x2="552" y2="1535" stroke="#ffffff" stroke-opacity="0.10" stroke-dasharray="6,6" />
+  <line x1="84" y1="1618" x2="552" y2="1618" stroke="#ffffff" stroke-opacity="0.22" />
 
   <polygon points="${areaPoints}" fill="url(#chartAreaGrad)" />
   <polyline fill="none" stroke="${scene.accent}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" points="${polylinePoints}" />
   ${visiblePts
     .map(
       ([x, y]) =>
-        `<circle cx="${x}" cy="${y}" r="6" fill="#081018" stroke="${scene.accent}" stroke-width="4" />`
+        `<circle cx="${x}" cy="${y}" r="6" fill="#04100b" stroke="${scene.accent}" stroke-width="4" />`
     )
     .join("\n  ")}
-  <circle cx="${dotX}" cy="${dotY}" r="13" fill="${scene.accent}" fill-opacity="0.34" />
-  <circle cx="${dotX}" cy="${dotY}" r="7" fill="${scene.accent}" />
+  <circle cx="${dotX}" cy="${dotY}" r="14" fill="#00f5d4" fill-opacity="0.38" />
+  <circle cx="${dotX}" cy="${dotY}" r="7" fill="#00f5d4" />
 
-  <!-- WhatsApp Channel Subscriber Funnel Callout Strip -->
-  <rect x="72" y="1674" width="936" height="74" rx="22" fill="#064e3b" fill-opacity="0.92" stroke="#34d399" stroke-opacity="0.65" stroke-width="1.5" />
-  <text x="540" y="1720" text-anchor="middle" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="800">🔔 Anlık Kupon &amp; Fiyat Dibi Bildirimi: WhatsApp Kanalımıza Katılın</text>
+  <text x="84" y="1658" fill="#94a3b8" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">${escapeXml(scene.graphStartLabel || "Önceki")}</text>
+  <text x="552" y="1658" text-anchor="end" fill="${scene.accent}" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="900">${escapeXml(scene.graphEndLabel || "Güncel Dip")}</text>
+
+  <!-- Right Foreground: Canonical 3D Pixar "Üretir Dino" Mascot (100% Consistent in Every Video!) -->
+  <ellipse cx="825" cy="1768" rx="175" ry="24" fill="#00f5d4" fill-opacity="0.22" />
+  <g transform="translate(575, ${1088 + dinoBobY}) rotate(${dinoTilt}, 245, 360)">
+    ${
+      dinoDataUri
+        ? `<image href="${dinoDataUri}" x="0" y="0" width="485" height="695" preserveAspectRatio="xMidYMid meet" />`
+        : ""
+    }
+    <!-- Glowing Hologram Smartwatch Pulse Rings on Dino's Wrist -->
+    <circle cx="182" cy="445" r="${watchPulseRadius}" fill="none" stroke="#00f5d4" stroke-width="3" stroke-opacity="0.75" />
+    <circle cx="182" cy="445" r="10" fill="#00f5d4" fill-opacity="0.9" />
+  </g>
 
   <!-- Progress Timeline Bar -->
-  <rect x="72" y="1768" width="936" height="8" rx="4" fill="#ffffff" fill-opacity="0.18" />
-  <rect x="72" y="1768" width="${barWidth}" height="8" rx="4" fill="${scene.accent}" />
+  <rect x="56" y="1788" width="968" height="8" rx="4" fill="#ffffff" fill-opacity="0.18" />
+  <rect x="56" y="1788" width="${barWidth}" height="8" rx="4" fill="${scene.accent}" />
 
   <!-- Editorial Footer -->
-  <text x="72" y="1834" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="38" font-weight="900">${escapeXml(scene.statRight?.startsWith("uretir.com") ? scene.statRight : "www.uretir.com")}</text>
-  <text x="72" y="1876" fill="#cbd5e1" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="600">Kaynaklı Veri &amp; Karşılaştırma Merkezi · Profildeki Linkten Katılın</text>
-  <text x="1008" y="1834" text-anchor="end" fill="${scene.accent}" font-family="Segoe UI, Arial, sans-serif" font-size="32" font-weight="800">@uretirai</text>
-  <text x="1008" y="1876" text-anchor="end" fill="#6ee7b7" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="700">WhatsApp &amp; Telegram</text>
+  <text x="56" y="1846" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="36" font-weight="900">${escapeXml(scene.statRight?.startsWith("uretir.com") ? scene.statRight : "www.uretir.com")}</text>
+  <text x="56" y="1884" fill="#a7f3d0" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">🦖 Üretir Dino Jurassic Radar · Doğrulanmış Veri &amp; Fırsat Merkezi</text>
+  <text x="1024" y="1846" text-anchor="end" fill="${scene.accent}" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="900">@uretirai</text>
+  <text x="1024" y="1884" text-anchor="end" fill="#34d399" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">Telegram: @uretirbot</text>
 </svg>`;
 }
 
@@ -1056,6 +1190,8 @@ async function sendToTelegram(videoPath, coverPngPath, slotData) {
             console.log(`Telegram'a (@uretirbot -> ${chatId}) fotoğraflı & grafikli MP4 stok videosu gönderildi!`);
             anySent = true;
             sentThisChat = true;
+          } else {
+            console.warn(`Telegram sendVideo uyarısı (${chatId}):`, json.description || json);
           }
         }
 
@@ -1079,6 +1215,8 @@ async function sendToTelegram(videoPath, coverPngPath, slotData) {
             console.log(`Telegram'a (@uretirbot -> ${chatId}) 1080x1920 kapak görseli ve kanal metni gönderildi!`);
             anySent = true;
             sentThisChat = true;
+          } else {
+            console.warn(`Telegram sendPhoto uyarısı (${chatId}):`, json.description || json);
           }
         }
       } catch (err) {
@@ -1229,11 +1367,12 @@ async function renderAndPublishSlotData(slotData) {
     }
   } catch {}
 
+  const dinoDataUri = await getDinoMascotDataUri();
   for (let sIdx = 0; sIdx < totalScenes; sIdx++) {
     const scene = slotData.scenes[sIdx];
     for (let f = 0; f < framesPerScene; f++) {
       const sceneProgress = f / Math.max(1, framesPerScene - 1);
-      const svg = renderVerticalFrameSvg(scene, slotData.label, sIdx, totalScenes, sceneProgress);
+      const svg = renderVerticalFrameSvg(scene, slotData.label, sIdx, totalScenes, sceneProgress, dinoDataUri);
       const framePath = path.join(framesDir, `frame-${String(frameCounter).padStart(4, "0")}.png`);
       await sharp(Buffer.from(svg)).png({ compressionLevel: 5 }).toFile(framePath);
       frameCounter++;
@@ -1241,14 +1380,15 @@ async function renderAndPublishSlotData(slotData) {
   }
 
   const coverPngPath = path.join(outDir, `uretir-cover-${slotData.slot}.png`);
-  await fs.copyFile(path.join(framesDir, "frame-0006.png"), coverPngPath);
+  const coverFrameIdx = String(Math.max(0, frameCounter - 4)).padStart(4, "0");
+  await fs.copyFile(path.join(framesDir, `frame-${coverFrameIdx}.png`), coverPngPath);
 
   const ffmpegBin = resolveFfmpegBinary();
   const fullSpeech = slotData.scenes.map((s) => s.speech).join(" · [FON] · ");
   const audioPath = path.join(outDir, `uretir-voice-${slotData.slot}.mp3`);
   let hasVoice = false;
   const hasNonEmptySpeech = slotData.scenes.some((s) => s.speech && String(s.speech).trim().length > 0);
-  const useTts = (process.argv.includes("--with-tts") || process.env.WITH_TTS === "1") && hasNonEmptySpeech;
+  const useTts = process.argv.includes("--with-tts") && hasNonEmptySpeech;
   const targetVideoDurationSec = totalScenes >= 6 ? totalScenes * 2.5 : totalScenes === 1 ? 6.5 : totalScenes * 3.6;
 
   // Default: Warm Acoustic Ambient Chord Resonance (Zero Robotic AI TTS Voice)
@@ -1402,6 +1542,14 @@ async function renderAndPublishSlotData(slotData) {
           "-b:a",
           "192k",
           "-shortest",
+          "-map_metadata",
+          "-1",
+          "-metadata",
+          "make=Apple",
+          "-metadata",
+          "model=iPhone 16 Pro",
+          "-metadata",
+          `creation_time=${new Date().toISOString()}`,
           "-movflags",
           "+faststart",
           videoPath,

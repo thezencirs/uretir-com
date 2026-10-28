@@ -740,48 +740,48 @@ async function getDinoMascotDataUri() {
 
 function getDinoVlogComment(kicker = "", slotLabel = "") {
   const combined = `${kicker} ${slotLabel}`.toLocaleLowerCase("tr-TR");
-  if (combined.includes("indirim")) {
-    return ["Akıllı saatim alarm verdi!", "360 günün en dip fiyatını", "canlı grafiğe yansıttım!"];
+  if (combined.includes("odak") || combined.includes("zaman") || combined.includes("haber")) {
+    return ["Tüketmeyi bırak, üretmeye geç!", "İlk 90 dakika derin odakla", "üretim ivmeni 3 katına çıkar!"];
   }
-  if (combined.includes("haber")) {
-    return ["81 ili akıllı saatimden", "canlı taradım; sıcak gündem", "grafiği arkamda akıyor!"];
+  if (combined.includes("kaldıraç") || combined.includes("otomasyon") || combined.includes("puan")) {
+    return ["Tekrarlayan işleri ajanlara", "devret; 1 saatte 10 saatlik", "yaratıcı değer üret!"];
   }
-  if (combined.includes("puan")) {
-    return ["Alışveriş öncesi en yüksek", "kart puanı ve nakit iadeyi", "saatimin radarıyla buldum!"];
+  if (combined.includes("sistem") || combined.includes("prototip") || combined.includes("indirim")) {
+    return ["Mükemmeli bekleme; bugün", "çalışan ilk sistemini kur,", "grafikteki gibi büyüt!"];
   }
-  if (combined.includes("finans")) {
-    return ["Dolar, 24 ayar gram altın", "ve BIST 100 kırılımını", "arkamdaki grafiğe çizdim!"];
+  if (combined.includes("veri") || combined.includes("strateji") || combined.includes("finans")) {
+    return ["Gürültüyü ele, veriyi oku!", "Akıllı saatimden net karar", "ve strateji grafiğini açtım!"];
   }
-  if (combined.includes("evai") || combined.includes("konut")) {
-    return ["Bölge m² ortalamasının", "altında kalan kelepir konut", "ilanını radarımda yakaladım!"];
+  if (combined.includes("dijital") || combined.includes("varlık") || combined.includes("evai")) {
+    return ["Sadece zamanını satma;", "7/24 çalışan dijital varlık", "ve otomasyon sistemleri üret!"];
   }
-  if (combined.includes("araba") || combined.includes("araç")) {
-    return ["Sıfır liste fiyatının altında", "kalan fırsat araç ilanını", "hologram grafiğe çıkardım!"];
+  if (combined.includes("bileşik") || combined.includes("pareto") || combined.includes("araba")) {
+    return ["Her gün %1 üretim gelişimi,", "yıl sonunda 37 kat büyüme", "demektir; grafiğe bak!"];
   }
-  return ["Üretir Dino iş başında!", "Doğrulanmış canlı verileri", "akıllı saatimden yansıttım!"];
+  return ["Üretir Dino iş başında!", "Tüketen değil üreten ol;", "geleceği birlikte üretelim!"];
 }
 
 function getUretirFikriTip(kicker = "", slotLabel = "") {
   const combined = `${kicker} ${slotLabel}`.toLocaleLowerCase("tr-TR");
-  if (combined.includes("indirim")) {
-    return "ÜRETİR FİKRİ: 360 günlük dip grafiğini görmeden asla sepete ekleme!";
+  if (combined.includes("odak") || combined.includes("zaman") || combined.includes("haber")) {
+    return "ÜRETİR FİKRİ: Güne ekran kaydırarak değil, en önemli işini üreterek başla!";
   }
-  if (combined.includes("haber")) {
-    return "ÜRETİR FİKRİ: Saatlerce akış kaydırma; 81 il haritasından 10 saniyede özeti al!";
+  if (combined.includes("kaldıraç") || combined.includes("otomasyon") || combined.includes("puan")) {
+    return "ÜRETİR FİKRİ: Tekrarlayan işleri yapay zekaya devret, enerjini üretime sakla!";
   }
-  if (combined.includes("puan")) {
-    return "ÜRETİR FİKRİ: Kasada düz çekme; banka kampanyasını eşleştirip nakit iade kazan!";
+  if (combined.includes("sistem") || combined.includes("prototip") || combined.includes("indirim")) {
+    return "ÜRETİR FİKRİ: Fikri zihninde tutma; bugün çalışan ilk prototipini üret!";
   }
-  if (combined.includes("finans")) {
-    return "ÜRETİR FİKRİ: Paranı enflasyona ezdirme; 30 günlük altın ve kur eğilimini izle!";
+  if (combined.includes("veri") || combined.includes("strateji") || combined.includes("finans")) {
+    return "ÜRETİR FİKRİ: Tahminle değil, doğrulanmış veri ve grafikle strateji üret!";
   }
-  if (combined.includes("evai") || combined.includes("konut")) {
-    return "ÜRETİR FİKRİ: İlan başlığına değil, bölge m² medyan grafiğine bakarak yatırım yap!";
+  if (combined.includes("dijital") || combined.includes("varlık") || combined.includes("evai")) {
+    return "ÜRETİR FİKRİ: Bir kez üret, senin yerine 7/24 çalışan dijital sistem kur!";
   }
-  if (combined.includes("araba") || combined.includes("araç")) {
-    return "ÜRETİR FİKRİ: Sıfır liste fiyatıyla 2. el makasını kıyaslamadan kapora gönderme!";
+  if (combined.includes("bileşik") || combined.includes("pareto") || combined.includes("araba")) {
+    return "ÜRETİR FİKRİ: Sonuçların %80'ini üreten %20'lik kritik adımlara odaklan!";
   }
-  return "ÜRETİR FİKRİ: Doğrulanmış canlı veri ve grafiklerle zaman ve bütçe kazan!";
+  return "ÜRETİR FİKRİ: Tüketici kalma; yapay zeka ve sistemlerle değer üret!";
 }
 
 function easeOutBack(x) {
@@ -1245,13 +1245,13 @@ async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path, numFrames 
               "--model",
               onnxPath,
               "--length-scale",
-              "0.94",
+              "1.22",
               "--noise-scale",
-              "0.60",
+              "0.58",
               "--noise-w-scale",
-              "0.74",
+              "0.72",
               "--sentence-silence",
-              "0.18",
+              "0.48",
               "--output_file",
               rawWavPath,
               cleanText,
@@ -1274,13 +1274,13 @@ async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path, numFrames 
                 "--model",
                 onnxPath,
                 "--length-scale",
-                "0.94",
+                "1.22",
                 "--noise-scale",
-                "0.60",
+                "0.58",
                 "--noise-w-scale",
-                "0.74",
+                "0.72",
                 "--sentence-silence",
-                "0.18",
+                "0.48",
                 "--output_file",
                 rawWavPath,
                 cleanText,
@@ -1294,7 +1294,7 @@ async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path, numFrames 
 
       if (wavBuilt && existsSync(rawWavPath)) {
         const envelope = await extractWavEnvelope(rawWavPath, numFrames);
-        // Apply Broadcast Baritone Vocal Mastering Filter (Deep chest resonance at 115Hz, clarity at 3.2kHz, radio compressor, optimum 1.02x pace)
+        // Apply Broadcast Baritone Vocal Mastering Filter (Deep chest resonance at 115Hz, clarity at 3.2kHz, radio compressor, calm optimum ~115 WPM pace)
         await execFileAsync(
           ffmpegBin,
           [
@@ -1302,7 +1302,7 @@ async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path, numFrames 
             "-i",
             rawWavPath,
             "-af",
-            "asetrate=22050*0.955,aresample=44100,atempo=1.065,highpass=f=65,equalizer=f=115:t=q:w=1.1:g=4.2,equalizer=f=280:t=q:w=1.4:g=-2.2,equalizer=f=3200:t=q:w=1.2:g=2.8,acompressor=threshold=-18dB:ratio=3.2:attack=12:release=180:makeup=2.5,extrastereo=m=1.18,alimiter=limit=0.95",
+            "asetrate=22050*0.94,aresample=44100,atempo=0.98,highpass=f=65,equalizer=f=115:t=q:w=1.1:g=4.2,equalizer=f=280:t=q:w=1.4:g=-2.2,equalizer=f=3200:t=q:w=1.2:g=2.5,acompressor=threshold=-18dB:ratio=3.2:attack=15:release=220:makeup=2.5,extrastereo=m=1.18,alimiter=limit=0.95",
             "-c:a",
             "libmp3lame",
             "-b:a",
@@ -1450,17 +1450,17 @@ async function sendToTelegram(videoPath, coverPngPath, slotData) {
   const replyMarkup = JSON.stringify({
     inline_keyboard: [
       [
-        { text: "📦 6'lı Yeni Stok Üret", callback_data: "cat:all" },
-        { text: "🔥 İndirimAI Stok", callback_data: "cat:indirimai" },
+        { text: "📦 6'lı Üretir Stok Üret", callback_data: "cat:all" },
+        { text: "🚀 Fikirden Ürüne", callback_data: "cat:indirimai" },
       ],
       [
-        { text: "🗺️ HaberAI Stok", callback_data: "cat:haberai" },
-        { text: "💳 PuanAI Stok", callback_data: "cat:puanai" },
+        { text: "🦖 Derin Odak", callback_data: "cat:haberai" },
+        { text: "⚡ AI Kaldıracı", callback_data: "cat:puanai" },
       ],
       [
-        { text: "📈 FinansAI Stok", callback_data: "cat:finansai" },
-        { text: "🏠 EvAI Stok", callback_data: "cat:evai" },
-        { text: "🚗 ArabaAI Stok", callback_data: "cat:arabaai" },
+        { text: "📊 Veri Zekası", callback_data: "cat:finansai" },
+        { text: "⚙️ Dijital Varlık", callback_data: "cat:evai" },
+        { text: "📈 Bileşik Gelişim", callback_data: "cat:arabaai" },
       ],
       [
         { text: "🌐 uretir.com", url: slotData.targetUrl || "https://www.uretir.com" },
@@ -2074,16 +2074,8 @@ async function runSlot(slot) {
  */
 async function buildSeparateCategorySlotMap() {
   const dedupFile = path.resolve("reports", "social-media", "published-hashes.json");
-  const usedProductsSet = new Set([
-    "dyson 360 combi hepa+k-karbon hava temizleyici filtre",
-    "dyson combi360 2 al 1 öde ve 360 gün fiyat geçmişi radarı",
-  ]);
-  const usedImagesSet = new Set([
-    "dyson-combi360.jpg",
-    "https://images.unsplash.com/photo-1585771724684-38269d6639fd?auto=format&fit=crop&w=1200&q=85",
-    "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=1200&q=85",
-    "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=85",
-  ]);
+  const usedProductsSet = new Set();
+  const usedImagesSet = new Set();
 
   try {
     if (existsSync(dedupFile)) {
@@ -2093,15 +2085,6 @@ async function buildSeparateCategorySlotMap() {
     }
   } catch {}
 
-  const [indirimData, haberData, puanData, arabaData, evData, liveSlot09] = await Promise.all([
-    fetchJsonSafe(`${SITE_URL}/api/indirim-ai`),
-    fetchJsonSafe(`${SITE_URL}/api/haber-ai`),
-    fetchJsonSafe(`${SITE_URL}/api/puan-ai/campaigns`),
-    fetchJsonSafe(`${SITE_URL}/api/araba-ai`),
-    fetchJsonSafe(`${SITE_URL}/api/ev-ai`),
-    gatherLiveSlotData("09"),
-  ]);
-
   const stampLabel = new Intl.DateTimeFormat("tr-TR", {
     day: "2-digit",
     month: "long",
@@ -2109,389 +2092,340 @@ async function buildSeparateCategorySlotMap() {
     minute: "2-digit",
   }).format(new Date());
 
-  // 1. Pick fresh İndirimAI product (never Dyson or already published product)
-  const fallbackDeals = [
-    {
-      productName: "Apple iPhone 16 128 GB & Samsung Galaxy S24 FE Dönem Dibi Fiyat Analizi",
-      storeName: "Amazon Türkiye & Hepsiburada",
-      currentPrice: 56499,
-      highPrice: 64999,
-    },
-    {
-      productName: "Philips 5400 Serisi LatteGo Tam Otomatik Espresso Makinesi Dönem Dibi",
-      storeName: "Hepsiburada & Trendyol",
-      currentPrice: 21499,
-      highPrice: 26999,
-    },
-    {
-      productName: "Roborock S8 Sonic Mopping Akıllı Robot Süpürge 360 Gün Dip Fiyatı",
-      storeName: "Amazon Türkiye & Teknosa",
-      currentPrice: 24999,
-      highPrice: 31499,
-    },
-    {
-      productName: `MacBook Air M3 16GB RAM 512GB SSD Eğitim & Sepet İndirimi (${stampLabel})`,
-      storeName: "Gürgençler & Amazon Türkiye",
-      currentPrice: 46999,
-      highPrice: 54999,
-    },
-  ];
-  const allDeals = [
-    ...(indirimData?.lows?.["360"] || []),
-    ...(indirimData?.lows?.["90"] || []),
-    ...(indirimData?.lows?.["30"] || []),
-    ...(indirimData?.items || []),
-    ...fallbackDeals,
-  ];
-  const freshDeal =
-    allDeals.find((d) => {
-      const name = String(d?.productName || d?.title || "").toLocaleLowerCase("tr-TR").trim();
-      return name && !name.includes("dyson") && !usedProductsSet.has(name);
-    }) || {
-      productName: `Teknoloji ve Ev Elektroniğinde 360 Günlük Yeni Dip Fiyat Listesi (${stampLabel})`,
-      storeName: "Amazon Türkiye & Hepsiburada",
-      currentPrice: 18499,
-      highPrice: 23999,
-    };
-  const dealTitle = freshDeal.productName || freshDeal.title;
-  const dealPrice = freshDeal.currentPrice
-    ? `${Number(freshDeal.currentPrice).toLocaleString("tr-TR")} TL`
-    : "56.499 TL";
-  const dealHigh = freshDeal.highPrice
-    ? `${Number(freshDeal.highPrice).toLocaleString("tr-TR")} TL`
-    : "64.999 TL";
-  const dealPhoto = pickFreshVisual("indirimai", freshDeal.imageUrl, usedImagesSet);
+  function pickFreshTopic(candidates, fallbackPrefix) {
+    const found = candidates.find(
+      (c) => !usedProductsSet.has(String(c.title).toLocaleLowerCase("tr-TR").trim())
+    );
+    return (
+      found || {
+        ...candidates[0],
+        title: `${candidates[0].title} (${stampLabel})`,
+      }
+    );
+  }
 
-  // 2. Pick fresh HaberAI headline & photo
-  const fallbackNews = [
+  // 1. ODAK & ZAMAN ÜRETİMİ (09:00)
+  const odakTopic = pickFreshTopic([
     {
-      title: "Merkez Bankası Enflasyon Raporu ve 81 İl Sanayi Üretim Endeksi Açıklandı",
-      source: "Anadolu Ajansı & TRT Haber",
+      title: "Tüketerek Değil Üreterek Başla: İlk 90 Dakika Derin Odak Formülü",
+      sub: "Zihin Dağınıklığını Bitiren ve Üretim İvmesini 3 Katına Çıkaran Sabah Sistemi",
     },
     {
-      title: "Türkiye Genelinde Yüksek Hızlı Tren ve Ulaştırma Yatırımlarında Yeni Etap",
-      source: "Anadolu Ajansı & Resmî Gazete",
+      title: "Ekran Kaydırmayı Bırak: Günün İlk Saatinde Kendi Değerini Üret",
+      sub: "Tüketici Alışkanlıklardan Üretici Zihin Yapısına Geçiş Rehberi",
     },
     {
-      title: `81 İl Ekonomi, Ticaret ve Yerel Gündem Bülteni (${stampLabel})`,
-      source: "Anadolu Ajansı & TRT Haber",
+      title: "Derin Çalışma Mimarisi: Az Zamanda Çok Değer Üretmenin Matematiği",
+      sub: "Bölünmeyen Odak Bloklarıyla Maksimum Üretkenlik Çarpanı",
     },
-  ];
-  const allNews = [...(haberData?.items || []), ...fallbackNews];
-  const freshNews =
-    allNews.find((n) => {
-      const t = String(n?.title || "").toLocaleLowerCase("tr-TR").trim();
-      return t && !usedProductsSet.has(t);
-    }) || {
-      title: `Türkiye'nin 81 İlinde Kaynaklı Sıcak Gündem Haritası (${stampLabel})`,
-      source: "Anadolu Ajansı & TRT Haber",
-    };
-  const haberPhoto = pickFreshVisual("haberai", freshNews.imageUrl, usedImagesSet);
+  ]);
+  const haberPhoto = pickFreshVisual("haberai", null, usedImagesSet);
 
-  // 3. Pick fresh PuanAI campaign & photo
-  const fallbackCampaigns = [
+  // 2. YAPAY ZEKA KALDIRACI & AJANLAR (11:00)
+  const kaldiracTopic = pickFreshTopic([
     {
-      title: "Market, E-Ticaret ve Akaryakıt Harcamalarında 7.500 TL'ye Varan Chip-Para & Worldpuan",
-      bankName: "Axess · Bonus · World · Maximum",
+      title: "Yapay Zeka Kaldıracı: 10 Saatlik İşi 1 Saatte Üreten Ajan Mimarisi",
+      sub: "Tekrarlayan İşleri Otomasyona Devredip Yaratıcı Üretime Odaklanma Sistemi",
     },
     {
-      title: "Elektronik ve Beyaz Eşya Alışverişlerinde 10.000 TL MaxiPuan & Peşin Fiyatına 6 Taksit",
-      bankName: "Maximum · World · Bonus · Bankkart",
+      title: "Tek Başına Çalışma: Yapay Zeka Ajanlarıyla Kendi Üretim Ekibini Kur",
+      sub: "Doğru Prompt, Doğru Araç ve Otonom İş Akışlarıyla 10 Kat Hızlanma",
     },
     {
-      title: `Uçak Bileti, Otel ve Seyahat Harcamalarında 8.500 TL Mil & Puan Fırsatı (${stampLabel})`,
-      bankName: "Shop&Fly · Miles&Smiles · Maximiles · Adios",
+      title: "Zamanı Kaldıraçla Çarp: Yapay Zeka Destekli Dijital Üretim Rehberi",
+      sub: "Manuel Emeği Sistemli Yapay Zeka İş Akışlarına Dönüştürme Formülü",
     },
-  ];
-  const allCampaigns = [...(puanData?.campaigns || []), ...fallbackCampaigns];
-  const freshCampaign =
-    allCampaigns.find((c) => {
-      const t = String(c?.title || "").toLocaleLowerCase("tr-TR").trim();
-      return t && !usedProductsSet.has(t);
-    }) || {
-      title: `Banka Kredi Kartlarında Aylık En Yüksek Puan & Nakit İade Tablosu (${stampLabel})`,
-      bankName: "Axess · Bonus · World · Maximum",
-    };
-  const puanPhoto = pickFreshVisual("puanai", freshCampaign.imageUrl, usedImagesSet);
+  ]);
+  const puanPhoto = pickFreshVisual("puanai", null, usedImagesSet);
 
-  // 4. Pick fresh FinansAI market snapshot & photo
-  const finansCandidates = [
-    liveSlot09.scenes[2]?.title,
-    "TCMB Döviz Kurları, 24 Ayar Gram Altın ve BIST 100 Canlı Referans Tablosu",
-    "Serbest Piyasa Dolar/TL, Euro/TL, Ons & Gram Altın 30 Günlük Eğilim Analizi",
-    "Borsa İstanbul BIST 100 Endeksi, Sektörel Hisseler ve Kripto Piyasa Özeti",
-    `Canlı Döviz, 24 Ayar Gram Altın ve BIST 100 Piyasa Referans Bülteni (${stampLabel})`,
-  ].filter(Boolean);
-  const finansTitle =
-    finansCandidates.find((t) => !usedProductsSet.has(String(t).toLocaleLowerCase("tr-TR").trim())) ||
-    `Canlı Döviz, Gram Altın ve BIST 100 Referans Tablosu (${stampLabel})`;
+  // 3. FİKİRDEN ÜRÜNE & SİSTEM KURMA (13:00)
+  const sistemTopic = pickFreshTopic([
+    {
+      title: "Fikri Zihninde Tutma: Sıfırdan Çalışan Dijital Sistem ve Ürün Üretimi",
+      sub: "Mükemmeli Beklemeden İlk Çalışan Prototipi Hayata Geçirme Disiplini",
+    },
+    {
+      title: "Fikirden Ürüne Geçiş: Üreten İnsanların 3 Adımlı Sistem Rehberi",
+      sub: "Tasarla, Küçük Bir Prototip Kur ve Gerçek Veriyle Sürekli Geliştir",
+    },
+    {
+      title: "Ertelemeyi Bitiren Üretim Kuralı: Bugün Küçük Ama Çalışan Bir Sistem Kur",
+      sub: "Karmaşık Projeleri Basit ve Ölçeklenebilir Adımlara Bölme Sanatı",
+    },
+  ]);
+  const dealPhoto = pickFreshVisual("indirimai", null, usedImagesSet);
+
+  // 4. VERİDEN STRATEJİ VE KARAR ÜRETME (15:00)
+  const veriTopic = pickFreshTopic([
+    {
+      title: "Tahminle Değil Veriyle Üret: Gürültüyü Eleyen Canlı Karar Radarı",
+      sub: "Bilgi Kirliliğinden Arınmış Doğrulanmış Grafikler ve Strateji Masası",
+    },
+    {
+      title: "Bilgi Kirliliğinden Net Stratejiye: Veriyi Okuyan Geleceği Üretir",
+      sub: "Duygusal Kararlar Yerine Ölçülebilir Metriklerle Hareket Etme Sistemi",
+    },
+    {
+      title: "Veri Zekası ve Analiz: Karmaşık Tablolardan Net Eylem Planı Üretmek",
+      sub: "uretir.com Yapay Zeka Radarıyla Saniyeler İçinde Doğru Karar Alma",
+    },
+  ]);
   const finansPhoto = pickFreshVisual("finansai", null, usedImagesSet);
 
-  // 5. Pick fresh EvAI property listing & photo
-  const fallbackProperties = [
+  // 5. DİJİTAL VARLIK VE 7/24 OTOMASYON (18:00)
+  const dijitalTopic = pickFreshTopic([
     {
-      title: "İstanbul, Ankara ve İzmir Bölge m² Medyanının Altındaki Yeni Konut İlanları",
+      title: "Zamanını Satma, Sistem Kur: 7/24 Çalışan Dijital Varlık Üretimi",
+      sub: "Kod, İçerik, Araç ve Otomasyonlarla Sürekli Değer Üreten Ekosistem",
     },
     {
-      title: "Sahibinden, Emlakjet ve TOKİ Kamu İhale Vitrini: Emsal Altı 3+1 & 2+1 Fırsatları",
+      title: "Bir Kez Üret Sürekli Çalışsın: Ölçeklenebilir Dijital Sistem Mimarisi",
+      sub: "Mesai Saatlerinden Bağımsız Değer Yaratan Otonom İş Akışları",
     },
     {
-      title: `Çoklu Platform Konut Radarı: Bölge Ortalamasının %18 Altındaki Yeni İlanlar (${stampLabel})`,
+      title: "Mikro Otomasyon Devrimi: Kendi Dijital Üretim Hattını Tasarla",
+      sub: "Sıfır Maliyetli Bulut İş Akışlarıyla Kesintisiz Dijital Üretim",
     },
-  ];
-  const allProperties = [...(evData?.items || []), ...fallbackProperties];
-  const freshProperty =
-    allProperties.find((e) => {
-      const t = String(e?.title || "").toLocaleLowerCase("tr-TR").trim();
-      return t && !usedProductsSet.has(t);
-    }) || {
-      title: `Bölge m² Medyanının Altındaki Yeni Konut ve İhale Kayıtları (${stampLabel})`,
-    };
-  const evPhoto = pickFreshVisual("evai", freshProperty.imageUrl, usedImagesSet);
+  ]);
+  const evPhoto = pickFreshVisual("evai", null, usedImagesSet);
 
-  // 6. Pick fresh ArabaAI vehicle listing & photo
-  const fallbackCars = [
+  // 6. BİLEŞİK GELİŞİM & PARETO %80/20 (20:00)
+  const paretoTopic = pickFreshTopic([
     {
-      title: "Togg T10X, Renault Megane ve BYD Seal Sıfır Liste Altı Yeni Araç Fırsatları",
+      title: "Her Gün %1 Üretim Gelişimi: 365 Günde 37 Kat Bileşik Büyüme",
+      sub: "Küçük Ama Sürekli Üretim Adımlarının Yıl Sonunda Yarattığı Dev İvme",
     },
     {
-      title: "Sahibinden, Arabam.com & Letgo: Sıfır Liste Fiyatına Göre Avantajlı 2. El SUV Vitrini",
+      title: "Pareto Üretim Yasası: Sonuçların %80'ini Üreten %20'lik Kritik Adım",
+      sub: "Enerjini En Yüksek Etkiyi Yaratan Çekirdek Üretime Odaklama Sanatı",
     },
     {
-      title: `Çoklu Platform Araç Radarı: Emsal Altı Sedan ve Elektrikli Araç İlanları (${stampLabel})`,
+      title: "Tüketen Değil Üreten Ol: Geleceği İnşa Edenlerin Büyüme Grafiği",
+      sub: "Her Gün Somut Bir Çıktı Üreterek Kendi Dijital Geleceğini İnşa Et",
     },
-  ];
-  const allCars = [...(arabaData?.deals || []), ...(arabaData?.prices || []), ...fallbackCars];
-  const freshCar =
-    allCars.find((c) => {
-      const t = String(c?.title || `${c?.brand || ""} ${c?.model || ""}`).toLocaleLowerCase("tr-TR").trim();
-      return t && !usedProductsSet.has(t);
-    }) || {
-      title: `Sıfır Liste Fiyatının Altında Kalan Yeni Araç İlanları (${stampLabel})`,
-    };
-  const carTitle = freshCar.title || `${freshCar.brand} ${freshCar.model}`;
-  const arabaPhoto = pickFreshVisual("arabaai", freshCar.imageUrl, usedImagesSet);
+  ]);
+  const arabaPhoto = pickFreshVisual("arabaai", null, usedImagesSet);
 
   return {
     haberai: {
       slot: "cat-haberai",
-      label: "HABERAI · 81 İL CANLI GÜNDEM HARİTASI",
-      targetUrl: "https://www.uretir.com/haber-ai",
+      label: "ÜRETİR.COM · DERİN ODAK VE ZAMAN ÜRETİMİ",
+      targetUrl: "https://www.uretir.com",
       whatsappTargetKey: "haberai",
       customCaption: [
-        `🗺️ Şehrinde Bugün Ne Oldu? 81 İl Canlı Gündem Haritası Yayında! (HaberAI)`,
+        `🦖 Tüketerek Değil, Üreterek Güne Başla! | Üretir Dino (uretir.com)`,
         ``,
-        `📌 ${freshNews.title}`,
-        `📍 Kaynak: ${freshNews.source || "Anadolu Ajansı (AA) & TRT Haber Resmî Bülten Akışı"}`,
+        `📌 ${odakTopic.title}`,
+        `💡 Üretir Fikri: Güne ekran kaydırarak değil, ilk 90 dakikada en önemli işini üreterek başla.`,
         ``,
-        `🌐 Şehrini haritada seç ve oku: www.uretir.com/haber-ai`,
-        `📲 WhatsApp HaberAI Kanalına Katıl (Anlık Bildirim): https://whatsapp.com/channel/0029Vb7L8mF5q08X9v2k1R2p`,
+        `🌐 Üretenlerin bilgi, topluluk ve yapay zeka ekosistemi: www.uretir.com`,
+        `📸 Instagram: @uretirai | ▶️ YouTube: @Uretir`,
         ``,
-        `#HaberAI #TürkiyeHaritası #SonDakika #Gündem #81İl #EkonomiHaberleri #Üretir #Keşfet`,
+        `#Üretir #Üretkenlik #DerinOdak #ZamanYönetimi #YapayZeka #SistemKur #Gelişim #Keşfet`,
       ].join("\n"),
       scenes: [
         {
-          kicker: "HABERAI · 81 İL TÜRKİYE HARİTASI",
-          title: freshNews.title,
-          sub: "Anadolu Ajansı ve TRT Haber Doğrulanmış Şehir Bazlı Bültenler",
-          highlight: "URETIR.COM/HABER-AI",
-          statLeft: "Kaynak: AA & TRT Haber",
-          statRight: "WhatsApp: HaberAI Kanalı",
+          kicker: "ÜRETİR FELSEFESİ · DERİN ODAK VE ZAMAN ÜRETİMİ",
+          title: odakTopic.title,
+          sub: odakTopic.sub,
+          highlight: "DERİN ODAK: +3.4 KAT ÜRETİM",
+          statLeft: "Odak Çarpanı Grafiği",
+          statRight: "www.uretir.com",
           accent: "#c8f560",
           bg1: "#102118",
           bg2: "#070e0a",
           photoUrl: haberPhoto,
-          photoTag: "HABERAI · YENİ GÜNDEM",
-          graphLabel: "81 İL CANLI HABER VE GÜNDEM YOĞUNLUĞU",
-          graphStartLabel: "Bölgesel Akış",
-          graphEndLabel: "81 İl Tam Kapsam",
+          photoTag: "URETIR.COM · DERİN ODAK",
+          graphLabel: "ODAKLANMA SÜRESİ VE ÜRETİLEN DEĞER İVMESİ",
+          graphStartLabel: "Dağınık Mesai: %22",
+          graphEndLabel: "Derin Odak: %94",
           graphTrend: "up",
-          speech: `Gündemi saatlerce kaydırmayı bırak! Ben Üretir Dino. Seksen bir ili akıllı saatimden taradım ve günün sıcak gelişmesini arkamdaki grafiğe yansıttım: ${freshNews.title}. Zaman kazanmak için üretir nokta com Haber A İ'ye göz at!`,
+          speech: `Selam, ben Üretir Dino. Güne başkalarının içeriklerini tüketerek başlama. İlk doksan dakikanı tek bir hedefe ayır, ve kendi değerini üret. Tüm yapay zeka sistemleri, üretir nokta com adresinde.`,
         },
       ],
     },
     puanai: {
       slot: "cat-puanai",
-      label: "PUANAI · BANKA KREDİ KARTI KAMPANYA RADARI",
-      targetUrl: "https://www.uretir.com/puan-ai",
+      label: "ÜRETİR.COM · YAPAY ZEKA KALDIRACI VE AJANLAR",
+      targetUrl: "https://www.uretir.com/ajanlar",
       whatsappTargetKey: "puanai",
       customCaption: [
-        `💳 Yeni Ayın En Yüksek Puan Veren Banka Kampanyası! (PuanAI)`,
+        `⚡ Çok Çalışmak Yetmez, Akıllı Üretmek Gerekir! | Üretir Dino (uretir.com)`,
         ``,
-        `📌 ${freshCampaign.title}`,
-        `✨ Banka & Kart: ${freshCampaign.bankName || "Axess, Bonus, World, Maximum ve Bankkart"}`,
+        `📌 ${kaldiracTopic.title}`,
+        `💡 Üretir Fikri: Tekrarlayan işleri yapay zeka ajanlarına devret; enerjini yaratıcı üretime sakla.`,
         ``,
-        `🌐 Harcama yapmadan önce kartını karşılaştır: www.uretir.com/puan-ai`,
-        `📲 WhatsApp PuanAI Kanalına Abone Ol: https://whatsapp.com/channel/0029Vb6x9kP8fewr2N4m8T1k`,
+        `🌐 Yapay zeka araçları ve otonom ajan ekosistemi: www.uretir.com/ajanlar`,
+        `📸 Instagram: @uretirai | ▶️ YouTube: @Uretir`,
         ``,
-        `#PuanAI #KrediKartıKampanyaları #ChipPara #Bonus #Worldpuan #Maximum #Bankkart #Tasarruf #Üretir #Keşfet`,
+        `#Üretir #YapayZeka #Otomasyon #Üretkenlik #AIAgents #Teknoloji #DijitalÜretim #Keşfet`,
       ].join("\n"),
       scenes: [
         {
-          kicker: "PUANAI · YENİ KAMPANYA RADARI",
-          title: freshCampaign.title,
-          sub: `${freshCampaign.bankName || "Resmî Banka Kaynaklı"} · Alışveriş Öncesi Net Puan Hesaplama`,
-          highlight: "URETIR.COM/PUAN-AI",
-          statLeft: "Resmî Banka Kaynaklı",
-          statRight: "WhatsApp: PuanAI Kanalı",
-          accent: "#78a5b6",
+          kicker: "YAPAY ZEKA KALDIRACI · OTONOM AJAN SİSTEMLERİ",
+          title: kaldiracTopic.title,
+          sub: kaldiracTopic.sub,
+          highlight: "AI KALDIRACI: 10 KAT HIZ",
+          statLeft: "Otomasyon Kaldıraç Eğrisi",
+          statRight: "uretir.com/ajanlar",
+          accent: "#34d399",
           bg1: "#0f2027",
           bg2: "#071014",
           photoUrl: puanPhoto,
-          photoTag: "PUANAI · YENİ KAMPANYA",
-          graphLabel: "AYLIK KART PUANI VE NAKİT İADE POTANSİYELİ",
-          graphStartLabel: "Standart Kart: 0 TL",
-          graphEndLabel: "PuanAI Seçimi: Maks Puan",
+          photoTag: "URETIR.COM · AI KALDIRACI",
+          graphLabel: "MANUEL İŞ YÜKÜ VS. YAPAY ZEKA ÜRETİM KALDIRACI",
+          graphStartLabel: "Manuel Emek: 1x",
+          graphEndLabel: "Üretir AI: 10x Değer",
           graphTrend: "up",
-          speech: `Kasada kartını düz çekiyorsan zarardasın! Ben Üretir Dino. Arkamdaki grafikte gördüğün gibi doğru banka kampanyasıyla yüksek puan ve nakit iade kazanabilirsin: ${freshCampaign.title}. Harcamadan önce üretir nokta com Puan A İ'yi kontrol et!`,
+          speech: `Çok çalışmak yetmez, akıllı üretmek gerekir. Tekrarlayan işleri yapay zeka ajanlarına devret. Arkamdaki grafikte gördüğün gibi, üretim hızını on katına çıkar. Araçlar üretir nokta com adresinde.`,
         },
       ],
     },
     indirimai: {
       slot: "cat-indirimai",
-      label: "İNDİRİMAI · GERÇEK DÖNEM DİBİ & YENİ ÜRÜN RADARI",
-      targetUrl: "https://www.uretir.com/indirim-ai",
+      label: "ÜRETİR.COM · FİKİRDEN ÜRÜNE VE SİSTEM İNŞASI",
+      targetUrl: "https://www.uretir.com",
       whatsappTargetKey: "indirimai",
       customCaption: [
-        `🔥 Yeni Dönem Dibi Ürün Yakalandı: 360 Günlük Fiyat Geçmişiyle Doğrulandı! (İndirimAI)`,
+        `🚀 En İyi Fikir, Hayata Geçirilen Fikirdir! | Üretir Dino (uretir.com)`,
         ``,
-        `📌 Ürün: ${dealTitle}`,
-        `💰 Kampanya Fiyatı: ${dealPrice} (Önceki Tepe: ${dealHigh})`,
+        `📌 ${sistemTopic.title}`,
+        `💡 Üretir Fikri: Mükemmel anı beklemeyi bırak; bugün çalışan küçük bir sistem kur ve büyüt.`,
         ``,
-        `🌐 360 gün fiyat grafiği ve mağaza linki: www.uretir.com/indirim-ai`,
-        `📲 Stok Bitmeden WhatsApp İndirimAI Kanalına Katıl: https://whatsapp.com/channel/0029Vb8K2pL4inow5M3n9Q0w`,
+        `🌐 Fikirden ürüne yapay zeka ve üretim merkezi: www.uretir.com`,
+        `📸 Instagram: @uretirai | ▶️ YouTube: @Uretir`,
         ``,
-        `#İndirimAI #Gerçekİndirim #FiyatGeçmişi #KuponKodu #Alışveriş #TeknolojiFırsatı #Üretir #Keşfet`,
+        `#Üretir #FikirdenÜrüne #SistemKur #Üretkenlik #Girişimcilik #YapayZeka #Maker #Keşfet`,
       ].join("\n"),
       scenes: [
         {
-          kicker: "İNDİRİMAI · YENİ ÜRÜN DİP FİYAT",
-          title: dealTitle,
-          sub: `${freshDeal.storeName || "Doğrulanmış Mağaza"} · 360 Günlük Fiyat Geçmişiyle Dönem Dibi`,
-          highlight: `DİP FİYAT: ${dealPrice}`,
-          statLeft: `Önceki: ${dealHigh}`,
-          statRight: "WhatsApp: İndirimAI Kanalı",
+          kicker: "ÜRETİR MANİFESTOSU · FİKİRDEN ÇALIŞAN SİSTEME",
+          title: sistemTopic.title,
+          sub: sistemTopic.sub,
+          highlight: "FİKİRDEN ÜRÜNE · URETIR.COM",
+          statLeft: "Prototip -> Sistem İvmesi",
+          statRight: "www.uretir.com",
           accent: "#f6ad55",
           bg1: "#26170b",
           bg2: "#0f0904",
           photoUrl: dealPhoto,
-          photoTag: "İNDİRİMAI · YENİ ÜRÜN",
-          graphLabel: "360 GÜNLÜK FİYAT GEÇMİŞİ VE DÖNEM DİBİ (TL)",
-          graphStartLabel: `Tepe: ${dealHigh}`,
-          graphEndLabel: `Dip: ${dealPrice}`,
-          graphTrend: "down",
-          speech: `Dur ve arkamdaki grafiğe dikkatle bak! Ben Üretir Dino. Akıllı saatimin radarı üç yüz altmış günlük fiyat geçmişini taradı ve gerçek dönem dibini yakaladı: ${dealTitle}, sadece ${dealPrice}. Sahte indirimlere kanma, üretir nokta com İndirim A İ ile bütçeni koru!`,
+          photoTag: "URETIR.COM · SİSTEM ÜRETİMİ",
+          graphLabel: "FİKİRDEN PROTOTİPE VE ÇALIŞAN SİSTEME BÜYÜME",
+          graphStartLabel: "Ham Fikir: 0",
+          graphEndLabel: "Canlı Sistem: +%420",
+          graphTrend: "up",
+          speech: `En iyi fikir, hayata geçirilen fikirdir. Mükemmel anı beklemeyi bırak, bugün çalışan küçük bir sistem kur. Arkamdaki büyüme grafiğini kendi projenle yakala. Rehberler üretir nokta com adresinde.`,
         },
       ],
     },
     finansai: {
       slot: "cat-finansai",
-      label: "FİNANSAI · CANLI PİYASA & MAKRO VERİ MASASI",
-      targetUrl: "https://www.uretir.com/finans-ai",
+      label: "ÜRETİR.COM · VERİDEN STRATEJİ VE KARAR ÜRETİMİ",
+      targetUrl: "https://www.uretir.com",
       whatsappTargetKey: "finansai",
       customCaption: [
-        `📈 Piyasa Özeti: Dolar, Euro, 24 Ayar Gram Altın ve BIST 100 Referans Tablosu (FinansAI)`,
+        `📊 Duygularla Değil, Doğrulanmış Veriyle Karar Üret! | Üretir Dino (uretir.com)`,
         ``,
-        `📌 ${finansTitle}`,
-        `📌 30 Günlük Eğilim Grafikleri ve Enflasyon Sepeti Kıyaslaması`,
+        `📌 ${veriTopic.title}`,
+        `💡 Üretir Fikri: Bilgi kirliliğinde kaybolma; canlı grafikleri okuyarak net strateji üret.`,
         ``,
-        `🌐 Canlı kurlar ve 30 günlük grafikler: www.uretir.com/finans-ai`,
-        `📲 Sabah 09:00 Piyasa Özeti İçin WhatsApp FinansAI Kanalı: https://whatsapp.com/channel/0029Vb9M4rN2k8pL7Q1v5X3z`,
+        `🌐 Doğrulanmış veri ve yapay zeka analiz merkezi: www.uretir.com`,
+        `📸 Instagram: @uretirai | ▶️ YouTube: @Uretir`,
         ``,
-        `#FinansAI #Dolar #Altın #GramAltın #Borsaİstanbul #BIST100 #Ekonomi #Piyasa #Üretir #Keşfet`,
+        `#Üretir #VeriAnalizi #Strateji #Üretkenlik #YapayZeka #KararDestek #VeriZekası #Keşfet`,
       ].join("\n"),
       scenes: [
         {
-          kicker: "FİNANSAI · CANLI PİYASA MASASI",
-          title: finansTitle,
-          sub: "1 Aylık Eğilim Grafikleri ve Doğrulanmış Piyasa Referans Tablosu",
-          highlight: "URETIR.COM/FINANS-AI",
-          statLeft: "Dolar · Euro · Altın",
-          statRight: "WhatsApp: FinansAI Kanalı",
+          kicker: "VERİ ZEKASI · GÜRÜLTÜDEN NET STRATEJİ ÜRETİMİ",
+          title: veriTopic.title,
+          sub: veriTopic.sub,
+          highlight: "VERİDEN KARAR ÜRET",
+          statLeft: "Canlı Veri -> Net Karar",
+          statRight: "www.uretir.com",
           accent: "#4fd1c5",
           bg1: "#0d2426",
           bg2: "#061112",
           photoUrl: finansPhoto,
-          photoTag: "FİNANSAI · YENİ VERİ",
-          graphLabel: "30 GÜNLÜK PİYASA VE GRAM ALTIN EĞİLİMİ",
-          graphStartLabel: "Aylık Baz",
-          graphEndLabel: "Canlı Kapanış",
+          photoTag: "URETIR.COM · VERİ ZEKASI",
+          graphLabel: "HAM VERİ GÜRÜLTÜSÜNDEN NET STRATEJİ SİNYALİNE",
+          graphStartLabel: "Ham Gürültü",
+          graphEndLabel: "Net Strateji: %98",
           graphTrend: "up",
-          speech: `Piyasa nereye kırılıyor? Ben Üretir Dino! Akıllı saatimin hologram radarı döviz, gram altın ve Borsa İstanbul trendini arkamdaki canlı grafiğe çizdi: ${finansTitle}. Paranı enflasyona ezdirmemek için üretir nokta com Finans A İ'yi takip et!`,
+          speech: `Bilgi kirliliğinde kaybolma. Akıllı saatimin radarı gürültüyü eler, arkamdaki gibi net strateji üretir. Duygularla değil, doğrulanmış verilerle karar ver. Canlı merkez üretir nokta com adresinde.`,
         },
       ],
     },
     evai: {
       slot: "cat-evai",
-      label: "EVAI · ÇOKLU PLATFORM KONUT & EMSAL RADARI",
-      targetUrl: "https://www.uretir.com/ev-ai",
+      label: "ÜRETİR.COM · DİJİTAL VARLIK VE 7/24 OTOMASYON",
+      targetUrl: "https://www.uretir.com",
       whatsappTargetKey: "evai",
       customCaption: [
-        `🏠 Bölge Ortalamasının Altındaki Yeni Konut İlanı: Sahibinden, Emlakjet & Letgo (EvAI)`,
+        `⚙️ Zamanını Satma, Senin Yerine Çalışan Sistem Üret! | Üretir Dino (uretir.com)`,
         ``,
-        `📌 ${freshProperty.title}`,
-        `📌 Sahibinden, Emlakjet, Hepsiemlak, Letgo ve TOKİ/Kamu İhale Fotoğraflı Önizleme Kartları`,
+        `📌 ${dijitalTopic.title}`,
+        `💡 Üretir Fikri: Bir kez üret, 7/24 değer yaratan dijital varlık ve otomasyona dönüştür.`,
         ``,
-        `🌐 Tüm fotoğraflı konut analizleri: www.uretir.com/ev-ai`,
-        `📲 Emsal Altı Konut Bildirimleri İçin WhatsApp EvAI Kanalı: https://whatsapp.com/channel/0029Vb5P1tR9hX4k6W8n2Y4c`,
+        `🌐 Dijital üretim ve otomasyon ekosistemi: www.uretir.com`,
+        `📸 Instagram: @uretirai | ▶️ YouTube: @Uretir`,
         ``,
-        `#EvAI #Emlak #KonutFiyatları #Sahibinden #Emlakjet #Hepsiemlak #Gayrimenkul #Yatırım #Üretir #Keşfet`,
+        `#Üretir #DijitalVarlık #Otomasyon #SistemTasarımı #Üretkenlik #YapayZeka #Yazılım #Keşfet`,
       ].join("\n"),
       scenes: [
         {
-          kicker: "EVAI · YENİ KONUT & EMSAL VİTRİNİ",
-          title: freshProperty.title,
-          sub: "Bölge Medyanının Altında Kalan Fotoğraflı Konut ve Kamu İhale Kayıtları",
-          highlight: "URETIR.COM/EV-AI",
-          statLeft: "Sahibinden · Emlakjet · Letgo",
-          statRight: "WhatsApp: EvAI Kanalı",
+          kicker: "DİJİTAL VARLIK İNŞASI · 7/24 ÇALIŞAN SİSTEMLER",
+          title: dijitalTopic.title,
+          sub: dijitalTopic.sub,
+          highlight: "7/24 DİJİTAL OTOMASYON",
+          statLeft: "Bileşik Dijital Varlık",
+          statRight: "www.uretir.com",
           accent: "#f687b3",
           bg1: "#2b1422",
           bg2: "#13080e",
           photoUrl: evPhoto,
-          photoTag: "EVAI · YENİ KONUT İLANI",
-          graphLabel: "BÖLGESEL M² MEDYANI VE PLATFORM KIYASLAMASI",
-          graphStartLabel: "Bölge m² Ortalaması",
-          graphEndLabel: "Emsal Altı Fırsatlar",
-          graphTrend: "down",
-          speech: `Şişirilmiş konut ilanlarına kanma! Ben Üretir Dino. Bölge metrekare ortalamasını arkamdaki grafikte hesapladım ve emsal altı kelepir fırsatları yakaladım: ${freshProperty.title}. Doğru yatırım için üretir nokta com Ev A İ radarını kullan!`,
+          photoTag: "URETIR.COM · DİJİTAL VARLIK",
+          graphLabel: "SAATLİK MESAİ VS. 7/24 DİJİTAL OTOMASYON DEĞERİ",
+          graphStartLabel: "Tekil Mesai",
+          graphEndLabel: "7/24 Otomatik Değer",
+          graphTrend: "up",
+          speech: `Sadece zamanını satarak büyüyemezsin. Kod yaz, içerik tasarla, veya yedi yirmi dört çalışan bir otomasyon kur. Bir kez üret, sürekli değer yaratsın. Üretir ekosistemi, üretir nokta com adresinde.`,
         },
       ],
     },
     arabaai: {
       slot: "cat-arabaai",
-      label: "ARABAAI · ÇOKLU PLATFORM ARAÇ & SIFIR LİSTE RADARI",
-      targetUrl: "https://www.uretir.com/araba-ai",
+      label: "ÜRETİR.COM · BİLEŞİK GELİŞİM VE PARETO %80/20",
+      targetUrl: "https://www.uretir.com",
       whatsappTargetKey: "arabaai",
       customCaption: [
-        `🚗 Sıfır Liste Fiyatının Altında Kalan Yeni Araç İlanı: Sahibinden, Arabam.com & Letgo (ArabaAI)`,
+        `📈 Her Gün %1 Üretim Gelişimi = Yıl Sonunda 37 Kat Büyüme! | Üretir Dino (uretir.com)`,
         ``,
-        `📌 ${carTitle}`,
-        `📌 Sahibinden, Arabam.com, Letgo ve Resmî Distribütör Fotoğraflı Araç Önizleme Vitrini`,
+        `📌 ${paretoTopic.title}`,
+        `💡 Üretir Fikri: Enerjinin %20'sini en kritik üretime odakla, sonuçların %80'ini yakala.`,
         ``,
-        `🌐 Araç fiyat geçmişi ve platform kıyaslaması: www.uretir.com/araba-ai`,
-        `📲 Fırsat Araç Bildirimleri İçin WhatsApp ArabaAI Kanalı: https://whatsapp.com/channel/0029Vb4N8vS7dM2j9Z5p1B6v`,
+        `🌐 Geleceği üretenlerin merkezi: www.uretir.com`,
+        `📸 Instagram: @uretirai | ▶️ YouTube: @Uretir`,
         ``,
-        `#ArabaAI #Otomobil #İkinciElAraba #SıfırAraç #Sahibinden #Arabamcom #Togg #Otomotiv #Üretir #Keşfet`,
+        `#Üretir #BileşikGelişim #Pareto #Üretkenlik #Disiplin #YapayZeka #BaşarıGrafiği #Keşfet`,
       ].join("\n"),
       scenes: [
         {
-          kicker: "ARABAAI · YENİ ARAÇ & LİSTE VİTRİNİ",
-          title: carTitle,
-          sub: "Sıfır Liste Fiyatına Göre Avantajlı 2. El Araç Referansları Fotoğraflı Vitrinde",
-          highlight: "URETIR.COM/ARABA-AI",
-          statLeft: "Sahibinden · Arabam · Letgo",
-          statRight: "WhatsApp: ArabaAI Kanalı",
+          kicker: "BİLEŞİK ÜRETİM YASASI · HER GÜN %1 İLERLEME",
+          title: paretoTopic.title,
+          sub: paretoTopic.sub,
+          highlight: "365 GÜNDE 37 KAT BÜYÜME",
+          statLeft: "Bileşik Üretim Eğrisi",
+          statRight: "www.uretir.com",
           accent: "#63b3ed",
           bg1: "#0e1f33",
           bg2: "#060e17",
           photoUrl: arabaPhoto,
-          photoTag: "ARABAAI · YENİ ARAÇ İLANI",
-          graphLabel: "SIFIR LİSTE FİYATI VE 2. EL PİYASA KIYASLAMASI",
-          graphStartLabel: "Sıfır Liste Fiyatı",
-          graphEndLabel: "Çoklu Platform Kıyas",
-          graphTrend: "down",
-          speech: `Sıfır liste fiyatının altında araç bulunur mu? Arkamdaki grafiğe bak! Ben Üretir Dino. Tüm ilan platformlarını kıyasladım ve piyasa altı fırsat araçları çıkardım: ${carTitle}. Araç alırken yanılmamak için üretir nokta com Araba A İ'ye gir!`,
+          photoTag: "URETIR.COM · BİLEŞİK GELİŞİM",
+          graphLabel: "365 GÜNLÜK BİLEŞİK ÜRETİM VE YETKİNLİK GRAFİĞİ",
+          graphStartLabel: "1. Gün: 1.0x",
+          graphEndLabel: "365. Gün: 37.8x İvme",
+          graphTrend: "up",
+          speech: `Günü bitirirken kendine tek bir soru sor. Bugün ne ürettin? Her gün yüzde bir gelişim, yıl sonunda otuz yedi kat büyüme demektir. Üretenlerin merkezi, üretir nokta com.`,
         },
       ],
     },

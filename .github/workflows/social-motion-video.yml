@@ -34,10 +34,22 @@ jobs:
           node-version: "22"
           cache: "pnpm"
 
+      - name: Setup uv & Python 3.11 for Piper Neural Turkish TTS
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: Cache Piper Turkish Male Voice Model (.local/voices)
+        uses: actions/cache@v4
+        with:
+          path: .local/voices
+          key: uretir-piper-tr-fahrettin-v1
+
       - name: Install FFmpeg & dependencies
         run: |
           sudo apt-get update -y
           sudo apt-get install -y ffmpeg fonts-dejavu-core
+          uv python install 3.11
           pnpm install --frozen-lockfile
 
       - name: Generate 6-Category Stock & Send to Telegram (@uretirbot)

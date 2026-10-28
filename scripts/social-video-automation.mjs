@@ -741,16 +741,16 @@ async function getDinoMascotDataUri() {
 function getDinoVlogComment(kicker = "", slotLabel = "") {
   const combined = `${kicker} ${slotLabel}`.toLocaleLowerCase("tr-TR");
   if (combined.includes("indirim")) {
-    return ["Akıllı saatim alarm verdi!", "360 günün en dip fiyatını", "hologram ekrana yansıttım!"];
+    return ["Akıllı saatim alarm verdi!", "360 günün en dip fiyatını", "canlı grafiğe yansıttım!"];
   }
   if (combined.includes("haber")) {
-    return ["81 ili akıllı saatimden", "canlı taradım; sıcak gündem", "haritası arkamda akıyor!"];
+    return ["81 ili akıllı saatimden", "canlı taradım; sıcak gündem", "grafiği arkamda akıyor!"];
   }
   if (combined.includes("puan")) {
     return ["Alışveriş öncesi en yüksek", "kart puanı ve nakit iadeyi", "saatimin radarıyla buldum!"];
   }
   if (combined.includes("finans")) {
-    return ["Dolar, 24 ayar gram altın", "ve BIST 100 eğrisini", "canlı grafiğe yansıttım!"];
+    return ["Dolar, 24 ayar gram altın", "ve BIST 100 kırılımını", "arkamdaki grafiğe çizdim!"];
   }
   if (combined.includes("evai") || combined.includes("konut")) {
     return ["Bölge m² ortalamasının", "altında kalan kelepir konut", "ilanını radarımda yakaladım!"];
@@ -761,32 +761,144 @@ function getDinoVlogComment(kicker = "", slotLabel = "") {
   return ["Üretir Dino iş başında!", "Doğrulanmış canlı verileri", "akıllı saatimden yansıttım!"];
 }
 
+function getUretirFikriTip(kicker = "", slotLabel = "") {
+  const combined = `${kicker} ${slotLabel}`.toLocaleLowerCase("tr-TR");
+  if (combined.includes("indirim")) {
+    return "ÜRETİR FİKRİ: 360 günlük dip grafiğini görmeden asla sepete ekleme!";
+  }
+  if (combined.includes("haber")) {
+    return "ÜRETİR FİKRİ: Saatlerce akış kaydırma; 81 il haritasından 10 saniyede özeti al!";
+  }
+  if (combined.includes("puan")) {
+    return "ÜRETİR FİKRİ: Kasada düz çekme; banka kampanyasını eşleştirip nakit iade kazan!";
+  }
+  if (combined.includes("finans")) {
+    return "ÜRETİR FİKRİ: Paranı enflasyona ezdirme; 30 günlük altın ve kur eğilimini izle!";
+  }
+  if (combined.includes("evai") || combined.includes("konut")) {
+    return "ÜRETİR FİKRİ: İlan başlığına değil, bölge m² medyan grafiğine bakarak yatırım yap!";
+  }
+  if (combined.includes("araba") || combined.includes("araç")) {
+    return "ÜRETİR FİKRİ: Sıfır liste fiyatıyla 2. el makasını kıyaslamadan kapora gönderme!";
+  }
+  return "ÜRETİR FİKRİ: Doğrulanmış canlı veri ve grafiklerle zaman ve bütçe kazan!";
+}
+
+function easeOutBack(x) {
+  const t = Math.max(0, Math.min(1, x));
+  const c1 = 1.70158;
+  const c3 = c1 + 1;
+  return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+}
+
+function buildSmoothBezierPath(points) {
+  if (!points || points.length === 0) return "";
+  if (points.length === 1) return `M ${points[0][0]} ${points[0][1]}`;
+  let d = `M ${points[0][0].toFixed(1)} ${points[0][1].toFixed(1)}`;
+  for (let i = 0; i < points.length - 1; i++) {
+    const p0 = points[Math.max(0, i - 1)];
+    const p1 = points[i];
+    const p2 = points[i + 1];
+    const p3 = points[Math.min(points.length - 1, i + 2)];
+    const cp1x = p1[0] + (p2[0] - p0[0]) / 6;
+    const cp1y = p1[1] + (p2[1] - p0[1]) / 6;
+    const cp2x = p2[0] - (p3[0] - p1[0]) / 6;
+    const cp2y = p2[1] - (p3[1] - p1[1]) / 6;
+    d += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`;
+  }
+  return d;
+}
+
 /**
- * Jurassic "Üretir Dino" Vlog + Hologram Smartwatch Studio Composer
- * - 1080x1920 Full-Bleed Real Photograph Background with handheld vlog camera motion
- * - Foreground consistent 3D Pixar "Üretir Dino" mascot (hat, AR glasses, giant hologram smartwatch, neon sneakers)
- * - Live hologram projection beam from Dino's giant smartwatch onto the animated ECharts data curve
+ * Jurassic "Üretir Dino" Vlog + Full-Screen Graph Motion + Voice-Reactive Studio Composer
+ * - 1080x1920 Full-Bleed Real Photograph + Multi-Layer Animated "Graph Motion" Backdrop (Candlesticks, Bezier Ribbons, Cyber-Grid, Radar)
+ * - Active, Walking, Voice-Reactive 3D Pixar "Üretir Dino" mascot (hat, AR glasses scanline, giant hologram smartwatch, neon sneakers)
+ * - Live hologram projection beam & data packets from Dino's giant smartwatch onto the animated data curves
  */
-function renderVerticalFrameSvg(scene, slotLabel, sceneIdx, totalScenes, progressRatio, dinoDataUri = null) {
+function renderVerticalFrameSvg(
+  scene,
+  slotLabel,
+  sceneIdx,
+  totalScenes,
+  progressRatio,
+  dinoDataUri = null,
+  voiceAmp = 0.35
+) {
   const titleLines = wrapLines(scene.title, 25, 3);
   const subLines = wrapLines(scene.sub, 40, 2);
   const dinoSpeechLines = getDinoVlogComment(scene.kicker, slotLabel);
+  const uretirFikriText = getUretirFikriTip(scene.kicker, slotLabel);
   const barWidth = Math.max(48, Math.round(968 * progressRatio));
-  const cardOffsetY = Math.round((1 - Math.min(1, progressRatio * 3.5)) * 18);
+  const cardSpring = easeOutBack(Math.min(1, progressRatio * 3.8));
+  const cardOffsetY = Math.round((1 - cardSpring) * 26);
 
   // Full-bleed 1080x1920 Ken Burns + Handheld Vlog camera motion
-  const kenBurnsScale = (1.03 + progressRatio * 0.07).toFixed(4);
-  const kenBurnsShiftX = Math.round(-36 * progressRatio + Math.sin(progressRatio * Math.PI * 2) * 8);
-  const kenBurnsShiftY = Math.round(-44 * progressRatio + Math.cos(progressRatio * Math.PI * 2) * 6);
+  const kenBurnsScale = (1.04 + progressRatio * 0.08).toFixed(4);
+  const kenBurnsShiftX = Math.round(-38 * progressRatio + Math.sin(progressRatio * Math.PI * 2) * 10);
+  const kenBurnsShiftY = Math.round(-46 * progressRatio + Math.cos(progressRatio * Math.PI * 2) * 8);
 
-  // 30 FPS Animated Mascot Breathing / Vlog Bobbing & Smartwatch Pulse
-  const dinoBobY = Math.round(Math.sin(progressRatio * Math.PI * 4) * 11);
-  const dinoTilt = (Math.sin(progressRatio * Math.PI * 4) * 1.4).toFixed(2);
-  const watchPulseRadius = Math.round(24 + Math.abs(Math.sin(progressRatio * Math.PI * 6)) * 22);
-  const holoBeamOpacity = (0.24 + Math.abs(Math.sin(progressRatio * Math.PI * 6)) * 0.18).toFixed(2);
+  // Active 30 FPS + Voice-Reactive Mascot Rigging (Walk-in, Stride, Hop, Squash-Stretch, Tilt)
+  const walkInProgress = easeOutBack(Math.min(1, progressRatio * 4.2));
+  const walkInOffsetX = Math.round((1 - walkInProgress) * 195);
+  const dinoStrideX = Math.round(Math.sin(progressRatio * Math.PI * 6) * 24 + walkInOffsetX);
+  const dinoBobY = Math.round(
+    -Math.abs(Math.sin(progressRatio * Math.PI * 8)) * 26 - voiceAmp * 18
+  );
+  const dinoTilt = (
+    Math.sin(progressRatio * Math.PI * 6) * 4.2 +
+    (voiceAmp - 0.3) * 3.2
+  ).toFixed(2);
+  const dinoScaleX = (1 - voiceAmp * 0.028 + Math.cos(progressRatio * Math.PI * 8) * 0.018).toFixed(3);
+  const dinoScaleY = (1 + voiceAmp * 0.055 - Math.cos(progressRatio * Math.PI * 8) * 0.022).toFixed(3);
 
-  // Left-side Hologram Chart Coordinates (x: 86..548, y: 1445..1605)
+  const watchPulseRadius = Math.round(24 + voiceAmp * 26 + Math.abs(Math.sin(progressRatio * Math.PI * 8)) * 18);
+  const watchRotation = Math.round(progressRatio * 540);
+  const holoBeamOpacity = Math.min(0.55, 0.24 + voiceAmp * 0.22 + Math.abs(Math.sin(progressRatio * Math.PI * 6)) * 0.12).toFixed(2);
+  const glassesScanY = Math.round(168 + Math.abs(Math.sin(progressRatio * Math.PI * 6)) * 42);
+
+  // Background Graph Motion: Upper Candlestick & Bezier Ribbon Band (y: 190..545)
   const isDownTrend = scene.graphTrend === "down";
+  const numCandles = 16;
+  const bgCandleElements = [];
+  const bgUpperRibbonPts = [];
+  for (let i = 0; i < numCandles; i++) {
+    const cx = 74 + i * 62;
+    const reveal = easeOutBack(Math.min(1, Math.max(0, progressRatio * 2.2 - i * 0.065)));
+    const wave = Math.sin(i * 0.65 + progressRatio * Math.PI * 4) * 34;
+    const trendShift = isDownTrend ? i * 8.5 : (numCandles - 1 - i) * 8.5;
+    const baseCenterY = 265 + trendShift + wave;
+    const bodyHalf = Math.round((16 + (i % 3) * 10 + voiceAmp * 14) * reveal);
+    const wickHalf = Math.round(bodyHalf * 1.65 + 10);
+    const isBull = isDownTrend ? i % 3 === 0 : i % 3 !== 0;
+    const cColor = isBull ? "#34d399" : scene.accent;
+    bgUpperRibbonPts.push([cx, baseCenterY]);
+    if (reveal > 0.05) {
+      bgCandleElements.push(
+        `<line x1="${cx}" y1="${(baseCenterY - wickHalf).toFixed(1)}" x2="${cx}" y2="${(baseCenterY + wickHalf).toFixed(1)}" stroke="${cColor}" stroke-width="2.5" stroke-opacity="${(0.42 * reveal).toFixed(2)}" />`,
+        `<rect x="${cx - 14}" y="${(baseCenterY - bodyHalf).toFixed(1)}" width="28" height="${Math.max(6, bodyHalf * 2)}" rx="5" fill="${cColor}" fill-opacity="${(0.32 * reveal).toFixed(2)}" stroke="${cColor}" stroke-width="1.5" stroke-opacity="${(0.62 * reveal).toFixed(2)}" />`
+      );
+    }
+  }
+  const bgUpperSplinePath = buildSmoothBezierPath(bgUpperRibbonPts);
+  const leadCandleIdx = Math.min(numCandles - 1, Math.max(1, Math.floor(progressRatio * (numCandles - 1))));
+  const [leadBgX, leadBgY] = bgUpperRibbonPts[leadCandleIdx] || [540, 360];
+
+  // Background Graph Motion: Lower Audio-Reactive & Trend Bars behind Dino & Chart (y: 1120..1730)
+  const bgLowerBars = [];
+  const bgLowerRibbonPts = [];
+  for (let i = 0; i < 18; i++) {
+    const bx = 68 + i * 55;
+    const barWave = Math.abs(Math.sin(i * 0.55 + progressRatio * Math.PI * 6));
+    const barH = Math.round(70 + barWave * 180 + voiceAmp * 95 * ((i % 2) + 0.5));
+    const by = 1735 - barH;
+    bgLowerRibbonPts.push([bx + 16, by - 18]);
+    bgLowerBars.push(
+      `<rect x="${bx}" y="${by}" width="32" height="${barH}" rx="8" fill="#00f5d4" fill-opacity="0.11" stroke="#00f5d4" stroke-opacity="0.24" stroke-width="1" />`
+    );
+  }
+  const bgLowerSplinePath = buildSmoothBezierPath(bgLowerRibbonPts);
+
+  // Left-side Foreground Hologram Chart Coordinates (x: 88..544, y: 1445..1605)
   const pts = isDownTrend
     ? [
         [88, 1455],
@@ -809,35 +921,47 @@ function renderVerticalFrameSvg(scene, slotLabel, sceneIdx, totalScenes, progres
 
   const activeIdx = Math.min(
     pts.length - 1,
-    Math.max(1, Math.floor(progressRatio * (pts.length - 1) + 0.8))
+    Math.max(1, Math.floor(progressRatio * (pts.length - 1) + 0.85))
   );
-  const visiblePts = pts.slice(0, activeIdx + 1);
+  const visiblePts = pts.slice(0, activeIdx + 1).map(([x, y], i) => [
+    x,
+    Math.round(y + Math.sin(progressRatio * Math.PI * 6 + i) * 4),
+  ]);
+  const fgSplinePath = buildSmoothBezierPath(visiblePts);
   const polylinePoints = visiblePts.map(([x, y]) => `${x},${y}`).join(" ");
   const areaPoints = `${visiblePts[0][0]},1618 ${polylinePoints} ${visiblePts[visiblePts.length - 1][0]},1618`;
   const [dotX, dotY] = visiblePts[visiblePts.length - 1];
+
+  // Smartwatch World Coordinates (follows Dino's active stride & bounce!)
+  const watchWorldX = 575 + dinoStrideX + 182;
+  const watchWorldY = 1088 + dinoBobY + 445;
+  const packetT = (progressRatio * 4) % 1;
+  const packetX = Math.round(watchWorldX + (dotX - watchWorldX) * packetT);
+  const packetY = Math.round(watchWorldY + (dotY - watchWorldY) * packetT);
+  const gridOffset = Math.round((progressRatio * 120) % 60);
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920">
   <defs>
     <linearGradient id="topScrim" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#030906" stop-opacity="0.76" />
-      <stop offset="16%" stop-color="#030906" stop-opacity="0.14" />
-      <stop offset="46%" stop-color="#030906" stop-opacity="0.10" />
-      <stop offset="68%" stop-color="#030906" stop-opacity="0.86" />
-      <stop offset="100%" stop-color="#020604" stop-opacity="0.98" />
+      <stop offset="0%" stop-color="#020806" stop-opacity="0.82" />
+      <stop offset="18%" stop-color="#03100b" stop-opacity="0.46" />
+      <stop offset="50%" stop-color="#03100b" stop-opacity="0.52" />
+      <stop offset="70%" stop-color="#020906" stop-opacity="0.88" />
+      <stop offset="100%" stop-color="#010503" stop-opacity="0.98" />
     </linearGradient>
     <linearGradient id="chartAreaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="${scene.accent}" stop-opacity="0.45" />
-      <stop offset="100%" stop-color="${scene.accent}" stop-opacity="0.0" />
+      <stop offset="0%" stop-color="${scene.accent}" stop-opacity="0.52" />
+      <stop offset="100%" stop-color="${scene.accent}" stop-opacity="0.02" />
     </linearGradient>
     <linearGradient id="holoBeamGrad" x1="100%" y1="50%" x2="0%" y2="50%">
       <stop offset="0%" stop-color="#00f5d4" stop-opacity="${holoBeamOpacity}" />
-      <stop offset="55%" stop-color="${scene.accent}" stop-opacity="0.14" />
-      <stop offset="100%" stop-color="${scene.accent}" stop-opacity="0.02" />
+      <stop offset="55%" stop-color="${scene.accent}" stop-opacity="0.18" />
+      <stop offset="100%" stop-color="${scene.accent}" stop-opacity="0.03" />
     </linearGradient>
   </defs>
 
-  <!-- 1080x1920 Full-Bleed Real Photograph Background -->
+  <!-- 1. 1080x1920 Full-Bleed Real Photograph Background -->
   <rect width="1080" height="1920" fill="${scene.bg1 || "#06110b"}" />
   ${
     scene.photoDataUri
@@ -846,53 +970,97 @@ function renderVerticalFrameSvg(scene, slotLabel, sceneIdx, totalScenes, progres
   </g>`
       : ""
   }
-  <!-- Jurassic Studio Scrim -->
+  <!-- Jurassic Cyber Studio Scrim -->
   <rect width="1080" height="1920" fill="url(#topScrim)" />
 
-  <!-- Top Jurassic Vlog Masthead -->
-  <text x="56" y="118" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="60" font-weight="900">üretir<tspan fill="${scene.accent}">.</tspan></text>
-  <rect x="275" y="72" width="236" height="54" rx="27" fill="#062819" fill-opacity="0.88" stroke="#34d399" stroke-width="2" />
-  <text x="393" y="107" text-anchor="middle" fill="#a7f3d0" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="900">🦖 DİNO VLOG</text>
+  <!-- 2. FULL-SCREEN BACKGROUND "GRAPH MOTION" LAYER (Scrolling Cyber-Grid + Candlesticks + Spline Ribbons) -->
+  <g opacity="0.88">
+    <!-- Scrolling Isometric Cyber Grid -->
+    <line x1="0" y1="${220 + gridOffset}" x2="1080" y2="${220 + gridOffset}" stroke="#00f5d4" stroke-opacity="0.12" stroke-dasharray="8,8" />
+    <line x1="0" y1="${340 + gridOffset}" x2="1080" y2="${340 + gridOffset}" stroke="#00f5d4" stroke-opacity="0.12" stroke-dasharray="8,8" />
+    <line x1="0" y1="${460 + gridOffset}" x2="1080" y2="${460 + gridOffset}" stroke="#00f5d4" stroke-opacity="0.12" stroke-dasharray="8,8" />
+    <line x1="${180 + gridOffset}" y1="150" x2="${180 + gridOffset}" y2="1760" stroke="#34d399" stroke-opacity="0.08" />
+    <line x1="${540 + gridOffset}" y1="150" x2="${540 + gridOffset}" y2="1760" stroke="#34d399" stroke-opacity="0.08" />
+    <line x1="${900 - gridOffset}" y1="150" x2="${900 - gridOffset}" y2="1760" stroke="#34d399" stroke-opacity="0.08" />
 
-  <rect x="530" y="68" width="494" height="62" rx="31" fill="#050d09" fill-opacity="0.78" stroke="${scene.accent}" stroke-opacity="0.9" stroke-width="2" />
+    <!-- Rotating Background Jurassic Radar HUD -->
+    <g transform="translate(540, 380) rotate(${watchRotation})">
+      <circle cx="0" cy="0" r="210" fill="none" stroke="#00f5d4" stroke-opacity="0.16" stroke-width="2" stroke-dasharray="28,18" />
+      <circle cx="0" cy="0" r="145" fill="none" stroke="${scene.accent}" stroke-opacity="0.18" stroke-width="1.5" stroke-dasharray="12,14" />
+      <line x1="0" y1="0" x2="210" y2="0" stroke="#00f5d4" stroke-opacity="0.32" stroke-width="3" />
+    </g>
+
+    <!-- Upper Background Animated Candlesticks & Moving Average Ribbon -->
+    ${bgCandleElements.join("\n    ")}
+    <path d="${bgUpperSplinePath}" fill="none" stroke="#00f5d4" stroke-width="5" stroke-opacity="0.68" stroke-linecap="round" />
+    <circle cx="${leadBgX.toFixed(1)}" cy="${leadBgY.toFixed(1)}" r="16" fill="#00f5d4" fill-opacity="0.32" />
+    <circle cx="${leadBgX.toFixed(1)}" cy="${leadBgY.toFixed(1)}" r="7" fill="#ffffff" stroke="#00f5d4" stroke-width="3" />
+
+    <!-- Live Floating Graph Motion Telemetry Badge -->
+    <g transform="translate(${Math.min(720, Math.max(64, leadBgX - 110)).toFixed(0)}, ${(leadBgY - 64).toFixed(0)})">
+      <rect x="0" y="0" width="268" height="44" rx="22" fill="#04140e" fill-opacity="0.88" stroke="#00f5d4" stroke-width="1.8" />
+      <text x="134" y="29" text-anchor="middle" fill="#00f5d4" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="900">⚡ CANLI GRAPH MOTION</text>
+    </g>
+
+    <!-- Lower Background Voice-Reactive Histogram Bars & Trend Wave (Behind Üretir Dino) -->
+    ${bgLowerBars.join("\n    ")}
+    <path d="${bgLowerSplinePath}" fill="none" stroke="${scene.accent}" stroke-width="4" stroke-opacity="0.45" stroke-dasharray="14,8" />
+  </g>
+
+  <!-- 3. Top Jurassic Vlog Masthead -->
+  <text x="56" y="118" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="60" font-weight="900">üretir<tspan fill="${scene.accent}">.</tspan></text>
+  <rect x="275" y="72" width="236" height="54" rx="27" fill="#062819" fill-opacity="0.92" stroke="#34d399" stroke-width="2" />
+  <text x="393" y="107" text-anchor="middle" fill="#a7f3d0" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="900">🦖 DİNO MOTION</text>
+
+  <rect x="530" y="68" width="494" height="62" rx="31" fill="#050d09" fill-opacity="0.84" stroke="${scene.accent}" stroke-opacity="0.9" stroke-width="2" />
   <circle cx="566" cy="99" r="9" fill="${scene.accent}" />
   <text x="588" y="107" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="800" letter-spacing="0.5">${escapeXml(scene.photoTag || "DOĞRULANMIŞ KAYNAK")}</text>
 
-  <!-- Floating Kicker Pill over Full-Bleed Photo -->
-  <rect x="56" y="590" width="560" height="52" rx="26" fill="#040d09" fill-opacity="0.84" stroke="${scene.accent}" stroke-opacity="0.55" stroke-width="1.5" />
-  <text x="86" y="624" fill="${scene.accent}" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="800" letter-spacing="0.8">${escapeXml(scene.kicker)}</text>
+  <!-- 4. "ÜRETİR FİKİRLERİ" Smart Productivity / Money Insight Banner -->
+  <g transform="translate(0, ${Math.round(cardOffsetY * 0.6)})">
+    <rect x="56" y="568" width="968" height="66" rx="33" fill="#051c14" fill-opacity="0.94" stroke="#34d399" stroke-width="2.2" />
+    <circle cx="96" cy="601" r="16" fill="#34d399" />
+    <text x="96" y="608" text-anchor="middle" fill="#04120a" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="900">💡</text>
+    <text x="126" y="609" fill="#ecfdf5" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="800">${escapeXml(uretirFikriText)}</text>
+  </g>
 
-  <!-- Middle Showcase Glass Card (Pointed at by Üretir Dino!) -->
+  <!-- 5. Middle Showcase Glass Card (Pointed at by Üretir Dino!) -->
   <g transform="translate(0, ${cardOffsetY})">
-    <rect x="56" y="656" width="968" height="432" rx="32" fill="#06100c" fill-opacity="0.86" stroke="#ffffff" stroke-opacity="0.24" stroke-width="1.5" />
+    <rect x="56" y="652" width="968" height="434" rx="32" fill="#06100c" fill-opacity="0.88" stroke="#ffffff" stroke-opacity="0.28" stroke-width="1.8" />
+    <text x="94" y="700" fill="${scene.accent}" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="900" letter-spacing="1.0">${escapeXml(scene.kicker)}</text>
 
     ${titleLines
       .map(
         (line, idx) =>
-          `<text x="94" y="${734 + idx * 60}" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="48" font-weight="900">${escapeXml(line)}</text>`
+          `<text x="94" y="${754 + idx * 56}" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="46" font-weight="900">${escapeXml(line)}</text>`
       )
       .join("\n    ")}
 
     ${subLines
       .map(
         (line, idx) =>
-          `<text x="94" y="${912 + idx * 36}" fill="#d1fae5" font-family="Segoe UI, Arial, sans-serif" font-size="26" font-weight="600">${escapeXml(line)}</text>`
+          `<text x="94" y="${920 + idx * 34}" fill="#d1fae5" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="600">${escapeXml(line)}</text>`
       )
       .join("\n    ")}
 
     <!-- Verified Price / Metric Highlight Bar -->
-    <rect x="94" y="974" width="892" height="92" rx="22" fill="${scene.accent}" />
+    <rect x="94" y="976" width="892" height="90" rx="22" fill="${scene.accent}" />
     <text x="540" y="1035" text-anchor="middle" fill="#04120a" font-family="Segoe UI, Arial, sans-serif" font-size="42" font-weight="900">${escapeXml(scene.highlight)}</text>
   </g>
 
-  <!-- 3D Hologram Projection Cone shooting from Dino's Giant Smartwatch (x=760,y=1535) to Left Chart -->
-  <polygon points="${755},${1535 + dinoBobY} 584,1325 584,1685" fill="url(#holoBeamGrad)" />
-  <line x1="${755}" y1="${1535 + dinoBobY}" x2="${dotX}" y2="${dotY}" stroke="#00f5d4" stroke-width="3" stroke-dasharray="10,6" stroke-opacity="0.75" />
+  <!-- 6. 3D Hologram Projection Cone & Laser Packet shooting from Dino's Giant Smartwatch -->
+  <polygon points="${watchWorldX},${watchWorldY} 584,1320 584,1688" fill="url(#holoBeamGrad)" />
+  <line x1="${watchWorldX}" y1="${watchWorldY}" x2="${dotX}" y2="${dotY}" stroke="#00f5d4" stroke-width="3.5" stroke-dasharray="12,6" stroke-opacity="0.88" />
+  <circle cx="${packetX}" cy="${packetY}" r="9" fill="#ffffff" stroke="#00f5d4" stroke-width="4" />
 
-  <!-- Left Upper: Üretir Dino Live Vlog Speech Bubble -->
-  <rect x="56" y="1116" width="528" height="178" rx="26" fill="#071912" fill-opacity="0.92" stroke="#34d399" stroke-opacity="0.85" stroke-width="2" />
-  <polygon points="584,1182 626,${1202 + dinoBobY} 584,1224" fill="#071912" stroke="#34d399" stroke-width="2" />
-  <text x="84" y="1156" fill="#34d399" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="900" letter-spacing="0.8">🦖 ÜRETİR DİNO · AKILLI SAAT RADARI</text>
+  <!-- 7. Left Upper: Üretir Dino Voice-Synced Speech Bubble -->
+  <rect x="56" y="1112" width="528" height="182" rx="26" fill="#071912" fill-opacity="0.94" stroke="#34d399" stroke-opacity="0.9" stroke-width="2.2" />
+  <polygon points="584,1180 ${618 + Math.round(dinoStrideX * 0.4)},${1202 + dinoBobY} 584,1224" fill="#071912" stroke="#34d399" stroke-width="2" />
+  <text x="84" y="1154" fill="#34d399" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="900" letter-spacing="0.8">🦖 ÜRETİR DİNO · TOK SESLİ ANALİZ</text>
+  <!-- Voice-Reactive Equalizer Bars in Speech Bubble Header -->
+  <rect x="488" y="${1136 - Math.round(voiceAmp * 14)}" width="7" height="${12 + Math.round(voiceAmp * 18)}" rx="3" fill="#00f5d4" />
+  <rect x="500" y="${1132 - Math.round(voiceAmp * 20)}" width="7" height="${16 + Math.round(voiceAmp * 26)}" rx="3" fill="#34d399" />
+  <rect x="512" y="${1138 - Math.round(voiceAmp * 12)}" width="7" height="${10 + Math.round(voiceAmp * 16)}" rx="3" fill="#c8f560" />
   ${dinoSpeechLines
     .map(
       (line, idx) =>
@@ -900,91 +1068,268 @@ function renderVerticalFrameSvg(scene, slotLabel, sceneIdx, totalScenes, progres
     )
     .join("\n  ")}
 
-  <!-- Left Lower: Hologram Smartwatch Data Chart Card -->
-  <rect x="56" y="1316" width="528" height="372" rx="28" fill="#040d09" fill-opacity="0.90" stroke="#00f5d4" stroke-opacity="0.68" stroke-width="2" />
-  <text x="84" y="1358" fill="#00f5d4" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="900" letter-spacing="0.7">⌚ HOLO-SAAT CANLI GRAFİK</text>
-  <text x="84" y="1388" fill="#cbd5e1" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">${escapeXml(scene.statLeft)}</text>
+  <!-- 8. Left Lower: Hologram Smartwatch Live Graph Motion Card -->
+  <rect x="56" y="1314" width="528" height="374" rx="28" fill="#040d09" fill-opacity="0.92" stroke="#00f5d4" stroke-opacity="0.78" stroke-width="2.2" />
+  <text x="84" y="1356" fill="#00f5d4" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="900" letter-spacing="0.7">⌚ HOLO-SAAT GRAPH MOTION</text>
+  <text x="84" y="1386" fill="#cbd5e1" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">${escapeXml(scene.statLeft)}</text>
 
-  <line x1="84" y1="1450" x2="552" y2="1450" stroke="#ffffff" stroke-opacity="0.10" stroke-dasharray="6,6" />
-  <line x1="84" y1="1535" x2="552" y2="1535" stroke="#ffffff" stroke-opacity="0.10" stroke-dasharray="6,6" />
-  <line x1="84" y1="1618" x2="552" y2="1618" stroke="#ffffff" stroke-opacity="0.22" />
+  <line x1="84" y1="1450" x2="552" y2="1450" stroke="#ffffff" stroke-opacity="0.12" stroke-dasharray="6,6" />
+  <line x1="84" y1="1535" x2="552" y2="1535" stroke="#ffffff" stroke-opacity="0.12" stroke-dasharray="6,6" />
+  <line x1="84" y1="1618" x2="552" y2="1618" stroke="#ffffff" stroke-opacity="0.24" />
 
   <polygon points="${areaPoints}" fill="url(#chartAreaGrad)" />
-  <polyline fill="none" stroke="${scene.accent}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" points="${polylinePoints}" />
+  <path d="${fgSplinePath}" fill="none" stroke="${scene.accent}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
   ${visiblePts
     .map(
       ([x, y]) =>
-        `<circle cx="${x}" cy="${y}" r="6" fill="#04100b" stroke="${scene.accent}" stroke-width="4" />`
+        `<circle cx="${x}" cy="${y}" r="6.5" fill="#04100b" stroke="${scene.accent}" stroke-width="4" />`
     )
     .join("\n  ")}
-  <circle cx="${dotX}" cy="${dotY}" r="14" fill="#00f5d4" fill-opacity="0.38" />
-  <circle cx="${dotX}" cy="${dotY}" r="7" fill="#00f5d4" />
+  <circle cx="${dotX}" cy="${dotY}" r="${14 + Math.round(voiceAmp * 10)}" fill="#00f5d4" fill-opacity="0.42" />
+  <circle cx="${dotX}" cy="${dotY}" r="7.5" fill="#00f5d4" />
 
   <text x="84" y="1658" fill="#94a3b8" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">${escapeXml(scene.graphStartLabel || "Önceki")}</text>
   <text x="552" y="1658" text-anchor="end" fill="${scene.accent}" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="900">${escapeXml(scene.graphEndLabel || "Güncel Dip")}</text>
 
-  <!-- Right Foreground: Canonical 3D Pixar "Üretir Dino" Mascot (100% Consistent in Every Video!) -->
-  <ellipse cx="825" cy="1768" rx="175" ry="24" fill="#00f5d4" fill-opacity="0.22" />
-  <g transform="translate(575, ${1088 + dinoBobY}) rotate(${dinoTilt}, 245, 360)">
+  <!-- 9. Right Foreground: Actively Moving, Voice-Synced 3D Pixar "Üretir Dino" Mascot -->
+  <ellipse cx="${825 + dinoStrideX}" cy="1768" rx="${175 - Math.round(Math.abs(dinoBobY) * 1.2)}" ry="${24 + Math.round(voiceAmp * 8)}" fill="#00f5d4" fill-opacity="0.28" />
+  <ellipse cx="${825 + dinoStrideX}" cy="1768" rx="${110 + Math.round(voiceAmp * 45)}" ry="12" fill="none" stroke="#c8f560" stroke-width="2.5" stroke-opacity="0.65" />
+  <g transform="translate(${575 + dinoStrideX}, ${1088 + dinoBobY}) rotate(${dinoTilt}, 245, 360) translate(245, 680) scale(${dinoScaleX}, ${dinoScaleY}) translate(-245, -680)">
     ${
       dinoDataUri
         ? `<image href="${dinoDataUri}" x="0" y="0" width="485" height="695" preserveAspectRatio="xMidYMid meet" />`
         : ""
     }
-    <!-- Glowing Hologram Smartwatch Pulse Rings on Dino's Wrist -->
-    <circle cx="182" cy="445" r="${watchPulseRadius}" fill="none" stroke="#00f5d4" stroke-width="3" stroke-opacity="0.75" />
-    <circle cx="182" cy="445" r="10" fill="#00f5d4" fill-opacity="0.9" />
+    <!-- Animated AR Smart-Glasses Laser Scanline on Dino's Visor -->
+    <line x1="158" y1="${glassesScanY}" x2="328" y2="${glassesScanY}" stroke="#00f5d4" stroke-width="3" stroke-opacity="0.65" />
+    <!-- Rotating Hologram Smartwatch Reticle & Pulse Rings on Dino's Wrist -->
+    <g transform="translate(182, 445) rotate(${watchRotation})">
+      <circle cx="0" cy="0" r="${watchPulseRadius}" fill="none" stroke="#00f5d4" stroke-width="3.5" stroke-dasharray="14,8" stroke-opacity="0.88" />
+      <circle cx="0" cy="0" r="${Math.round(watchPulseRadius * 0.65)}" fill="none" stroke="#c8f560" stroke-width="2.5" stroke-dasharray="8,6" stroke-opacity="0.78" />
+    </g>
+    <circle cx="182" cy="445" r="11" fill="#00f5d4" fill-opacity="0.95" />
   </g>
 
-  <!-- Progress Timeline Bar -->
+  <!-- 10. Progress Timeline Bar -->
   <rect x="56" y="1788" width="968" height="8" rx="4" fill="#ffffff" fill-opacity="0.18" />
   <rect x="56" y="1788" width="${barWidth}" height="8" rx="4" fill="${scene.accent}" />
 
-  <!-- Editorial Footer -->
+  <!-- 11. Editorial Footer -->
   <text x="56" y="1846" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="36" font-weight="900">${escapeXml(scene.statRight?.startsWith("uretir.com") ? scene.statRight : "www.uretir.com")}</text>
-  <text x="56" y="1884" fill="#a7f3d0" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">🦖 Üretir Dino Jurassic Radar · Doğrulanmış Veri &amp; Fırsat Merkezi</text>
+  <text x="56" y="1884" fill="#a7f3d0" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">🦖 Üretir Dino Graph Motion · Doğrulanmış Veri &amp; Fırsat Merkezi</text>
   <text x="1024" y="1846" text-anchor="end" fill="${scene.accent}" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="900">@uretirai</text>
   <text x="1024" y="1884" text-anchor="end" fill="#34d399" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">Telegram: @uretirbot</text>
 </svg>`;
 }
 
-async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path) {
-  // 1. High-speed verified Turkish TTS over HTTPS (natural Turkish pronunciation, 500ms)
+function normalizeTextForTurkishTts(rawText) {
+  return String(rawText || "")
+    .replace(/https?:\/\/(www\.)?uretir\.com/gi, "üretir nokta com")
+    .replace(/www\.uretir\.com/gi, "üretir nokta com")
+    .replace(/uretir\.com/gi, "üretir nokta com")
+    .replace(/İndirimAI/gi, "İndirim A İ")
+    .replace(/HaberAI/gi, "Haber A İ")
+    .replace(/PuanAI/gi, "Puan A İ")
+    .replace(/FinansAI/gi, "Finans A İ")
+    .replace(/EvAI/gi, "Ev A İ")
+    .replace(/ArabaAI/gi, "Araba A İ")
+    .replace(/SporAI/gi, "Spor A İ")
+    .replace(/OyunAI/gi, "Oyun A İ")
+    .replace(/BIST\s*100/gi, "Borsa İstanbul yüz")
+    .replace(/m²/g, " metrekare ")
+    .replace(/-%(\d+)/g, "yüzde $1 indirim ")
+    .replace(/%(\d+)/g, "yüzde $1 ")
+    .replace(/\bTL\b/g, "lira")
+    .replace(/\bUSD\b/g, "dolar")
+    .replace(/\([^)]*\)/g, " ")
+    .replace(/[·•|—–]/g, ", ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+async function extractWavEnvelope(wavPath, numFrames = 48) {
   try {
-    const chunks = text
-      .match(/.{1,160}(?:\s|$)/g)
-      ?.map((s) => s.trim())
-      .filter(Boolean) || [text.slice(0, 160)];
-    const buffers = [];
-    for (const chunk of chunks) {
-      const ttsUrl = `https://translate.googleapis.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(chunk)}&tl=tr&client=tw-ob`;
-      const res = await fetch(ttsUrl, {
-        headers: {
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        },
-        signal: AbortSignal.timeout(8_000),
-      });
-      if (res.ok) {
-        buffers.push(Buffer.from(await res.arrayBuffer()));
+    if (!existsSync(wavPath)) return null;
+    const buf = await fs.readFile(wavPath);
+    if (buf.length <= 44) return null;
+    const pcmLen = Math.floor((buf.length - 44) / 2);
+    const samplesPerFrame = Math.max(1, Math.floor(pcmLen / numFrames));
+    const rmsArr = [];
+    let maxRms = 0.01;
+    for (let f = 0; f < numFrames; f++) {
+      const startSample = f * samplesPerFrame;
+      const endSample = Math.min(pcmLen, startSample + samplesPerFrame);
+      let sumSq = 0;
+      let count = 0;
+      for (let s = startSample; s < endSample; s += 4) {
+        const val = buf.readInt16LE(44 + s * 2) / 32768.0;
+        sumSq += val * val;
+        count++;
       }
+      const rms = count > 0 ? Math.sqrt(sumSq / count) : 0;
+      if (rms > maxRms) maxRms = rms;
+      rmsArr.push(rms);
     }
-    if (buffers.length > 0) {
-      await fs.writeFile(outMp3Path, Buffer.concat(buffers));
-      return true;
+    return rmsArr.map((r) => Math.min(1.0, Math.max(0.12, r / maxRms)));
+  } catch {
+    return null;
+  }
+}
+
+async function ensurePiperTurkishModel() {
+  const voiceDir = path.resolve(".local", "voices");
+  await fs.mkdir(voiceDir, { recursive: true });
+  const onnxPath = path.join(voiceDir, "tr_TR-fahrettin-medium.onnx");
+  const jsonPath = path.join(voiceDir, "tr_TR-fahrettin-medium.onnx.json");
+
+  let needsDownload = !existsSync(onnxPath) || !existsSync(jsonPath);
+  if (!needsDownload) {
+    try {
+      const st = await fs.stat(onnxPath);
+      if (st.size < 10_000_000) needsDownload = true;
+    } catch {
+      needsDownload = true;
     }
-  } catch (err) {
-    console.warn("TTS warning:", err);
   }
 
-  // 2. Try Node.js msedge-tts (Microsoft Edge Neural Turkish Voice)
+  if (needsDownload) {
+    console.log("🎙️ [Üretir Tok Ses Motoru] Piper VITS Türkçe Erkek Ses Modeli (tr_TR-fahrettin-medium) indiriliyor...");
+    const onnxUrl =
+      "https://huggingface.co/csukuangfj/vits-piper-tr_TR-fahrettin-medium/resolve/main/tr_TR-fahrettin-medium.onnx";
+    const jsonUrl =
+      "https://huggingface.co/csukuangfj/vits-piper-tr_TR-fahrettin-medium/resolve/main/tr_TR-fahrettin-medium.onnx.json";
+    const [onnxRes, jsonRes] = await Promise.all([
+      fetch(onnxUrl, { signal: AbortSignal.timeout(60_000) }),
+      fetch(jsonUrl, { signal: AbortSignal.timeout(20_000) }),
+    ]);
+    if (onnxRes.ok && jsonRes.ok) {
+      await fs.writeFile(onnxPath, Buffer.from(await onnxRes.arrayBuffer()));
+      await fs.writeFile(jsonPath, Buffer.from(await jsonRes.arrayBuffer()));
+    }
+  }
+  return existsSync(onnxPath) ? onnxPath : null;
+}
+
+async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path, numFrames = 48) {
+  const cleanText = normalizeTextForTurkishTts(text);
+  const ffmpegBin = resolveFfmpegBinary();
+  const rawWavPath = outMp3Path.replace(/\.mp3$/i, ".raw.wav");
+
+  // 1. PRIMARY: Piper VITS Neural Turkish Male (tr_TR-fahrettin-medium) + FFmpeg Broadcast Baritone Mastering ("Doğal, Tok, Optimum Hız ve %100 Stabil")
+  try {
+    const onnxPath = await ensurePiperTurkishModel();
+    if (onnxPath) {
+      const localUv = path.resolve(
+        ".local",
+        "open-source-stack",
+        "bin",
+        process.platform === "win32" ? "uv.exe" : "uv"
+      );
+      const uvCandidates = existsSync(localUv) ? [localUv, "uv"] : ["uv"];
+      let wavBuilt = false;
+
+      for (const uvBin of uvCandidates) {
+        if (wavBuilt) break;
+        try {
+          await execFileAsync(
+            uvBin,
+            [
+              "run",
+              "--python",
+              "3.11",
+              "--with",
+              "piper-tts",
+              "python",
+              "-m",
+              "piper",
+              "--model",
+              onnxPath,
+              "--length-scale",
+              "0.94",
+              "--noise-scale",
+              "0.60",
+              "--noise-w-scale",
+              "0.74",
+              "--sentence-silence",
+              "0.18",
+              "--output_file",
+              rawWavPath,
+              cleanText,
+            ],
+            { timeout: 35_000 }
+          );
+          if (existsSync(rawWavPath)) wavBuilt = true;
+        } catch {}
+      }
+
+      if (!wavBuilt) {
+        for (const pyBin of ["python3", "python"]) {
+          if (wavBuilt) break;
+          try {
+            await execFileAsync(
+              pyBin,
+              [
+                "-m",
+                "piper",
+                "--model",
+                onnxPath,
+                "--length-scale",
+                "0.94",
+                "--noise-scale",
+                "0.60",
+                "--noise-w-scale",
+                "0.74",
+                "--sentence-silence",
+                "0.18",
+                "--output_file",
+                rawWavPath,
+                cleanText,
+              ],
+              { timeout: 25_000 }
+            );
+            if (existsSync(rawWavPath)) wavBuilt = true;
+          } catch {}
+        }
+      }
+
+      if (wavBuilt && existsSync(rawWavPath)) {
+        const envelope = await extractWavEnvelope(rawWavPath, numFrames);
+        // Apply Broadcast Baritone Vocal Mastering Filter (Deep chest resonance at 115Hz, clarity at 3.2kHz, radio compressor, optimum 1.02x pace)
+        await execFileAsync(
+          ffmpegBin,
+          [
+            "-y",
+            "-i",
+            rawWavPath,
+            "-af",
+            "asetrate=22050*0.955,aresample=44100,atempo=1.065,highpass=f=65,equalizer=f=115:t=q:w=1.1:g=4.2,equalizer=f=280:t=q:w=1.4:g=-2.2,equalizer=f=3200:t=q:w=1.2:g=2.8,acompressor=threshold=-18dB:ratio=3.2:attack=12:release=180:makeup=2.5,extrastereo=m=1.18,alimiter=limit=0.95",
+            "-c:a",
+            "libmp3lame",
+            "-b:a",
+            "192k",
+            outMp3Path,
+          ],
+          { timeout: 25_000 }
+        );
+        await fs.unlink(rawWavPath).catch(() => {});
+        if (existsSync(outMp3Path)) {
+          return { ok: true, envelope };
+        }
+      }
+    }
+  } catch (piperErr) {
+    console.warn("[Piper Tok Ses Uyarısı]:", piperErr?.message || piperErr);
+  }
+
+  // 2. Fallback: Try Node.js msedge-tts (Microsoft Edge Neural Turkish Voice) + Baritone Mastering
   try {
     const { MsEdgeTTS, OUTPUT_FORMAT } = requireOpenSource("msedge-tts");
     const tts = new MsEdgeTTS();
-    await tts.setMetadata(voice, OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3);
-    let toFilePromise = tts.toFile(path.dirname(outMp3Path), text);
+    await tts.setMetadata(voice || "tr-TR-AhmetNeural", OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3);
+    let toFilePromise = tts.toFile(path.dirname(outMp3Path), cleanText);
     toFilePromise = toFilePromise.catch(() => {});
     const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("MsEdgeTTS timeout")), 2000)
+      setTimeout(() => reject(new Error("MsEdgeTTS timeout")), 4000)
     );
     const { audioFilePath } = await Promise.race([toFilePromise, timeoutPromise]);
     try { tts.close(); } catch {}
@@ -993,53 +1338,11 @@ async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path) {
         await fs.copyFile(audioFilePath, outMp3Path);
         await fs.unlink(audioFilePath).catch(() => {});
       }
-      if (existsSync(outMp3Path)) return true;
+      if (existsSync(outMp3Path)) return { ok: true, envelope: null };
     }
   } catch {}
 
-  // 3. Try uv + rany2/edge-tts (Microsoft Neural Turkish Voice)
-  const localUv = path.resolve(".local", "open-source-stack", "bin", process.platform === "win32" ? "uv.exe" : "uv");
-  if (existsSync(localUv)) {
-    try {
-      await execFileAsync(
-        localUv,
-        ["run", "--python", "3.12", "--with", "edge-tts", "python", "-m", "edge_tts", "--voice", voice, "--rate=+4%", "--text", text, "--write-media", outMp3Path],
-        { timeout: 15_000 }
-      );
-      if (existsSync(outMp3Path)) return true;
-    } catch {
-      // Try next binary
-    }
-  }
-
-  // 4. Fallback to existing pre-rendered Turkish neural voice tracks if offline/sandbox
-  if (existsSync(outMp3Path)) {
-    try {
-      const st = await fs.stat(outMp3Path);
-      if (st.size > 1000) return true;
-    } catch {}
-  }
-  const cachedVoices = [
-    path.resolve("reports", "social-media", "slot-09", path.basename(outMp3Path)),
-    path.resolve("reports", "social-media", "slot-12", path.basename(outMp3Path)),
-    path.resolve("reports", "social-media", "slot-15", path.basename(outMp3Path)),
-    path.resolve("reports", "social-media", "slot-20", path.basename(outMp3Path)),
-    path.resolve("reports", "social-media", "test-speech.mp3"),
-    path.resolve("reports", "social-media", "audio.mp3"),
-  ];
-  for (const cv of cachedVoices) {
-    if (existsSync(cv)) {
-      try {
-        const st = await fs.stat(cv);
-        if (st.size > 1000) {
-          await fs.copyFile(cv, outMp3Path);
-          return true;
-        }
-      } catch {}
-    }
-  }
-
-  return false;
+  return { ok: false, envelope: null };
 }
 
 async function resolveTelegramTargets() {
@@ -1355,7 +1658,7 @@ async function renderAndPublishSlotData(slotData) {
     }
   }
 
-  const framesPerScene = slotData.scenes.length >= 6 ? 24 : 36;
+  const framesPerScene = slotData.scenes.length >= 6 ? 24 : slotData.scenes.length === 1 ? 54 : 36;
   const totalScenes = slotData.scenes.length;
   let frameCounter = 0;
 
@@ -1367,32 +1670,78 @@ async function renderAndPublishSlotData(slotData) {
     }
   } catch {}
 
-  const dinoDataUri = await getDinoMascotDataUri();
-  for (let sIdx = 0; sIdx < totalScenes; sIdx++) {
-    const scene = slotData.scenes[sIdx];
-    for (let f = 0; f < framesPerScene; f++) {
-      const sceneProgress = f / Math.max(1, framesPerScene - 1);
-      const svg = renderVerticalFrameSvg(scene, slotData.label, sIdx, totalScenes, sceneProgress, dinoDataUri);
-      const framePath = path.join(framesDir, `frame-${String(frameCounter).padStart(4, "0")}.png`);
-      await sharp(Buffer.from(svg)).png({ compressionLevel: 5 }).toFile(framePath);
-      frameCounter++;
-    }
-  }
-
-  const coverPngPath = path.join(outDir, `uretir-cover-${slotData.slot}.png`);
-  const coverFrameIdx = String(Math.max(0, frameCounter - 4)).padStart(4, "0");
-  await fs.copyFile(path.join(framesDir, `frame-${coverFrameIdx}.png`), coverPngPath);
-
   const ffmpegBin = resolveFfmpegBinary();
   const fullSpeech = slotData.scenes.map((s) => s.speech).join(" · [FON] · ");
   const audioPath = path.join(outDir, `uretir-voice-${slotData.slot}.mp3`);
   let hasVoice = false;
   const hasNonEmptySpeech = slotData.scenes.some((s) => s.speech && String(s.speech).trim().length > 0);
-  const useTts = process.argv.includes("--with-tts") && hasNonEmptySpeech;
-  const targetVideoDurationSec = totalScenes >= 6 ? totalScenes * 2.5 : totalScenes === 1 ? 6.5 : totalScenes * 3.6;
+  const useTts = !process.argv.includes("--no-tts") && process.env.WITH_TTS !== "0" && hasNonEmptySpeech;
+  const targetVideoDurationSec = totalScenes >= 6 ? totalScenes * 2.5 : totalScenes === 1 ? 8.5 : totalScenes * 3.8;
+  const sceneEnvelopes = [];
 
-  // Default: Warm Acoustic Ambient Chord Resonance (Zero Robotic AI TTS Voice)
-  if (!useTts) {
+  // 1. Synthesize Deep Baritone Turkish Voiceover FIRST & Extract Per-Frame Audio Envelope for Dino + Graph Motion Sync
+  if (useTts) {
+    try {
+      const sceneVoicePaths = [];
+      for (let i = 0; i < slotData.scenes.length; i++) {
+        const sp = path.join(outDir, `scene-voice-${i}.mp3`);
+        const res = await synthesizeNaturalTurkishVoice(
+          slotData.scenes[i].speech,
+          slotData.voice || "tr-TR-AhmetNeural",
+          sp,
+          framesPerScene
+        );
+        if (res?.ok && existsSync(sp)) {
+          sceneVoicePaths.push(sp);
+          sceneEnvelopes[i] = res.envelope;
+        }
+      }
+
+      if (sceneVoicePaths.length > 0) {
+        const inputs = [];
+        const padFilters = [];
+        const concatLabels = [];
+        for (let i = 0; i < sceneVoicePaths.length; i++) {
+          inputs.push("-i", sceneVoicePaths[i]);
+          const padSec = i === sceneVoicePaths.length - 1 ? "0.95" : "0.75";
+          padFilters.push(`[${i}:a]aformat=sample_rates=44100:channel_layouts=stereo,apad=pad_dur=${padSec}[v${i}]`);
+          concatLabels.push(`[v${i}]`);
+        }
+
+        const bgmIdx = sceneVoicePaths.length;
+        const bgmExpr = [
+          "0.14*sin(2*PI*220*t)*(0.65+0.35*sin(2*PI*2.2*t))",
+          "0.11*sin(2*PI*261.63*t)",
+          "0.10*sin(2*PI*329.63*t)",
+          "0.09*sin(2*PI*392.00*t)*(0.5+0.5*cos(2*PI*0.55*t))",
+          "0.13*sin(2*PI*110*t)*(0.55+0.45*sin(2*PI*2.2*t))",
+          "0.06*sin(2*PI*523.25*t)*exp(-mod(t,2.0)*2.4)",
+        ].join("+");
+
+        inputs.push("-f", "lavfi", "-i", `aevalsrc='${bgmExpr}|${bgmExpr}':s=44100:d=40`);
+
+        const filterComplex = [
+          ...padFilters,
+          `${concatLabels.join("")}concat=n=${sceneVoicePaths.length}:v=0:a=1,asplit=2[voice_main][voice_sc]`,
+          `[${bgmIdx}:a]lowpass=f=2200,highpass=f=60,volume=0.72[bgm_raw]`,
+          `[bgm_raw][voice_sc]sidechaincompress=threshold=0.02:ratio=6.0:attack=25:release=380:makeup=1.15[bgm_ducked]`,
+          `[voice_main][bgm_ducked]amix=inputs=2:duration=first:dropout_transition=0:weights='1.48 0.78',alimiter=limit=0.95[outa]`,
+        ].join(";");
+
+        await execFileAsync(
+          ffmpegBin,
+          ["-y", ...inputs, "-filter_complex", filterComplex, "-map", "[outa]", "-c:a", "libmp3lame", "-b:a", "192k", audioPath],
+          { timeout: 60_000 }
+        );
+        hasVoice = existsSync(audioPath);
+      }
+    } catch (mixErr) {
+      console.warn("[Tok Ses & Fon Miks Uyarısı]:", mixErr?.message || mixErr);
+    }
+  }
+
+  // Fallback to Ambient Chord Resonance if TTS was disabled or unavailable
+  if (!hasVoice) {
     try {
       const bgmExprL = [
         "0.20*sin(2*PI*220*t)*(0.68+0.32*sin(2*PI*2.0*t))",
@@ -1436,68 +1785,30 @@ async function renderAndPublishSlotData(slotData) {
     } catch (fonErr) {
       console.warn("[Stereo Fon Müziği Uyarısı]:", fonErr?.message || fonErr);
     }
-  } else {
-    // Optional TTS + Fon interleave mode (--with-tts)
-    try {
-      const sceneVoicePaths = [];
-      for (let i = 0; i < slotData.scenes.length; i++) {
-        const sp = path.join(outDir, `scene-voice-${i}.mp3`);
-        const ok = await synthesizeNaturalTurkishVoice(
-          slotData.scenes[i].speech,
-          slotData.voice || "tr-TR-AhmetNeural",
-          sp
-        );
-        if (ok && existsSync(sp)) {
-          sceneVoicePaths.push(sp);
-        }
-      }
-
-      if (sceneVoicePaths.length > 0) {
-        const inputs = [];
-        const padFilters = [];
-        const concatLabels = [];
-        for (let i = 0; i < sceneVoicePaths.length; i++) {
-          inputs.push("-i", sceneVoicePaths[i]);
-          const padSec = i === sceneVoicePaths.length - 1 ? "2.4" : "2.2";
-          padFilters.push(`[${i}:a]aformat=sample_rates=44100:channel_layouts=stereo,apad=pad_dur=${padSec}[v${i}]`);
-          concatLabels.push(`[v${i}]`);
-        }
-
-        const bgmIdx = sceneVoicePaths.length;
-        const bgmExpr = [
-          "0.16*sin(2*PI*220*t)*(0.65+0.35*sin(2*PI*1.8*t))",
-          "0.13*sin(2*PI*261.63*t)",
-          "0.12*sin(2*PI*329.63*t)",
-          "0.10*sin(2*PI*392.00*t)*(0.5+0.5*cos(2*PI*0.45*t))",
-          "0.14*sin(2*PI*110*t)*(0.55+0.45*sin(2*PI*1.8*t))",
-          "0.07*sin(2*PI*523.25*t)*exp(-mod(t,3.6)*2.2)",
-        ].join("+");
-
-        inputs.push("-f", "lavfi", "-i", `aevalsrc='${bgmExpr}|${bgmExpr}':s=44100:d=32`);
-
-        const filterComplex = [
-          ...padFilters,
-          `${concatLabels.join("")}concat=n=${sceneVoicePaths.length}:v=0:a=1,asplit=2[voice_main][voice_sc]`,
-          `[${bgmIdx}:a]lowpass=f=2100,highpass=f=60,volume=0.82[bgm_raw]`,
-          `[bgm_raw][voice_sc]sidechaincompress=threshold=0.025:ratio=5.5:attack=35:release=420:makeup=1.25[bgm_ducked]`,
-          `[voice_main][bgm_ducked]amix=inputs=2:duration=first:dropout_transition=0:weights='1.35 0.95',alimiter=limit=0.95[outa]`,
-        ].join(";");
-
-        await execFileAsync(
-          ffmpegBin,
-          ["-y", ...inputs, "-filter_complex", filterComplex, "-map", "[outa]", "-c:a", "libmp3lame", "-b:a", "192k", audioPath],
-          { timeout: 60_000 }
-        );
-        hasVoice = existsSync(audioPath);
-      }
-    } catch (mixErr) {
-      console.warn("[Fon Müzikli Miks Uyarısı]:", mixErr?.message || mixErr);
-    }
   }
 
   console.log(
-    `[2/4] [Stereo Broadcast Fon Müziği & Akıcı Ses Kanalı]: ${hasVoice ? "BAŞARILI" : "YEDEK MOD"}`
+    `[2/4] [Doğal Tok Seslendirme (Piper Baritone) & Stereo Fon Kanalı]: ${hasVoice ? "BAŞARILI" : "YEDEK MOD"}`
   );
+
+  // 2. Render Audio-Reactive 30 FPS Graph Motion + Moving Üretir Dino Frames
+  const dinoDataUri = await getDinoMascotDataUri();
+  for (let sIdx = 0; sIdx < totalScenes; sIdx++) {
+    const scene = slotData.scenes[sIdx];
+    const env = sceneEnvelopes[sIdx];
+    for (let f = 0; f < framesPerScene; f++) {
+      const sceneProgress = f / Math.max(1, framesPerScene - 1);
+      const voiceAmp = env && env[f] !== undefined ? env[f] : 0.32 + Math.abs(Math.sin(sceneProgress * Math.PI * 10)) * 0.45;
+      const svg = renderVerticalFrameSvg(scene, slotData.label, sIdx, totalScenes, sceneProgress, dinoDataUri, voiceAmp);
+      const framePath = path.join(framesDir, `frame-${String(frameCounter).padStart(4, "0")}.png`);
+      await sharp(Buffer.from(svg)).png({ compressionLevel: 5 }).toFile(framePath);
+      frameCounter++;
+    }
+  }
+
+  const coverPngPath = path.join(outDir, `uretir-cover-${slotData.slot}.png`);
+  const coverFrameIdx = String(Math.max(0, frameCounter - 4)).padStart(4, "0");
+  await fs.copyFile(path.join(framesDir, `frame-${coverFrameIdx}.png`), coverPngPath);
 
   let inputFramerate = (frameCounter / targetVideoDurationSec).toFixed(3);
   if (hasVoice && existsSync(audioPath)) {
@@ -1506,8 +1817,8 @@ async function renderAndPublishSlotData(slotData) {
       const m = String(stderr || "").match(/Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)/);
       if (m) {
         const durSec = Number(m[1]) * 3600 + Number(m[2]) * 60 + Number(m[3]);
-        if (durSec > 4) {
-          inputFramerate = Math.max(4.0, Math.min(15.0, frameCounter / durSec)).toFixed(3);
+        if (durSec > 3) {
+          inputFramerate = Math.max(3.5, Math.min(18.0, frameCounter / durSec)).toFixed(3);
         }
       }
     } catch {}
@@ -1665,10 +1976,12 @@ async function renderAndPublishSlotData(slotData) {
     console.log(`[4/4] ⛔ [İHLAL AJANI ENGELİ] %100 İHLAL YOKTUR onayı alınamadığı için yayın durduruldu:`, complianceChecks);
   } else {
     console.log(
-      `[4/4] ✅ "%100 İHLAL YOKTUR" onayı alındı -> Telegram (@uretirbot) ve Instagram (@uretirai) gönderimleri başlatılıyor...`
+      `[4/4] ✅ "%100 İHLAL YOKTUR" onayı alındı -> Sadece Telegram (@uretirbot) stok dağıtımı başlatılıyor...`
     );
     tgPublished = await sendToTelegram(videoBuilt ? videoPath : null, coverPngPath, slotData);
-    igPublished = await publishToInstagramReels(videoBuilt ? videoPath : null, coverPngPath, slotData);
+    if (process.argv.includes("--with-instagram")) {
+      igPublished = await publishToInstagramReels(videoBuilt ? videoPath : null, coverPngPath, slotData);
+    }
 
     publishedLedger.signatures[signatureKey] = Date.now();
     if (primaryTitleNorm) {
@@ -1993,7 +2306,7 @@ async function buildSeparateCategorySlotMap() {
           graphStartLabel: "Bölgesel Akış",
           graphEndLabel: "81 İl Tam Kapsam",
           graphTrend: "up",
-          speech: `Haber A İ Türkiye haritasında seksen bir ilin doğrulanmış sıcak gündemi yayında. Detaylar üretir nokta com'da.`,
+          speech: `Gündemi saatlerce kaydırmayı bırak! Ben Üretir Dino. Seksen bir ili akıllı saatimden taradım ve günün sıcak gelişmesini arkamdaki grafiğe yansıttım: ${freshNews.title}. Zaman kazanmak için üretir nokta com Haber A İ'ye göz at!`,
         },
       ],
     },
@@ -2030,7 +2343,7 @@ async function buildSeparateCategorySlotMap() {
           graphStartLabel: "Standart Kart: 0 TL",
           graphEndLabel: "PuanAI Seçimi: Maks Puan",
           graphTrend: "up",
-          speech: `Puan A İ'de banka kredi kartlarının en yüksek puan ve nakit iade kampanyaları vitrinde. Detaylar üretir nokta com'da.`,
+          speech: `Kasada kartını düz çekiyorsan zarardasın! Ben Üretir Dino. Arkamdaki grafikte gördüğün gibi doğru banka kampanyasıyla yüksek puan ve nakit iade kazanabilirsin: ${freshCampaign.title}. Harcamadan önce üretir nokta com Puan A İ'yi kontrol et!`,
         },
       ],
     },
@@ -2067,7 +2380,7 @@ async function buildSeparateCategorySlotMap() {
           graphStartLabel: `Tepe: ${dealHigh}`,
           graphEndLabel: `Dip: ${dealPrice}`,
           graphTrend: "down",
-          speech: `İndirim A İ'de üç yüz altmış günlük fiyat geçmişiyle doğrulanmış gerçek fırsat: ${dealTitle}, ${dealPrice}. Detaylar üretir nokta com'da.`,
+          speech: `Dur ve arkamdaki grafiğe dikkatle bak! Ben Üretir Dino. Akıllı saatimin radarı üç yüz altmış günlük fiyat geçmişini taradı ve gerçek dönem dibini yakaladı: ${dealTitle}, sadece ${dealPrice}. Sahte indirimlere kanma, üretir nokta com İndirim A İ ile bütçeni koru!`,
         },
       ],
     },
@@ -2104,7 +2417,7 @@ async function buildSeparateCategorySlotMap() {
           graphStartLabel: "Aylık Baz",
           graphEndLabel: "Canlı Kapanış",
           graphTrend: "up",
-          speech: `Finans A İ canlı piyasa masasında döviz, altın ve borsa referans verileri yayında. Detaylar üretir nokta com'da.`,
+          speech: `Piyasa nereye kırılıyor? Ben Üretir Dino! Akıllı saatimin hologram radarı döviz, gram altın ve Borsa İstanbul trendini arkamdaki canlı grafiğe çizdi: ${finansTitle}. Paranı enflasyona ezdirmemek için üretir nokta com Finans A İ'yi takip et!`,
         },
       ],
     },
@@ -2141,7 +2454,7 @@ async function buildSeparateCategorySlotMap() {
           graphStartLabel: "Bölge m² Ortalaması",
           graphEndLabel: "Emsal Altı Fırsatlar",
           graphTrend: "down",
-          speech: `Ev A İ'de bölge emsal ortalamasının altındaki konut ve ihale fırsatları yayında. Detaylar üretir nokta com'da.`,
+          speech: `Şişirilmiş konut ilanlarına kanma! Ben Üretir Dino. Bölge metrekare ortalamasını arkamdaki grafikte hesapladım ve emsal altı kelepir fırsatları yakaladım: ${freshProperty.title}. Doğru yatırım için üretir nokta com Ev A İ radarını kullan!`,
         },
       ],
     },
@@ -2178,7 +2491,7 @@ async function buildSeparateCategorySlotMap() {
           graphStartLabel: "Sıfır Liste Fiyatı",
           graphEndLabel: "Çoklu Platform Kıyas",
           graphTrend: "down",
-          speech: `Araba A İ'de sıfır liste fiyatına göre avantajlı araç fırsatları vitrinde. Detaylar üretir nokta com'da.`,
+          speech: `Sıfır liste fiyatının altında araç bulunur mu? Arkamdaki grafiğe bak! Ben Üretir Dino. Tüm ilan platformlarını kıyasladım ve piyasa altı fırsat araçları çıkardım: ${carTitle}. Araç alırken yanılmamak için üretir nokta com Araba A İ'ye gir!`,
         },
       ],
     },

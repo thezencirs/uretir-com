@@ -1089,17 +1089,74 @@ function renderVerticalFrameSvg(
 
 function normalizeTextForTurkishTts(rawText) {
   return String(rawText || "")
-    .replace(/https?:\/\/(www\.)?uretir\.com/gi, "üretir nokta com")
-    .replace(/www\.uretir\.com/gi, "üretir nokta com")
-    .replace(/uretir\.com/gi, "üretir nokta com")
-    .replace(/İndirimAI/gi, "İndirim A İ")
-    .replace(/HaberAI/gi, "Haber A İ")
-    .replace(/PuanAI/gi, "Puan A İ")
-    .replace(/FinansAI/gi, "Finans A İ")
-    .replace(/EvAI/gi, "Ev A İ")
-    .replace(/ArabaAI/gi, "Araba A İ")
-    .replace(/SporAI/gi, "Spor A İ")
-    .replace(/OyunAI/gi, "Oyun A İ")
+    // 1. Domain & file extensions (.com -> nokta kom, .md -> nokta em di)
+    .replace(/https?:\/\/(www\.)?uretir\.com/gi, "üretir nokta kom")
+    .replace(/www\.uretir\.com/gi, "üretir nokta kom")
+    .replace(/uretir\.com'da/gi, "üretir nokta komda")
+    .replace(/uretir\.com'dan/gi, "üretir nokta komdan")
+    .replace(/uretir\.com'a/gi, "üretir nokta koma")
+    .replace(/uretir\.com/gi, "üretir nokta kom")
+    .replace(/üretir\s+nokta\s+com'da/gi, "üretir nokta komda")
+    .replace(/üretir\s+nokta\s+com'dan/gi, "üretir nokta komdan")
+    .replace(/üretir\s+nokta\s+com'a/gi, "üretir nokta koma")
+    .replace(/üretir\s+nokta\s+com\b/gi, "üretir nokta kom")
+    .replace(/\.com'da\b/gi, " nokta komda")
+    .replace(/\.com'dan\b/gi, " nokta komdan")
+    .replace(/\.com'a\b/gi, " nokta koma")
+    .replace(/\.com\b/gi, " nokta kom")
+    .replace(/\bnokta\s+com'da\b/gi, "nokta komda")
+    .replace(/\bnokta\s+com\b/gi, "nokta kom")
+    .replace(/\bURETIR\.md\b/gi, "üretir nokta em di")
+    .replace(/\bSKILL\.md\b/gi, "skil nokta em di")
+    .replace(/\bCLAUDE\.md\b/gi, "klod nokta em di")
+    .replace(/\.md\b/gi, " nokta em di")
+    // 2. Üretir AI brand names & AI acronyms
+    .replace(/İndirimAI/gi, "İndirim Ey Ay")
+    .replace(/HaberAI/gi, "Haber Ey Ay")
+    .replace(/PuanAI/gi, "Puan Ey Ay")
+    .replace(/FinansAI/gi, "Finans Ey Ay")
+    .replace(/EvAI/gi, "Ev Ey Ay")
+    .replace(/ArabaAI/gi, "Araba Ey Ay")
+    .replace(/SporAI/gi, "Spor Ey Ay")
+    .replace(/OyunAI/gi, "Oyun Ey Ay")
+    .replace(/\bOpenAI\b/gi, "Opın Ey Ay")
+    .replace(/\bChatGPT\b/gi, "Çet Ci Pi Ti")
+    .replace(/\bAI\b/g, "Ey Ay")
+    // 3. Common English AI / developer terms -> Natural Turkish phonetics
+    .replace(/\bpre-tool\s+hook\b/gi, "pri tul huk")
+    .replace(/\bpre-tool\b/gi, "pri tul")
+    .replace(/\bpost-tool\b/gi, "post tul")
+    .replace(/\bhook'?larla\b/gi, "huklarla")
+    .replace(/\bhook'?lar\b/gi, "huklar")
+    .replace(/\bhook'?u\b/gi, "huku")
+    .replace(/\bhook'?un\b/gi, "hukun")
+    .replace(/\bhook\b/gi, "huk")
+    .replace(/\bskill'?ini\b/gi, "skilini")
+    .replace(/\bskill'?i\b/gi, "skili")
+    .replace(/\bskill'?e\b/gi, "skile")
+    .replace(/\bskill'?ler\b/gi, "skiller")
+    .replace(/\bskill\b/gi, "skil")
+    .replace(/\/?compact\b/gi, "kompakt")
+    .replace(/\/?clear\b/gi, "kliır")
+    .replace(/\/?plan\b/gi, "plan")
+    .replace(/\bcontext\s+window\b/gi, "kontekst vindov")
+    .replace(/\bcontext\b/gi, "kontekst")
+    .replace(/\btoken'?lar\b/gi, "tokınlar")
+    .replace(/\btoken'?ı\b/gi, "tokını")
+    .replace(/\btoken\b/gi, "tokın")
+    .replace(/\b200K\b/gi, "iki yüz ka")
+    .replace(/\bprompt'?u\b/gi, "promptu")
+    .replace(/\bprompt'?lar\b/gi, "promptlar")
+    .replace(/\bprompt\b/gi, "prompt")
+    .replace(/\bSonnet\b/gi, "Sonet")
+    .replace(/\bClaude\s+Code\b/gi, "Klod Kod")
+    .replace(/\bClaude\b/gi, "Klod")
+    .replace(/\bsubagent\b/gi, "sab eycınt")
+    .replace(/\bagent\b/gi, "eycınt")
+    .replace(/\bworkflow\b/gi, "vörkflov")
+    .replace(/\bGitHub\s+Actions\b/gi, "Git Hab Ekşıns")
+    .replace(/\bGitHub\b/gi, "Git Hab")
+    // 4. Numbers, symbols, currency
     .replace(/BIST\s*100/gi, "Borsa İstanbul yüz")
     .replace(/m²/g, " metrekare ")
     .replace(/-%(\d+)/g, "yüzde $1 indirim ")
@@ -1214,11 +1271,11 @@ async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path, numFrames 
               "--model",
               onnxPath,
               "--length-scale",
-              "1.20",
+              "1.06",
               "--noise-scale",
-              "0.58",
+              "0.60",
               "--noise-w-scale",
-              "0.72",
+              "0.75",
               "--sentence-silence",
               "0.42",
               "--output_file",
@@ -1243,11 +1300,11 @@ async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path, numFrames 
                 "--model",
                 onnxPath,
                 "--length-scale",
-                "1.20",
+                "1.06",
                 "--noise-scale",
-                "0.58",
+                "0.60",
                 "--noise-w-scale",
-                "0.72",
+                "0.75",
                 "--sentence-silence",
                 "0.42",
                 "--output_file",
@@ -1264,8 +1321,8 @@ async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path, numFrames 
       if (wavBuilt && existsSync(rawWavPath)) {
         const wavStats = await extractWavEnvelope(rawWavPath, numFrames);
         const envelope = wavStats?.envelope || null;
-        const durationSec = wavStats?.rawDurationSec ? wavStats.rawDurationSec / (0.94 * 0.98) : 3.6;
-        // Apply Broadcast Baritone Vocal Mastering Filter (Deep chest resonance at 115Hz, clarity at 3.2kHz, radio compressor, calm optimum ~118 WPM pace)
+        const durationSec = wavStats?.rawDurationSec ? wavStats.rawDurationSec / (0.97 * 0.96) : 3.6;
+        // Apply Broadcast Baritone Vocal Mastering Filter (Natural crisp articulation, warm 120Hz chest resonance, zero phase-smear)
         await execFileAsync(
           ffmpegBin,
           [
@@ -1273,7 +1330,7 @@ async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path, numFrames 
             "-i",
             rawWavPath,
             "-af",
-            "asetrate=22050*0.94,aresample=44100,atempo=0.98,highpass=f=65,equalizer=f=115:t=q:w=1.1:g=4.2,equalizer=f=280:t=q:w=1.4:g=-2.2,equalizer=f=3200:t=q:w=1.2:g=2.5,acompressor=threshold=-18dB:ratio=3.2:attack=15:release=220:makeup=2.5,extrastereo=m=1.18,alimiter=limit=0.95",
+            "asetrate=22050*0.97,aresample=44100,atempo=0.96,highpass=f=70,equalizer=f=120:t=q:w=1.2:g=3.0,equalizer=f=300:t=q:w=1.5:g=-1.8,equalizer=f=3400:t=q:w=1.2:g=2.2,acompressor=threshold=-16dB:ratio=2.6:attack=18:release=200:makeup=2.0,alimiter=limit=0.95",
             "-c:a",
             "libmp3lame",
             "-b:a",
@@ -2116,7 +2173,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "Günlük hızlı işlerde Sonnet,",
           subLine2: "derin mimaride Opus kullan.",
           subHighlight: "Opus kullan.",
-          speech: "Bir: Doğru modeli seç. Günlük hızlı üretimde Sonnet, derin mimaride Opus kullan.",
+          speech: "Önce doğru modeli seç. Günlük hızlı üretimde Sonnet, derin mimaride Opus kullan.",
         },
         {
           ...ep1Base,
@@ -2127,7 +2184,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "İzin modunu açık tut,",
           subLine2: "her adımda onay alarak ilerlesin.",
           subHighlight: "onay alarak",
-          speech: "İki: İzin modunu ayarla. Model her kritik adımda senden onay alarak güvenle ilerlesin.",
+          speech: "İzin modunu açık tut ki model her kritik adımda senden onay alarak güvenle ilerlesin.",
         },
         {
           ...ep1Base,
@@ -2138,7 +2195,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "Kurallarını bir kez yaz,",
           subLine2: "model her sohbette seni tanısın.",
           subHighlight: "seni tanısın.",
-          speech: "Üç: Kalıcı hafıza dosyası oluştur. Kurallarını bir kez yaz, model her sohbette seni tanısın.",
+          speech: "Proje hafızası için kurallarını URETIR.md dosyasına bir kez yaz, model her sohbette seni tanısın.",
         },
         {
           ...ep1Base,
@@ -2149,7 +2206,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "Bağlam yüzde yetmişi geçince",
           subLine2: "sohbeti özetleyip tazele.",
           subHighlight: "yüzde yetmişi",
-          speech: "Dört: Bağlam çubuğunu izle. Doluluk yüzde yetmişi geçince sohbeti özetleyip tazele.",
+          speech: "Context çubuğunu takip et. Doluluk yüzde yetmişi geçince sohbeti özetleyip tazele.",
         },
         {
           ...ep1Base,
@@ -2160,7 +2217,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "Tekrarlayan işini skill yap,",
           subLine2: "tüm rehberler uretir.com'da.",
           subHighlight: "uretir.com'da.",
-          speech: "Beş: Tekrarlayan işini skill yap. Tüm yapay zeka eğitimleri üretir nokta com adresinde.",
+          speech: "Ve tekrarlayan işini skill yap. Tüm yapay zeka eğitimleri uretir.com adresinde.",
         },
       ],
     },
@@ -2192,7 +2249,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "Model seni dinlemiyor değil,",
           subLine2: "dolan bağlamda kuralı unutuyor.",
           subHighlight: "bağlamda",
-          speech: "Model seni dinlemiyor değil. Bağlam penceresi doldukça ilk verdiğin talimatları unutuyor.",
+          speech: "Model seni dinlemiyor değil. Context penceresi doldukça ilk verdiğin talimatları unutuyor.",
         },
         {
           ...ep2Base,
@@ -2203,7 +2260,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "Daha ilk mesajı yazmadan",
           subLine2: "sistem araçları yer kaplar.",
           subHighlight: "sistem araçları",
-          speech: "Bir: Daha ilk mesajı yazmadan, sistem ve araç tanımları hafızanın bir kısmını doldurur.",
+          speech: "Daha ilk mesajı yazmadan, sistem ve araç tanımları hafızanın bir kısmını doldurur.",
         },
         {
           ...ep2Base,
@@ -2214,7 +2271,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "Okunan her büyük dosya",
           subLine2: "aktif pencereyi hızla şişirir.",
           subHighlight: "hızla şişirir.",
-          speech: "İki: Sohbette okuttuğun her büyük dosya, aktif hafıza penceresini hızla şişirir.",
+          speech: "Sohbette okuttuğun her büyük dosya, iki yüz ka token penceresini hızla şişirir.",
         },
         {
           ...ep2Base,
@@ -2225,7 +2282,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "Yüzde yetmişe ulaştığında",
           subLine2: "compact ile geçmişi özetle.",
           subHighlight: "compact ile",
-          speech: "Üç: Doluluk yüzde yetmişe ulaştığında, compact komutuyla kararları koruyup geçmişi özetle.",
+          speech: "Doluluk yüzde yetmişe ulaştığında, compact komutuyla kararları koruyup geçmişi özetle.",
         },
         {
           ...ep2Base,
@@ -2236,7 +2293,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "Yeni bir göreve geçerken",
           subLine2: "clear ile tertemiz sayfa aç.",
           subHighlight: "tertemiz sayfa",
-          speech: "Dört: Tamamen farklı bir göreve geçerken, eski sohbeti uzatma, tertemiz bir sayfa aç.",
+          speech: "Farklı bir göreve geçerken eski sohbeti uzatma, clear komutuyla tertemiz bir sayfa aç.",
         },
         {
           ...ep2Base,
@@ -2247,7 +2304,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "Kritik kuralı sohbete değil,",
           subLine2: "kalıcı dosyaya yaz: uretir.com",
           subHighlight: "uretir.com",
-          speech: "Beş: Kritik kuralları sohbete değil, kalıcı kural dosyasına yaz. Detaylar üretir nokta com'da.",
+          speech: "Kritik kuralları sohbete değil, kalıcı kural dosyasına yaz. Detaylar uretir.com'da.",
         },
       ],
     },
@@ -2290,7 +2347,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "Nasıl yazacağını anlatma,",
           subLine2: "istediğin son çıktıyı tanımla.",
           subHighlight: "son çıktıyı",
-          speech: "Bir: Kodu nasıl yazacağını anlatma, ulaşmak istediğin son çıktıyı net olarak tanımla.",
+          speech: "Kodu nasıl yazacağını anlatma, ulaşmak istediğin son çıktıyı net olarak tanımla.",
         },
         {
           ...ep3Base,
@@ -2301,7 +2358,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "Değişmemesi gereken alanları",
           subLine2: "baştan kırmızı çizgiyle belirt.",
           subHighlight: "kırmızı çizgiyle",
-          speech: "İki: Sistemde bozulmaması ve dokunulmaması gereken alanları baştan net şekilde belirt.",
+          speech: "Sistemde bozulmaması ve dokunulmaması gereken alanları baştan net şekilde belirt.",
         },
         {
           ...ep3Base,
@@ -2312,7 +2369,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "Uzun açıklamalar yerine",
           subLine2: "tek bir somut örnek göster.",
           subHighlight: "somut örnek",
-          speech: "Üç: Uzun paragraflar yazmak yerine, beklediğin formatı gösteren tek bir somut örnek ver.",
+          speech: "Uzun paragraflar yazmak yerine, beklediğin formatı gösteren tek bir somut örnek ver.",
         },
         {
           ...ep3Base,
@@ -2323,7 +2380,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "Doğrudan üretime geçme,",
           subLine2: "önce plan isteyip onayla.",
           subHighlight: "plan isteyip",
-          speech: "Dört: Büyük işlerde doğrudan üretime geçme. Önce plan iste, mimariyi gör ve onayla.",
+          speech: "Büyük işlerde doğrudan üretime geçme. Önce plan iste, mimariyi gör ve onayla.",
         },
         {
           ...ep3Base,
@@ -2334,7 +2391,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "Test kriterini baştan ver,",
           subLine2: "rehberler uretir.com'da.",
           subHighlight: "uretir.com'da.",
-          speech: "Beş: Doğrulama kriterini baştan ver ki model işini test etsin. Rehberler üretir nokta com'da.",
+          speech: "Doğrulama kriterini baştan ver ki model işini test etsin. Rehberler uretir.com'da.",
         },
       ],
     },
@@ -2371,7 +2428,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "Genel stil tercihlerini",
           subLine2: "kural dosyasında tut.",
           subHighlight: "kural dosyasında",
-          speech: "Bir: Genel yazım stili ve mimari tercihler için kural dosyası harika bir rehberdir.",
+          speech: "Genel yazım stili ve mimari tercihler için kural dosyası harika bir rehberdir.",
         },
         {
           ...ep4Base,
@@ -2382,7 +2439,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "Kritik işlem öncesinde",
           subLine2: "pre-tool hook devreye girer.",
           subHighlight: "pre-tool hook",
-          speech: "İki: Asla atlanmaması gereken adımlarda, araç çalışmadan önce devreye giren hook kullan.",
+          speech: "Asla atlanmaması gereken adımlarda, araç çalışmadan önce devreye giren pre-tool hook kullan.",
         },
         {
           ...ep4Base,
@@ -2393,7 +2450,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "Dosya kaydedildiği anda",
           subLine2: "otomatik kontrol çalışsın.",
           subHighlight: "otomatik kontrol",
-          speech: "Üç: Her dosya değişikliğinden sonra otomatik format ve test kontrolünü koda bağla.",
+          speech: "Her dosya değişikliğinden sonra otomatik format ve test kontrolünü koda bağla.",
         },
         {
           ...ep4Base,
@@ -2404,7 +2461,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "Tehlikeli sistem komutlarını",
           subLine2: "otomatik olarak engelle.",
           subHighlight: "otomatik olarak",
-          speech: "Dört: Canlı sistemi bozabilecek tehlikeli komutları hook ile otomatik olarak engelle.",
+          speech: "Canlı sistemi bozabilecek tehlikeli komutları hook ile otomatik olarak engelle.",
         },
         {
           ...ep4Base,
@@ -2415,7 +2472,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "Hızı kuralla birleştir,",
           subLine2: "sistemler uretir.com'da.",
           subHighlight: "uretir.com'da.",
-          speech: "Beş: Yapay zeka hızını kesin kurallarla birleştir. Tüm sistemler üretir nokta com adresinde.",
+          speech: "Yapay zeka hızını kesin kurallarla birleştir. Tüm sistemler uretir.com adresinde.",
         },
       ],
     },
@@ -2441,7 +2498,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "Her işi tek ajana yaptırma,",
           subLine2: "alt ajanlarla on kat hızlan.",
           subHighlight: "on kat hızlan.",
-          speech: "Her işi tek bir ajana yaptırma. Görevleri alt ajanlara bölerek on kat hızlan.",
+          speech: "Her işi tek bir ajana yaptırma. Görevleri subagent sistemine bölerek on kat hızlan.",
         },
         {
           ...ep5Base,
@@ -2452,7 +2509,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "Derin dosya taramasını",
           subLine2: "araştırmacı ajana devret.",
           subHighlight: "araştırmacı ajana",
-          speech: "Bir: Yüzlerce dosyayı tarama işini araştırmacı alt ajana devret.",
+          speech: "Yüzlerce dosyayı tarama işini araştırmacı alt ajana devret.",
         },
         {
           ...ep5Base,
@@ -2463,7 +2520,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "Üretilen çıktıyı bağımsız",
           subLine2: "inceleme ajanına denetlet.",
           subHighlight: "inceleme ajanına",
-          speech: "İki: Üretilen çıktıyı, ikinci bir denetim ajanına bağımsız gözle kontrol ettir.",
+          speech: "Üretilen çıktıyı, ikinci bir denetim ajanına bağımsız gözle kontrol ettir.",
         },
         {
           ...ep5Base,
@@ -2474,7 +2531,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "Uzun test kayıtlarını",
           subLine2: "alt ajan arka planda çözsün.",
           subHighlight: "arka planda",
-          speech: "Üç: Uzun test çıktılarını ana ekrana taşıma, test ajanı arka planda doğrulama yapsın.",
+          speech: "Uzun test çıktılarını ana ekrana taşıma, test ajanı arka planda doğrulama yapsın.",
         },
         {
           ...ep5Base,
@@ -2485,7 +2542,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "Ana ekrana sadece",
           subLine2: "net sonuç özeti gelsin.",
           subHighlight: "net sonuç özeti",
-          speech: "Dört: Böylece ana sohbetin hiç şişmez, ekrana sadece net sonuç özeti gelir.",
+          speech: "Böylece ana context penceren hiç şişmez, ekrana sadece net sonuç özeti gelir.",
         },
         {
           ...ep5Base,
@@ -2496,7 +2553,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "Kendi ajan ekibini kur,",
           subLine2: "merkez uretir.com'da.",
           subHighlight: "uretir.com'da.",
-          speech: "Beş: Kendi yapay zeka ajan ekibini kur. Rehberler üretir nokta com adresinde.",
+          speech: "Kendi yapay zeka ajan ekibini kur. Rehberler uretir.com adresinde.",
         },
       ],
     },
@@ -2533,7 +2590,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "Sürekli tekrar ettiğin",
           subLine2: "iş akışını tespit et.",
           subHighlight: "iş akışını",
-          speech: "Bir: Her hafta tekrar tekrar yaptığın standart bir iş akışını tespit et.",
+          speech: "Her hafta tekrar tekrar yaptığın standart bir workflow sürecini tespit et.",
         },
         {
           ...ep6Base,
@@ -2544,7 +2601,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "Kuralları ve adımları",
           subLine2: "SKILL.md dosyasına yaz.",
           subHighlight: "SKILL.md",
-          speech: "İki: O işin tüm adımlarını ve kalite kurallarını bir skill dosyasına açıkça yaz.",
+          speech: "O işin tüm adımlarını ve kalite kurallarını SKILL.md dosyasına açıkça yaz.",
         },
         {
           ...ep6Base,
@@ -2555,7 +2612,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "En beğendiğin örnek çıktıyı",
           subLine2: "klasöre referans olarak koy.",
           subHighlight: "referans olarak",
-          speech: "Üç: En beğendiğin örnek çıktıyı klasöre referans olarak ekle ki kalite hiç düşmesin.",
+          speech: "En beğendiğin örnek çıktıyı klasöre referans olarak ekle ki kalite hiç düşmesin.",
         },
         {
           ...ep6Base,
@@ -2566,7 +2623,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "Artık uzun açıklama yok,",
           subLine2: "tek komutla anında çalıştır.",
           subHighlight: "tek komutla",
-          speech: "Dört: Artık uzun açıklamalar yazmadan, tek bir komutla o işi saniyeler içinde çalıştır.",
+          speech: "Artık uzun açıklamalar yazmadan, tek bir komutla o işi saniyeler içinde çalıştır.",
         },
         {
           ...ep6Base,
@@ -2577,7 +2634,7 @@ async function buildSeparateCategorySlotMap() {
           subLine1: "Kendi üretim kütüphaneni kur,",
           subLine2: "altyapı uretir.com'da.",
           subHighlight: "uretir.com'da.",
-          speech: "Beş: Her hafta yeni bir beceri ekleyerek sistemini büyüt. Altyapı üretir nokta com'da.",
+          speech: "Her hafta yeni bir skill ekleyerek sistemini büyüt. Altyapı uretir.com'da.",
         },
       ],
     },

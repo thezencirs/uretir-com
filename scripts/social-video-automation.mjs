@@ -964,9 +964,9 @@ function renderVerticalFrameSvg(
 
     <!-- Natural Warm Moss & Emerald Studio Backdrop for the Middle Stage -->
     <linearGradient id="stageNaturalBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#193325" />
-      <stop offset="48%" stop-color="#1d3b2a" />
-      <stop offset="100%" stop-color="#0d1f16" />
+      <stop offset="0%" stop-color="${scene.stageBg1 || "#193325"}" />
+      <stop offset="48%" stop-color="${scene.stageBg2 || "#1d3b2a"}" />
+      <stop offset="100%" stop-color="${scene.stageBg3 || "#0d1f16"}" />
     </linearGradient>
 
     <!-- Warm Natural Key-Light Glow Behind Üretir Dino -->
@@ -2046,6 +2046,9 @@ async function buildSeparateCategorySlotMap() {
     cardSub: "Hafıza taşmadan bağlamı yönet.",
     moduleTag: "02 • Bağlam • üretir",
     accent: "#34d399",
+    stageBg1: "#132e26",
+    stageBg2: "#18382d",
+    stageBg3: "#091914",
     rows: [
       { num: "01", label: "Sistem ve araç yükü" },
       { num: "02", label: "Dosya okuma birikimi" },
@@ -2065,6 +2068,9 @@ async function buildSeparateCategorySlotMap() {
     cardSub: "Hedefi ve sınırları net tanımla.",
     moduleTag: "03 • Prompt • üretir",
     accent: "#c8f560",
+    stageBg1: "#20341c",
+    stageBg2: "#263e21",
+    stageBg3: "#0f1a0d",
     rows: [
       { num: "01", label: "Hedef çıktıyı tanımla" },
       { num: "02", label: "Dokunulmaz sınırları çiz" },
@@ -2083,7 +2089,10 @@ async function buildSeparateCategorySlotMap() {
     cardTitle: "Tavsiye mi, kural mı?",
     cardSub: "Kritik adımı şansa bırakma.",
     moduleTag: "04 • Hook • üretir",
-    accent: "#34d399",
+    accent: "#2dd4bf",
+    stageBg1: "#112d30",
+    stageBg2: "#15383b",
+    stageBg3: "#081719",
     rows: [
       { num: "01", label: "Tavsiye: Kural dosyası" },
       { num: "02", label: "Zorunlu: Pre-tool hook" },
@@ -2102,7 +2111,10 @@ async function buildSeparateCategorySlotMap() {
     cardTitle: "Araştırmayı devret.",
     cardSub: "Ana ekrana sadece özet gelsin.",
     moduleTag: "05 • Ajanlar • üretir",
-    accent: "#c8f560",
+    accent: "#d9f99d",
+    stageBg1: "#263018",
+    stageBg2: "#2e3a1d",
+    stageBg3: "#12180b",
     rows: [
       { num: "01", label: "Araştırmacı alt ajan" },
       { num: "02", label: "Kod inceleme ajanı" },
@@ -2122,6 +2134,9 @@ async function buildSeparateCategorySlotMap() {
     cardSub: "Tekrarlayan işini komuta dönüştür.",
     moduleTag: "06 • Skill • üretir",
     accent: "#34d399",
+    stageBg1: "#143022",
+    stageBg2: "#193c2a",
+    stageBg3: "#091811",
     rows: [
       { num: "01", label: "Tekrarlayan işi seç" },
       { num: "02", label: "SKILL.md şablonu yaz" },

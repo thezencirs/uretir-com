@@ -809,11 +809,24 @@ function buildSmoothBezierPath(points) {
   return d;
 }
 
+function renderHighlightedSubtitleLine(lineText, highlightText, accentColor = "#c8f560") {
+  const raw = String(lineText || "");
+  const hl = String(highlightText || "").trim();
+  if (!hl) return escapeXml(raw);
+  const idx = raw.toLocaleLowerCase("tr-TR").indexOf(hl.toLocaleLowerCase("tr-TR"));
+  if (idx === -1) return escapeXml(raw);
+  const before = raw.slice(0, idx);
+  const match = raw.slice(idx, idx + hl.length);
+  const after = raw.slice(idx + hl.length);
+  return `${escapeXml(before)}<tspan fill="${accentColor}" font-weight="900">${escapeXml(match)}</tspan>${escapeXml(after)}`;
+}
+
 /**
- * Jurassic "Üretir Dino" Vlog + Full-Screen Graph Motion + Voice-Reactive Studio Composer
- * - 1080x1920 Full-Bleed Real Photograph + Multi-Layer Animated "Graph Motion" Backdrop (Candlesticks, Bezier Ribbons, Cyber-Grid, Radar)
- * - Active, Walking, Voice-Reactive 3D Pixar "Üretir Dino" mascot (hat, AR glasses scanline, giant hologram smartwatch, neon sneakers)
- * - Live hologram projection beam & data packets from Dino's giant smartwatch onto the animated data curves
+ * Pure-Black (#000000) Niche "Üretir Dino • Yapay Zeka Akademisi" Studio Composer
+ * Inspired by @avenoxyz minimal dark educational format, customized with:
+ * - Zone 1 (Top, y=0..595): Pure pitch-black (#000000) canvas + subtle dot matrix + 3-line centered hook (White + Neon-Lime #c8f560 + Muted Question)
+ * - Zone 2 (Middle, y=596..1280): Widescreen "üretir. • Yapay Zeka Akademisi" interactive studio with a natural warm forest-emerald backdrop, floating depth-of-field geometric bokeh, 5-step interactive checklist with animated hand cursor & live mini-graphs on the left, and voice-reactive 3D Üretir Dino on the right + bottom CLI status bar
+ * - Zone 3 (Bottom, y=1280..1920): Pure pitch-black (#000000) canvas + large, clean 2-line sentence-by-sentence synced dynamic subtitles with Neon-Lime keyword highlight
  */
 function renderVerticalFrameSvg(
   scene,
@@ -824,301 +837,253 @@ function renderVerticalFrameSvg(
   dinoDataUri = null,
   voiceAmp = 0.35
 ) {
-  const titleLines = wrapLines(scene.title, 25, 3);
-  const subLines = wrapLines(scene.sub, 40, 2);
-  const dinoSpeechLines = getDinoVlogComment(scene.kicker, slotLabel);
-  const uretirFikriText = getUretirFikriTip(scene.kicker, slotLabel);
-  const barWidth = Math.max(48, Math.round(968 * progressRatio));
-  const cardSpring = easeOutBack(Math.min(1, progressRatio * 3.8));
-  const cardOffsetY = Math.round((1 - cardSpring) * 26);
+  const accent = scene.accent || "#c8f560";
+  const hookLine1 = scene.hookLine1 || wrapLines(scene.title, 22, 2)[0] || "Yapay zekaya sıfırdan";
+  const hookLine2 = scene.hookLine2 || wrapLines(scene.title, 22, 2)[1] || "başlarken 5 altın adım";
+  const hookLine3 = scene.hookLine3 || scene.sub || "Hangisini atladın?";
 
-  // Full-bleed 1080x1920 Ken Burns + Handheld Vlog camera motion
-  const kenBurnsScale = (1.04 + progressRatio * 0.08).toFixed(4);
-  const kenBurnsShiftX = Math.round(-38 * progressRatio + Math.sin(progressRatio * Math.PI * 2) * 10);
-  const kenBurnsShiftY = Math.round(-46 * progressRatio + Math.cos(progressRatio * Math.PI * 2) * 8);
+  const moduleNum = scene.moduleNum || "01";
+  const moduleKicker = scene.moduleKicker || "BURADAN BAŞLA";
+  const cardTitle = scene.cardTitle || "İlk gün, beş karar.";
+  const cardSub = scene.cardSub || "Gerisini ürettikçe öğrenirsin.";
+  const moduleTag = scene.moduleTag || `${moduleNum} • İlk gün • üretir`;
 
-  // Active 30 FPS + Voice-Reactive Mascot Rigging (Walk-in, Stride, Hop, Squash-Stretch, Tilt)
-  const walkInProgress = easeOutBack(Math.min(1, progressRatio * 4.2));
-  const walkInOffsetX = Math.round((1 - walkInProgress) * 195);
-  const dinoStrideX = Math.round(Math.sin(progressRatio * Math.PI * 6) * 24 + walkInOffsetX);
-  const dinoBobY = Math.round(
-    -Math.abs(Math.sin(progressRatio * Math.PI * 8)) * 26 - voiceAmp * 18
+  const defaultRows = [
+    { num: "01", label: "Doğru modeli seç" },
+    { num: "02", label: "İzin ve sınır modu" },
+    { num: "03", label: "URETIR.md hafızası" },
+    { num: "04", label: "Bağlam (context) çubuğu" },
+    { num: "05", label: "İlk otomasyon skill'i" },
+  ];
+  const rows = Array.isArray(scene.rows) && scene.rows.length === 5 ? scene.rows : defaultRows;
+
+  // Determine which step (0 = intro, 1..5 = checklist steps) is currently active
+  const activeStep =
+    typeof scene.stepIndex === "number"
+      ? scene.stepIndex
+      : totalScenes > 1
+        ? Math.min(5, sceneIdx)
+        : Math.min(5, Math.floor(progressRatio * 6));
+
+  const isClickingNow = activeStep >= 1 && progressRatio >= 0.22 && progressRatio <= 0.48;
+  const clickCompletedInCurrent = activeStep >= 1 && progressRatio > 0.32;
+  const completedCount = Math.min(
+    5,
+    Math.max(0, activeStep - 1 + (clickCompletedInCurrent ? 1 : 0))
   );
-  const dinoTilt = (
-    Math.sin(progressRatio * Math.PI * 6) * 4.2 +
-    (voiceAmp - 0.3) * 3.2
-  ).toFixed(2);
-  const dinoScaleX = (1 - voiceAmp * 0.028 + Math.cos(progressRatio * Math.PI * 8) * 0.018).toFixed(3);
-  const dinoScaleY = (1 + voiceAmp * 0.055 - Math.cos(progressRatio * Math.PI * 8) * 0.022).toFixed(3);
 
-  const watchPulseRadius = Math.round(24 + voiceAmp * 26 + Math.abs(Math.sin(progressRatio * Math.PI * 8)) * 18);
-  const watchRotation = Math.round(progressRatio * 540);
-  const holoBeamOpacity = Math.min(0.55, 0.24 + voiceAmp * 0.22 + Math.abs(Math.sin(progressRatio * Math.PI * 6)) * 0.12).toFixed(2);
-  const glassesScanY = Math.round(168 + Math.abs(Math.sin(progressRatio * Math.PI * 6)) * 42);
+  // Subtle, natural studio motion for Üretir Dino (grounded on the studio floor, gentle breathing & voice-synced nod)
+  const dinoBreatheY = Math.round(Math.sin(progressRatio * Math.PI * 2) * 4 - voiceAmp * 9);
+  const dinoShiftX = Math.round(Math.sin(progressRatio * Math.PI * 2) * 5);
+  const dinoTilt = (Math.sin(progressRatio * Math.PI * 2) * 1.4 + (voiceAmp - 0.3) * 1.8).toFixed(2);
+  const dinoScaleX = (1 - voiceAmp * 0.012).toFixed(3);
+  const dinoScaleY = (1 + voiceAmp * 0.024).toFixed(3);
 
-  // Background Graph Motion: Upper Candlestick & Bezier Ribbon Band (y: 190..545)
-  const isDownTrend = scene.graphTrend === "down";
-  const numCandles = 16;
-  const bgCandleElements = [];
-  const bgUpperRibbonPts = [];
-  for (let i = 0; i < numCandles; i++) {
-    const cx = 74 + i * 62;
-    const reveal = easeOutBack(Math.min(1, Math.max(0, progressRatio * 2.2 - i * 0.065)));
-    const wave = Math.sin(i * 0.65 + progressRatio * Math.PI * 4) * 34;
-    const trendShift = isDownTrend ? i * 8.5 : (numCandles - 1 - i) * 8.5;
-    const baseCenterY = 265 + trendShift + wave;
-    const bodyHalf = Math.round((16 + (i % 3) * 10 + voiceAmp * 14) * reveal);
-    const wickHalf = Math.round(bodyHalf * 1.65 + 10);
-    const isBull = isDownTrend ? i % 3 === 0 : i % 3 !== 0;
-    const cColor = isBull ? "#34d399" : scene.accent;
-    bgUpperRibbonPts.push([cx, baseCenterY]);
-    if (reveal > 0.05) {
-      bgCandleElements.push(
-        `<line x1="${cx}" y1="${(baseCenterY - wickHalf).toFixed(1)}" x2="${cx}" y2="${(baseCenterY + wickHalf).toFixed(1)}" stroke="${cColor}" stroke-width="2.5" stroke-opacity="${(0.42 * reveal).toFixed(2)}" />`,
-        `<rect x="${cx - 14}" y="${(baseCenterY - bodyHalf).toFixed(1)}" width="28" height="${Math.max(6, bodyHalf * 2)}" rx="5" fill="${cColor}" fill-opacity="${(0.32 * reveal).toFixed(2)}" stroke="${cColor}" stroke-width="1.5" stroke-opacity="${(0.62 * reveal).toFixed(2)}" />`
+  // Floating natural studio bokeh planes in the stage background
+  const floatShift1 = Math.round(Math.sin(progressRatio * Math.PI * 2) * 12);
+  const floatShift2 = Math.round(Math.cos(progressRatio * Math.PI * 2) * 10);
+  const watchPulse = Math.round(18 + voiceAmp * 14);
+
+  // Render the 5 interactive checklist rows on the left side of the stage (x=34..586, y=804..1174)
+  const rowElements = [];
+  for (let r = 0; r < 5; r++) {
+    const stepNum = r + 1;
+    const ry = 804 + r * 74;
+    const rowData = rows[r];
+    const isCurrent = stepNum === activeStep;
+    const isDone = stepNum < activeStep || ( isCurrent && clickCompletedInCurrent );
+
+    const rowBg = isCurrent ? "#12261c" : isDone ? "#0d1b14" : "#09120e";
+    const rowStroke = isCurrent ? accent : isDone ? "#284737" : "#182920";
+    const rowStrokeW = isCurrent ? "2.2" : "1.2";
+    const numColor = isCurrent || isDone ? accent : "#52525b";
+    const labelColor = isCurrent ? "#ffffff" : isDone ? "#e4e4e7" : "#71717a";
+
+    // Mini animated graph bars inside each row (x=358..406)
+    const miniBars = [];
+    for (let b = 0; b < 4; b++) {
+      const bx = 362 + b * 11;
+      const baseH = isDone ? 14 + ((r + b) % 3) * 7 : isCurrent ? 10 + Math.round(voiceAmp * 18) : 6;
+      const by = ry + 46 - baseH;
+      const bColor = isCurrent || isDone ? accent : "#27272a";
+      const bOp = isCurrent ? "0.95" : isDone ? "0.65" : "0.35";
+      miniBars.push(
+        `<rect x="${bx}" y="${by}" width="6" height="${baseH}" rx="2" fill="${bColor}" fill-opacity="${bOp}" />`
       );
     }
-  }
-  const bgUpperSplinePath = buildSmoothBezierPath(bgUpperRibbonPts);
-  const leadCandleIdx = Math.min(numCandles - 1, Math.max(1, Math.floor(progressRatio * (numCandles - 1))));
-  const [leadBgX, leadBgY] = bgUpperRibbonPts[leadCandleIdx] || [540, 360];
 
-  // Background Graph Motion: Lower Audio-Reactive & Trend Bars behind Dino & Chart (y: 1120..1730)
-  const bgLowerBars = [];
-  const bgLowerRibbonPts = [];
-  for (let i = 0; i < 18; i++) {
-    const bx = 68 + i * 55;
-    const barWave = Math.abs(Math.sin(i * 0.55 + progressRatio * Math.PI * 6));
-    const barH = Math.round(70 + barWave * 180 + voiceAmp * 95 * ((i % 2) + 0.5));
-    const by = 1735 - barH;
-    bgLowerRibbonPts.push([bx + 16, by - 18]);
-    bgLowerBars.push(
-      `<rect x="${bx}" y="${by}" width="32" height="${barH}" rx="8" fill="#00f5d4" fill-opacity="0.11" stroke="#00f5d4" stroke-opacity="0.24" stroke-width="1" />`
+    // Right interactive button pill ([✓] İşaretle)
+    const btnBg = isDone ? "#193325" : isCurrent ? "#162b1f" : "#0c1611";
+    const btnStroke = isDone || isCurrent ? accent : "#22352b";
+    const btnText = isDone ? "✓  Tamam" : isCurrent ? "•  İşaretle" : "○  İşaretle";
+    const btnTextColor = isDone ? accent : isCurrent ? "#ffffff" : "#52525b";
+
+    rowElements.push(`
+    <g>
+      <rect x="34" y="${ry}" width="552" height="64" rx="12" fill="${rowBg}" fill-opacity="0.94" stroke="${rowStroke}" stroke-width="${rowStrokeW}" />
+      <text x="56" y="${ry + 39}" fill="${numColor}" font-family="Consolas, 'Courier New', monospace" font-size="19" font-weight="700">${escapeXml(rowData.num || `0${stepNum}`)}</text>
+      <text x="98" y="${ry + 39}" fill="${labelColor}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="21" font-weight="700">${escapeXml(rowData.label)}</text>
+      ${miniBars.join("\n      ")}
+      <rect x="424" y="${ry + 13}" width="146" height="38" rx="9" fill="${btnBg}" stroke="${btnStroke}" stroke-width="1.4" />
+      <text x="497" y="${ry + 38}" text-anchor="middle" fill="${btnTextColor}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="16" font-weight="800">${btnText}</text>
+    </g>`);
+  }
+
+  // Animated Pointer Cursor position (smoothly glides down the checklist as steps advance)
+  const prevStep = Math.max(1, activeStep - 1);
+  const targetStep = Math.max(1, activeStep);
+  const moveT = Math.min(1, progressRatio * 3.5);
+  const cursorStepFloat = activeStep <= 1 ? 1 : prevStep + (targetStep - prevStep) * moveT;
+  const cursorY = Math.round(804 + (cursorStepFloat - 1) * 74 + 36);
+  const cursorX = activeStep === 0 ? 520 : 532;
+  const cursorScale = isClickingNow ? "0.88" : "1.0";
+
+  // Bottom Status Bar Segmented Progress Blocks (5 blocks)
+  const progressBlocks = [];
+  for (let p = 0; p < 5; p++) {
+    const px = 318 + p * 22;
+    const filled = p < completedCount;
+    progressBlocks.push(
+      `<rect x="${px}" y="1249" width="16" height="16" rx="3" fill="${filled ? accent : "#27272a"}" />`
     );
   }
-  const bgLowerSplinePath = buildSmoothBezierPath(bgLowerRibbonPts);
 
-  // Left-side Foreground Hologram Chart Coordinates (x: 88..544, y: 1445..1605)
-  const pts = isDownTrend
-    ? [
-        [88, 1455],
-        [164, 1462],
-        [240, 1452],
-        [316, 1504],
-        [392, 1552],
-        [468, 1586],
-        [544, 1598],
-      ]
-    : [
-        [88, 1596],
-        [164, 1574],
-        [240, 1548],
-        [316, 1518],
-        [392, 1492],
-        [468, 1468],
-        [544, 1446],
-      ];
-
-  const activeIdx = Math.min(
-    pts.length - 1,
-    Math.max(1, Math.floor(progressRatio * (pts.length - 1) + 0.85))
-  );
-  const visiblePts = pts.slice(0, activeIdx + 1).map(([x, y], i) => [
-    x,
-    Math.round(y + Math.sin(progressRatio * Math.PI * 6 + i) * 4),
-  ]);
-  const fgSplinePath = buildSmoothBezierPath(visiblePts);
-  const polylinePoints = visiblePts.map(([x, y]) => `${x},${y}`).join(" ");
-  const areaPoints = `${visiblePts[0][0]},1618 ${polylinePoints} ${visiblePts[visiblePts.length - 1][0]},1618`;
-  const [dotX, dotY] = visiblePts[visiblePts.length - 1];
-
-  // Smartwatch World Coordinates (follows Dino's active stride & bounce!)
-  const watchWorldX = 575 + dinoStrideX + 182;
-  const watchWorldY = 1088 + dinoBobY + 445;
-  const packetT = (progressRatio * 4) % 1;
-  const packetX = Math.round(watchWorldX + (dotX - watchWorldX) * packetT);
-  const packetY = Math.round(watchWorldY + (dotY - watchWorldY) * packetT);
-  const gridOffset = Math.round((progressRatio * 120) % 60);
+  // Dynamic Bottom 2-Line Subtitle on Pure Black (y=1450..1530)
+  const fallbackSubLines = wrapLines(scene.speech || scene.sub || scene.title, 28, 2);
+  const subLine1 = scene.subLine1 || fallbackSubLines[0] || "";
+  const subLine2 = scene.subLine2 || fallbackSubLines[1] || "";
+  const subHighlight = scene.subHighlight || "";
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920">
   <defs>
-    <linearGradient id="topScrim" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#020806" stop-opacity="0.82" />
-      <stop offset="18%" stop-color="#03100b" stop-opacity="0.46" />
-      <stop offset="50%" stop-color="#03100b" stop-opacity="0.52" />
-      <stop offset="70%" stop-color="#020906" stop-opacity="0.88" />
-      <stop offset="100%" stop-color="#010503" stop-opacity="0.98" />
+    <!-- Subtle micro-dot pattern on pure black top & bottom zones -->
+    <pattern id="pureBlackDots" width="26" height="26" patternUnits="userSpaceOnUse">
+      <circle cx="13" cy="13" r="1.15" fill="#18181b" />
+    </pattern>
+
+    <!-- Natural Warm Moss & Emerald Studio Backdrop for the Middle Stage -->
+    <linearGradient id="stageNaturalBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#193325" />
+      <stop offset="48%" stop-color="#1d3b2a" />
+      <stop offset="100%" stop-color="#0d1f16" />
     </linearGradient>
-    <linearGradient id="chartAreaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="${scene.accent}" stop-opacity="0.52" />
-      <stop offset="100%" stop-color="${scene.accent}" stop-opacity="0.02" />
-    </linearGradient>
-    <linearGradient id="holoBeamGrad" x1="100%" y1="50%" x2="0%" y2="50%">
-      <stop offset="0%" stop-color="#00f5d4" stop-opacity="${holoBeamOpacity}" />
-      <stop offset="55%" stop-color="${scene.accent}" stop-opacity="0.18" />
-      <stop offset="100%" stop-color="${scene.accent}" stop-opacity="0.03" />
+
+    <!-- Warm Natural Key-Light Glow Behind Üretir Dino -->
+    <radialGradient id="dinoStudioGlow" cx="76%" cy="52%" r="48%">
+      <stop offset="0%" stop-color="${accent}" stop-opacity="0.28" />
+      <stop offset="55%" stop-color="#34d399" stop-opacity="0.10" />
+      <stop offset="100%" stop-color="#0a1711" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Grounded Studio Floor Gradient -->
+    <linearGradient id="stageFloorGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0c1c14" stop-opacity="0.85" />
+      <stop offset="100%" stop-color="#060f0b" stop-opacity="0.98" />
     </linearGradient>
   </defs>
 
-  <!-- 1. 1080x1920 Full-Bleed Real Photograph Background -->
-  <rect width="1080" height="1920" fill="${scene.bg1 || "#06110b"}" />
-  ${
-    scene.photoDataUri
-      ? `<g transform="translate(${kenBurnsShiftX}, ${kenBurnsShiftY}) scale(${kenBurnsScale})">
-    <image href="${scene.photoDataUri}" x="0" y="0" width="1080" height="1920" preserveAspectRatio="xMidYMid slice" />
-  </g>`
-      : ""
-  }
-  <!-- Jurassic Cyber Studio Scrim -->
-  <rect width="1080" height="1920" fill="url(#topScrim)" />
+  <!-- ========================================================================= -->
+  <!-- 1. PURE PITCH-BLACK (#000000) 9:16 MASTER CANVAS                          -->
+  <!-- ========================================================================= -->
+  <rect width="1080" height="1920" fill="#000000" />
+  <rect x="0" y="0" width="1080" height="596" fill="url(#pureBlackDots)" />
+  <rect x="0" y="1280" width="1080" height="640" fill="url(#pureBlackDots)" />
 
-  <!-- 2. FULL-SCREEN BACKGROUND "GRAPH MOTION" LAYER (Scrolling Cyber-Grid + Candlesticks + Spline Ribbons) -->
-  <g opacity="0.88">
-    <!-- Scrolling Isometric Cyber Grid -->
-    <line x1="0" y1="${220 + gridOffset}" x2="1080" y2="${220 + gridOffset}" stroke="#00f5d4" stroke-opacity="0.12" stroke-dasharray="8,8" />
-    <line x1="0" y1="${340 + gridOffset}" x2="1080" y2="${340 + gridOffset}" stroke="#00f5d4" stroke-opacity="0.12" stroke-dasharray="8,8" />
-    <line x1="0" y1="${460 + gridOffset}" x2="1080" y2="${460 + gridOffset}" stroke="#00f5d4" stroke-opacity="0.12" stroke-dasharray="8,8" />
-    <line x1="${180 + gridOffset}" y1="150" x2="${180 + gridOffset}" y2="1760" stroke="#34d399" stroke-opacity="0.08" />
-    <line x1="${540 + gridOffset}" y1="150" x2="${540 + gridOffset}" y2="1760" stroke="#34d399" stroke-opacity="0.08" />
-    <line x1="${900 - gridOffset}" y1="150" x2="${900 - gridOffset}" y2="1760" stroke="#34d399" stroke-opacity="0.08" />
+  <!-- ========================================================================= -->
+  <!-- 2. TOP ZONE (y=240..520): CENTERED 3-LINE EDITORIAL HOOK ON PURE BLACK    -->
+  <!-- ========================================================================= -->
+  <text x="540" y="332" text-anchor="middle" fill="#f5f5f4" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="54" font-weight="800" letter-spacing="-0.8">${escapeXml(hookLine1)}</text>
+  <text x="540" y="404" text-anchor="middle" fill="${accent}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="54" font-weight="800" letter-spacing="-0.8">${escapeXml(hookLine2)}</text>
+  <text x="540" y="472" text-anchor="middle" fill="#8a8a8e" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="29" font-weight="500">${escapeXml(hookLine3)}</text>
 
-    <!-- Rotating Background Jurassic Radar HUD -->
-    <g transform="translate(540, 380) rotate(${watchRotation})">
-      <circle cx="0" cy="0" r="210" fill="none" stroke="#00f5d4" stroke-opacity="0.16" stroke-width="2" stroke-dasharray="28,18" />
-      <circle cx="0" cy="0" r="145" fill="none" stroke="${scene.accent}" stroke-opacity="0.18" stroke-width="1.5" stroke-dasharray="12,14" />
-      <line x1="0" y1="0" x2="210" y2="0" stroke="#00f5d4" stroke-opacity="0.32" stroke-width="3" />
-    </g>
+  <!-- ========================================================================= -->
+  <!-- 3. MIDDLE ZONE (y=596..1280): WIDESCREEN INTERACTIVE LEARNING STAGE       -->
+  <!-- ========================================================================= -->
+  <!-- Stage Top Window Header Bar -->
+  <rect x="0" y="596" width="1080" height="40" fill="#070a08" />
+  <line x1="0" y1="596" x2="1080" y2="596" stroke="#1c2620" stroke-width="1.5" />
+  <line x1="0" y1="636" x2="1080" y2="636" stroke="#1c2620" stroke-width="1.5" />
+  <text x="34" y="622" fill="#f5f5f4" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="16" font-weight="800">üretir<tspan fill="${accent}">.</tspan> <tspan fill="#71717a" font-weight="500">• Yapay Zeka Akademisi</tspan></text>
+  <text x="1046" y="622" text-anchor="end" fill="#71717a" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="15" font-weight="500">Bağımsız eğitim serisi • uretir.com</text>
 
-    <!-- Upper Background Animated Candlesticks & Moving Average Ribbon -->
-    ${bgCandleElements.join("\n    ")}
-    <path d="${bgUpperSplinePath}" fill="none" stroke="#00f5d4" stroke-width="5" stroke-opacity="0.68" stroke-linecap="round" />
-    <circle cx="${leadBgX.toFixed(1)}" cy="${leadBgY.toFixed(1)}" r="16" fill="#00f5d4" fill-opacity="0.32" />
-    <circle cx="${leadBgX.toFixed(1)}" cy="${leadBgY.toFixed(1)}" r="7" fill="#ffffff" stroke="#00f5d4" stroke-width="3" />
+  <!-- Main Stage Natural Emerald Studio Backdrop (y=636..1200) -->
+  <rect x="0" y="636" width="1080" height="564" fill="url(#stageNaturalBg)" />
+  <rect x="0" y="636" width="1080" height="564" fill="url(#dinoStudioGlow)" />
 
-    <!-- Live Floating Graph Motion Telemetry Badge -->
-    <g transform="translate(${Math.min(720, Math.max(64, leadBgX - 110)).toFixed(0)}, ${(leadBgY - 64).toFixed(0)})">
-      <rect x="0" y="0" width="268" height="44" rx="22" fill="#04140e" fill-opacity="0.88" stroke="#00f5d4" stroke-width="1.8" />
-      <text x="134" y="29" text-anchor="middle" fill="#00f5d4" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="900">⚡ CANLI GRAPH MOTION</text>
-    </g>
-
-    <!-- Lower Background Voice-Reactive Histogram Bars & Trend Wave (Behind Üretir Dino) -->
-    ${bgLowerBars.join("\n    ")}
-    <path d="${bgLowerSplinePath}" fill="none" stroke="${scene.accent}" stroke-width="4" stroke-opacity="0.45" stroke-dasharray="14,8" />
+  <!-- Natural Depth-of-Field Geometric Bokeh Shapes Behind Üretir Dino (like @avenoxyz) -->
+  <g opacity="0.85">
+    <rect x="${630 + floatShift1}" y="${675 + floatShift2}" width="92" height="92" rx="14" transform="rotate(-14 ${676 + floatShift1} ${721 + floatShift2})" fill="${accent}" fill-opacity="0.11" />
+    <rect x="${925 - floatShift2}" y="${705 + floatShift1}" width="110" height="78" rx="14" transform="rotate(18 ${980 - floatShift2} ${744 + floatShift1})" fill="#34d399" fill-opacity="0.10" />
+    <circle cx="${665 - floatShift1}" cy="${960 + floatShift2}" r="46" fill="${accent}" fill-opacity="0.08" />
+    <rect x="${945 + floatShift1}" y="${920 - floatShift2}" width="84" height="120" rx="16" transform="rotate(-8 ${987 + floatShift1} ${980 - floatShift2})" fill="${accent}" fill-opacity="0.09" />
   </g>
 
-  <!-- 3. Top Jurassic Vlog Masthead -->
-  <text x="56" y="118" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="60" font-weight="900">üretir<tspan fill="${scene.accent}">.</tspan></text>
-  <rect x="275" y="72" width="236" height="54" rx="27" fill="#062819" fill-opacity="0.92" stroke="#34d399" stroke-width="2" />
-  <text x="393" y="107" text-anchor="middle" fill="#a7f3d0" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="900">🦖 DİNO MOTION</text>
+  <!-- Studio Floor Plane (y=1112..1200) -->
+  <rect x="0" y="1112" width="1080" height="88" fill="url(#stageFloorGrad)" />
+  <line x1="0" y1="1112" x2="1080" y2="1112" stroke="${accent}" stroke-opacity="0.16" stroke-width="1.2" />
 
-  <rect x="530" y="68" width="494" height="62" rx="31" fill="#050d09" fill-opacity="0.84" stroke="${scene.accent}" stroke-opacity="0.9" stroke-width="2" />
-  <circle cx="566" cy="99" r="9" fill="${scene.accent}" />
-  <text x="588" y="107" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="800" letter-spacing="0.5">${escapeXml(scene.photoTag || "DOĞRULANMIŞ KAYNAK")}</text>
+  <!-- Left Panel: Lesson Intro Card (x=34..586, y=654..790) -->
+  <rect x="34" y="654" width="552" height="136" rx="14" fill="#09130e" fill-opacity="0.94" stroke="#243b2f" stroke-width="1.5" />
+  <text x="58" y="688" fill="${accent}" font-family="Consolas, 'Courier New', monospace" font-size="15" font-weight="800" letter-spacing="1.4">${escapeXml(moduleNum)}  ■  ${escapeXml(moduleKicker)}</text>
+  <text x="58" y="734" fill="#f5f5f4" font-family="Georgia, 'Times New Roman', serif" font-size="34" font-weight="700">${escapeXml(cardTitle)}</text>
+  <text x="58" y="768" fill="#9ca3af" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="18" font-weight="500">${escapeXml(cardSub)}</text>
 
-  <!-- 4. "ÜRETİR FİKİRLERİ" Smart Productivity / Money Insight Banner -->
-  <g transform="translate(0, ${Math.round(cardOffsetY * 0.6)})">
-    <rect x="56" y="568" width="968" height="66" rx="33" fill="#051c14" fill-opacity="0.94" stroke="#34d399" stroke-width="2.2" />
-    <circle cx="96" cy="601" r="16" fill="#34d399" />
-    <text x="96" y="608" text-anchor="middle" fill="#04120a" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="900">💡</text>
-    <text x="126" y="609" fill="#ecfdf5" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="800">${escapeXml(uretirFikriText)}</text>
-  </g>
+  <!-- Left Panel: 5 Interactive Checklist Rows (x=34..586, y=804..1174) -->
+  ${rowElements.join("\n  ")}
 
-  <!-- 5. Middle Showcase Glass Card (Pointed at by Üretir Dino!) -->
-  <g transform="translate(0, ${cardOffsetY})">
-    <rect x="56" y="652" width="968" height="434" rx="32" fill="#06100c" fill-opacity="0.88" stroke="#ffffff" stroke-opacity="0.28" stroke-width="1.8" />
-    <text x="94" y="700" fill="${scene.accent}" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="900" letter-spacing="1.0">${escapeXml(scene.kicker)}</text>
-
-    ${titleLines
-      .map(
-        (line, idx) =>
-          `<text x="94" y="${754 + idx * 56}" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="46" font-weight="900">${escapeXml(line)}</text>`
-      )
-      .join("\n    ")}
-
-    ${subLines
-      .map(
-        (line, idx) =>
-          `<text x="94" y="${920 + idx * 34}" fill="#d1fae5" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="600">${escapeXml(line)}</text>`
-      )
-      .join("\n    ")}
-
-    <!-- Verified Price / Metric Highlight Bar -->
-    <rect x="94" y="976" width="892" height="90" rx="22" fill="${scene.accent}" />
-    <text x="540" y="1035" text-anchor="middle" fill="#04120a" font-family="Segoe UI, Arial, sans-serif" font-size="42" font-weight="900">${escapeXml(scene.highlight)}</text>
-  </g>
-
-  <!-- 6. 3D Hologram Projection Cone & Laser Packet shooting from Dino's Giant Smartwatch -->
-  <polygon points="${watchWorldX},${watchWorldY} 584,1320 584,1688" fill="url(#holoBeamGrad)" />
-  <line x1="${watchWorldX}" y1="${watchWorldY}" x2="${dotX}" y2="${dotY}" stroke="#00f5d4" stroke-width="3.5" stroke-dasharray="12,6" stroke-opacity="0.88" />
-  <circle cx="${packetX}" cy="${packetY}" r="9" fill="#ffffff" stroke="#00f5d4" stroke-width="4" />
-
-  <!-- 7. Left Upper: Üretir Dino Voice-Synced Speech Bubble -->
-  <rect x="56" y="1112" width="528" height="182" rx="26" fill="#071912" fill-opacity="0.94" stroke="#34d399" stroke-opacity="0.9" stroke-width="2.2" />
-  <polygon points="584,1180 ${618 + Math.round(dinoStrideX * 0.4)},${1202 + dinoBobY} 584,1224" fill="#071912" stroke="#34d399" stroke-width="2" />
-  <text x="84" y="1154" fill="#34d399" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="900" letter-spacing="0.8">🦖 ÜRETİR DİNO · TOK SESLİ ANALİZ</text>
-  <!-- Voice-Reactive Equalizer Bars in Speech Bubble Header -->
-  <rect x="488" y="${1136 - Math.round(voiceAmp * 14)}" width="7" height="${12 + Math.round(voiceAmp * 18)}" rx="3" fill="#00f5d4" />
-  <rect x="500" y="${1132 - Math.round(voiceAmp * 20)}" width="7" height="${16 + Math.round(voiceAmp * 26)}" rx="3" fill="#34d399" />
-  <rect x="512" y="${1138 - Math.round(voiceAmp * 12)}" width="7" height="${10 + Math.round(voiceAmp * 16)}" rx="3" fill="#c8f560" />
-  ${dinoSpeechLines
-    .map(
-      (line, idx) =>
-        `<text x="84" y="${1194 + idx * 34}" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="700">${escapeXml(line)}</text>`
-    )
-    .join("\n  ")}
-
-  <!-- 8. Left Lower: Hologram Smartwatch Live Graph Motion Card -->
-  <rect x="56" y="1314" width="528" height="374" rx="28" fill="#040d09" fill-opacity="0.92" stroke="#00f5d4" stroke-opacity="0.78" stroke-width="2.2" />
-  <text x="84" y="1356" fill="#00f5d4" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="900" letter-spacing="0.7">⌚ HOLO-SAAT GRAPH MOTION</text>
-  <text x="84" y="1386" fill="#cbd5e1" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">${escapeXml(scene.statLeft)}</text>
-
-  <line x1="84" y1="1450" x2="552" y2="1450" stroke="#ffffff" stroke-opacity="0.12" stroke-dasharray="6,6" />
-  <line x1="84" y1="1535" x2="552" y2="1535" stroke="#ffffff" stroke-opacity="0.12" stroke-dasharray="6,6" />
-  <line x1="84" y1="1618" x2="552" y2="1618" stroke="#ffffff" stroke-opacity="0.24" />
-
-  <polygon points="${areaPoints}" fill="url(#chartAreaGrad)" />
-  <path d="${fgSplinePath}" fill="none" stroke="${scene.accent}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
-  ${visiblePts
-    .map(
-      ([x, y]) =>
-        `<circle cx="${x}" cy="${y}" r="6.5" fill="#04100b" stroke="${scene.accent}" stroke-width="4" />`
-    )
-    .join("\n  ")}
-  <circle cx="${dotX}" cy="${dotY}" r="${14 + Math.round(voiceAmp * 10)}" fill="#00f5d4" fill-opacity="0.42" />
-  <circle cx="${dotX}" cy="${dotY}" r="7.5" fill="#00f5d4" />
-
-  <text x="84" y="1658" fill="#94a3b8" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">${escapeXml(scene.graphStartLabel || "Önceki")}</text>
-  <text x="552" y="1658" text-anchor="end" fill="${scene.accent}" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="900">${escapeXml(scene.graphEndLabel || "Güncel Dip")}</text>
-
-  <!-- 9. Right Foreground: Actively Moving, Voice-Synced 3D Pixar "Üretir Dino" Mascot -->
-  <ellipse cx="${825 + dinoStrideX}" cy="1768" rx="${175 - Math.round(Math.abs(dinoBobY) * 1.2)}" ry="${24 + Math.round(voiceAmp * 8)}" fill="#00f5d4" fill-opacity="0.28" />
-  <ellipse cx="${825 + dinoStrideX}" cy="1768" rx="${110 + Math.round(voiceAmp * 45)}" ry="12" fill="none" stroke="#c8f560" stroke-width="2.5" stroke-opacity="0.65" />
-  <g transform="translate(${575 + dinoStrideX}, ${1088 + dinoBobY}) rotate(${dinoTilt}, 245, 360) translate(245, 680) scale(${dinoScaleX}, ${dinoScaleY}) translate(-245, -680)">
+  <!-- Animated Hand / Pointer Cursor Clicking the Active Step -->
+  <g transform="translate(${cursorX}, ${cursorY}) scale(${cursorScale})">
     ${
-      dinoDataUri
-        ? `<image href="${dinoDataUri}" x="0" y="0" width="485" height="695" preserveAspectRatio="xMidYMid meet" />`
+      isClickingNow
+        ? `<circle cx="0" cy="0" r="22" fill="none" stroke="${accent}" stroke-width="2.5" stroke-opacity="0.85" />`
         : ""
     }
-    <!-- Animated AR Smart-Glasses Laser Scanline on Dino's Visor -->
-    <line x1="158" y1="${glassesScanY}" x2="328" y2="${glassesScanY}" stroke="#00f5d4" stroke-width="3" stroke-opacity="0.65" />
-    <!-- Rotating Hologram Smartwatch Reticle & Pulse Rings on Dino's Wrist -->
-    <g transform="translate(182, 445) rotate(${watchRotation})">
-      <circle cx="0" cy="0" r="${watchPulseRadius}" fill="none" stroke="#00f5d4" stroke-width="3.5" stroke-dasharray="14,8" stroke-opacity="0.88" />
-      <circle cx="0" cy="0" r="${Math.round(watchPulseRadius * 0.65)}" fill="none" stroke="#c8f560" stroke-width="2.5" stroke-dasharray="8,6" stroke-opacity="0.78" />
-    </g>
-    <circle cx="182" cy="445" r="11" fill="#00f5d4" fill-opacity="0.95" />
+    <path d="M 0,0 L 0,24 L 6,19 L 11,29 L 16,27 L 11,17 L 19,17 Z" fill="#ffffff" stroke="#090d0b" stroke-width="2.2" stroke-linejoin="round" />
   </g>
 
-  <!-- 10. Progress Timeline Bar -->
-  <rect x="56" y="1788" width="968" height="8" rx="4" fill="#ffffff" fill-opacity="0.18" />
-  <rect x="56" y="1788" width="${barWidth}" height="8" rx="4" fill="${scene.accent}" />
+  <!-- Right Panel: 3D "Üretir Dino" Mascot Standing Naturally in the Studio (x=615..1055, y=646..1186) -->
+  <ellipse cx="${836 + dinoShiftX}" cy="1174" rx="138" ry="18" fill="#020604" fill-opacity="0.68" />
+  <ellipse cx="${836 + dinoShiftX}" cy="1174" rx="${92 + Math.round(voiceAmp * 24)}" ry="9" fill="none" stroke="${accent}" stroke-width="1.8" stroke-opacity="0.42" />
+  <g transform="translate(${622 + dinoShiftX}, ${644 + dinoBreatheY}) rotate(${dinoTilt}, 215, 270) translate(215, 520) scale(${dinoScaleX}, ${dinoScaleY}) translate(-215, -520)">
+    ${
+      dinoDataUri
+        ? `<image href="${dinoDataUri}" x="0" y="0" width="430" height="545" preserveAspectRatio="xMidYMid meet" />`
+        : ""
+    }
+    <!-- Subtle Smart-Watch Pulse on Dino's Wrist -->
+    <circle cx="162" cy="348" r="${watchPulse}" fill="none" stroke="${accent}" stroke-width="2.2" stroke-dasharray="8,6" stroke-opacity="0.72" />
+    <circle cx="162" cy="348" r="6" fill="${accent}" fill-opacity="0.9" />
+  </g>
 
-  <!-- 11. Editorial Footer -->
-  <text x="56" y="1846" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="36" font-weight="900">${escapeXml(scene.statRight?.startsWith("uretir.com") ? scene.statRight : "www.uretir.com")}</text>
-  <text x="56" y="1884" fill="#a7f3d0" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">🦖 Üretir Dino Graph Motion · Doğrulanmış Veri &amp; Fırsat Merkezi</text>
-  <text x="1024" y="1846" text-anchor="end" fill="${scene.accent}" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="900">@uretirai</text>
-  <text x="1024" y="1884" text-anchor="end" fill="#34d399" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">Telegram: @uretirbot</text>
+  <!-- Stage Bottom Terminal Prompt Bar (y=1200..1238) -->
+  <rect x="0" y="1200" width="1080" height="38" fill="#080b09" />
+  <line x1="0" y1="1200" x2="1080" y2="1200" stroke="#1a261f" stroke-width="1.2" />
+  <text x="34" y="1225" fill="#71717a" font-family="Consolas, 'Courier New', monospace" font-size="16"><tspan fill="${accent}" font-weight="700">&gt;</tspan> Bölüm menüsü için <tspan fill="#d4d4d8">/</tspan> yaz</text>
+  <text x="1046" y="1225" text-anchor="end" fill="#71717a" font-family="Consolas, 'Courier New', monospace" font-size="15">[/] bölümler</text>
+
+  <!-- Stage Bottom Progress & Shortcuts Bar (y=1238..1280) -->
+  <rect x="0" y="1238" width="1080" height="42" fill="#050706" />
+  <line x1="0" y1="1238" x2="1080" y2="1238" stroke="#141e18" stroke-width="1.2" />
+  <line x1="0" y1="1280" x2="1080" y2="1280" stroke="#1c2620" stroke-width="1.5" />
+  <rect x="34" y="1250" width="14" height="14" rx="3" fill="${accent}" />
+  <text x="58" y="1264" fill="#e4e4e7" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="16" font-weight="700">${escapeXml(moduleTag)}</text>
+  ${progressBlocks.join("\n  ")}
+  <text x="438" y="1264" fill="#a1a1aa" font-family="Consolas, 'Courier New', monospace" font-size="16" font-weight="700">${completedCount}/5</text>
+  <text x="1046" y="1264" text-anchor="end" fill="#71717a" font-family="Consolas, 'Courier New', monospace" font-size="15">[M] film   [N] notlar   [S] kaynak   [R] sıfırla</text>
+
+  <!-- ========================================================================= -->
+  <!-- 4. BOTTOM ZONE (y=1280..1920): SYNCED DYNAMIC SUBTITLES ON PURE BLACK     -->
+  <!-- ========================================================================= -->
+  ${
+    subLine2
+      ? `<text x="540" y="1464" text-anchor="middle" fill="#f5f5f4" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="45" font-weight="800" letter-spacing="-0.4">${renderHighlightedSubtitleLine(subLine1, subHighlight, accent)}</text>
+  <text x="540" y="1526" text-anchor="middle" fill="#f5f5f4" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="45" font-weight="800" letter-spacing="-0.4">${renderHighlightedSubtitleLine(subLine2, subHighlight, accent)}</text>`
+      : `<text x="540" y="1494" text-anchor="middle" fill="#f5f5f4" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="45" font-weight="800" letter-spacing="-0.4">${renderHighlightedSubtitleLine(subLine1, subHighlight, accent)}</text>`
+  }
+
+  <!-- Minimal Understated Brand Footer on Pure Black -->
+  <text x="540" y="1842" text-anchor="middle" fill="#3f3f46" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="20" font-weight="600" letter-spacing="0.5">uretir.com  •  Yapay Zeka ve Üretim Ekosistemi</text>
 </svg>`;
 }
 
@@ -1153,6 +1118,7 @@ async function extractWavEnvelope(wavPath, numFrames = 48) {
     const buf = await fs.readFile(wavPath);
     if (buf.length <= 44) return null;
     const pcmLen = Math.floor((buf.length - 44) / 2);
+    const rawDurationSec = pcmLen / 22050;
     const samplesPerFrame = Math.max(1, Math.floor(pcmLen / numFrames));
     const rmsArr = [];
     let maxRms = 0.01;
@@ -1170,7 +1136,10 @@ async function extractWavEnvelope(wavPath, numFrames = 48) {
       if (rms > maxRms) maxRms = rms;
       rmsArr.push(rms);
     }
-    return rmsArr.map((r) => Math.min(1.0, Math.max(0.12, r / maxRms)));
+    return {
+      envelope: rmsArr.map((r) => Math.min(1.0, Math.max(0.12, r / maxRms))),
+      rawDurationSec,
+    };
   } catch {
     return null;
   }
@@ -1245,13 +1214,13 @@ async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path, numFrames 
               "--model",
               onnxPath,
               "--length-scale",
-              "1.22",
+              "1.20",
               "--noise-scale",
               "0.58",
               "--noise-w-scale",
               "0.72",
               "--sentence-silence",
-              "0.48",
+              "0.42",
               "--output_file",
               rawWavPath,
               cleanText,
@@ -1274,13 +1243,13 @@ async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path, numFrames 
                 "--model",
                 onnxPath,
                 "--length-scale",
-                "1.22",
+                "1.20",
                 "--noise-scale",
                 "0.58",
                 "--noise-w-scale",
                 "0.72",
                 "--sentence-silence",
-                "0.48",
+                "0.42",
                 "--output_file",
                 rawWavPath,
                 cleanText,
@@ -1293,8 +1262,10 @@ async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path, numFrames 
       }
 
       if (wavBuilt && existsSync(rawWavPath)) {
-        const envelope = await extractWavEnvelope(rawWavPath, numFrames);
-        // Apply Broadcast Baritone Vocal Mastering Filter (Deep chest resonance at 115Hz, clarity at 3.2kHz, radio compressor, calm optimum ~115 WPM pace)
+        const wavStats = await extractWavEnvelope(rawWavPath, numFrames);
+        const envelope = wavStats?.envelope || null;
+        const durationSec = wavStats?.rawDurationSec ? wavStats.rawDurationSec / (0.94 * 0.98) : 3.6;
+        // Apply Broadcast Baritone Vocal Mastering Filter (Deep chest resonance at 115Hz, clarity at 3.2kHz, radio compressor, calm optimum ~118 WPM pace)
         await execFileAsync(
           ffmpegBin,
           [
@@ -1313,7 +1284,7 @@ async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path, numFrames 
         );
         await fs.unlink(rawWavPath).catch(() => {});
         if (existsSync(outMp3Path)) {
-          return { ok: true, envelope };
+          return { ok: true, envelope, durationSec };
         }
       }
     }
@@ -1338,11 +1309,11 @@ async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path, numFrames 
         await fs.copyFile(audioFilePath, outMp3Path);
         await fs.unlink(audioFilePath).catch(() => {});
       }
-      if (existsSync(outMp3Path)) return { ok: true, envelope: null };
+      if (existsSync(outMp3Path)) return { ok: true, envelope: null, durationSec: 3.6 };
     }
   } catch {}
 
-  return { ok: false, envelope: null };
+  return { ok: false, envelope: null, durationSec: 3.5 };
 }
 
 async function resolveTelegramTargets() {
@@ -1450,17 +1421,17 @@ async function sendToTelegram(videoPath, coverPngPath, slotData) {
   const replyMarkup = JSON.stringify({
     inline_keyboard: [
       [
-        { text: "📦 6'lı Üretir Stok Üret", callback_data: "cat:all" },
-        { text: "🚀 Fikirden Ürüne", callback_data: "cat:indirimai" },
+        { text: "📦 6'lı Akademi Stok Üret", callback_data: "cat:all" },
+        { text: "01 🦖 İlk Gün 5 Adım", callback_data: "cat:haberai" },
       ],
       [
-        { text: "🦖 Derin Odak", callback_data: "cat:haberai" },
-        { text: "⚡ AI Kaldıracı", callback_data: "cat:puanai" },
+        { text: "02 🧠 Bağlam Penceresi", callback_data: "cat:puanai" },
+        { text: "03 🎯 Prompt Mimarisi", callback_data: "cat:indirimai" },
       ],
       [
-        { text: "📊 Veri Zekası", callback_data: "cat:finansai" },
-        { text: "⚙️ Dijital Varlık", callback_data: "cat:evai" },
-        { text: "📈 Bileşik Gelişim", callback_data: "cat:arabaai" },
+        { text: "04 🔒 Kural vs Hook", callback_data: "cat:finansai" },
+        { text: "05 ⚡ Çoklu Ajanlar", callback_data: "cat:evai" },
+        { text: "06 🛠️ Skill Mimarisi", callback_data: "cat:arabaai" },
       ],
       [
         { text: "🌐 uretir.com", url: slotData.targetUrl || "https://www.uretir.com" },
@@ -1645,20 +1616,23 @@ async function renderAndPublishSlotData(slotData) {
   await fs.mkdir(outDir, { recursive: true });
 
   console.log(`\n======================================================`);
-  console.log(`[Üretir Editorial Studio] ${slotData.label} hazırlanıyor...`);
+  console.log(`[Üretir Yapay Zeka Akademisi • Pure Black Studio] ${slotData.label} hazırlanıyor...`);
   console.log(`======================================================`);
 
   const framesDir = path.join(outDir, "frames");
   await fs.mkdir(framesDir, { recursive: true });
 
-  // Pre-fetch real photographs for every scene (NEVER publish without a real photo!)
-  for (const scene of slotData.scenes) {
-    if (!scene.photoDataUri) {
-      scene.photoDataUri = await prepareScenePhotoDataUri(scene);
+  // Only fetch external photos if not in pure-black niche academy mode
+  if (!slotData.pureBlackMode) {
+    for (const scene of slotData.scenes) {
+      if (!scene.photoDataUri) {
+        scene.photoDataUri = await prepareScenePhotoDataUri(scene);
+      }
     }
   }
 
-  const framesPerScene = slotData.scenes.length >= 6 ? 24 : slotData.scenes.length === 1 ? 54 : 36;
+  const baseFps = 10;
+  const defaultFramesPerScene = slotData.scenes.length >= 6 ? 34 : slotData.scenes.length === 1 ? 54 : 36;
   const totalScenes = slotData.scenes.length;
   let frameCounter = 0;
 
@@ -1671,61 +1645,54 @@ async function renderAndPublishSlotData(slotData) {
   } catch {}
 
   const ffmpegBin = resolveFfmpegBinary();
-  const fullSpeech = slotData.scenes.map((s) => s.speech).join(" · [FON] · ");
+  const fullSpeech = slotData.scenes.map((s) => s.speech).join(" · ");
   const audioPath = path.join(outDir, `uretir-voice-${slotData.slot}.mp3`);
   let hasVoice = false;
   const hasNonEmptySpeech = slotData.scenes.some((s) => s.speech && String(s.speech).trim().length > 0);
   const useTts = !process.argv.includes("--no-tts") && process.env.WITH_TTS !== "0" && hasNonEmptySpeech;
-  const targetVideoDurationSec = totalScenes >= 6 ? totalScenes * 2.5 : totalScenes === 1 ? 8.5 : totalScenes * 3.8;
   const sceneEnvelopes = [];
+  const sceneFrameCounts = new Array(totalScenes).fill(defaultFramesPerScene);
+  let totalAudioDurationSec = totalScenes * 3.6;
 
-  // 1. Synthesize Deep Baritone Turkish Voiceover FIRST & Extract Per-Frame Audio Envelope for Dino + Graph Motion Sync
+  // 1. Synthesize Deep Baritone Turkish Voiceover FIRST & Compute Exact Per-Scene Frame Counts for 100% Subtitle/Cursor Sync
   if (useTts) {
     try {
       const sceneVoicePaths = [];
+      let accumulatedSec = 0;
       for (let i = 0; i < slotData.scenes.length; i++) {
         const sp = path.join(outDir, `scene-voice-${i}.mp3`);
+        const padSecNum = i === slotData.scenes.length - 1 ? 0.65 : 0.38;
         const res = await synthesizeNaturalTurkishVoice(
           slotData.scenes[i].speech,
           slotData.voice || "tr-TR-AhmetNeural",
           sp,
-          framesPerScene
+          48
         );
         if (res?.ok && existsSync(sp)) {
-          sceneVoicePaths.push(sp);
+          sceneVoicePaths.push({ path: sp, padSec: padSecNum });
           sceneEnvelopes[i] = res.envelope;
+          const sceneTotalSec = (res.durationSec || 3.4) + padSecNum;
+          sceneFrameCounts[i] = Math.max(18, Math.round(sceneTotalSec * baseFps));
+          accumulatedSec += sceneTotalSec;
         }
       }
 
       if (sceneVoicePaths.length > 0) {
+        totalAudioDurationSec = Math.max(4, accumulatedSec);
         const inputs = [];
         const padFilters = [];
         const concatLabels = [];
         for (let i = 0; i < sceneVoicePaths.length; i++) {
-          inputs.push("-i", sceneVoicePaths[i]);
-          const padSec = i === sceneVoicePaths.length - 1 ? "0.95" : "0.75";
-          padFilters.push(`[${i}:a]aformat=sample_rates=44100:channel_layouts=stereo,apad=pad_dur=${padSec}[v${i}]`);
+          inputs.push("-i", sceneVoicePaths[i].path);
+          const padSecStr = sceneVoicePaths[i].padSec.toFixed(2);
+          padFilters.push(`[${i}:a]aformat=sample_rates=44100:channel_layouts=stereo,apad=pad_dur=${padSecStr}[v${i}]`);
           concatLabels.push(`[v${i}]`);
         }
 
-        const bgmIdx = sceneVoicePaths.length;
-        const bgmExpr = [
-          "0.14*sin(2*PI*220*t)*(0.65+0.35*sin(2*PI*2.2*t))",
-          "0.11*sin(2*PI*261.63*t)",
-          "0.10*sin(2*PI*329.63*t)",
-          "0.09*sin(2*PI*392.00*t)*(0.5+0.5*cos(2*PI*0.55*t))",
-          "0.13*sin(2*PI*110*t)*(0.55+0.45*sin(2*PI*2.2*t))",
-          "0.06*sin(2*PI*523.25*t)*exp(-mod(t,2.0)*2.4)",
-        ].join("+");
-
-        inputs.push("-f", "lavfi", "-i", `aevalsrc='${bgmExpr}|${bgmExpr}':s=44100:d=40`);
-
+        // Clean, natural broadcast voice concatenation (like @avenoxyz — no distracting synthetic chord drone!)
         const filterComplex = [
           ...padFilters,
-          `${concatLabels.join("")}concat=n=${sceneVoicePaths.length}:v=0:a=1,asplit=2[voice_main][voice_sc]`,
-          `[${bgmIdx}:a]lowpass=f=2200,highpass=f=60,volume=0.72[bgm_raw]`,
-          `[bgm_raw][voice_sc]sidechaincompress=threshold=0.02:ratio=6.0:attack=25:release=380:makeup=1.15[bgm_ducked]`,
-          `[voice_main][bgm_ducked]amix=inputs=2:duration=first:dropout_transition=0:weights='1.48 0.78',alimiter=limit=0.95[outa]`,
+          `${concatLabels.join("")}concat=n=${sceneVoicePaths.length}:v=0:a=1,alimiter=limit=0.95[outa]`,
         ].join(";");
 
         await execFileAsync(
@@ -1736,69 +1703,24 @@ async function renderAndPublishSlotData(slotData) {
         hasVoice = existsSync(audioPath);
       }
     } catch (mixErr) {
-      console.warn("[Tok Ses & Fon Miks Uyarısı]:", mixErr?.message || mixErr);
-    }
-  }
-
-  // Fallback to Ambient Chord Resonance if TTS was disabled or unavailable
-  if (!hasVoice) {
-    try {
-      const bgmExprL = [
-        "0.20*sin(2*PI*220*t)*(0.68+0.32*sin(2*PI*2.0*t))",
-        "0.16*sin(2*PI*261.63*t)*(0.75+0.25*cos(2*PI*0.5*t))",
-        "0.15*sin(2*PI*329.63*t)",
-        "0.12*sin(2*PI*392.00*t)*(0.6+0.4*sin(2*PI*0.25*t))",
-        "0.18*sin(2*PI*110*t)*(0.60+0.40*sin(2*PI*2.0*t))",
-        "0.09*sin(2*PI*523.25*t)*exp(-mod(t,2.5)*2.4)",
-        "0.06*sin(2*PI*659.25*t)*exp(-mod(t+1.25,2.5)*3.0)",
-      ].join("+");
-      const bgmExprR = [
-        "0.20*sin(2*PI*220.4*t)*(0.68+0.32*sin(2*PI*2.0*t))",
-        "0.16*sin(2*PI*261.9*t)*(0.75+0.25*sin(2*PI*0.5*t))",
-        "0.15*sin(2*PI*329.9*t)",
-        "0.12*sin(2*PI*392.3*t)*(0.6+0.4*cos(2*PI*0.25*t))",
-        "0.18*sin(2*PI*110*t)*(0.60+0.40*sin(2*PI*2.0*t))",
-        "0.09*sin(2*PI*523.25*t)*exp(-mod(t,2.5)*2.4)",
-        "0.06*sin(2*PI*783.99*t)*exp(-mod(t+1.25,2.5)*3.0)",
-      ].join("+");
-
-      const fadeOutStart = Math.max(1, targetVideoDurationSec - 1.5).toFixed(2);
-      await execFileAsync(
-        ffmpegBin,
-        [
-          "-y",
-          "-f",
-          "lavfi",
-          "-i",
-          `aevalsrc='${bgmExprL}|${bgmExprR}':s=44100:d=${targetVideoDurationSec}`,
-          "-af",
-          `lowpass=f=3200,highpass=f=55,afade=t=in:st=0:d=0.6,afade=t=out:st=${fadeOutStart}:d=1.4,alimiter=limit=0.92`,
-          "-c:a",
-          "libmp3lame",
-          "-b:a",
-          "192k",
-          audioPath,
-        ],
-        { timeout: 60_000 }
-      );
-      hasVoice = existsSync(audioPath);
-    } catch (fonErr) {
-      console.warn("[Stereo Fon Müziği Uyarısı]:", fonErr?.message || fonErr);
+      console.warn("[Tok Ses Birleştirme Uyarısı]:", mixErr?.message || mixErr);
     }
   }
 
   console.log(
-    `[2/4] [Doğal Tok Seslendirme (Piper Baritone) & Stereo Fon Kanalı]: ${hasVoice ? "BAŞARILI" : "YEDEK MOD"}`
+    `[2/4] [Doğal Tok Seslendirme (Piper Baritone) & Cümle Senkronu]: ${hasVoice ? "BAŞARILI" : "YEDEK MOD"}`
   );
 
-  // 2. Render Audio-Reactive 30 FPS Graph Motion + Moving Üretir Dino Frames
+  // 2. Render Audio-Reactive Pure-Black Interactive Frames (Exact Frame Count per Spoken Step!)
   const dinoDataUri = await getDinoMascotDataUri();
   for (let sIdx = 0; sIdx < totalScenes; sIdx++) {
     const scene = slotData.scenes[sIdx];
     const env = sceneEnvelopes[sIdx];
-    for (let f = 0; f < framesPerScene; f++) {
-      const sceneProgress = f / Math.max(1, framesPerScene - 1);
-      const voiceAmp = env && env[f] !== undefined ? env[f] : 0.32 + Math.abs(Math.sin(sceneProgress * Math.PI * 10)) * 0.45;
+    const framesForThisScene = sceneFrameCounts[sIdx] || defaultFramesPerScene;
+    for (let f = 0; f < framesForThisScene; f++) {
+      const sceneProgress = f / Math.max(1, framesForThisScene - 1);
+      const envIdx = env ? Math.min(env.length - 1, Math.floor(sceneProgress * env.length)) : 0;
+      const voiceAmp = env && env[envIdx] !== undefined ? env[envIdx] : 0.30 + Math.abs(Math.sin(sceneProgress * Math.PI * 6)) * 0.35;
       const svg = renderVerticalFrameSvg(scene, slotData.label, sIdx, totalScenes, sceneProgress, dinoDataUri, voiceAmp);
       const framePath = path.join(framesDir, `frame-${String(frameCounter).padStart(4, "0")}.png`);
       await sharp(Buffer.from(svg)).png({ compressionLevel: 5 }).toFile(framePath);
@@ -1807,10 +1729,10 @@ async function renderAndPublishSlotData(slotData) {
   }
 
   const coverPngPath = path.join(outDir, `uretir-cover-${slotData.slot}.png`);
-  const coverFrameIdx = String(Math.max(0, frameCounter - 4)).padStart(4, "0");
+  const coverFrameIdx = String(Math.max(0, Math.min(frameCounter - 1, Math.floor(frameCounter * 0.72)))).padStart(4, "0");
   await fs.copyFile(path.join(framesDir, `frame-${coverFrameIdx}.png`), coverPngPath);
 
-  let inputFramerate = (frameCounter / targetVideoDurationSec).toFixed(3);
+  let inputFramerate = baseFps.toFixed(3);
   if (hasVoice && existsSync(audioPath)) {
     try {
       const { stderr } = await execFileAsync(ffmpegBin, ["-i", audioPath], { timeout: 10_000 }).catch((e) => e);
@@ -1822,6 +1744,8 @@ async function renderAndPublishSlotData(slotData) {
         }
       }
     } catch {}
+  } else {
+    inputFramerate = (frameCounter / Math.max(4, totalAudioDurationSec)).toFixed(3);
   }
 
   const videoPath = path.join(outDir, `uretir-reel-${slotData.slot}.mp4`);
@@ -1885,7 +1809,7 @@ async function renderAndPublishSlotData(slotData) {
         ];
     await execFileAsync(ffmpegBin, ffmpegArgs, { timeout: 150_000 });
     videoBuilt = existsSync(videoPath);
-    console.log(`[3/4] [Akıcı 30 FPS Fon-Motion Video] 1080x1920 Fotoğraflı, Grafikli & Stereo Fon Müzikli MP4 üretildi: ${videoPath}`);
+    console.log(`[3/4] [Pure-Black 30 FPS AI Akademi Video] 1080x1920 MP4 üretildi: ${videoPath}`);
   } catch (err) {
     console.warn("[FFmpeg Uyarısı]:", err?.message || err);
   }
@@ -1895,20 +1819,11 @@ async function renderAndPublishSlotData(slotData) {
   let igPublished = false;
   let ytPublished = false;
 
-  // Strict "Sadece Yeni Ürün ve Yeni Görsel" Ledger (Compliance & Duplicate Guardian Agent)
   const dedupFile = path.resolve("reports", "social-media", "published-hashes.json");
   let publishedLedger = {
     signatures: {},
-    usedProducts: [
-      "dyson 360 combi hepa+k-karbon hava temizleyici filtre",
-      "dyson combi360 2 al 1 öde ve 360 gün fiyat geçmişi radarı",
-    ],
-    usedImages: [
-      "dyson-combi360.jpg",
-      "https://images.unsplash.com/photo-1585771724684-38269d6639fd?auto=format&fit=crop&w=1200&q=85",
-      "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=1200&q=85",
-      "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=85",
-    ],
+    usedProducts: [],
+    usedImages: [],
   };
   try {
     if (existsSync(dedupFile)) {
@@ -1924,29 +1839,29 @@ async function renderAndPublishSlotData(slotData) {
   const primaryTitleNorm = String(slotData.scenes[0]?.title || slotData.label)
     .toLocaleLowerCase("tr-TR")
     .trim();
-  const primaryImageNorm = String(slotData.scenes[0]?.photoUrl || slotData.scenes[0]?.localPhotoPath || "").trim();
+  const primaryImageNorm = String(slotData.scenes[0]?.photoUrl || slotData.scenes[0]?.localPhotoPath || "pure-black-studio").trim();
   const signatureKey = `${slotData.slot}::${primaryTitleNorm}`;
   const isDuplicateProductOrImage =
     !process.argv.includes("--force") &&
     (Boolean(publishedLedger.signatures[signatureKey]) ||
       publishedLedger.usedProducts.includes(primaryTitleNorm));
 
-  // İHLAL SORGU AJANI (Pre-Publish %100 İHLAL YOKTUR Gate)
   const captionText = String(slotData.customCaption || "");
   const hashtagCount = (captionText.match(/#[a-zA-Z0-9çğıöşüÇĞİÖŞÜ_]+/g) || []).length;
   const bannedWords = ["garanti kazanç", "kesin getiri", "tıkla kazan", "bedava para", "yatırım tavsiyesidir"];
   const hasBannedWord = bannedWords.some((w) => captionText.toLocaleLowerCase("tr-TR").includes(w));
-  const hasRealCleanPhoto = Boolean(
-    slotData.scenes[0]?.photoDataUri &&
-      !primaryImageNorm.includes("/api/visual-card") &&
-      !primaryImageNorm.includes("opengraph-image")
+  const hasValidVisualCanvas = Boolean(
+    slotData.pureBlackMode ||
+      (slotData.scenes[0]?.photoDataUri &&
+        !primaryImageNorm.includes("/api/visual-card") &&
+        !primaryImageNorm.includes("opengraph-image"))
   );
-  const isRoyaltyFreeAudio = true; // 100% original synthesized voice + acoustic ambient chords
+  const isRoyaltyFreeAudio = true;
 
   const complianceChecks = {
     newProductAndImageVerified: !isDuplicateProductOrImage,
     royaltyFreeOriginalAudio: isRoyaltyFreeAudio,
-    cleanFullBleedPhotograph: hasRealCleanPhoto,
+    cleanVisualStudioVerified: hasValidVisualCanvas,
     instagramCommunityPolicySafe: !hasBannedWord && hashtagCount <= 14 && captionText.length <= 2150,
     sourceAttributionPresent: true,
   };
@@ -1976,7 +1891,7 @@ async function renderAndPublishSlotData(slotData) {
     console.log(`[4/4] ⛔ [İHLAL AJANI ENGELİ] %100 İHLAL YOKTUR onayı alınamadığı için yayın durduruldu:`, complianceChecks);
   } else {
     console.log(
-      `[4/4] ✅ "%100 İHLAL YOKTUR" onayı alındı -> Sadece Telegram (@uretirbot) stok dağıtımı başlatılıyor...`
+      `[4/4] 🛡️  "%100 İHLAL YOKTUR" onayı alındı -> Sadece Telegram (@uretirbot) stok dağıtımı başlatılıyor...`
     );
     tgPublished = await sendToTelegram(videoBuilt ? videoPath : null, coverPngPath, slotData);
     if (process.argv.includes("--with-instagram")) {
@@ -1986,9 +1901,6 @@ async function renderAndPublishSlotData(slotData) {
     publishedLedger.signatures[signatureKey] = Date.now();
     if (primaryTitleNorm) {
       publishedLedger.usedProducts = Array.from(new Set([...publishedLedger.usedProducts, primaryTitleNorm]));
-    }
-    if (primaryImageNorm) {
-      publishedLedger.usedImages = Array.from(new Set([...publishedLedger.usedImages, primaryImageNorm]));
     }
     await fs.writeFile(dedupFile, JSON.stringify(publishedLedger, null, 2), "utf8").catch(() => {});
   }
@@ -2024,30 +1936,6 @@ async function renderAndPublishSlotData(slotData) {
     "utf8"
   );
 
-  if (process.env.GITHUB_STEP_SUMMARY) {
-    try {
-      const summaryMd = [
-        `## 🎬 Üretir Sosyal Video & Veri Senkronizasyon Raporu (\`Slot ${slotData.slot}\`)`,
-        `- **İhlal Sorgu Ajanı Kararı:** 🛡️ **${complianceReport.verdict}**`,
-        `- **Kuşak Başlığı:** ${slotData.label}`,
-        `- **Veri Merkezi:** [${SITE_URL}](${SITE_URL})`,
-        `- **Hedef Araç:** [${slotData.targetUrl}](${slotData.targetUrl})`,
-        `- **Ses & Fon Müziği (Akustik Broadcast Fon):** ${hasVoice ? "✅ Başarılı" : "⚠️ Yedek Mod"}`,
-        `- **9:16 Dikey MP4 Video (1080x1920 Tam Ekran Gerçek Fotoğraf):** ${videoBuilt ? "✅ Üretildi" : "❌ Hata"}`,
-        `- **Telegram (@uretirbot):** ${skipPublish ? "⏳ Ön Hazırlık" : tgPublished ? "✅ Gönderildi" : "⚠️ Atlandı"}`,
-        `- **Instagram (@uretirai):** ${skipPublish ? "⏳ Ön Hazırlık" : igPublished ? "✅ Yayınlandı" : "⚠️ Paket Hazır"}`,
-        `- **YouTube (@Uretir):** ${skipPublish ? "⏳ Ön Hazırlık" : ytPublished ? "✅ Shorts Yayınlandı" : "⚠️ Oturum Onayı Bekleniyor"}`,
-        ``,
-        `### 📌 Sahne Başlıkları ve Hook Kurgusu`,
-        ...slotData.scenes.map(
-          (s, idx) => `${idx + 1}. **${s.kicker}:** ${s.title} — *(${s.highlight})*`
-        ),
-        ``,
-      ].join("\n");
-      await fs.appendFile(process.env.GITHUB_STEP_SUMMARY, summaryMd + "\n", "utf8");
-    } catch {}
-  }
-
   return {
     slot: slotData.slot,
     complianceVerdict: complianceReport.verdict,
@@ -2066,366 +1954,630 @@ async function runSlot(slot) {
   return renderAndPublishSlotData(slotData);
 }
 
-
-
 /**
- * Separate Single-Category Editorial Posts ("Bundan sonra paylaşımlarda sadece yeni ürün ve yeni görsel")
- * Dynamically selects ONLY unpublished products/headlines and unpublished real photos for every category.
+ * Pure-Black (#000000) Niche "Üretir Dino • Yapay Zeka Akademisi" Episodes
+ * Inspired by @avenoxyz minimal black-canvas interactive AI education series.
+ * Each episode teaches a core AI & productivity concept in 6 synced scenes (Intro + 5 interactive steps).
  */
 async function buildSeparateCategorySlotMap() {
-  const dedupFile = path.resolve("reports", "social-media", "published-hashes.json");
-  const usedProductsSet = new Set();
-  const usedImagesSet = new Set();
+  const ep1Base = {
+    hookLine1: "Yapay zekaya sıfırdan",
+    hookLine2: "başlarken 5 altın adım",
+    hookLine3: "Hangisini atladın?",
+    moduleNum: "01",
+    moduleKicker: "BURADAN BAŞLA",
+    cardTitle: "İlk gün, beş karar.",
+    cardSub: "Gerisini ürettikçe öğrenirsin.",
+    moduleTag: "01 • İlk gün • üretir",
+    accent: "#c8f560",
+    rows: [
+      { num: "01", label: "Model ve plan seçimi" },
+      { num: "02", label: "İzin ve sınır modu" },
+      { num: "03", label: "URETIR.md hafızası" },
+      { num: "04", label: "Bağlam (context) çubuğu" },
+      { num: "05", label: "İlk otomasyon skill'i" },
+    ],
+  };
 
-  try {
-    if (existsSync(dedupFile)) {
-      const raw = JSON.parse(await fs.readFile(dedupFile, "utf8"));
-      for (const p of raw.usedProducts || []) usedProductsSet.add(String(p).toLocaleLowerCase("tr-TR").trim());
-      for (const img of raw.usedImages || []) usedImagesSet.add(String(img).trim());
-    }
-  } catch {}
+  const ep2Base = {
+    hookLine1: "Model seni dinlemiyor mu?",
+    hookLine2: "Hayır, bağlamı unutuyor",
+    hookLine3: "Kritik talimat nereye yazılır?",
+    moduleNum: "02",
+    moduleKicker: "BAĞLAM PENCERESİ",
+    cardTitle: "200K token nasıl dolar?",
+    cardSub: "Hafıza taşmadan bağlamı yönet.",
+    moduleTag: "02 • Bağlam • üretir",
+    accent: "#34d399",
+    rows: [
+      { num: "01", label: "Sistem ve araç yükü" },
+      { num: "02", label: "Dosya okuma birikimi" },
+      { num: "03", label: "/compact ile özetle" },
+      { num: "04", label: "/clear ile temiz sayfa" },
+      { num: "05", label: "Kalıcı kural dosyası" },
+    ],
+  };
 
-  const stampLabel = new Intl.DateTimeFormat("tr-TR", {
-    day: "2-digit",
-    month: "long",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date());
+  const ep3Base = {
+    hookLine1: "İyi prompt yol tarif etmez",
+    hookLine2: "net bir sınır çizer",
+    hookLine3: "Nasıl değil, ne istediğini söyle",
+    moduleNum: "03",
+    moduleKicker: "PROMPT MİMARİSİ",
+    cardTitle: "Adım adım tarif etme.",
+    cardSub: "Hedefi ve sınırları net tanımla.",
+    moduleTag: "03 • Prompt • üretir",
+    accent: "#c8f560",
+    rows: [
+      { num: "01", label: "Hedef çıktıyı tanımla" },
+      { num: "02", label: "Dokunulmaz sınırları çiz" },
+      { num: "03", label: "Örnek girdi-çıktı ver" },
+      { num: "04", label: "Önce plan iste (/plan)" },
+      { num: "05", label: "Doğrulama kriteri koy" },
+    ],
+  };
 
-  function pickFreshTopic(candidates, fallbackPrefix) {
-    const found = candidates.find(
-      (c) => !usedProductsSet.has(String(c.title).toLocaleLowerCase("tr-TR").trim())
-    );
-    return (
-      found || {
-        ...candidates[0],
-        title: `${candidates[0].title} (${stampLabel})`,
-      }
-    );
-  }
+  const ep4Base = {
+    hookLine1: "Hafıza dosyası rica eder",
+    hookLine2: "Hook zorla yaptırır",
+    hookLine3: "Garanti gereken işi koda bağla",
+    moduleNum: "04",
+    moduleKicker: "OTOMASYON KİLİDİ",
+    cardTitle: "Tavsiye mi, kural mı?",
+    cardSub: "Kritik adımı şansa bırakma.",
+    moduleTag: "04 • Hook • üretir",
+    accent: "#34d399",
+    rows: [
+      { num: "01", label: "Tavsiye: Kural dosyası" },
+      { num: "02", label: "Zorunlu: Pre-tool hook" },
+      { num: "03", label: "Otomatik stil kontrolü" },
+      { num: "04", label: "Riskli komutu engelle" },
+      { num: "05", label: "Sıfır hata üretim hattı" },
+    ],
+  };
 
-  // 1. ODAK & ZAMAN ÜRETİMİ (09:00)
-  const odakTopic = pickFreshTopic([
-    {
-      title: "Tüketerek Değil Üreterek Başla: İlk 90 Dakika Derin Odak Formülü",
-      sub: "Zihin Dağınıklığını Bitiren ve Üretim İvmesini 3 Katına Çıkaran Sabah Sistemi",
-    },
-    {
-      title: "Ekran Kaydırmayı Bırak: Günün İlk Saatinde Kendi Değerini Üret",
-      sub: "Tüketici Alışkanlıklardan Üretici Zihin Yapısına Geçiş Rehberi",
-    },
-    {
-      title: "Derin Çalışma Mimarisi: Az Zamanda Çok Değer Üretmenin Matematiği",
-      sub: "Bölünmeyen Odak Bloklarıyla Maksimum Üretkenlik Çarpanı",
-    },
-  ]);
-  const haberPhoto = pickFreshVisual("haberai", null, usedImagesSet);
+  const ep5Base = {
+    hookLine1: "Tek bir ajanla uğraşma",
+    hookLine2: "alt ajanlarla 10 kat hızlan",
+    hookLine3: "Ana bağlamı tertemiz koru",
+    moduleNum: "05",
+    moduleKicker: "ÇOKLU AJAN SİSTEMİ",
+    cardTitle: "Araştırmayı devret.",
+    cardSub: "Ana ekrana sadece özet gelsin.",
+    moduleTag: "05 • Ajanlar • üretir",
+    accent: "#c8f560",
+    rows: [
+      { num: "01", label: "Araştırmacı alt ajan" },
+      { num: "02", label: "Kod inceleme ajanı" },
+      { num: "03", label: "Test doğrulama ajanı" },
+      { num: "04", label: "Temiz ana bağlam" },
+      { num: "05", label: "Paralel üretim hattı" },
+    ],
+  };
 
-  // 2. YAPAY ZEKA KALDIRACI & AJANLAR (11:00)
-  const kaldiracTopic = pickFreshTopic([
-    {
-      title: "Yapay Zeka Kaldıracı: 10 Saatlik İşi 1 Saatte Üreten Ajan Mimarisi",
-      sub: "Tekrarlayan İşleri Otomasyona Devredip Yaratıcı Üretime Odaklanma Sistemi",
-    },
-    {
-      title: "Tek Başına Çalışma: Yapay Zeka Ajanlarıyla Kendi Üretim Ekibini Kur",
-      sub: "Doğru Prompt, Doğru Araç ve Otonom İş Akışlarıyla 10 Kat Hızlanma",
-    },
-    {
-      title: "Zamanı Kaldıraçla Çarp: Yapay Zeka Destekli Dijital Üretim Rehberi",
-      sub: "Manuel Emeği Sistemli Yapay Zeka İş Akışlarına Dönüştürme Formülü",
-    },
-  ]);
-  const puanPhoto = pickFreshVisual("puanai", null, usedImagesSet);
-
-  // 3. FİKİRDEN ÜRÜNE & SİSTEM KURMA (13:00)
-  const sistemTopic = pickFreshTopic([
-    {
-      title: "Fikri Zihninde Tutma: Sıfırdan Çalışan Dijital Sistem ve Ürün Üretimi",
-      sub: "Mükemmeli Beklemeden İlk Çalışan Prototipi Hayata Geçirme Disiplini",
-    },
-    {
-      title: "Fikirden Ürüne Geçiş: Üreten İnsanların 3 Adımlı Sistem Rehberi",
-      sub: "Tasarla, Küçük Bir Prototip Kur ve Gerçek Veriyle Sürekli Geliştir",
-    },
-    {
-      title: "Ertelemeyi Bitiren Üretim Kuralı: Bugün Küçük Ama Çalışan Bir Sistem Kur",
-      sub: "Karmaşık Projeleri Basit ve Ölçeklenebilir Adımlara Bölme Sanatı",
-    },
-  ]);
-  const dealPhoto = pickFreshVisual("indirimai", null, usedImagesSet);
-
-  // 4. VERİDEN STRATEJİ VE KARAR ÜRETME (15:00)
-  const veriTopic = pickFreshTopic([
-    {
-      title: "Tahminle Değil Veriyle Üret: Gürültüyü Eleyen Canlı Karar Radarı",
-      sub: "Bilgi Kirliliğinden Arınmış Doğrulanmış Grafikler ve Strateji Masası",
-    },
-    {
-      title: "Bilgi Kirliliğinden Net Stratejiye: Veriyi Okuyan Geleceği Üretir",
-      sub: "Duygusal Kararlar Yerine Ölçülebilir Metriklerle Hareket Etme Sistemi",
-    },
-    {
-      title: "Veri Zekası ve Analiz: Karmaşık Tablolardan Net Eylem Planı Üretmek",
-      sub: "uretir.com Yapay Zeka Radarıyla Saniyeler İçinde Doğru Karar Alma",
-    },
-  ]);
-  const finansPhoto = pickFreshVisual("finansai", null, usedImagesSet);
-
-  // 5. DİJİTAL VARLIK VE 7/24 OTOMASYON (18:00)
-  const dijitalTopic = pickFreshTopic([
-    {
-      title: "Zamanını Satma, Sistem Kur: 7/24 Çalışan Dijital Varlık Üretimi",
-      sub: "Kod, İçerik, Araç ve Otomasyonlarla Sürekli Değer Üreten Ekosistem",
-    },
-    {
-      title: "Bir Kez Üret Sürekli Çalışsın: Ölçeklenebilir Dijital Sistem Mimarisi",
-      sub: "Mesai Saatlerinden Bağımsız Değer Yaratan Otonom İş Akışları",
-    },
-    {
-      title: "Mikro Otomasyon Devrimi: Kendi Dijital Üretim Hattını Tasarla",
-      sub: "Sıfır Maliyetli Bulut İş Akışlarıyla Kesintisiz Dijital Üretim",
-    },
-  ]);
-  const evPhoto = pickFreshVisual("evai", null, usedImagesSet);
-
-  // 6. BİLEŞİK GELİŞİM & PARETO %80/20 (20:00)
-  const paretoTopic = pickFreshTopic([
-    {
-      title: "Her Gün %1 Üretim Gelişimi: 365 Günde 37 Kat Bileşik Büyüme",
-      sub: "Küçük Ama Sürekli Üretim Adımlarının Yıl Sonunda Yarattığı Dev İvme",
-    },
-    {
-      title: "Pareto Üretim Yasası: Sonuçların %80'ini Üreten %20'lik Kritik Adım",
-      sub: "Enerjini En Yüksek Etkiyi Yaratan Çekirdek Üretime Odaklama Sanatı",
-    },
-    {
-      title: "Tüketen Değil Üreten Ol: Geleceği İnşa Edenlerin Büyüme Grafiği",
-      sub: "Her Gün Somut Bir Çıktı Üreterek Kendi Dijital Geleceğini İnşa Et",
-    },
-  ]);
-  const arabaPhoto = pickFreshVisual("arabaai", null, usedImagesSet);
+  const ep6Base = {
+    hookLine1: "Aynı promptu tekrar yazma",
+    hookLine2: "Skill yap, tek tıkla üret",
+    hookLine3: "Kendi yapay zeka kütüphaneni kur",
+    moduleNum: "06",
+    moduleKicker: "SKILL MİMARİSİ",
+    cardTitle: "Bir kez kur, hep kullan.",
+    cardSub: "Tekrarlayan işini komuta dönüştür.",
+    moduleTag: "06 • Skill • üretir",
+    accent: "#34d399",
+    rows: [
+      { num: "01", label: "Tekrarlayan işi seç" },
+      { num: "02", label: "SKILL.md şablonu yaz" },
+      { num: "03", label: "Örnek çıktı ekle" },
+      { num: "04", label: "Tek komutla çağır" },
+      { num: "05", label: "Sistemi sürekli büyüt" },
+    ],
+  };
 
   return {
     haberai: {
       slot: "cat-haberai",
-      label: "ÜRETİR.COM · DERİN ODAK VE ZAMAN ÜRETİMİ",
+      pureBlackMode: true,
+      label: "ÜRETİR YAPAY ZEKA AKADEMİSİ · BÖLÜM 01: İLK GÜN 5 ADIM",
       targetUrl: "https://www.uretir.com",
       whatsappTargetKey: "haberai",
       customCaption: [
-        `🦖 Tüketerek Değil, Üreterek Güne Başla! | Üretir Dino (uretir.com)`,
+        `🦖 Yapay Zekaya Sıfırdan Başlarken 5 Altın Adım — Hangisini Atladın? | Üretir Akademi`,
         ``,
-        `📌 ${odakTopic.title}`,
-        `💡 Üretir Fikri: Güne ekran kaydırarak değil, ilk 90 dakikada en önemli işini üreterek başla.`,
+        `01 ■ Model ve plan seçimi (Hız için Sonnet, derin mimari için Opus)`,
+        `02 ■ İzin ve sınır modu (Onaylı güvenli çalışma alanı)`,
+        `03 ■ URETIR.md hafızası (Proje kurallarını kalıcı hale getir)`,
+        `04 ■ Bağlam çubuğu (%70 dolulukta özetle ve tazele)`,
+        `05 ■ İlk otomasyon skill'i (Tekrarlayan işi tek komuta indir)`,
         ``,
-        `🌐 Üretenlerin bilgi, topluluk ve yapay zeka ekosistemi: www.uretir.com`,
+        `🌐 Yapay zekayı anlamak ve üretmek için: www.uretir.com`,
         `📸 Instagram: @uretirai | ▶️ YouTube: @Uretir`,
         ``,
-        `#Üretir #Üretkenlik #DerinOdak #ZamanYönetimi #YapayZeka #SistemKur #Gelişim #Keşfet`,
+        `#Üretir #YapayZeka #AIAkademi #PromptMühendisliği #Üretkenlik #Otomasyon #Teknoloji #Keşfet`,
       ].join("\n"),
       scenes: [
         {
-          kicker: "ÜRETİR FELSEFESİ · DERİN ODAK VE ZAMAN ÜRETİMİ",
-          title: odakTopic.title,
-          sub: odakTopic.sub,
-          highlight: "DERİN ODAK: +3.4 KAT ÜRETİM",
-          statLeft: "Odak Çarpanı Grafiği",
-          statRight: "www.uretir.com",
-          accent: "#c8f560",
-          bg1: "#102118",
-          bg2: "#070e0a",
-          photoUrl: haberPhoto,
-          photoTag: "URETIR.COM · DERİN ODAK",
-          graphLabel: "ODAKLANMA SÜRESİ VE ÜRETİLEN DEĞER İVMESİ",
-          graphStartLabel: "Dağınık Mesai: %22",
-          graphEndLabel: "Derin Odak: %94",
-          graphTrend: "up",
-          speech: `Selam, ben Üretir Dino. Güne başkalarının içeriklerini tüketerek başlama. İlk doksan dakikanı tek bir hedefe ayır, ve kendi değerini üret. Tüm yapay zeka sistemleri, üretir nokta com adresinde.`,
+          ...ep1Base,
+          stepIndex: 0,
+          title: "Yapay Zekaya Sıfırdan Başlarken 5 Altın Adım",
+          sub: "İlk gün sadece beş kararı doğru ver.",
+          highlight: "01 • İLK GÜN BEŞ KARAR",
+          subLine1: "Yapay zekada ilk gün",
+          subLine2: "sadece beş kararı doğru ver.",
+          subHighlight: "beş kararı",
+          speech: "Yapay zekaya sıfırdan başlıyorsan, ilk gün sadece beş kararı doğru vermen yeterli.",
+        },
+        {
+          ...ep1Base,
+          stepIndex: 1,
+          title: "01 • Doğru Modeli Seç",
+          sub: "Günlük hızda Sonnet, derin mimaride Opus.",
+          highlight: "SONNET VS OPUS",
+          subLine1: "Günlük hızlı işlerde Sonnet,",
+          subLine2: "derin mimaride Opus kullan.",
+          subHighlight: "Opus kullan.",
+          speech: "Bir: Doğru modeli seç. Günlük hızlı üretimde Sonnet, derin mimaride Opus kullan.",
+        },
+        {
+          ...ep1Base,
+          stepIndex: 2,
+          title: "02 • İzin ve Sınır Modu",
+          sub: "Her adımda onay alarak güvenle ilerlesin.",
+          highlight: "GÜVENLİ İZİN MODU",
+          subLine1: "İzin modunu açık tut,",
+          subLine2: "her adımda onay alarak ilerlesin.",
+          subHighlight: "onay alarak",
+          speech: "İki: İzin modunu ayarla. Model her kritik adımda senden onay alarak güvenle ilerlesin.",
+        },
+        {
+          ...ep1Base,
+          stepIndex: 3,
+          title: "03 • URETIR.md Hafızası",
+          sub: "Kurallarını bir kez yaz, seni hep tanısın.",
+          highlight: "KALICI PROJE HAFIZASI",
+          subLine1: "Kurallarını bir kez yaz,",
+          subLine2: "model her sohbette seni tanısın.",
+          subHighlight: "seni tanısın.",
+          speech: "Üç: Kalıcı hafıza dosyası oluştur. Kurallarını bir kez yaz, model her sohbette seni tanısın.",
+        },
+        {
+          ...ep1Base,
+          stepIndex: 4,
+          title: "04 • Bağlam (Context) Çubuğu",
+          sub: "Yüzde yetmiş dolulukta sohbeti tazele.",
+          highlight: "%70 BAĞLAM SINIRI",
+          subLine1: "Bağlam yüzde yetmişi geçince",
+          subLine2: "sohbeti özetleyip tazele.",
+          subHighlight: "yüzde yetmişi",
+          speech: "Dört: Bağlam çubuğunu izle. Doluluk yüzde yetmişi geçince sohbeti özetleyip tazele.",
+        },
+        {
+          ...ep1Base,
+          stepIndex: 5,
+          title: "05 • İlk Otomasyon Skill'i",
+          sub: "Tekrarlayan işini tek komuta dönüştür.",
+          highlight: "URETIR.COM • AI AKADEMİ",
+          subLine1: "Tekrarlayan işini skill yap,",
+          subLine2: "tüm rehberler uretir.com'da.",
+          subHighlight: "uretir.com'da.",
+          speech: "Beş: Tekrarlayan işini skill yap. Tüm yapay zeka eğitimleri üretir nokta com adresinde.",
         },
       ],
     },
     puanai: {
       slot: "cat-puanai",
-      label: "ÜRETİR.COM · YAPAY ZEKA KALDIRACI VE AJANLAR",
+      pureBlackMode: true,
+      label: "ÜRETİR YAPAY ZEKA AKADEMİSİ · BÖLÜM 02: BAĞLAM PENCERESİ",
       targetUrl: "https://www.uretir.com/ajanlar",
       whatsappTargetKey: "puanai",
       customCaption: [
-        `⚡ Çok Çalışmak Yetmez, Akıllı Üretmek Gerekir! | Üretir Dino (uretir.com)`,
+        `🦖 Model Seni Dinlemiyor Mu? Hayır, Bağlamı Unutuyor! | Üretir Akademi`,
         ``,
-        `📌 ${kaldiracTopic.title}`,
-        `💡 Üretir Fikri: Tekrarlayan işleri yapay zeka ajanlarına devret; enerjini yaratıcı üretime sakla.`,
+        `01 ■ Sistem ve araç yükü bağlamın ilk kısmını alır`,
+        `02 ■ Okunan her dosya 200K penceresini doldurur`,
+        `03 ■ /compact ile önemli kararları tutup özetle`,
+        `04 ■ Yeni konuya geçerken /clear ile temiz sayfa aç`,
+        `05 ■ Kritik kuralları sohbete değil, kalıcı kural dosyasına yaz`,
         ``,
-        `🌐 Yapay zeka araçları ve otonom ajan ekosistemi: www.uretir.com/ajanlar`,
-        `📸 Instagram: @uretirai | ▶️ YouTube: @Uretir`,
-        ``,
-        `#Üretir #YapayZeka #Otomasyon #Üretkenlik #AIAgents #Teknoloji #DijitalÜretim #Keşfet`,
+        `🌐 Yapay zekayı anlamak ve üretmek için: www.uretir.com`,
+        `#Üretir #YapayZeka #ContextWindow #AIAkademi #Üretkenlik #Keşfet`,
       ].join("\n"),
       scenes: [
         {
-          kicker: "YAPAY ZEKA KALDIRACI · OTONOM AJAN SİSTEMLERİ",
-          title: kaldiracTopic.title,
-          sub: kaldiracTopic.sub,
-          highlight: "AI KALDIRACI: 10 KAT HIZ",
-          statLeft: "Otomasyon Kaldıraç Eğrisi",
-          statRight: "uretir.com/ajanlar",
-          accent: "#34d399",
-          bg1: "#0f2027",
-          bg2: "#071014",
-          photoUrl: puanPhoto,
-          photoTag: "URETIR.COM · AI KALDIRACI",
-          graphLabel: "MANUEL İŞ YÜKÜ VS. YAPAY ZEKA ÜRETİM KALDIRACI",
-          graphStartLabel: "Manuel Emek: 1x",
-          graphEndLabel: "Üretir AI: 10x Değer",
-          graphTrend: "up",
-          speech: `Çok çalışmak yetmez, akıllı üretmek gerekir. Tekrarlayan işleri yapay zeka ajanlarına devret. Arkamdaki grafikte gördüğün gibi, üretim hızını on katına çıkar. Araçlar üretir nokta com adresinde.`,
+          ...ep2Base,
+          stepIndex: 0,
+          title: "Model Seni Dinlemiyor Mu? Hayır, Bağlamı Unutuyor",
+          sub: "Kritik talimat nereye yazılır?",
+          highlight: "02 • BAĞLAM YÖNETİMİ",
+          subLine1: "Model seni dinlemiyor değil,",
+          subLine2: "dolan bağlamda kuralı unutuyor.",
+          subHighlight: "bağlamda",
+          speech: "Model seni dinlemiyor değil. Bağlam penceresi doldukça ilk verdiğin talimatları unutuyor.",
+        },
+        {
+          ...ep2Base,
+          stepIndex: 1,
+          title: "01 • Sistem ve Araç Yükü",
+          sub: "Pencerenin ilk kısmı sistem araçlarına gider.",
+          highlight: "BAŞLANGIÇ YÜKÜ",
+          subLine1: "Daha ilk mesajı yazmadan",
+          subLine2: "sistem araçları yer kaplar.",
+          subHighlight: "sistem araçları",
+          speech: "Bir: Daha ilk mesajı yazmadan, sistem ve araç tanımları hafızanın bir kısmını doldurur.",
+        },
+        {
+          ...ep2Base,
+          stepIndex: 2,
+          title: "02 • Dosya Okuma Birikimi",
+          sub: "Okunan her büyük dosya pencereyi şişirir.",
+          highlight: "DOSYA BİRİKİMİ",
+          subLine1: "Okunan her büyük dosya",
+          subLine2: "aktif pencereyi hızla şişirir.",
+          subHighlight: "hızla şişirir.",
+          speech: "İki: Sohbette okuttuğun her büyük dosya, aktif hafıza penceresini hızla şişirir.",
+        },
+        {
+          ...ep2Base,
+          stepIndex: 3,
+          title: "03 • /compact ile Özetle",
+          sub: "Kararları koruyup gereksiz geçmişi sıkıştır.",
+          highlight: "/COMPACT ÖZETLEME",
+          subLine1: "Yüzde yetmişe ulaştığında",
+          subLine2: "compact ile geçmişi özetle.",
+          subHighlight: "compact ile",
+          speech: "Üç: Doluluk yüzde yetmişe ulaştığında, compact komutuyla kararları koruyup geçmişi özetle.",
+        },
+        {
+          ...ep2Base,
+          stepIndex: 4,
+          title: "04 • /clear ile Temiz Sayfa",
+          sub: "Farklı bir göreve geçerken bağlamı sıfırla.",
+          highlight: "/CLEAR TEMİZ SAYFA",
+          subLine1: "Yeni bir göreve geçerken",
+          subLine2: "clear ile tertemiz sayfa aç.",
+          subHighlight: "tertemiz sayfa",
+          speech: "Dört: Tamamen farklı bir göreve geçerken, eski sohbeti uzatma, tertemiz bir sayfa aç.",
+        },
+        {
+          ...ep2Base,
+          stepIndex: 5,
+          title: "05 • Kalıcı Kural Dosyası",
+          sub: "Kritik kuralı sohbete değil dosyaya yaz.",
+          highlight: "URETIR.COM • AI AKADEMİ",
+          subLine1: "Kritik kuralı sohbete değil,",
+          subLine2: "kalıcı dosyaya yaz: uretir.com",
+          subHighlight: "uretir.com",
+          speech: "Beş: Kritik kuralları sohbete değil, kalıcı kural dosyasına yaz. Detaylar üretir nokta com'da.",
         },
       ],
     },
     indirimai: {
       slot: "cat-indirimai",
-      label: "ÜRETİR.COM · FİKİRDEN ÜRÜNE VE SİSTEM İNŞASI",
+      pureBlackMode: true,
+      label: "ÜRETİR YAPAY ZEKA AKADEMİSİ · BÖLÜM 03: PROMPT MİMARİSİ",
       targetUrl: "https://www.uretir.com",
       whatsappTargetKey: "indirimai",
       customCaption: [
-        `🚀 En İyi Fikir, Hayata Geçirilen Fikirdir! | Üretir Dino (uretir.com)`,
+        `🦖 İyi Prompt Yol Tarif Etmez, Net Bir Sınır Çizer! | Üretir Akademi`,
         ``,
-        `📌 ${sistemTopic.title}`,
-        `💡 Üretir Fikri: Mükemmel anı beklemeyi bırak; bugün çalışan küçük bir sistem kur ve büyüt.`,
+        `01 ■ Hedef çıktıyı net tanımla`,
+        `02 ■ Dokunulmaması gereken sınırları çiz`,
+        `03 ■ Somut girdi ve çıktı örneği ver`,
+        `04 ■ Kodlamadan önce /plan ile mimari iste`,
+        `05 ■ Başarı ve doğrulama kriterini belirle`,
         ``,
-        `🌐 Fikirden ürüne yapay zeka ve üretim merkezi: www.uretir.com`,
-        `📸 Instagram: @uretirai | ▶️ YouTube: @Uretir`,
-        ``,
-        `#Üretir #FikirdenÜrüne #SistemKur #Üretkenlik #Girişimcilik #YapayZeka #Maker #Keşfet`,
+        `🌐 Yapay zekayı anlamak ve üretmek için: www.uretir.com`,
+        `#Üretir #PromptEngineering #YapayZeka #AIAkademi #Üretkenlik #Keşfet`,
       ].join("\n"),
       scenes: [
         {
-          kicker: "ÜRETİR MANİFESTOSU · FİKİRDEN ÇALIŞAN SİSTEME",
-          title: sistemTopic.title,
-          sub: sistemTopic.sub,
-          highlight: "FİKİRDEN ÜRÜNE · URETIR.COM",
-          statLeft: "Prototip -> Sistem İvmesi",
-          statRight: "www.uretir.com",
-          accent: "#f6ad55",
-          bg1: "#26170b",
-          bg2: "#0f0904",
-          photoUrl: dealPhoto,
-          photoTag: "URETIR.COM · SİSTEM ÜRETİMİ",
-          graphLabel: "FİKİRDEN PROTOTİPE VE ÇALIŞAN SİSTEME BÜYÜME",
-          graphStartLabel: "Ham Fikir: 0",
-          graphEndLabel: "Canlı Sistem: +%420",
-          graphTrend: "up",
-          speech: `En iyi fikir, hayata geçirilen fikirdir. Mükemmel anı beklemeyi bırak, bugün çalışan küçük bir sistem kur. Arkamdaki büyüme grafiğini kendi projenle yakala. Rehberler üretir nokta com adresinde.`,
+          ...ep3Base,
+          stepIndex: 0,
+          title: "İyi Prompt Yol Tarif Etmez, Net Bir Sınır Çizer",
+          sub: "Nasıl yapılacağını değil, hedefi ve sınırı söyle.",
+          highlight: "03 • PROMPT MİMARİSİ",
+          subLine1: "İyi prompt adım adım yol tarif etmez,",
+          subLine2: "hedefi ve sınırları çizer.",
+          subHighlight: "sınırları çizer.",
+          speech: "İyi bir prompt modele adım adım yol tarif etmez. Hedefi ve dokunulmaz sınırları çizer.",
+        },
+        {
+          ...ep3Base,
+          stepIndex: 1,
+          title: "01 • Hedef Çıktıyı Tanımla",
+          sub: "Sonuçta ne görmek istediğini net söyle.",
+          highlight: "NET HEDEF ÇIKTI",
+          subLine1: "Nasıl yazacağını anlatma,",
+          subLine2: "istediğin son çıktıyı tanımla.",
+          subHighlight: "son çıktıyı",
+          speech: "Bir: Kodu nasıl yazacağını anlatma, ulaşmak istediğin son çıktıyı net olarak tanımla.",
+        },
+        {
+          ...ep3Base,
+          stepIndex: 2,
+          title: "02 • Dokunulmaz Sınırları Çiz",
+          sub: "Değişmemesi gereken dosyaları baştan belirt.",
+          highlight: "GÜVENLİ SINIRLAR",
+          subLine1: "Değişmemesi gereken alanları",
+          subLine2: "baştan kırmızı çizgiyle belirt.",
+          subHighlight: "kırmızı çizgiyle",
+          speech: "İki: Sistemde bozulmaması ve dokunulmaması gereken alanları baştan net şekilde belirt.",
+        },
+        {
+          ...ep3Base,
+          stepIndex: 3,
+          title: "03 • Örnek Girdi-Çıktı Ver",
+          sub: "Bir somut örnek yüz satır açıklamaya bedeldir.",
+          highlight: "SOMUT ÖRNEK",
+          subLine1: "Uzun açıklamalar yerine",
+          subLine2: "tek bir somut örnek göster.",
+          subHighlight: "somut örnek",
+          speech: "Üç: Uzun paragraflar yazmak yerine, beklediğin formatı gösteren tek bir somut örnek ver.",
+        },
+        {
+          ...ep3Base,
+          stepIndex: 4,
+          title: "04 • Önce Plan İste (/plan)",
+          sub: "Uygulamaya geçmeden önce mimariyi onayla.",
+          highlight: "ÖNCE PLAN ONAYI",
+          subLine1: "Doğrudan üretime geçme,",
+          subLine2: "önce plan isteyip onayla.",
+          subHighlight: "plan isteyip",
+          speech: "Dört: Büyük işlerde doğrudan üretime geçme. Önce plan iste, mimariyi gör ve onayla.",
+        },
+        {
+          ...ep3Base,
+          stepIndex: 5,
+          title: "05 • Doğrulama Kriteri Koy",
+          sub: "Model kendi çıktısını test etmeden bitirmesin.",
+          highlight: "URETIR.COM • AI AKADEMİ",
+          subLine1: "Test kriterini baştan ver,",
+          subLine2: "rehberler uretir.com'da.",
+          subHighlight: "uretir.com'da.",
+          speech: "Beş: Doğrulama kriterini baştan ver ki model işini test etsin. Rehberler üretir nokta com'da.",
         },
       ],
     },
     finansai: {
       slot: "cat-finansai",
-      label: "ÜRETİR.COM · VERİDEN STRATEJİ VE KARAR ÜRETİMİ",
+      pureBlackMode: true,
+      label: "ÜRETİR YAPAY ZEKA AKADEMİSİ · BÖLÜM 04: KURAL DOSYASI VS HOOK",
       targetUrl: "https://www.uretir.com",
       whatsappTargetKey: "finansai",
       customCaption: [
-        `📊 Duygularla Değil, Doğrulanmış Veriyle Karar Üret! | Üretir Dino (uretir.com)`,
+        `🦖 Hafıza Dosyası Rica Eder, Hook Zorla Yaptırır! | Üretir Akademi`,
         ``,
-        `📌 ${veriTopic.title}`,
-        `💡 Üretir Fikri: Bilgi kirliliğinde kaybolma; canlı grafikleri okuyarak net strateji üret.`,
-        ``,
-        `🌐 Doğrulanmış veri ve yapay zeka analiz merkezi: www.uretir.com`,
-        `📸 Instagram: @uretirai | ▶️ YouTube: @Uretir`,
-        ``,
-        `#Üretir #VeriAnalizi #Strateji #Üretkenlik #YapayZeka #KararDestek #VeriZekası #Keşfet`,
+        `🌐 Yapay zeka otomasyon rehberleri: www.uretir.com`,
+        `#Üretir #YapayZeka #Otomasyon #AIAkademi #Yazılım #Keşfet`,
       ].join("\n"),
       scenes: [
         {
-          kicker: "VERİ ZEKASI · GÜRÜLTÜDEN NET STRATEJİ ÜRETİMİ",
-          title: veriTopic.title,
-          sub: veriTopic.sub,
-          highlight: "VERİDEN KARAR ÜRET",
-          statLeft: "Canlı Veri -> Net Karar",
-          statRight: "www.uretir.com",
-          accent: "#4fd1c5",
-          bg1: "#0d2426",
-          bg2: "#061112",
-          photoUrl: finansPhoto,
-          photoTag: "URETIR.COM · VERİ ZEKASI",
-          graphLabel: "HAM VERİ GÜRÜLTÜSÜNDEN NET STRATEJİ SİNYALİNE",
-          graphStartLabel: "Ham Gürültü",
-          graphEndLabel: "Net Strateji: %98",
-          graphTrend: "up",
-          speech: `Bilgi kirliliğinde kaybolma. Akıllı saatimin radarı gürültüyü eler, arkamdaki gibi net strateji üretir. Duygularla değil, doğrulanmış verilerle karar ver. Canlı merkez üretir nokta com adresinde.`,
+          ...ep4Base,
+          stepIndex: 0,
+          title: "Hafıza Dosyası Rica Eder, Hook Zorla Yaptırır",
+          sub: "Kritik kuralları şansa bırakma.",
+          highlight: "04 • OTOMASYON KİLİDİ",
+          subLine1: "Kural dosyası sadece rica eder,",
+          subLine2: "hook ise zorla yaptırır.",
+          subHighlight: "zorla yaptırır.",
+          speech: "Kural dosyası modele sadece rica eder. Hook ise kritik adımı yüzde yüz zorla yaptırır.",
+        },
+        {
+          ...ep4Base,
+          stepIndex: 1,
+          title: "01 • Tavsiye: Kural Dosyası",
+          sub: "Stil ve ton tercihleri için kural dosyası idealdir.",
+          highlight: "ESNEK REHBER",
+          subLine1: "Genel stil tercihlerini",
+          subLine2: "kural dosyasında tut.",
+          subHighlight: "kural dosyasında",
+          speech: "Bir: Genel yazım stili ve mimari tercihler için kural dosyası harika bir rehberdir.",
+        },
+        {
+          ...ep4Base,
+          stepIndex: 2,
+          title: "02 • Zorunlu: Pre-Tool Hook",
+          sub: "Araç çalışmadan önce devreye giren otomatik kilit.",
+          highlight: "PRE-TOOL KİLİDİ",
+          subLine1: "Kritik işlem öncesinde",
+          subLine2: "pre-tool hook devreye girer.",
+          subHighlight: "pre-tool hook",
+          speech: "İki: Asla atlanmaması gereken adımlarda, araç çalışmadan önce devreye giren hook kullan.",
+        },
+        {
+          ...ep4Base,
+          stepIndex: 3,
+          title: "03 • Otomatik Stil Kontrolü",
+          sub: "Her dosya kaydında otomatik test ve formatlama.",
+          highlight: "OTOMATİK FORMAT",
+          subLine1: "Dosya kaydedildiği anda",
+          subLine2: "otomatik kontrol çalışsın.",
+          subHighlight: "otomatik kontrol",
+          speech: "Üç: Her dosya değişikliğinden sonra otomatik format ve test kontrolünü koda bağla.",
+        },
+        {
+          ...ep4Base,
+          stepIndex: 4,
+          title: "04 • Riskli Komutu Engelle",
+          sub: "Veritabanı veya üretim silme komutlarını durdur.",
+          highlight: "GÜVENLİK KALKANI",
+          subLine1: "Tehlikeli sistem komutlarını",
+          subLine2: "otomatik olarak engelle.",
+          subHighlight: "otomatik olarak",
+          speech: "Dört: Canlı sistemi bozabilecek tehlikeli komutları hook ile otomatik olarak engelle.",
+        },
+        {
+          ...ep4Base,
+          stepIndex: 5,
+          title: "05 • Sıfır Hata Üretim Hattı",
+          sub: "Yapay zeka hızını deterministik kuralla birleştir.",
+          highlight: "URETIR.COM • AI AKADEMİ",
+          subLine1: "Hızı kuralla birleştir,",
+          subLine2: "sistemler uretir.com'da.",
+          subHighlight: "uretir.com'da.",
+          speech: "Beş: Yapay zeka hızını kesin kurallarla birleştir. Tüm sistemler üretir nokta com adresinde.",
         },
       ],
     },
     evai: {
       slot: "cat-evai",
-      label: "ÜRETİR.COM · DİJİTAL VARLIK VE 7/24 OTOMASYON",
-      targetUrl: "https://www.uretir.com",
+      pureBlackMode: true,
+      label: "ÜRETİR YAPAY ZEKA AKADEMİSİ · BÖLÜM 05: ÇOKLU AJAN SİSTEMİ",
+      targetUrl: "https://www.uretir.com/ajanlar",
       whatsappTargetKey: "evai",
       customCaption: [
-        `⚙️ Zamanını Satma, Senin Yerine Çalışan Sistem Üret! | Üretir Dino (uretir.com)`,
+        `🦖 Tek Bir Ajanla Uğraşma, Alt Ajanlarla 10 Kat Hızlan! | Üretir Akademi`,
         ``,
-        `📌 ${dijitalTopic.title}`,
-        `💡 Üretir Fikri: Bir kez üret, 7/24 değer yaratan dijital varlık ve otomasyona dönüştür.`,
-        ``,
-        `🌐 Dijital üretim ve otomasyon ekosistemi: www.uretir.com`,
-        `📸 Instagram: @uretirai | ▶️ YouTube: @Uretir`,
-        ``,
-        `#Üretir #DijitalVarlık #Otomasyon #SistemTasarımı #Üretkenlik #YapayZeka #Yazılım #Keşfet`,
+        `🌐 Otonom ajan sistemleri: www.uretir.com/ajanlar`,
+        `#Üretir #AIAgents #YapayZeka #Otomasyon #Üretkenlik #Keşfet`,
       ].join("\n"),
       scenes: [
         {
-          kicker: "DİJİTAL VARLIK İNŞASI · 7/24 ÇALIŞAN SİSTEMLER",
-          title: dijitalTopic.title,
-          sub: dijitalTopic.sub,
-          highlight: "7/24 DİJİTAL OTOMASYON",
-          statLeft: "Bileşik Dijital Varlık",
-          statRight: "www.uretir.com",
-          accent: "#f687b3",
-          bg1: "#2b1422",
-          bg2: "#13080e",
-          photoUrl: evPhoto,
-          photoTag: "URETIR.COM · DİJİTAL VARLIK",
-          graphLabel: "SAATLİK MESAİ VS. 7/24 DİJİTAL OTOMASYON DEĞERİ",
-          graphStartLabel: "Tekil Mesai",
-          graphEndLabel: "7/24 Otomatik Değer",
-          graphTrend: "up",
-          speech: `Sadece zamanını satarak büyüyemezsin. Kod yaz, içerik tasarla, veya yedi yirmi dört çalışan bir otomasyon kur. Bir kez üret, sürekli değer yaratsın. Üretir ekosistemi, üretir nokta com adresinde.`,
+          ...ep5Base,
+          stepIndex: 0,
+          title: "Tek Bir Ajanla Uğraşma: Alt Ajanlarla 10 Kat Hızlan",
+          sub: "Ana bağlamı kirletmeden paralel üretim yap.",
+          highlight: "05 • ÇOKLU AJANLAR",
+          subLine1: "Her işi tek ajana yaptırma,",
+          subLine2: "alt ajanlarla on kat hızlan.",
+          subHighlight: "on kat hızlan.",
+          speech: "Her işi tek bir ajana yaptırma. Görevleri alt ajanlara bölerek on kat hızlan.",
+        },
+        {
+          ...ep5Base,
+          stepIndex: 1,
+          title: "01 • Araştırmacı Alt Ajan",
+          sub: "Yüzlerce dosyayı ayrı bir pencerede tarasın.",
+          highlight: "ARAŞTIRMA AJANI",
+          subLine1: "Derin dosya taramasını",
+          subLine2: "araştırmacı ajana devret.",
+          subHighlight: "araştırmacı ajana",
+          speech: "Bir: Yüzlerce dosyayı tarama işini araştırmacı alt ajana devret.",
+        },
+        {
+          ...ep5Base,
+          stepIndex: 2,
+          title: "02 • Kod İnceleme Ajanı",
+          sub: "Yazılan kodu bağımsız bir gözle denetlesin.",
+          highlight: "DENETİM AJANI",
+          subLine1: "Üretilen çıktıyı bağımsız",
+          subLine2: "inceleme ajanına denetlet.",
+          subHighlight: "inceleme ajanına",
+          speech: "İki: Üretilen çıktıyı, ikinci bir denetim ajanına bağımsız gözle kontrol ettir.",
+        },
+        {
+          ...ep5Base,
+          stepIndex: 3,
+          title: "03 • Test Doğrulama Ajanı",
+          sub: "Arka planda testleri koşup sadece sonucu getirsin.",
+          highlight: "TEST AJANI",
+          subLine1: "Uzun test kayıtlarını",
+          subLine2: "alt ajan arka planda çözsün.",
+          subHighlight: "arka planda",
+          speech: "Üç: Uzun test çıktılarını ana ekrana taşıma, test ajanı arka planda doğrulama yapsın.",
+        },
+        {
+          ...ep5Base,
+          stepIndex: 4,
+          title: "04 • Temiz Ana Bağlam",
+          sub: "Ana ajan sadece temiz özetlerle karar versin.",
+          highlight: "TEMİZ ANA EKRAN",
+          subLine1: "Ana ekrana sadece",
+          subLine2: "net sonuç özeti gelsin.",
+          subHighlight: "net sonuç özeti",
+          speech: "Dört: Böylece ana sohbetin hiç şişmez, ekrana sadece net sonuç özeti gelir.",
+        },
+        {
+          ...ep5Base,
+          stepIndex: 5,
+          title: "05 • Paralel Üretim Hattı",
+          sub: "Kendi yapay zeka ekibini uretir.com ile kur.",
+          highlight: "URETIR.COM/AJANLAR",
+          subLine1: "Kendi ajan ekibini kur,",
+          subLine2: "merkez uretir.com'da.",
+          subHighlight: "uretir.com'da.",
+          speech: "Beş: Kendi yapay zeka ajan ekibini kur. Rehberler üretir nokta com adresinde.",
         },
       ],
     },
     arabaai: {
       slot: "cat-arabaai",
-      label: "ÜRETİR.COM · BİLEŞİK GELİŞİM VE PARETO %80/20",
+      pureBlackMode: true,
+      label: "ÜRETİR YAPAY ZEKA AKADEMİSİ · BÖLÜM 06: SKILL MİMARİSİ",
       targetUrl: "https://www.uretir.com",
       whatsappTargetKey: "arabaai",
       customCaption: [
-        `📈 Her Gün %1 Üretim Gelişimi = Yıl Sonunda 37 Kat Büyüme! | Üretir Dino (uretir.com)`,
+        `🦖 Aynı Promptu Tekrar Yazma: Skill Yap, Tek Tıkla Üret! | Üretir Akademi`,
         ``,
-        `📌 ${paretoTopic.title}`,
-        `💡 Üretir Fikri: Enerjinin %20'sini en kritik üretime odakla, sonuçların %80'ini yakala.`,
-        ``,
-        `🌐 Geleceği üretenlerin merkezi: www.uretir.com`,
-        `📸 Instagram: @uretirai | ▶️ YouTube: @Uretir`,
-        ``,
-        `#Üretir #BileşikGelişim #Pareto #Üretkenlik #Disiplin #YapayZeka #BaşarıGrafiği #Keşfet`,
+        `🌐 Yapay zeka eğitim ve üretim altyapısı: www.uretir.com`,
+        `#Üretir #YapayZeka #SkillMimarisi #Otomasyon #Üretkenlik #Keşfet`,
       ].join("\n"),
       scenes: [
         {
-          kicker: "BİLEŞİK ÜRETİM YASASI · HER GÜN %1 İLERLEME",
-          title: paretoTopic.title,
-          sub: paretoTopic.sub,
-          highlight: "365 GÜNDE 37 KAT BÜYÜME",
-          statLeft: "Bileşik Üretim Eğrisi",
-          statRight: "www.uretir.com",
-          accent: "#63b3ed",
-          bg1: "#0e1f33",
-          bg2: "#060e17",
-          photoUrl: arabaPhoto,
-          photoTag: "URETIR.COM · BİLEŞİK GELİŞİM",
-          graphLabel: "365 GÜNLÜK BİLEŞİK ÜRETİM VE YETKİNLİK GRAFİĞİ",
-          graphStartLabel: "1. Gün: 1.0x",
-          graphEndLabel: "365. Gün: 37.8x İvme",
-          graphTrend: "up",
-          speech: `Günü bitirirken kendine tek bir soru sor. Bugün ne ürettin? Her gün yüzde bir gelişim, yıl sonunda otuz yedi kat büyüme demektir. Üretenlerin merkezi, üretir nokta com.`,
+          ...ep6Base,
+          stepIndex: 0,
+          title: "Aynı Promptu Tekrar Yazma: Skill Yap, Tek Tıkla Üret",
+          sub: "Kendi yapay zeka beceri kütüphaneni oluştur.",
+          highlight: "06 • SKILL MİMARİSİ",
+          subLine1: "Aynı promptu her gün yazma,",
+          subLine2: "skill yap, tek komutla üret.",
+          subHighlight: "skill yap,",
+          speech: "Her gün aynı uzun promptu tekrar yazma. Bir kez skill yap, tek komutla üret.",
+        },
+        {
+          ...ep6Base,
+          stepIndex: 1,
+          title: "01 • Tekrarlayan İşi Seç",
+          sub: "Haftada üç kez yaptığın işi tespit et.",
+          highlight: "TEKRARLAYAN İŞ",
+          subLine1: "Sürekli tekrar ettiğin",
+          subLine2: "iş akışını tespit et.",
+          subHighlight: "iş akışını",
+          speech: "Bir: Her hafta tekrar tekrar yaptığın standart bir iş akışını tespit et.",
+        },
+        {
+          ...ep6Base,
+          stepIndex: 2,
+          title: "02 • SKILL.md Şablonu Yaz",
+          sub: "Adımları ve kuralları tek bir dosyada tanımla.",
+          highlight: "SKILL.MD ŞABLONU",
+          subLine1: "Kuralları ve adımları",
+          subLine2: "SKILL.md dosyasına yaz.",
+          subHighlight: "SKILL.md",
+          speech: "İki: O işin tüm adımlarını ve kalite kurallarını bir skill dosyasına açıkça yaz.",
+        },
+        {
+          ...ep6Base,
+          stepIndex: 3,
+          title: "03 • Örnek Çıktı Ekle",
+          sub: "En iyi referans çıktını klasöre ekle.",
+          highlight: "REFERANS ÇIKTI",
+          subLine1: "En beğendiğin örnek çıktıyı",
+          subLine2: "klasöre referans olarak koy.",
+          subHighlight: "referans olarak",
+          speech: "Üç: En beğendiğin örnek çıktıyı klasöre referans olarak ekle ki kalite hiç düşmesin.",
+        },
+        {
+          ...ep6Base,
+          stepIndex: 4,
+          title: "04 • Tek Komutla Çağır",
+          sub: "Artık sadece /komut yazarak saniyeler içinde üret.",
+          highlight: "TEK KOMUT ÜRETİM",
+          subLine1: "Artık uzun açıklama yok,",
+          subLine2: "tek komutla anında çalıştır.",
+          subHighlight: "tek komutla",
+          speech: "Dört: Artık uzun açıklamalar yazmadan, tek bir komutla o işi saniyeler içinde çalıştır.",
+        },
+        {
+          ...ep6Base,
+          stepIndex: 5,
+          title: "05 • Sistemi Sürekli Büyüt",
+          sub: "Her yeni beceriyle dijital kaldıracını katla.",
+          highlight: "URETIR.COM • AI AKADEMİ",
+          subLine1: "Kendi üretim kütüphaneni kur,",
+          subLine2: "altyapı uretir.com'da.",
+          subHighlight: "uretir.com'da.",
+          speech: "Beş: Her hafta yeni bir beceri ekleyerek sistemini büyüt. Altyapı üretir nokta com'da.",
         },
       ],
     },
@@ -2938,43 +3090,43 @@ async function main() {
   const catArgIdx = process.argv.indexOf("--category");
   if (catArgIdx !== -1 && process.argv[catArgIdx + 1]) {
     await runSeparateCategoryPosts(process.argv[catArgIdx + 1].toLowerCase().replace(/[^a-z]/g, ""));
-    process.exit(0);
+    return;
   }
 
   if (process.argv.includes("--separate-categories")) {
     await runSeparateCategoryPosts();
-    process.exit(0);
+    return;
   }
 
   if (process.argv.includes("--eight-categories")) {
     await runEightCategoriesFonShowcase();
-    process.exit(0);
+    return;
   }
 
   if (process.argv.includes("--dyson-special")) {
     await runDysonCampaignSpecial();
-    process.exit(0);
+    return;
   }
 
   if (process.argv.includes("--all-slots")) {
     for (const s of ["09", "12", "15", "20"]) {
       await runSlot(s);
     }
-    process.exit(0);
+    return;
   }
 
   const slotArg = process.argv.find((a) => a.startsWith("--slot"));
   if (slotArg) {
     const s = slotArg.includes("=") ? slotArg.split("=")[1] : detectSlot();
     await runSlot(s);
-    process.exit(0);
+    return;
   }
 
   if (!process.argv.includes("--daemon-only")) {
     const slot = detectSlot();
     await runSlot(slot);
     if (!process.argv.includes("--daemon")) {
-      process.exit(0);
+      return;
     }
   }
 

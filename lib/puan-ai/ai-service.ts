@@ -3,9 +3,18 @@ import { getRuleValue } from "@/lib/puan-ai/rule-engine";
 import type { CampaignMatch } from "@/lib/puan-ai/types";
 import { UNVERIFIED_RESPONSE } from "@/lib/puan-ai/types";
 
+function requiresEnrollment(campaign: CampaignMatch) { return campaign.rules.some((rule) => rule.kind === "REQUIRED_ENROLLMENT"); }
+
+function enrollmentNote(campaign: CampaignMatch) {
+  return requiresEnrollment(campaign)
+    ? `Puanı veya avantajı kazanmak için harcamadan önce ${campaign.bank.name} mobil uygulamasından ya da resmî kampanya sayfasından kampanyaya katılmayı unutma.`
+    : "Bazı kampanyalar katılım gerektirir; puanı kazanmak için bankanın mobil uygulamasından ya da resmî kampanya sayfasından katılım koşulunu kontrol et.";
+}
+
 function compactCampaign(campaign: CampaignMatch) {
   return {
     bank: campaign.bank.officialName,
+    enrollmentRequired: requiresEnrollment(campaign),
     cards: campaign.cards.map((card) => card.name),
     title: campaign.title,
     merchant: campaign.merchant?.name ?? campaign.category.name,
@@ -38,7 +47,7 @@ function deterministicAnswer(campaigns: CampaignMatch[]) {
     return [
       `${campaigns.length} güncel ve doğrulanmış kampanya buldum.`,
       "Ancak mağaza, kategori, tutar, kart veya taksit tercihi olmadan tek bir kartı “en iyi” olarak doğrulayamam.",
-      "Bu ayrıntılardan birini yazarsan aşağıdaki güncel seçenekleri koşullarına göre karşılaştırabilirim.",
+      "Ne alacağını, yaklaşık tutarı ve hangi kartı kullanmayı düşündüğünü yazarsan (kart numarası veya kişisel bilgi gerekmez) aşağıdaki güncel seçenekleri koşullarına göre karşılaştırabilirim.",
     ].join(" ");
   }
   const first = campaigns[0];
@@ -51,6 +60,7 @@ function deterministicAnswer(campaigns: CampaignMatch[]) {
     `Kayıtlı seçeneklerde öne çıkan eşleşme ${first.bank.name} tarafından sunulan “${first.title}”: ${first.benefitSummary}; ${installment}.`,
     first.decision.totalVerifiedBenefit > 0 ? `Girdiğin tutar için koşullar sağlanırsa hesaplanan avantaj ${first.decision.totalVerifiedBenefit.toLocaleString("tr-TR")} TL değerindedir.` : "Kesin kazanç hesaplanamadı; tutar ve birden fazla işlem gerekliliği dahil katılım koşullarını kontrol et.",
     alternatives > 0 ? `${alternatives} doğrulanmış alternatifi de koşullarıyla birlikte aşağıda karşılaştırabilirsin.` : "Tüm katılım ve istisna koşullarını aşağıdaki kartta kontrol et.",
+    enrollmentNote(first),
     "Bu bir finansal tavsiye değildir; işlemden hemen önce resmî kampanya sayfasını yeniden kontrol et.",
   ].join(" ");
 }
@@ -81,7 +91,9 @@ export async function* streamGroundedExplanation(query: string, campaigns: Campa
     const stream = await client.responses.create({
       model,
       instructions: [
-        "Sen PuanAI'sın. Türkçe, kısa ve anlaşılır yanıt ver.",
+        "Sen PuanAI'sın; kullanıcının yapacağı alışverişi, tutarı ve kullanmayı düşündüğü kartı doğal dille anlayan bir kampanya ajanısın. Türkçe, kısa ve anlaşılır yanıt ver.",
+        "Kart numarası, TC kimlik numarası, telefon veya başka kişisel bilgi isteme; kullanıcı paylaşsa bile yanıtta tekrar etme ve bunlara ihtiyacın olmadığını belirt.",
+        "Önerdiğin kampanyada enrollmentRequired true ise veya katılım koşulundan emin değilsen, puanı kazanmak için harcamadan önce bankanın mobil uygulamasından ya da resmî kampanya sayfasından kampanyaya katılması gerektiğini mutlaka söyle.",
         "Yalnızca verilen doğrulanmış kampanya JSON'undaki bilgileri kullan.",
         "Kampanya, puan, taksit, tarih, tutar, limit, banka, kart veya koşul uydurma.",
         "Kesin kazancı yalnızca calculatedBenefit alanından al. Üst limit veya benefit metnini kesin kazanç sayma. Sıfır hesaplanan avantaj, koşulların doğrulanmadığı anlamına gelebilir. Tüm piyasada en iyi olduğunu iddia etme.",

@@ -36,16 +36,16 @@ type ConversationSummary = {
 };
 
 const suggestions = [
-  "Migros'ta 1.000 TL alışveriş yapacağım. Hangi kart avantajlı?",
-  "Bir iPhone alacağım, taksit yapabilir miyim?",
-  "E-ticarette en yüksek güncel puan hangi kartta?",
+  "Migros'ta 1.000 TL alışveriş yapacağım, Bonus kartım var. Avantaj var mı?",
+  "Bir iPhone alacağım, Worldcard ile taksit yapabilir miyim?",
+  "Akaryakıta 2.000 TL harcayacağım, Axess kullanıyorum. Puan kazanır mıyım?",
   "3.000 TL online alışveriş için hangi kampanya uygun?",
 ];
 
 const greeting: ChatMessage = {
   id: "welcome",
   role: "assistant",
-  content: "Ne alacağını, nerede harcayacağını veya bütçeni yaz. Yalnızca güncel, resmî kaynağı ve doğrulama kaydı bulunan kampanyaları karşılaştırırım.",
+  content: "Merhaba, ben PuanAI. Ne alacağını, yaklaşık tutarı ve hangi kartı kullanmak istediğini yaz. Kart numarası ya da kişisel bilgi istemem; yalnızca güncel, resmî kaynağı doğrulanmış kampanyaları karşılaştırırım.",
   campaigns: [],
 };
 
@@ -206,9 +206,10 @@ export function PuanAIChat() {
       <div className="pa-thread" aria-live="polite">
         <div className="pa-thread__intro">
           <span className="pa-spark"><Sparkles size={20} /></span>
-          <p className="pa-kicker">Türkiye&apos;nin kampanya asistanı</p>
+          <p className="pa-kicker">Kampanya ajanın</p>
           <h1>Harcamadan önce,<br /><em>PuanAI&apos;a sor.</em></h1>
-          <p>Bankaların güncel kampanyalarını tutar, kart, mağaza ve taksit koşullarına göre karşılaştır.</p>
+          <p>Ne alacağını, tutarı ve kartını yaz; PuanAI avantajı bulsun, puanı kazanmak için katılman gereken kampanyayı söylesin.</p>
+          <p className="pa-privacy"><ShieldCheck size={14} /> Kart numarası, hesap veya kişisel bilgi toplamıyoruz; yalnızca yazdığın alışveriş bilgisiyle kampanya eşleştiriyoruz.</p>
         </div>
 
         <div className="pa-messages">
@@ -237,7 +238,7 @@ export function PuanAIChat() {
             value={input}
             onChange={(event) => setInput(event.target.value.slice(0, 1200))}
             onKeyDown={handleKeyDown}
-            placeholder="Örn. Migros'ta 2.500 TL harcayacağım; hangi kart daha avantajlı?"
+            placeholder="Örn. Migros'ta 2.500 TL harcayacağım, Bonus kartım var."
             rows={2}
             disabled={streaming}
           />

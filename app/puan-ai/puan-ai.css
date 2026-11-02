@@ -119,3 +119,5 @@
   .pa-message__campaigns { margin-left: -38px; }
 }
 @media(prefers-reduced-motion: reduce) { .pa-typing i { animation: none; } }
+.pa-privacy { display: flex; align-items: flex-start; gap: 8px; max-width: 560px; margin: 14px 0 0; padding: 10px 12px; border: 1px solid var(--line, rgba(0,0,0,.12)); border-radius: 10px; font-size: 13px; line-height: 1.5; color: var(--muted, #667); }
+.pa-privacy svg { flex: none; margin-top: 2px; color: var(--accent-deep, #4b7a1f); }

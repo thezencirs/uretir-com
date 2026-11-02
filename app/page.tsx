@@ -5,7 +5,7 @@ import { WhatsAppGrowthBanner } from "@/components/whatsapp-growth-banner";
 import { getPublishedContent } from "@/lib/site-content-store";
 import { publicNews } from "@/lib/site-content-model";
 import { ArrowDownRight, ArrowUpRight, CarFront, ChartNoAxesCombined, ChevronRight, Gamepad2, House, Layers, MapPinned, Rocket, Search, Sparkles, Tags, Trophy, WalletCards, Zap } from "lucide-react";
-import { HeroArt } from "@/components/hero-art";
+import { GalaxyIntro } from "@/components/galaxy-intro";
 import { NewsletterForm } from "@/components/newsletter-form";
 import { PostCard } from "@/components/post-card";
 import { SectionHeading } from "@/components/section-heading";
@@ -93,6 +93,7 @@ export default async function HomePage() {
   const content = await getPublishedContent();
   const latestNews = publicNews(content.news).slice(0, 3);
   return <div className="page-reveal">
+    <GalaxyIntro />
     <ToolShortcuts />
     <div className="section-wrap py-4">
       <FinanceStrip />
@@ -154,7 +155,7 @@ export default async function HomePage() {
     </section>
 
     <section className="home-entry">
-      <div className="section-wrap home-entry__grid">
+      <div className="section-wrap home-entry__grid home-entry__grid--solo">
       <div className="home-entry__copy">
         <div className="flex items-center gap-4">
           <p className="rule-label">{content.home.eyebrow}</p>
@@ -174,7 +175,7 @@ export default async function HomePage() {
           <div className="grid max-w-md flex-1 grid-cols-3 text-[10px] text-muted"><div><span className="font-bold text-[color:var(--foreground)]">01</span><p className="mt-2">Merak</p></div><div><span className="font-bold text-[color:var(--foreground)]">02</span><p className="mt-2">Yöntem</p></div><div><span className="font-bold text-[color:var(--foreground)]">03</span><p className="mt-2">Paylaşım</p></div></div>
         </div>
       </div>
-      <div className="home-entry__visual"><HeroArt /></div>
+      
       </div>
     </section>
 

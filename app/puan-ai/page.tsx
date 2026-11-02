@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { PuanAICampaignExplorer, PuanAIChat } from "@/components/puan-ai-chat";
 import { JsonLd } from "@/components/json-ld";
 import { absoluteUrl, SITE_URL } from "@/lib/seo";
-import { PuanAIQuickCompare } from "@/components/puan-ai-quick-compare";
 import { ChannelToolNavigation } from "@/components/channel-tool-navigation";
 import { getChannelTool } from "@/lib/channel-tools";
 import { SeoExplainer } from "@/components/seo-explainer";
@@ -56,7 +55,6 @@ export default function PuanAIPage() {
     <div className="page-reveal pa-page">
       <JsonLd data={softwareSchema} />
       <ChannelToolNavigation active="puan-ai" />
-      <PuanAIQuickCompare />
       <PuanAIChat />
       <section className="section-wrap pa-whatsapp" aria-label="WhatsApp gündem kanalı">
         <div>

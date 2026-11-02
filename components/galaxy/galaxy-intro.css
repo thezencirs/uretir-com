@@ -1,0 +1,91 @@
+.galaxy-intro {
+  --galaxy-accent: #c8f560;
+  position: relative;
+  isolation: isolate;
+  height: calc(100svh - 78px);
+  min-height: 520px;
+  overflow: hidden;
+  color: #f1f4e9;
+  background: radial-gradient(ellipse at 50% 60%, #0c1226 0%, #04060f 55%, #02030a 100%);
+}
+.galaxy-intro__canvas { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; display: block; opacity: 0; transition: opacity 1.2s ease; cursor: default; }
+.galaxy-intro[data-mode="webgl"] .galaxy-intro__canvas { opacity: 1; }
+.galaxy-intro[data-hover="1"] .galaxy-intro__canvas { cursor: pointer; }
+.galaxy-intro__vignette { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(ellipse at center, transparent 55%, rgba(1, 2, 8, .72) 100%), linear-gradient(to bottom, rgba(2, 3, 10, .55), transparent 18%, transparent 80%, rgba(2, 3, 10, .7)); }
+
+.galaxy-copy { position: absolute; z-index: 3; left: 50%; text-align: center; pointer-events: none; opacity: 0; transform: translate3d(-50%, 14px, 0); transition: opacity .7s ease, transform .7s cubic-bezier(.22, 1, .36, 1); width: min(92%, 760px); }
+.galaxy-copy p { margin: 0; }
+.galaxy-eyebrow { font-size: 11px; font-weight: 800; letter-spacing: .28em; color: var(--galaxy-accent); }
+.galaxy-title { margin-top: 14px !important; font-family: Georgia, serif; font-size: clamp(2.2rem, 5.6vw, 4.6rem); line-height: 1.04; letter-spacing: -.045em; text-shadow: 0 2px 40px rgba(0, 0, 0, .7); }
+.galaxy-sub { margin-top: 14px !important; font-size: clamp(.9rem, 1.4vw, 1.05rem); line-height: 1.6; color: #c3cbd8; text-shadow: 0 1px 18px rgba(0, 0, 0, .8); }
+.galaxy-copy--enter { top: 13%; }
+.galaxy-copy--fly { bottom: 15%; font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: #b7c3d6; }
+.galaxy-copy--planets { top: 5%; }
+.galaxy-intro[data-stage="enter"] .galaxy-copy--enter,
+.galaxy-intro[data-stage="fly"] .galaxy-copy--fly,
+.galaxy-intro[data-stage="planets"] .galaxy-copy--planets { opacity: 1; transform: translate3d(-50%, 0, 0); }
+
+.galaxy-scroll-hint { position: absolute; z-index: 3; left: 50%; bottom: 26px; display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 10px; font-weight: 800; letter-spacing: .24em; text-transform: uppercase; color: #aab6c8; opacity: 0; transform: translateX(-50%); transition: opacity .6s ease; pointer-events: none; }
+.galaxy-intro[data-stage="enter"] .galaxy-scroll-hint--enter,
+.galaxy-intro[data-stage="planets"] .galaxy-scroll-hint--planets { opacity: .9; }
+.galaxy-mouse { position: relative; width: 22px; height: 34px; border: 1.5px solid currentColor; border-radius: 12px; }
+.galaxy-mouse i { position: absolute; left: 50%; top: 7px; width: 3px; height: 7px; margin-left: -1.5px; border-radius: 2px; background: currentColor; animation: galaxy-wheel 1.6s ease-in-out infinite; }
+.galaxy-scroll-hint--planets svg { animation: galaxy-bob 1.8s ease-in-out infinite; }
+@keyframes galaxy-wheel { 0% { opacity: 0; transform: translateY(0); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(11px); } }
+@keyframes galaxy-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
+
+.galaxy-skip { position: absolute; z-index: 4; right: 22px; bottom: 22px; display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border: 1px solid rgba(225, 239, 228, .26); border-radius: 999px; background: rgba(5, 8, 16, .55); color: #dbe3ee; font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; cursor: pointer; backdrop-filter: blur(8px); transition: opacity .4s ease, border-color .2s ease; }
+.galaxy-skip:hover, .galaxy-skip:focus-visible { border-color: var(--galaxy-accent); color: #fff; }
+.galaxy-intro[data-stage="planets"] .galaxy-skip { opacity: 0; pointer-events: none; }
+.galaxy-rail { position: absolute; z-index: 3; right: 20px; top: 50%; width: 2px; height: 120px; margin-top: -60px; background: rgba(225, 239, 228, .16); border-radius: 2px; overflow: hidden; pointer-events: none; }
+.galaxy-rail span { display: block; width: 100%; height: 100%; background: var(--galaxy-accent); transform-origin: top; transform: scaleY(0); }
+
+.galaxy-labels { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.galaxy-label { position: absolute; left: 0; top: 0; display: block; width: 0; height: 0; opacity: 0; visibility: hidden; will-change: transform; transition: opacity .6s ease; text-decoration: none; color: inherit; }
+.galaxy-label[data-show="1"] { opacity: 1; visibility: visible; }
+.galaxy-label__ring { position: absolute; left: calc(var(--r, 24px) * -1 - 9px); top: calc(var(--r, 24px) * -1 - 9px); width: calc(var(--r, 24px) * 2 + 18px); height: calc(var(--r, 24px) * 2 + 18px); border: 1.5px solid transparent; border-radius: 50%; transition: border-color .25s ease, box-shadow .25s ease; }
+.galaxy-label[data-active="1"] .galaxy-label__ring, .galaxy-label:focus-visible .galaxy-label__ring { border-color: rgba(200, 245, 96, .8); box-shadow: 0 0 30px rgba(200, 245, 96, .25); }
+.galaxy-label:focus-visible { outline: none; }
+.galaxy-label__text { position: absolute; left: 0; top: calc(var(--r, 24px) + 16px); display: grid; gap: 2px; transform: translateX(-50%); padding: 5px 10px; text-align: center; white-space: nowrap; pointer-events: auto; border-radius: 10px; background: rgba(2, 4, 12, .5); backdrop-filter: blur(4px); }
+.galaxy-label__text strong { font-size: 13px; letter-spacing: .02em; text-shadow: 0 1px 14px rgba(0, 0, 0, .95); }
+.galaxy-label__text small { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: #aebbd0; text-shadow: 0 1px 12px rgba(0, 0, 0, .95); }
+.galaxy-label[data-active="1"] .galaxy-label__text strong { color: var(--galaxy-accent); }
+
+.galaxy-card { position: absolute; z-index: 5; left: 0; top: 0; width: min(280px, calc(100% - 24px)); display: grid; gap: 8px; padding: 16px 16px 14px; border: 1px solid rgba(225, 239, 228, .22); border-radius: 14px; background: rgba(6, 10, 20, .74); backdrop-filter: blur(14px); box-shadow: 0 18px 60px rgba(0, 0, 0, .55); opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .25s ease; }
+.galaxy-card[data-open="1"] { opacity: 1; visibility: visible; }
+.galaxy-card[data-touch="1"] { pointer-events: auto; }
+.galaxy-card__tag { font-size: 10px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; color: var(--galaxy-accent); }
+.galaxy-card strong { font-family: Georgia, serif; font-size: 24px; letter-spacing: -.03em; }
+.galaxy-card p { margin: 0; font-size: 13px; line-height: 1.55; color: #c3cbd8; }
+.galaxy-card__cta { display: inline-flex; align-items: center; gap: 6px; justify-self: start; margin-top: 4px; padding: 8px 14px; border-radius: 999px; background: var(--galaxy-accent); color: #10200a; font-size: 12px; font-weight: 800; text-decoration: none; }
+
+.galaxy-intro[data-traveling="1"]::after { content: ""; position: absolute; inset: 0; z-index: 6; background: #02030a; animation: galaxy-fade 1s ease-in forwards; pointer-events: none; }
+@keyframes galaxy-fade { from { opacity: 0; } to { opacity: 1; } }
+.galaxy-intro[data-traveling="1"] .galaxy-copy, .galaxy-intro[data-traveling="1"] .galaxy-card { opacity: 0 !important; }
+
+/* No WebGL: keep every tool reachable as a plain responsive grid. */
+.galaxy-intro[data-mode="fallback"] { height: auto; min-height: 0; padding: 72px 0 56px; }
+.galaxy-intro[data-mode="fallback"] .galaxy-intro__canvas, .galaxy-intro[data-mode="fallback"] .galaxy-scroll-hint, .galaxy-intro[data-mode="fallback"] .galaxy-skip, .galaxy-intro[data-mode="fallback"] .galaxy-rail, .galaxy-intro[data-mode="fallback"] .galaxy-card, .galaxy-intro[data-mode="fallback"] .galaxy-copy--enter, .galaxy-intro[data-mode="fallback"] .galaxy-copy--fly { display: none; }
+.galaxy-intro[data-mode="fallback"] .galaxy-copy--planets { position: relative; left: auto; top: auto; transform: none; margin: 0 auto 28px; opacity: 1; }
+.galaxy-intro[data-mode="fallback"] .galaxy-labels { position: relative; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; width: min(1000px, calc(100% - 32px)); margin: 0 auto; pointer-events: auto; }
+.galaxy-intro[data-mode="fallback"] .galaxy-label { position: relative; width: auto; height: auto; transform: none !important; padding: 14px; border: 1px solid rgba(225, 239, 228, .2); border-radius: 12px; background: rgba(255, 255, 255, .04); }
+.galaxy-intro[data-mode="fallback"] .galaxy-label__ring { display: none; }
+.galaxy-intro[data-mode="fallback"] .galaxy-label__text { position: static; transform: none; text-align: left; }
+
+@media (max-width: 760px) {
+  .galaxy-intro { height: calc(100svh - 78px - 66px); }
+  .galaxy-copy--enter { top: 9%; }
+  .galaxy-rail { right: 10px; height: 80px; margin-top: -40px; }
+  .galaxy-skip { right: 14px; bottom: 16px; }
+  .galaxy-card { width: min(260px, calc(100% - 24px)); }
+  .galaxy-label__text { padding: 2px 6px; background: none; backdrop-filter: none; }
+  .galaxy-label__text strong { font-size: 12px; }
+  .galaxy-label__text small { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .galaxy-mouse i, .galaxy-scroll-hint--planets svg { animation: none; }
+  .galaxy-copy, .galaxy-intro__canvas { transition: none; }
+}
+
+.home-entry .home-entry__grid--solo { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+.home-entry .home-entry__grid--solo .home-entry__copy { max-width: 46rem; padding-right: 0; }

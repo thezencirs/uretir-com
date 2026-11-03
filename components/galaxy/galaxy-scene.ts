@@ -424,7 +424,7 @@ export function createGalaxyScene(options: GalaxySceneOptions): GalaxyScene {
 
   const lightPos = new Vector3(0, 0, 0);
   const ringRadii = [5.6, 8.8, 12.0];
-  const ringSpeeds = [0.058, 0.040, 0.029];
+  const ringTurns = [1.6, 1.25, 1];
   const orbitLines: LineLoop[] = [];
   const orbitMaterial = new LineBasicMaterial({ color: 0x9fb8d8, transparent: true, opacity: 0, depthWrite: false });
   ringRadii.forEach((radius) => {
@@ -494,11 +494,11 @@ export function createGalaxyScene(options: GalaxySceneOptions): GalaxyScene {
   let forcedHover: string | null = null;
   let orbitDamp = 1;
 
-  let target = 0, current = 0, active = true, disposed = false, frame = 0, last = performance.now(), time = 0;
+  let target = 0, current = 0, active = true, disposed = false, frame = 0, last = performance.now(), time = 0, intro = 0, idle = 0, lastProgress = 0;
   let travel: { id: string; t: number; done: () => void } | null = null;
   let width = 1, height = 1, aspect = 1;
   const parallax = new Vector2();
-  const camPos = new Vector3(), camLook = new Vector3(), p0 = new Vector3(), p1 = new Vector3(), p2 = new Vector3(), tmpA = new Vector3(), tmpB = new Vector3(), projA = new Vector3(), projB = new Vector3();
+  const camPos = new Vector3(), camLook = new Vector3(), tmpA = new Vector3(), tmpB = new Vector3(), projA = new Vector3(), projB = new Vector3();
 
   function layout() {
     const rect = canvas.getBoundingClientRect();
@@ -515,51 +515,44 @@ export function createGalaxyScene(options: GalaxySceneOptions): GalaxyScene {
   const smooth = (a: number, b: number, v: number) => { const t = clamp01((v - a) / (b - a)); return t * t * (3 - 2 * t); };
   const smoother = (v: number) => { const t = clamp01(v); return t * t * t * (t * (t * 6 - 15) + 10); };
 
-  function quadBezier(out: Vector3, a: Vector3, b: Vector3, c: Vector3, t: number) {
-    const u = 1 - t;
-    return out.set(u * u * a.x + 2 * u * t * b.x + t * t * c.x, u * u * a.y + 2 * u * t * b.y + t * t * c.y, u * u * a.z + 2 * u * t * b.z + t * t * c.z);
-  }
-
   function planetWorld(rt: PlanetRuntime, out: Vector3) { return rt.group.getWorldPosition(out); }
 
   function update(dt: number) {
     const move = reducedMotion ? 0 : 1;
     time += dt * move;
-    current += (target - current) * (reducedMotion ? 1 : 1 - Math.exp(-dt * 3.4));
+    current += (target - current) * (reducedMotion ? 1 : 1 - Math.exp(-dt * 4.2));
     if (Math.abs(target - current) < 0.0004) current = target;
-    const t = smoother(current);
+    intro = reducedMotion ? 1 : Math.min(1, intro + dt / 2.4);
+    const k = smoother(intro);
 
     const portrait = aspect < 0.95;
     const ringScale = portrait ? 0.62 : Math.min(1, Math.max(0.52, aspect / 1.4));
     const zStretch = portrait ? Math.min(2.0, Math.max(0.92, 0.95 / aspect)) : 0.92;
     const baseDist = portrait ? 31.2 : 31.9;
-    const endMul = Math.max(1, ((12 * ringScale + 2.2) / (0.384 * aspect)) / baseDist);
-    const startMul = Math.min(1.9, Math.max(1, 0.95 / aspect));
+    const viewMul = Math.max(1, ((12 * ringScale + 2.2) / (0.384 * aspect)) / baseDist);
     const planetScale = portrait ? 1 : Math.min(1, Math.max(0.6, ringScale * 1.25));
 
-    p0.copy(galaxyCenter).add(tmpA.set(0, 44, 70).multiplyScalar(startMul));
-    (portrait ? p2.set(0, 24, 20) : p2.set(0, 17, 27)).multiplyScalar(endMul);
-    p1.copy(p0).add(p2).multiplyScalar(0.5);
-    p1.y += 12;
-    quadBezier(camPos, p0, p1, p2, t);
-    camLook.copy(galaxyCenter).lerp(tmpB.set(0, 0, 0), smooth(0.15, 1, t));
+    // The camera stays on the planetary system; the Milky Way remains visible behind it.
+    // A short entrance glides in from slightly farther away.
+    (portrait ? camPos.set(0, 24, 20) : camPos.set(0, 17, 27)).multiplyScalar(viewMul * (1 + 0.45 * (1 - k)));
+    camPos.y += 6 * (1 - k);
+    camLook.set(0, 0, 0);
 
-    // Gentle pointer parallax and slow drift keep the scene alive without user input.
+    // Gentle pointer parallax keeps the scene alive.
     parallax.x += (((pointerInside ? pointer.x : 0) - parallax.x) * (1 - Math.exp(-dt * 2.5)));
     parallax.y += (((pointerInside ? pointer.y : 0) - parallax.y) * (1 - Math.exp(-dt * 2.5)));
-    const drift = Math.sin(time * 0.07) * 0.6 * (1 - t * 0.6);
-    camPos.x += parallax.x * (1.4 + 8 * (1 - t)) * (reducedMotion ? 0 : 1) + drift * 4 * (1 - t);
-    camPos.y += parallax.y * (0.8 + 4 * (1 - t)) * (reducedMotion ? 0 : 1);
+    camPos.x += parallax.x * 1.6 * move;
+    camPos.y += parallax.y * 0.9 * move;
 
     if (travel) {
       travel.t = Math.min(1, travel.t + dt / 1.05);
       const rt = runtimes.find((item) => item.data.id === travel!.id);
       if (rt) {
-        const k = smoother(travel.t);
+        const tk = smoother(travel.t);
         planetWorld(rt, tmpA);
         tmpB.copy(camPos).sub(tmpA).normalize().multiplyScalar(rt.data.radius * planetScale * 2.1).add(tmpA);
-        camPos.lerp(tmpB, k);
-        camLook.lerp(tmpA, k);
+        camPos.lerp(tmpB, tk);
+        camLook.lerp(tmpA, tk);
       }
       if (travel.t >= 1) { const done = travel.done; travel = null; done(); }
     }
@@ -568,32 +561,35 @@ export function createGalaxyScene(options: GalaxySceneOptions): GalaxyScene {
 
     starMaterial.uniforms.uTime.value = time;
     hazeMaterial.uniforms.uTime.value = time;
-    hazeMaterial.uniforms.uHaze.value = 1 - 0.78 * smooth(0.45, 0.95, t);
+    hazeMaterial.uniforms.uHaze.value = 0.24;
     background.position.copy(camera.position);
 
-    const appear = smooth(0.58, 0.92, t);
-    system.visible = appear > 0.001;
+    const appear = smooth(0.15, 0.85, intro);
     orbitMaterial.opacity = 0.16 * appear;
     sunCore.material.opacity = appear;
     sunCorona.material.opacity = 0.38 * appear;
 
-    const dampTarget = (hoverId || forcedHover) ? 0.12 : 1;
+    // Hovering a planet slows the idle drift so it is easy to click.
+    const dampTarget = (hoverId || forcedHover) ? 0.1 : 1;
     orbitDamp += (dampTarget - orbitDamp) * (1 - Math.exp(-dt * 4));
+    idle += dt * 0.012 * orbitDamp * move;
     orbitLines.forEach((line) => line.scale.set(ringScale, 1, (ringScale * zStretch) / 0.92));
 
     runtimes.forEach((rt, index) => {
       const ring = rt.data.ring;
-      rt.angle += dt * ringSpeeds[ring] * orbitDamp * move;
+      // The wheel drives the orbit: at progress 1 the outer ring has completed exactly one revolution.
+      rt.angle = rt.data.phase + current * Math.PI * 2 * ringTurns[ring] + idle * ringTurns[ring];
       const a = ringRadii[ring] * ringScale;
       rt.group.position.set(Math.cos(rt.angle) * a, Math.sin(rt.angle * 2 + index) * 0.22, Math.sin(rt.angle) * a * zStretch);
-      const reveal = smooth(0.62 + index * 0.012, 0.95, t);
+      const reveal = smooth(0.25 + index * 0.05, 0.85 + index * 0.02, intro);
       rt.group.scale.setScalar(Math.max(0.0001, planetScale * reveal));
-      rt.body.rotation.y += dt * 0.12 * move;
+      rt.body.rotation.y += dt * 0.12 * move + (current - lastProgress) * 3;
       const wanted = (hoverId === rt.data.id || forcedHover === rt.data.id) ? 1 : 0;
       rt.hover += (wanted - rt.hover) * (1 - Math.exp(-dt * 9));
       rt.uniforms.uHover.value = rt.hover;
       rt.uniforms.uTime.value = time;
     });
+    lastProgress = current;
 
     // Hover picking against generous invisible spheres.
     if (pointerInside && appear > 0.9 && !travel) {
@@ -611,7 +607,7 @@ export function createGalaxyScene(options: GalaxySceneOptions): GalaxyScene {
       const y = (-projA.y * 0.5 + 0.5) * height;
       projB.setFromMatrixColumn(camera.matrixWorld, 0).multiplyScalar(rt.data.radius * planetScale).add(tmpA).project(camera);
       const r = Math.abs((projB.x * 0.5 + 0.5) * width - x);
-      return { id: rt.data.id, x, y, r, show: appear > 0.92 && projA.z < 1 && !travel };
+      return { id: rt.data.id, x, y, r, show: appear > 0.8 && projA.z < 1 && !travel };
     });
     onFrame({ progress: current, planets: screens });
   }
@@ -633,7 +629,7 @@ export function createGalaxyScene(options: GalaxySceneOptions): GalaxyScene {
 
   return {
     setTarget(value) { target = clamp01(value); if (!active) { active = true; last = performance.now(); if (!frame) frame = requestAnimationFrame(loop); } },
-    snapTo(value) { target = current = clamp01(value); },
+    snapTo(value) { target = current = lastProgress = clamp01(value); },
     setPointer(x, y, inside) { pointer.set(x, y); pointerInside = inside; },
     setHover(id) { forcedHover = id; },
     pickAt() { return hoverId; },

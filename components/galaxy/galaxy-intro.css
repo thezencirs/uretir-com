@@ -16,27 +16,23 @@
 .galaxy-copy { position: absolute; z-index: 3; left: 50%; text-align: center; pointer-events: none; opacity: 0; transform: translate3d(-50%, 14px, 0); transition: opacity .7s ease, transform .7s cubic-bezier(.22, 1, .36, 1); width: min(92%, 760px); }
 .galaxy-copy p { margin: 0; }
 .galaxy-eyebrow { font-size: 11px; font-weight: 800; letter-spacing: .28em; color: var(--galaxy-accent); }
-.galaxy-title { margin-top: 14px !important; font-family: Georgia, serif; font-size: clamp(2.2rem, 5.6vw, 4.6rem); line-height: 1.04; letter-spacing: -.045em; text-shadow: 0 2px 40px rgba(0, 0, 0, .7); }
+.galaxy-title { margin-top: 10px !important; font-family: Georgia, serif; font-size: clamp(1.7rem, 3.4vw, 3rem); line-height: 1.04; letter-spacing: -.045em; text-shadow: 0 2px 40px rgba(0, 0, 0, .7); }
 .galaxy-sub { margin-top: 14px !important; font-size: clamp(.9rem, 1.4vw, 1.05rem); line-height: 1.6; color: #c3cbd8; text-shadow: 0 1px 18px rgba(0, 0, 0, .8); }
-.galaxy-copy--enter { top: 13%; }
-.galaxy-copy--fly { bottom: 15%; font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: #b7c3d6; }
-.galaxy-copy--planets { top: 5%; }
-.galaxy-intro[data-stage="enter"] .galaxy-copy--enter,
-.galaxy-intro[data-stage="fly"] .galaxy-copy--fly,
-.galaxy-intro[data-stage="planets"] .galaxy-copy--planets { opacity: 1; transform: translate3d(-50%, 0, 0); }
+.galaxy-copy--orbit { top: 4.5%; }
+.galaxy-intro[data-mode="webgl"] .galaxy-copy--orbit, .galaxy-intro[data-mode="fallback"] .galaxy-copy--orbit { opacity: 1; transform: translate3d(-50%, 0, 0); }
 
-.galaxy-scroll-hint { position: absolute; z-index: 3; left: 50%; bottom: 26px; display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 10px; font-weight: 800; letter-spacing: .24em; text-transform: uppercase; color: #aab6c8; opacity: 0; transform: translateX(-50%); transition: opacity .6s ease; pointer-events: none; }
-.galaxy-intro[data-stage="enter"] .galaxy-scroll-hint--enter,
-.galaxy-intro[data-stage="planets"] .galaxy-scroll-hint--planets { opacity: .9; }
+.galaxy-scroll-hint { position: absolute; z-index: 3; left: 26px; bottom: 22px; display: flex; flex-direction: row; align-items: center; gap: 10px; font-size: 10px; font-weight: 800; letter-spacing: .24em; text-transform: uppercase; color: #aab6c8; opacity: 0; transition: opacity .6s ease; pointer-events: none; }
+.galaxy-intro[data-mode="webgl"][data-stage="orbit"] .galaxy-scroll-hint--orbit,
+.galaxy-intro[data-mode="webgl"][data-stage="done"] .galaxy-scroll-hint--done { opacity: .9; }
 .galaxy-mouse { position: relative; width: 22px; height: 34px; border: 1.5px solid currentColor; border-radius: 12px; }
 .galaxy-mouse i { position: absolute; left: 50%; top: 7px; width: 3px; height: 7px; margin-left: -1.5px; border-radius: 2px; background: currentColor; animation: galaxy-wheel 1.6s ease-in-out infinite; }
-.galaxy-scroll-hint--planets svg { animation: galaxy-bob 1.8s ease-in-out infinite; }
+.galaxy-scroll-hint--done svg { animation: galaxy-bob 1.8s ease-in-out infinite; }
 @keyframes galaxy-wheel { 0% { opacity: 0; transform: translateY(0); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(11px); } }
 @keyframes galaxy-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
 
 .galaxy-skip { position: absolute; z-index: 4; right: 22px; bottom: 22px; display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border: 1px solid rgba(225, 239, 228, .26); border-radius: 999px; background: rgba(5, 8, 16, .55); color: #dbe3ee; font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; cursor: pointer; backdrop-filter: blur(8px); transition: opacity .4s ease, border-color .2s ease; }
 .galaxy-skip:hover, .galaxy-skip:focus-visible { border-color: var(--galaxy-accent); color: #fff; }
-.galaxy-intro[data-stage="planets"] .galaxy-skip { opacity: 0; pointer-events: none; }
+.galaxy-intro[data-stage="done"] .galaxy-skip { border-color: var(--galaxy-accent); color: #fff; }
 .galaxy-rail { position: absolute; z-index: 3; right: 20px; top: 50%; width: 2px; height: 120px; margin-top: -60px; background: rgba(225, 239, 228, .16); border-radius: 2px; overflow: hidden; pointer-events: none; }
 .galaxy-rail span { display: block; width: 100%; height: 100%; background: var(--galaxy-accent); transform-origin: top; transform: scaleY(0); }
 
@@ -65,8 +61,8 @@
 
 /* No WebGL: keep every tool reachable as a plain responsive grid. */
 .galaxy-intro[data-mode="fallback"] { height: auto; min-height: 0; padding: 72px 0 56px; }
-.galaxy-intro[data-mode="fallback"] .galaxy-intro__canvas, .galaxy-intro[data-mode="fallback"] .galaxy-scroll-hint, .galaxy-intro[data-mode="fallback"] .galaxy-skip, .galaxy-intro[data-mode="fallback"] .galaxy-rail, .galaxy-intro[data-mode="fallback"] .galaxy-card, .galaxy-intro[data-mode="fallback"] .galaxy-copy--enter, .galaxy-intro[data-mode="fallback"] .galaxy-copy--fly { display: none; }
-.galaxy-intro[data-mode="fallback"] .galaxy-copy--planets { position: relative; left: auto; top: auto; transform: none; margin: 0 auto 28px; opacity: 1; }
+.galaxy-intro[data-mode="fallback"] .galaxy-intro__canvas, .galaxy-intro[data-mode="fallback"] .galaxy-scroll-hint, .galaxy-intro[data-mode="fallback"] .galaxy-skip, .galaxy-intro[data-mode="fallback"] .galaxy-rail, .galaxy-intro[data-mode="fallback"] .galaxy-card { display: none; }
+.galaxy-intro[data-mode="fallback"] .galaxy-copy--orbit { position: relative; left: auto; top: auto; transform: none; margin: 0 auto 28px; opacity: 1; }
 .galaxy-intro[data-mode="fallback"] .galaxy-labels { position: relative; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; width: min(1000px, calc(100% - 32px)); margin: 0 auto; pointer-events: auto; }
 .galaxy-intro[data-mode="fallback"] .galaxy-label { position: relative; width: auto; height: auto; transform: none !important; padding: 14px; border: 1px solid rgba(225, 239, 228, .2); border-radius: 12px; background: rgba(255, 255, 255, .04); }
 .galaxy-intro[data-mode="fallback"] .galaxy-label__ring { display: none; }
@@ -74,7 +70,8 @@
 
 @media (max-width: 760px) {
   .galaxy-intro { height: calc(100svh - 78px - 66px); }
-  .galaxy-copy--enter { top: 9%; }
+  .galaxy-copy--orbit { top: 3%; }
+  .galaxy-sub { display: none; }
   .galaxy-rail { right: 10px; height: 80px; margin-top: -40px; }
   .galaxy-skip { right: 14px; bottom: 16px; }
   .galaxy-card { width: min(260px, calc(100% - 24px)); }
@@ -83,9 +80,11 @@
   .galaxy-label__text small { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .galaxy-mouse i, .galaxy-scroll-hint--planets svg { animation: none; }
+  .galaxy-mouse i, .galaxy-scroll-hint--done svg { animation: none; }
   .galaxy-copy, .galaxy-intro__canvas { transition: none; }
 }
 
 .home-entry .home-entry__grid--solo { grid-template-columns: minmax(0, 1fr); min-height: 0; }
 .home-entry .home-entry__grid--solo .home-entry__copy { max-width: 46rem; padding-right: 0; }
+.galaxy-touch-only { display: none; }
+@media (hover: none) and (pointer: coarse) { .galaxy-touch-only { display: inline; } .galaxy-pointer-only { display: none; } }

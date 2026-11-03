@@ -10,7 +10,7 @@ import type { GalaxyScene, PlanetScreen } from "./galaxy/galaxy-scene";
 import "./galaxy/galaxy-intro.css";
 
 const SEEN_KEY = "uretir-galaxy-intro-v1";
-const WHEEL_RANGE = 1500;
+const WHEEL_RANGE = 1800;
 
 type Mode = "loading" | "webgl" | "fallback";
 
@@ -24,6 +24,7 @@ export function GalaxyIntro() {
   const labelRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
   const screensRef = useRef<Record<string, PlanetScreen>>({});
   const targetRef = useRef(0);
+  const renderedRef = useRef(0);
   const lockUntil = useRef(0);
   const lockEnabled = useRef(false);
   const reducedRef = useRef(false);
@@ -51,9 +52,17 @@ export function GalaxyIntro() {
     targetRef.current = value;
     scene?.setTarget(value);
     const now = performance.now();
-    if (value >= 1 && prev < 1) { lockUntil.current = now + 550; markSeen(); }
+    if (value >= 1 && prev < 1) { lockUntil.current = now + 700; markSeen(); }
     if (value <= 0 && prev > 0) lockUntil.current = now + 300;
   }, [markSeen]);
+
+  const continueToSite = useCallback(() => {
+    setProgress(1);
+    const root = rootRef.current;
+    if (!root) return;
+    const top = root.getBoundingClientRect().bottom + window.scrollY - 70;
+    window.setTimeout(() => window.scrollTo({ top, behavior: reducedRef.current ? "auto" : "smooth" }), reducedRef.current ? 0 : 450);
+  }, [setProgress]);
 
   const travel = useCallback((id: string) => {
     if (travelingRef.current) return;
@@ -85,7 +94,8 @@ export function GalaxyIntro() {
     targetRef.current = startDone ? 1 : 0;
 
     function updateFrame(info: { progress: number; planets: PlanetScreen[] }) {
-      const stage = info.progress < 0.08 ? "enter" : info.progress < 0.9 ? "fly" : "planets";
+      renderedRef.current = info.progress;
+      const stage = info.progress < 0.985 ? "orbit" : "done";
       if (root!.dataset.stage !== stage) root!.dataset.stage = stage;
       if (fillRef.current) fillRef.current.style.transform = `scaleY(${info.progress.toFixed(4)})`;
       const bounds = root!.getBoundingClientRect();
@@ -150,7 +160,7 @@ export function GalaxyIntro() {
           const target = targetRef.current;
           if (delta > 0) {
             if (target < 1) { event.preventDefault(); setProgress(target + delta / WHEEL_RANGE); }
-            else if (now < lockUntil.current) event.preventDefault();
+            else if (now < lockUntil.current || renderedRef.current < 0.985) event.preventDefault();
           } else if (target > 0) {
             event.preventDefault();
             if (now >= lockUntil.current) setProgress(target + delta / WHEEL_RANGE);
@@ -209,7 +219,7 @@ export function GalaxyIntro() {
       } catch {
         if (cancelled) return;
         targetRef.current = 1;
-        root.dataset.stage = "planets";
+        root.dataset.stage = "done";
         setMode("fallback");
       }
     })();
@@ -227,7 +237,7 @@ export function GalaxyIntro() {
 
   function handleCanvasPointerUp(event: React.PointerEvent<HTMLElement>) {
     const scene = sceneRef.current;
-    if (!scene || traveling || targetRef.current < 1) return;
+    if (!scene || traveling) return;
     pointerToScene(event, true);
     const mouse = event.pointerType === "mouse";
     window.setTimeout(() => {
@@ -244,13 +254,13 @@ export function GalaxyIntro() {
     travel(id);
   }
 
-  const stageHint = mode === "fallback" ? "planets" : undefined;
+  const stageHint = mode === "fallback" ? "done" : undefined;
 
   return <section
     ref={rootRef}
     className="galaxy-intro"
     data-mode={mode}
-    data-stage={stageHint ?? "enter"}
+    data-stage={stageHint ?? "orbit"}
     data-hover={hoverId ? "1" : "0"}
     data-traveling={traveling ? "1" : "0"}
     aria-label="Üretir evreni: tüm araçlara giden gezegenler"
@@ -265,18 +275,16 @@ export function GalaxyIntro() {
     />
     <div className="galaxy-intro__vignette" aria-hidden="true" />
 
-    <div className="galaxy-copy galaxy-copy--enter">
-      <p className="galaxy-eyebrow">ÜRETİR EVRENİ</p>
-      <p className="galaxy-title">Bilgi, bir galaksi kadar geniş.</p>
-      <p className="galaxy-sub">Kaydır; Samanyolu&apos;ndan çalışan araçlarımızın gezegenlerine yolculuk et.</p>
+    <div className="galaxy-copy galaxy-copy--orbit">
+      <p className="galaxy-eyebrow">ÜRETİR EVRENİ · 8 YAPAY ZEKÂ ARACI</p>
+      <p className="galaxy-title"><span className="galaxy-pointer-only">Tekerleği çevir</span><span className="galaxy-touch-only">Parmağınla kaydır</span>, gezegenler dönsün.</p>
+      <p className="galaxy-sub">Her gezegen çalışan bir aracımız. Üzerine gel, tıkla, keşfet.</p>
     </div>
-    <div className="galaxy-copy galaxy-copy--fly" aria-hidden="true"><p>Samanyolu&apos;ndan sistemimize yaklaşıyoruz…</p></div>
-    <div className="galaxy-copy galaxy-copy--planets"><p className="galaxy-eyebrow">8 GEZEGEN · 8 ARAÇ</p><p className="galaxy-sub">Bir dünyaya dokun, keşfet.</p></div>
 
-    <div className="galaxy-scroll-hint galaxy-scroll-hint--enter" aria-hidden="true"><span className="galaxy-mouse"><i /></span><span>Kaydır</span></div>
-    <div className="galaxy-scroll-hint galaxy-scroll-hint--planets" aria-hidden="true"><ChevronsDown size={18} /><span>Siteye devam et</span></div>
+    <div className="galaxy-scroll-hint galaxy-scroll-hint--orbit" aria-hidden="true"><span className="galaxy-mouse"><i /></span><span className="galaxy-pointer-only">Tekerleği çevir</span><span className="galaxy-touch-only">Kaydır</span></div>
+    <div className="galaxy-scroll-hint galaxy-scroll-hint--done" aria-hidden="true"><ChevronsDown size={18} /><span>Tam tur! Siteye devam et</span></div>
 
-    <button type="button" className="galaxy-skip" onClick={() => setProgress(1)}>Atla <ArrowDown size={13} aria-hidden="true" /></button>
+    <button type="button" className="galaxy-skip" onClick={continueToSite}>Siteye devam <ArrowDown size={13} aria-hidden="true" /></button>
     <div className="galaxy-rail" aria-hidden="true"><span ref={fillRef} /></div>
 
     <nav className="galaxy-labels" aria-label="Üretir araçları">

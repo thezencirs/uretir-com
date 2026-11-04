@@ -116,6 +116,11 @@ const FRESH_VISUAL_POOLS = {
     "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=85",
   ],
   indirimai: [
+    "https://images.unsplash.com/photo-1585515320310-259814833e62?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1583394838336-acd977736f90?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1588702547919-26089e690ecc?auto=format&fit=crop&w=1200&q=85",
+    "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=1200&q=85",
     "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1200&q=85",
     "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1200&q=85",
     "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=85",
@@ -724,15 +729,25 @@ async function prepareScenePhotoDataUri(scene) {
   return null;
 }
 
-let cachedDinoMascotDataUri = null;
-async function getDinoMascotDataUri() {
-  if (cachedDinoMascotDataUri) return cachedDinoMascotDataUri;
-  const cutoutPath = path.resolve("public", "mascot", "uretir-dino-cutout.png");
-  if (existsSync(cutoutPath)) {
+const cachedDinoCostumes = {};
+async function getDinoMascotDataUri(costumeKey = "founder") {
+  const key = String(costumeKey || "founder").toLowerCase();
+  if (cachedDinoCostumes[key]) return cachedDinoCostumes[key];
+  const fileMap = {
+    analyst: "uretir-dino-analyst.png",
+    scientist: "uretir-dino-scientist.png",
+    creator: "uretir-dino-creator.png",
+    founder: "uretir-dino-cutout.png",
+  };
+  const chosenFile = fileMap[key] || fileMap.founder;
+  const cutoutPath = path.resolve("public", "mascot", chosenFile);
+  const fallbackPath = path.resolve("public", "mascot", "uretir-dino-cutout.png");
+  const finalPath = existsSync(cutoutPath) ? cutoutPath : fallbackPath;
+  if (existsSync(finalPath)) {
     try {
-      const buf = await fs.readFile(cutoutPath);
-      cachedDinoMascotDataUri = `data:image/png;base64,${buf.toString("base64")}`;
-      return cachedDinoMascotDataUri;
+      const buf = await fs.readFile(finalPath);
+      cachedDinoCostumes[key] = `data:image/png;base64,${buf.toString("base64")}`;
+      return cachedDinoCostumes[key];
     } catch {}
   }
   return null;
@@ -791,6 +806,11 @@ function easeOutBack(x) {
   return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
 }
 
+function easeOutCubic(x) {
+  const t = Math.max(0, Math.min(1, x));
+  return 1 - Math.pow(1 - t, 3);
+}
+
 function buildSmoothBezierPath(points) {
   if (!points || points.length === 0) return "";
   if (points.length === 1) return `M ${points[0][0]} ${points[0][1]}`;
@@ -809,7 +829,7 @@ function buildSmoothBezierPath(points) {
   return d;
 }
 
-function renderHighlightedSubtitleLine(lineText, highlightText, accentColor = "#c8f560") {
+function renderHighlightedSubtitleLine(lineText, highlightText, accentColor = "#34d399") {
   const raw = String(lineText || "");
   const hl = String(highlightText || "").trim();
   if (!hl) return escapeXml(raw);
@@ -821,12 +841,107 @@ function renderHighlightedSubtitleLine(lineText, highlightText, accentColor = "#
   return `${escapeXml(before)}<tspan fill="${accentColor}" font-weight="900">${escapeXml(match)}</tspan>${escapeXml(after)}`;
 }
 
+const LIGHT_STUDIO_PALETTES = {
+  daylight_sage: {
+    bg1: "#F4F8F5",
+    bg2: "#E6F0EA",
+    grid: "#D5E5DC",
+    cardBg: "#FFFFFF",
+    cardAlt: "#EDF5F0",
+    border: "#BDD6C8",
+    textDark: "#0F172A",
+    textMuted: "#475569",
+    accent: "#059669",
+    accent2: "#10B981",
+    accentSoft: "#D1FAE5",
+    subBg: "#0F172A",
+    subAccent: "#34D399",
+  },
+  sky_indigo: {
+    bg1: "#F0F5FB",
+    bg2: "#E3ECF8",
+    grid: "#D2E0F2",
+    cardBg: "#FFFFFF",
+    cardAlt: "#EBF2FA",
+    border: "#B9CDEC",
+    textDark: "#0F172A",
+    textMuted: "#475569",
+    accent: "#2563EB",
+    accent2: "#4F46E5",
+    accentSoft: "#DBEAFE",
+    subBg: "#0F172A",
+    subAccent: "#60A5FA",
+  },
+  warm_sand: {
+    bg1: "#FBF7F1",
+    bg2: "#F3EAE0",
+    grid: "#E5D9C8",
+    cardBg: "#FFFFFF",
+    cardAlt: "#F7F0E6",
+    border: "#DEC8B0",
+    textDark: "#1C1917",
+    textMuted: "#57534E",
+    accent: "#EA580C",
+    accent2: "#D97706",
+    accentSoft: "#FFEDD5",
+    subBg: "#1C1917",
+    subAccent: "#FB923C",
+  },
+  lavender_mint: {
+    bg1: "#F6F4FF",
+    bg2: "#EBE7FE",
+    grid: "#DCD5F8",
+    cardBg: "#FFFFFF",
+    cardAlt: "#F1EEFC",
+    border: "#C7BDF2",
+    textDark: "#1E1B4B",
+    textMuted: "#4C1D95",
+    accent: "#7C3AED",
+    accent2: "#0D9488",
+    accentSoft: "#EDE9FE",
+    subBg: "#1E1B4B",
+    subAccent: "#A78BFA",
+  },
+  pearl_teal: {
+    bg1: "#F1F8FA",
+    bg2: "#E2F0F5",
+    grid: "#CEE3EB",
+    cardBg: "#FFFFFF",
+    cardAlt: "#EAF4F8",
+    border: "#B2D3E0",
+    textDark: "#0F172A",
+    textMuted: "#334155",
+    accent: "#0891B2",
+    accent2: "#0284C7",
+    accentSoft: "#CFFAFE",
+    subBg: "#0F172A",
+    subAccent: "#22D3EE",
+  },
+  peach_emerald: {
+    bg1: "#FFF8F4",
+    bg2: "#F8ECE4",
+    grid: "#EBDACF",
+    cardBg: "#FFFFFF",
+    cardAlt: "#FDF1EA",
+    border: "#E2C6B6",
+    textDark: "#18181B",
+    textMuted: "#52525B",
+    accent: "#E11D48",
+    accent2: "#059669",
+    accentSoft: "#FFE4E6",
+    subBg: "#18181B",
+    subAccent: "#FB7185",
+  },
+};
+
 /**
- * Pure-Black (#000000) Niche "Üretir Dino • Yapay Zeka Akademisi" Studio Composer
- * Inspired by @avenoxyz minimal dark educational format, customized with:
- * - Zone 1 (Top, y=0..595): Pure pitch-black (#000000) canvas + subtle dot matrix + 3-line centered hook (White + Neon-Lime #c8f560 + Muted Question)
- * - Zone 2 (Middle, y=596..1280): Widescreen "üretir. • Yapay Zeka Akademisi" interactive studio with a natural warm forest-emerald backdrop, floating depth-of-field geometric bokeh, 5-step interactive checklist with animated hand cursor & live mini-graphs on the left, and voice-reactive 3D Üretir Dino on the right + bottom CLI status bar
- * - Zone 3 (Bottom, y=1280..1920): Pure pitch-black (#000000) canvas + large, clean 2-line sentence-by-sentence synced dynamic subtitles with Neon-Lime keyword highlight
+ * Full-Screen 9:16 Vertical Graph Motion Composer (Lighter Studio Palettes + 4 Rotating Viral Templates + Multi-Costume Üretir Dino)
+ * Implements `animated-infographic`, `chart-animation`, and `animated-diagram` best practices:
+ * - Zone 1 (y=36..126): Live Agenda & Market Pulse Ticker Bar
+ * - Zone 2 (y=140..384): Oversized Viral Hook Card + Eased KPI Metric Counter
+ * - Zone 3 (y=400..1138): Full-Width 738px Graph Motion Stage (4 Rotating Templates: `bento_race`, `versus_matrix`, `flow_diagram`, `radar_bento`)
+ * - Zone 4 (y=1154..1616): Left Live Agenda Takeaway & Cyber-Robot Voice Spectrum + Right 3D Üretir Dino (Rotating Costumes!)
+ * - Zone 5 (y=1632..1882): Synced Dynamic Subtitles Dock + Viral Save/Share Bar
  */
 function renderVerticalFrameSvg(
   scene,
@@ -837,27 +952,41 @@ function renderVerticalFrameSvg(
   dinoDataUri = null,
   voiceAmp = 0.35
 ) {
-  const accent = scene.accent || "#c8f560";
-  const hookLine1 = scene.hookLine1 || wrapLines(scene.title, 22, 2)[0] || "Yapay zekaya sıfırdan";
-  const hookLine2 = scene.hookLine2 || wrapLines(scene.title, 22, 2)[1] || "başlarken 5 altın adım";
-  const hookLine3 = scene.hookLine3 || scene.sub || "Hangisini atladın?";
+  const paletteKey = scene.palette || "daylight_sage";
+  const pal = LIGHT_STUDIO_PALETTES[paletteKey] || LIGHT_STUDIO_PALETTES.daylight_sage;
+  const accent = scene.accent || pal.accent;
+  const accent2 = scene.accent2 || pal.accent2;
+  const template = scene.template || "bento_race";
+  const costumeKey = scene.costume || "analyst";
+
+  const costumeLabels = {
+    analyst: "🦖 DİNO ANALİST MODU",
+    scientist: "🧪 DİNO AI LAB MODU",
+    creator: "🎧 DİNO CREATOR MODU",
+    founder: "🧭 DİNO KURUCU MODU",
+  };
+  const costumeBadge = costumeLabels[costumeKey] || costumeLabels.analyst;
+
+  const hookLine1 = scene.hookLine1 || wrapLines(scene.title, 24, 2)[0] || "Yapay zeka ile üretimde";
+  const hookLine2 = scene.hookLine2 || wrapLines(scene.title, 24, 2)[1] || "10 kat kaldıraç sistemi";
+  const hookLine3 = scene.hookLine3 || scene.sub || "Kaydetmelik doğrulanan veri ve iş akışı";
 
   const moduleNum = scene.moduleNum || "01";
-  const moduleKicker = scene.moduleKicker || "BURADAN BAŞLA";
-  const cardTitle = scene.cardTitle || "İlk gün, beş karar.";
-  const cardSub = scene.cardSub || "Gerisini ürettikçe öğrenirsin.";
-  const moduleTag = scene.moduleTag || `${moduleNum} • İlk gün • üretir`;
+  const moduleKicker = scene.moduleKicker || "CANLI GÜNDEM & SİSTEM";
+  const liveTicker = scene.liveTicker || "CANLI: Dolar, Altın, BIST 100 ve Yapay Zeka Gündemi • uretir.com";
+  const kpiNumberTarget = Number(scene.kpiNumber || 10);
+  const kpiSuffix = scene.kpiSuffix || "x";
+  const kpiLabel = scene.kpiLabel || "ÜRETİM HIZI";
 
   const defaultRows = [
-    { num: "01", label: "Doğru modeli seç" },
-    { num: "02", label: "İzin ve sınır modu" },
-    { num: "03", label: "URETIR.md hafızası" },
-    { num: "04", label: "Bağlam (context) çubuğu" },
-    { num: "05", label: "İlk otomasyon skill'i" },
+    { num: "01", label: "Otonom Ajan & Kodlama", val: 95, oldText: "4 Saat Manuel", newText: "8 Dakika AI", tag: "12x Hız" },
+    { num: "02", label: "Canlı Gündem & Veri Sentezi", val: 89, oldText: "20 Sekme Tarama", newText: "Anlık Radar", tag: "10x Hız" },
+    { num: "03", label: "Kalıcı Hafıza (URETIR.md)", val: 84, oldText: "Her Gün Tekrar", newText: "Sıfır Unutma", tag: "%100 Net" },
+    { num: "04", label: "Otomatik Hook & Test Kilidi", val: 79, oldText: "İnsan Hatası", newText: "Sıfır Hata", tag: "Otonom" },
+    { num: "05", label: "Tek Komut Skill Kütüphanesi", val: 92, oldText: "Uzun Promptlar", newText: "Tek Tık Üretim", tag: "7/24 Aktif" },
   ];
   const rows = Array.isArray(scene.rows) && scene.rows.length === 5 ? scene.rows : defaultRows;
 
-  // Determine which step (0 = intro, 1..5 = checklist steps) is currently active
   const activeStep =
     typeof scene.stepIndex === "number"
       ? scene.stepIndex
@@ -866,224 +995,361 @@ function renderVerticalFrameSvg(
         : Math.min(5, Math.floor(progressRatio * 6));
 
   const isClickingNow = activeStep >= 1 && progressRatio >= 0.22 && progressRatio <= 0.48;
-  const clickCompletedInCurrent = activeStep >= 1 && progressRatio > 0.32;
-  const completedCount = Math.min(
-    5,
-    Math.max(0, activeStep - 1 + (clickCompletedInCurrent ? 1 : 0))
-  );
+  const clickCompletedInCurrent = activeStep >= 1 && progressRatio > 0.30;
+  const completedCount = Math.min(5, Math.max(1, activeStep === 0 ? 1 : activeStep));
+  const easedProg = easeOutCubic(Math.min(1, progressRatio * 1.4));
+  const animatedKpi =
+    kpiSuffix === "/7"
+      ? 24
+      : Math.max(1, Math.round(kpiNumberTarget * (0.35 + 0.65 * easedProg)));
 
-  // Subtle, natural studio motion for Üretir Dino (grounded on the studio floor, gentle breathing & voice-synced nod)
-  const dinoBreatheY = Math.round(Math.sin(progressRatio * Math.PI * 2) * 4 - voiceAmp * 9);
+  // Dino motion
+  const dinoBreatheY = Math.round(Math.sin(progressRatio * Math.PI * 2) * 5 - voiceAmp * 10);
   const dinoShiftX = Math.round(Math.sin(progressRatio * Math.PI * 2) * 5);
-  const dinoTilt = (Math.sin(progressRatio * Math.PI * 2) * 1.4 + (voiceAmp - 0.3) * 1.8).toFixed(2);
+  const dinoTilt = (Math.sin(progressRatio * Math.PI * 2) * 1.5 + (voiceAmp - 0.3) * 2.0).toFixed(2);
   const dinoScaleX = (1 - voiceAmp * 0.012).toFixed(3);
-  const dinoScaleY = (1 + voiceAmp * 0.024).toFixed(3);
+  const dinoScaleY = (1 + voiceAmp * 0.025).toFixed(3);
 
-  // Floating natural studio bokeh planes in the stage background
-  const floatShift1 = Math.round(Math.sin(progressRatio * Math.PI * 2) * 12);
-  const floatShift2 = Math.round(Math.cos(progressRatio * Math.PI * 2) * 10);
-  const watchPulse = Math.round(18 + voiceAmp * 14);
+  // Build Template-Specific Middle Graph Motion Stage (y=400..1138)
+  let stageContentSvg = "";
 
-  // Render the 5 interactive checklist rows on the left side of the stage (x=34..586, y=804..1174)
-  const rowElements = [];
-  for (let r = 0; r < 5; r++) {
-    const stepNum = r + 1;
-    const ry = 804 + r * 74;
-    const rowData = rows[r];
-    const isCurrent = stepNum === activeStep;
-    const isDone = stepNum < activeStep || ( isCurrent && clickCompletedInCurrent );
+  if (template === "versus_matrix") {
+    // TEMPLATE 2: ESKİ YÖNTEM VS ÜRETİR AI KALDIRACI (High-Save Comparison Matrix)
+    const matrixRows = rows.map((r, idx) => {
+      const stepNum = idx + 1;
+      const ry = 482 + idx * 88;
+      const isCurrent = stepNum === activeStep || (activeStep === 0 && idx === 0);
+      const isDone = stepNum < activeStep || isCurrent;
+      const rowStroke = isCurrent ? accent : pal.border;
+      const rowStrokeW = isCurrent ? "3" : "1.5";
+      const oldText = r.oldText || "3 Saat Manuel İş";
+      const newText = r.newText || r.label;
+      const badgeText = r.tag || "+10x";
+      const barW = Math.round((isDone ? (r.val || 88) : 45) * 2.2 * (isCurrent ? 0.6 + 0.4 * easedProg : 1));
+      return `
+      <g>
+        <rect x="56" y="${ry}" width="968" height="76" rx="14" fill="${isCurrent ? pal.cardAlt : pal.cardBg}" stroke="${rowStroke}" stroke-width="${rowStrokeW}" />
+        <rect x="72" y="${ry + 16}" width="44" height="44" rx="10" fill="${isCurrent ? accent : pal.accentSoft}" />
+        <text x="94" y="${ry + 45}" text-anchor="middle" fill="${isCurrent ? "#FFFFFF" : accent}" font-family="Consolas, monospace" font-size="20" font-weight="800">${escapeXml(r.num || `0${stepNum}`)}</text>
+        <!-- Old Method (Left) -->
+        <text x="134" y="${ry + 33}" fill="#DC2626" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="16" font-weight="700">✕ ESKİ: ${escapeXml(oldText)}</text>
+        <text x="134" y="${ry + 58}" fill="${pal.textDark}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="21" font-weight="800">✓ YENİ: ${escapeXml(newText)}</text>
+        <!-- Animated Progress Bar & Multiplier Pill (Right) -->
+        <rect x="640" y="${ry + 24}" width="220" height="28" rx="8" fill="${pal.bg2}" />
+        <rect x="640" y="${ry + 24}" width="${Math.min(220, Math.max(40, barW))}" height="28" rx="8" fill="${accent}" />
+        <rect x="878" y="${ry + 18}" width="126" height="40" rx="10" fill="${isCurrent ? accent : pal.accentSoft}" />
+        <text x="941" y="${ry + 44}" text-anchor="middle" fill="${isCurrent ? "#FFFFFF" : accent}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="18" font-weight="900">${escapeXml(badgeText)}</text>
+      </g>`;
+    });
 
-    const rowBg = isCurrent ? "#12261c" : isDone ? "#0d1b14" : "#09120e";
-    const rowStroke = isCurrent ? accent : isDone ? "#284737" : "#182920";
-    const rowStrokeW = isCurrent ? "2.2" : "1.2";
-    const numColor = isCurrent || isDone ? accent : "#52525b";
-    const labelColor = isCurrent ? "#ffffff" : isDone ? "#e4e4e7" : "#71717a";
+    // Bottom Efficiency Gain Curve inside Stage (y=934..1122)
+    const curvePts = [
+      [86, 1096],
+      [260, 1082],
+      [440, 1056],
+      [620, 1024],
+      [800, 998],
+      [980, Math.round(986 - voiceAmp * 8)],
+    ];
+    const bezierD = buildSmoothBezierPath(curvePts);
+    const areaD = `${bezierD} L 980 1106 L 86 1106 Z`;
 
-    // Mini animated graph bars inside each row (x=358..406)
-    const miniBars = [];
-    for (let b = 0; b < 4; b++) {
-      const bx = 362 + b * 11;
-      const baseH = isDone ? 14 + ((r + b) % 3) * 7 : isCurrent ? 10 + Math.round(voiceAmp * 18) : 6;
-      const by = ry + 46 - baseH;
-      const bColor = isCurrent || isDone ? accent : "#27272a";
-      const bOp = isCurrent ? "0.95" : isDone ? "0.65" : "0.35";
-      miniBars.push(
-        `<rect x="${bx}" y="${by}" width="6" height="${baseH}" rx="2" fill="${bColor}" fill-opacity="${bOp}" />`
-      );
-    }
+    stageContentSvg = `
+      <rect x="36" y="400" width="1008" height="738" rx="24" fill="${pal.cardBg}" stroke="${pal.border}" stroke-width="2" />
+      <rect x="56" y="418" width="474" height="48" rx="12" fill="#FEE2E2" />
+      <text x="293" y="449" text-anchor="middle" fill="#B91C1C" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="19" font-weight="800">✕ ESKİ MANUEL YÖNTEM (ZAMAN KAYBI)</text>
+      <rect x="550" y="418" width="474" height="48" rx="12" fill="${pal.accentSoft}" />
+      <text x="787" y="449" text-anchor="middle" fill="${accent}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="19" font-weight="900">✓ ÜRETİR AI SİSTEMİ (10X KALDIRAÇ)</text>
+      ${matrixRows.join("\n")}
+      <rect x="56" y="932" width="968" height="188" rx="16" fill="${pal.cardAlt}" stroke="${pal.border}" stroke-width="1.5" />
+      <text x="84" y="964" fill="${pal.textDark}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="19" font-weight="800">📈 NET ZAMAN VE VERİMLİLİK KAZANCI EĞRİSİ</text>
+      <text x="996" y="964" text-anchor="end" fill="${accent}" font-family="Consolas, monospace" font-size="22" font-weight="900">+%${Math.round(completedCount * 18 + voiceAmp * 8)} VERİM</text>
+      <path d="${areaD}" fill="${accent}" fill-opacity="0.16" />
+      <path d="${bezierD}" fill="none" stroke="${accent}" stroke-width="5" stroke-linecap="round" />
+      ${curvePts.map((pt, i) => `<circle cx="${pt[0]}" cy="${pt[1]}" r="${i === completedCount ? 9 : 6}" fill="${i <= completedCount ? accent : pal.border}" stroke="#FFFFFF" stroke-width="2.5" />`).join("\n")}
+    `;
+  } else if (template === "flow_diagram") {
+    // TEMPLATE 3: OTONOM SİSTEM AKIŞ ŞEMASI (2x2 Connected Node Architecture + Master Hub + Live Table)
+    const nodeCoords = [
+      { x: 60, y: 468, w: 450, h: 152 },
+      { x: 570, y: 468, w: 450, h: 152 },
+      { x: 60, y: 658, w: 450, h: 152 },
+      { x: 570, y: 658, w: 450, h: 152 },
+    ];
+    const nodesSvg = nodeCoords.map((nc, idx) => {
+      const r = rows[idx] || defaultRows[idx];
+      const stepNum = idx + 1;
+      const isCurrent = stepNum === activeStep || (activeStep === 0 && idx === 0);
+      const isDone = stepNum <= completedCount;
+      const strokeC = isCurrent ? accent : isDone ? accent2 : pal.border;
+      const valPct = r.val || 85 - idx * 4;
+      return `
+      <g>
+        <rect x="${nc.x}" y="${nc.y}" width="${nc.w}" height="${nc.h}" rx="18" fill="${isCurrent ? pal.cardAlt : pal.cardBg}" stroke="${strokeC}" stroke-width="${isCurrent ? 3.5 : 1.8}" />
+        <rect x="${nc.x + 20}" y="${nc.y + 20}" width="52" height="42" rx="10" fill="${isDone ? accent : pal.accentSoft}" />
+        <text x="${nc.x + 46}" y="${nc.y + 48}" text-anchor="middle" fill="${isDone ? "#FFFFFF" : accent}" font-family="Consolas, monospace" font-size="20" font-weight="900">0${stepNum}</text>
+        <text x="${nc.x + 88}" y="${nc.y + 47}" fill="${pal.textDark}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="22" font-weight="800">${escapeXml(r.label)}</text>
+        <text x="${nc.x + 22}" y="${nc.y + 88}" fill="${pal.textMuted}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="17" font-weight="600">${escapeXml(r.newText || "Otonom işlem ve doğrulama katmanı")}</text>
+        <rect x="${nc.x + 22}" y="${nc.y + 108}" width="${nc.w - 130}" height="18" rx="6" fill="${pal.bg2}" />
+        <rect x="${nc.x + 22}" y="${nc.y + 108}" width="${Math.round(((nc.w - 130) * valPct) / 100)}" height="18" rx="6" fill="${accent}" />
+        <text x="${nc.x + nc.w - 22}" y="${nc.y + 123}" text-anchor="end" fill="${accent}" font-family="Consolas, monospace" font-size="18" font-weight="900">%${valPct}</text>
+      </g>`;
+    });
 
-    // Right interactive button pill ([✓] İşaretle)
-    const btnBg = isDone ? "#193325" : isCurrent ? "#162b1f" : "#0c1611";
-    const btnStroke = isDone || isCurrent ? accent : "#22352b";
-    const btnText = isDone ? "✓  Tamam" : isCurrent ? "•  İşaretle" : "○  İşaretle";
-    const btnTextColor = isDone ? accent : isCurrent ? "#ffffff" : "#52525b";
+    const row5 = rows[4] || defaultRows[4];
+    const pulseX = Math.round(510 + Math.sin(progressRatio * Math.PI * 2) * 35);
 
-    rowElements.push(`
-    <g>
-      <rect x="34" y="${ry}" width="552" height="64" rx="12" fill="${rowBg}" fill-opacity="0.94" stroke="${rowStroke}" stroke-width="${rowStrokeW}" />
-      <text x="56" y="${ry + 39}" fill="${numColor}" font-family="Consolas, 'Courier New', monospace" font-size="19" font-weight="700">${escapeXml(rowData.num || `0${stepNum}`)}</text>
-      <text x="98" y="${ry + 39}" fill="${labelColor}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="21" font-weight="700">${escapeXml(rowData.label)}</text>
-      ${miniBars.join("\n      ")}
-      <rect x="424" y="${ry + 13}" width="146" height="38" rx="9" fill="${btnBg}" stroke="${btnStroke}" stroke-width="1.4" />
-      <text x="497" y="${ry + 38}" text-anchor="middle" fill="${btnTextColor}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="16" font-weight="800">${btnText}</text>
-    </g>`);
+    stageContentSvg = `
+      <rect x="36" y="400" width="1008" height="738" rx="24" fill="${pal.cardBg}" stroke="${pal.border}" stroke-width="2" />
+      <text x="64" y="444" fill="${pal.textDark}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="22" font-weight="900">⚡ KAYDETMELİK OTONOM SİSTEM AKIŞ ŞEMASI</text>
+      <text x="1016" y="444" text-anchor="end" fill="${accent}" font-family="Consolas, monospace" font-size="19" font-weight="800">AKTİF DÜĞÜM: 0${completedCount}/05</text>
+      <!-- Animated Flow Connectors Between Nodes -->
+      <line x1="510" y1="544" x2="570" y2="544" stroke="${accent}" stroke-width="4" stroke-dasharray="8,6" />
+      <path d="M 795 620 L 795 640 L 285 640 L 285 658" fill="none" stroke="${accent}" stroke-width="4" stroke-dasharray="8,6" />
+      <line x1="510" y1="734" x2="570" y2="734" stroke="${accent}" stroke-width="4" stroke-dasharray="8,6" />
+      <circle cx="${pulseX}" cy="544" r="8" fill="${accent}" />
+      ${nodesSvg.join("\n")}
+      <!-- Step 05 Master Hub Card (y=832..954) -->
+      <rect x="60" y="832" width="960" height="114" rx="18" fill="${pal.cardAlt}" stroke="${activeStep === 5 ? accent : pal.border}" stroke-width="${activeStep === 5 ? 3.5 : 2}" />
+      <rect x="84" y="856" width="66" height="66" rx="14" fill="${accent}" />
+      <text x="117" y="898" text-anchor="middle" fill="#FFFFFF" font-family="Consolas, monospace" font-size="24" font-weight="900">05</text>
+      <text x="172" y="882" fill="${pal.textDark}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="24" font-weight="900">${escapeXml(row5.label)} • 7/24 Dijital Varlık</text>
+      <text x="172" y="916" fill="${pal.textMuted}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="18" font-weight="600">Tüm adımlar birleşir ve 7/24 çalışan doğrulanmış dijital üretim sistemine dönüşür.</text>
+      <rect x="836" y="864" width="160" height="50" rx="12" fill="${accent}" />
+      <text x="916" y="896" text-anchor="middle" fill="#FFFFFF" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="18" font-weight="900">✓ TAM SİSTEM</text>
+      <!-- Bottom Live Telemetry Bar (y=966..1118) -->
+      <rect x="60" y="966" width="960" height="150" rx="16" fill="${pal.bg1}" stroke="${pal.border}" stroke-width="1.5" />
+      <text x="86" y="1002" fill="${pal.textDark}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="19" font-weight="800">📊 SİSTEM ÇIKTI HIZI VE DOĞRULUK METRİKLERİ</text>
+      <rect x="86" y="1024" width="280" height="72" rx="12" fill="${pal.cardBg}" stroke="${pal.border}" />
+      <text x="108" y="1052" fill="${pal.textMuted}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="15" font-weight="700">OTOMASYON ORANI</text>
+      <text x="108" y="1084" fill="${accent}" font-family="Consolas, monospace" font-size="28" font-weight="900">%${Math.min(99, 78 + completedCount * 4)}</text>
+      <rect x="396" y="1024" width="280" height="72" rx="12" fill="${pal.cardBg}" stroke="${pal.border}" />
+      <text x="418" y="1052" fill="${pal.textMuted}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="15" font-weight="700">HATA PAYI</text>
+      <text x="418" y="1084" fill="${accent2}" font-family="Consolas, monospace" font-size="28" font-weight="900">&lt; %0.4</text>
+      <rect x="706" y="1024" width="290" height="72" rx="12" fill="${pal.cardBg}" stroke="${pal.border}" />
+      <text x="728" y="1052" fill="${pal.textMuted}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="15" font-weight="700">CANLI VERİ MERKEZİ</text>
+      <text x="728" y="1084" fill="${pal.textDark}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="24" font-weight="900">uretir.com</text>
+    `;
+  } else if (template === "radar_bento") {
+    // TEMPLATE 4: 5 ALTIN KURAL BENTO CHECKLIST (Left) + MULTI-AXIS PERFORMANCE CHART (Right)
+    const checklistRows = rows.map((r, idx) => {
+      const stepNum = idx + 1;
+      const ry = 468 + idx * 126;
+      const isCurrent = stepNum === activeStep || (activeStep === 0 && idx === 0);
+      const isDone = stepNum < activeStep || (isCurrent && clickCompletedInCurrent);
+      return `
+      <g>
+        <rect x="54" y="${ry}" width="556" height="110" rx="16" fill="${isCurrent ? pal.cardAlt : pal.cardBg}" stroke="${isCurrent ? accent : pal.border}" stroke-width="${isCurrent ? 3.2 : 1.5}" />
+        <rect x="74" y="${ry + 22}" width="64" height="64" rx="14" fill="${isDone || isCurrent ? accent : pal.accentSoft}" />
+        <text x="106" y="${ry + 63}" text-anchor="middle" fill="${isDone || isCurrent ? "#FFFFFF" : accent}" font-family="Consolas, monospace" font-size="24" font-weight="900">${escapeXml(r.num || `0${stepNum}`)}</text>
+        <text x="158" y="${ry + 48}" fill="${pal.textDark}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="22" font-weight="800">${escapeXml(r.label)}</text>
+        <text x="158" y="${ry + 80}" fill="${pal.textMuted}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="16" font-weight="600">${escapeXml(r.newText || "Doğrulanmış yapay zeka üretim adımı")}</text>
+        <rect x="468" y="${ry + 32}" width="122" height="44" rx="11" fill="${isDone ? accent : pal.accentSoft}" />
+        <text x="529" y="${ry + 60}" text-anchor="middle" fill="${isDone ? "#FFFFFF" : accent}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="16" font-weight="900">${isDone ? "✓ TAMAM" : "• AKTİF"}</text>
+      </g>`;
+    });
+
+    const cursorY = Math.round(468 + Math.max(0, completedCount - 1) * 126 + 64);
+    const gaugePct = Math.min(100, completedCount * 20);
+    const dashLen = Math.round((gaugePct / 100) * 565);
+
+    stageContentSvg = `
+      <rect x="36" y="400" width="1008" height="738" rx="24" fill="${pal.cardBg}" stroke="${pal.border}" stroke-width="2" />
+      <text x="58" y="444" fill="${pal.textDark}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="22" font-weight="900">🎯 UYGULANABİLİR 5 ALTIN KURAL VE CANLI PERFORMANS ENDEKSİ</text>
+      ${checklistRows.join("\n")}
+      <!-- Animated Pointer Cursor -->
+      <g transform="translate(572, ${cursorY}) scale(${isClickingNow ? 0.88 : 1})">
+        <circle cx="0" cy="0" r="20" fill="${accent}" fill-opacity="0.22" />
+        <path d="M 0,0 L 0,24 L 6,19 L 11,29 L 16,27 L 11,17 L 19,17 Z" fill="${pal.textDark}" stroke="#FFFFFF" stroke-width="2" />
+      </g>
+      <!-- Right Column: Full-Height Multi-Metric Analytics Card (x=630..1024, y=468..1084) -->
+      <rect x="630" y="468" width="394" height="616" rx="20" fill="${pal.cardAlt}" stroke="${pal.border}" stroke-width="1.8" />
+      <text x="827" y="512" text-anchor="middle" fill="${pal.textDark}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="20" font-weight="900">CANLI KALDIRAÇ SKORU</text>
+      <!-- Circular Gauge -->
+      <circle cx="827" cy="648" r="90" fill="none" stroke="${pal.bg2}" stroke-width="20" />
+      <circle cx="827" cy="648" r="90" fill="none" stroke="${accent}" stroke-width="20" stroke-linecap="round" stroke-dasharray="${dashLen} 600" transform="rotate(-90 827 648)" />
+      <text x="827" y="650" text-anchor="middle" fill="${pal.textDark}" font-family="Consolas, monospace" font-size="42" font-weight="900">%${gaugePct}</text>
+      <text x="827" y="680" text-anchor="middle" fill="${pal.textMuted}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="13" font-weight="800">TAMAMLANAN</text>
+      <!-- Vertical Bar Comparison Inside Right Card -->
+      ${[0, 1, 2, 3, 4]
+        .map((b) => {
+          const bx = 668 + b * 68;
+          const bh = Math.round(70 + b * 24 + (b < completedCount ? 35 : 0) + voiceAmp * 16);
+          const by = 995 - bh;
+          return `<rect x="${bx}" y="${by}" width="44" height="${bh}" rx="10" fill="${b < completedCount ? accent : pal.border}" />
+          <text x="${bx + 22}" y="${by - 10}" text-anchor="middle" fill="${pal.textDark}" font-family="Consolas, monospace" font-size="15" font-weight="800">0${b + 1}</text>`;
+        })
+        .join("\n")}
+      <text x="827" y="1046" text-anchor="middle" fill="${accent}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="18" font-weight="900">📈 Her Adımda Katlanan Üretim Gücü</text>
+    `;
+  } else {
+    // DEFAULT TEMPLATE 1 (`bento_race`): BAR CHART RACE + LIVE SPLINE AREA CHART + BENTO KPI
+    const raceBars = rows.map((r, idx) => {
+      const stepNum = idx + 1;
+      const ry = 466 + idx * 78;
+      const isCurrent = stepNum === activeStep || (activeStep === 0 && idx === 0);
+      const isDone = stepNum <= completedCount;
+      const targetVal = r.val || 96 - idx * 5;
+      const shownVal = Math.round(targetVal * (isCurrent ? 0.72 + 0.28 * easedProg : isDone ? 1.0 : 0.65));
+      const maxBarW = 468;
+      const barW = Math.max(80, Math.round((maxBarW * shownVal) / 100));
+      return `
+      <g>
+        <rect x="56" y="${ry}" width="968" height="66" rx="14" fill="${isCurrent ? pal.cardAlt : pal.cardBg}" stroke="${isCurrent ? accent : pal.border}" stroke-width="${isCurrent ? 3 : 1.4}" />
+        <rect x="72" y="${ry + 13}" width="48" height="40" rx="10" fill="${isCurrent ? accent : pal.accentSoft}" />
+        <text x="96" y="${ry + 40}" text-anchor="middle" fill="${isCurrent ? "#FFFFFF" : accent}" font-family="Consolas, monospace" font-size="19" font-weight="900">#${stepNum}</text>
+        <text x="136" y="${ry + 41}" fill="${pal.textDark}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="21" font-weight="800">${escapeXml(r.label)}</text>
+        <rect x="460" y="${ry + 17}" width="${barW}" height="32" rx="9" fill="${isCurrent ? accent : isDone ? accent2 : pal.border}" fill-opacity="${isDone || isCurrent ? "0.92" : "0.55"}" />
+        <text x="${474 + barW}" y="${ry + 40}" fill="${pal.textDark}" font-family="Consolas, monospace" font-size="20" font-weight="900">%${shownVal}</text>
+      </g>`;
+    });
+
+    const splinePts = [
+      [84, 1084],
+      [180, 1054],
+      [280, 1028],
+      [380, 992],
+      [480, Math.round(956 - voiceAmp * 16)],
+    ];
+    const splinePath = buildSmoothBezierPath(splinePts);
+    const splineArea = `${splinePath} L 480 1104 L 84 1104 Z`;
+
+    stageContentSvg = `
+      <rect x="36" y="400" width="1008" height="738" rx="24" fill="${pal.cardBg}" stroke="${pal.border}" stroke-width="2" />
+      <text x="60" y="444" fill="${pal.textDark}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="22" font-weight="900">📊 CANLI ETKİ &amp; VERİMLİLİK SIRALAMASI</text>
+      <text x="1016" y="444" text-anchor="end" fill="${accent}" font-family="Consolas, monospace" font-size="18" font-weight="800">VERİ MERKEZİ: URETIR.COM</text>
+      ${raceBars.join("\n")}
+      <!-- Bottom Left Bento: Animated Trend Curve (x=56..524, y=866..1118) -->
+      <rect x="56" y="866" width="468" height="252" rx="18" fill="${pal.cardAlt}" stroke="${pal.border}" stroke-width="1.5" />
+      <text x="80" y="904" fill="${pal.textDark}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="19" font-weight="800">📈 ÜRETKENLİK İVME GRAFİĞİ</text>
+      <path d="${splineArea}" fill="${accent}" fill-opacity="0.18" />
+      <path d="${splinePath}" fill="none" stroke="${accent}" stroke-width="4.5" stroke-linecap="round" />
+      ${splinePts.map((pt) => `<circle cx="${pt[0]}" cy="${pt[1]}" r="6" fill="${accent}" stroke="#FFFFFF" stroke-width="2" />`).join("\n")}
+      <!-- Bottom Right Bento: Key Comparison Stat Card (x=544..1024, y=866..1118) -->
+      <rect x="544" y="866" width="480" height="252" rx="18" fill="${pal.cardAlt}" stroke="${pal.border}" stroke-width="1.5" />
+      <text x="572" y="904" fill="${pal.textDark}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="19" font-weight="800">⚡ GÜNDEM KALDIRAÇ ÖZETİ</text>
+      <rect x="572" y="924" width="204" height="168" rx="14" fill="${pal.cardBg}" stroke="${pal.border}" />
+      <text x="674" y="966" text-anchor="middle" fill="${pal.textMuted}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="16" font-weight="700">MANUEL SÜRE</text>
+      <text x="674" y="1024" text-anchor="middle" fill="#DC2626" font-family="Consolas, monospace" font-size="36" font-weight="900">10 Saat</text>
+      <text x="674" y="1064" text-anchor="middle" fill="${pal.textMuted}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="15" font-weight="600">Yüksek Yorgunluk</text>
+      <rect x="794" y="924" width="204" height="168" rx="14" fill="${accent}" />
+      <text x="896" y="966" text-anchor="middle" fill="#FFFFFF" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="16" font-weight="800">AI SİSTEMİ İLE</text>
+      <text x="896" y="1024" text-anchor="middle" fill="#FFFFFF" font-family="Consolas, monospace" font-size="36" font-weight="900">15 Dk</text>
+      <text x="896" y="1064" text-anchor="middle" fill="${pal.accentSoft}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="15" font-weight="700">Sıfır Hata • 7/24</text>
+    `;
   }
 
-  // Animated Pointer Cursor position (smoothly glides down the checklist as steps advance)
-  const prevStep = Math.max(1, activeStep - 1);
-  const targetStep = Math.max(1, activeStep);
-  const moveT = Math.min(1, progressRatio * 3.5);
-  const cursorStepFloat = activeStep <= 1 ? 1 : prevStep + (targetStep - prevStep) * moveT;
-  const cursorY = Math.round(804 + (cursorStepFloat - 1) * 74 + 36);
-  const cursorX = activeStep === 0 ? 520 : 532;
-  const cursorScale = isClickingNow ? "0.88" : "1.0";
-
-  // Bottom Status Bar Segmented Progress Blocks (5 blocks)
-  const progressBlocks = [];
-  for (let p = 0; p < 5; p++) {
-    const px = 318 + p * 22;
-    const filled = p < completedCount;
-    progressBlocks.push(
-      `<rect x="${px}" y="1249" width="16" height="16" rx="3" fill="${filled ? accent : "#27272a"}" />`
-    );
+  // Cyber-Robot Voice Equalizer Bars inside Left Agenda Card (18 bars)
+  const eqBars = [];
+  for (let i = 0; i < 18; i++) {
+    const bx = 68 + i * 26;
+    const wave = Math.abs(Math.sin(progressRatio * Math.PI * 4 + i * 0.55));
+    const bh = Math.max(10, Math.min(64, Math.round(12 + voiceAmp * 46 * wave)));
+    const by = 1584 - bh;
+    eqBars.push(`<rect x="${bx}" y="${by}" width="16" height="${bh}" rx="5" fill="${i % 2 === 0 ? accent : accent2}" />`);
   }
 
-  // Dynamic Bottom 2-Line Subtitle on Pure Black (y=1450..1530)
-  const fallbackSubLines = wrapLines(scene.speech || scene.sub || scene.title, 28, 2);
+  // Dynamic Bottom 2-Line Subtitle inside Floating Dock (y=1632..1798)
+  const fallbackSubLines = wrapLines(scene.speech || scene.sub || scene.title, 30, 2);
   const subLine1 = scene.subLine1 || fallbackSubLines[0] || "";
   const subLine2 = scene.subLine2 || fallbackSubLines[1] || "";
   const subHighlight = scene.subHighlight || "";
+  const currentRow = rows[Math.max(0, Math.min(4, completedCount - 1))] || rows[0];
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920">
   <defs>
-    <!-- Subtle micro-dot pattern on pure black top & bottom zones -->
-    <pattern id="pureBlackDots" width="26" height="26" patternUnits="userSpaceOnUse">
-      <circle cx="13" cy="13" r="1.15" fill="#18181b" />
+    <linearGradient id="lightCanvasGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="${pal.bg1}" />
+      <stop offset="100%" stop-color="${pal.bg2}" />
+    </linearGradient>
+    <pattern id="lightGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="${pal.grid}" stroke-width="1" />
     </pattern>
-
-    <!-- Natural Warm Moss & Emerald Studio Backdrop for the Middle Stage -->
-    <linearGradient id="stageNaturalBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="${scene.stageBg1 || "#193325"}" />
-      <stop offset="48%" stop-color="${scene.stageBg2 || "#1d3b2a"}" />
-      <stop offset="100%" stop-color="${scene.stageBg3 || "#0d1f16"}" />
-    </linearGradient>
-
-    <!-- Warm Natural Key-Light Glow Behind Üretir Dino -->
-    <radialGradient id="dinoStudioGlow" cx="76%" cy="52%" r="48%">
-      <stop offset="0%" stop-color="${accent}" stop-opacity="0.28" />
-      <stop offset="55%" stop-color="#34d399" stop-opacity="0.10" />
-      <stop offset="100%" stop-color="#0a1711" stop-opacity="0" />
+    <radialGradient id="dinoLightGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="${accent}" stop-opacity="0.22" />
+      <stop offset="100%" stop-color="${accent}" stop-opacity="0" />
     </radialGradient>
-
-    <!-- Grounded Studio Floor Gradient -->
-    <linearGradient id="stageFloorGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#0c1c14" stop-opacity="0.85" />
-      <stop offset="100%" stop-color="#060f0b" stop-opacity="0.98" />
-    </linearGradient>
   </defs>
 
-  <!-- ========================================================================= -->
-  <!-- 1. PURE PITCH-BLACK (#000000) 9:16 MASTER CANVAS                          -->
-  <!-- ========================================================================= -->
-  <rect width="1080" height="1920" fill="#000000" />
-  <rect x="0" y="0" width="1080" height="596" fill="url(#pureBlackDots)" />
-  <rect x="0" y="1280" width="1080" height="640" fill="url(#pureBlackDots)" />
+  <!-- 1. LIGHT, AIRY HIGH-RETENTION 9:16 VERTICAL STUDIO CANVAS -->
+  <rect width="1080" height="1920" fill="url(#lightCanvasGrad)" />
+  <rect width="1080" height="1920" fill="url(#lightGrid)" opacity="0.65" />
 
-  <!-- ========================================================================= -->
-  <!-- 2. TOP ZONE (y=240..520): CENTERED 3-LINE EDITORIAL HOOK ON PURE BLACK    -->
-  <!-- ========================================================================= -->
-  <text x="540" y="332" text-anchor="middle" fill="#f5f5f4" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="54" font-weight="800" letter-spacing="-0.8">${escapeXml(hookLine1)}</text>
-  <text x="540" y="404" text-anchor="middle" fill="${accent}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="54" font-weight="800" letter-spacing="-0.8">${escapeXml(hookLine2)}</text>
-  <text x="540" y="472" text-anchor="middle" fill="#8a8a8e" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="29" font-weight="500">${escapeXml(hookLine3)}</text>
+  <!-- 2. ZONE 1 (y=36..124): LIVE AGENDA & MARKET PULSE TOP BAR -->
+  <rect x="36" y="38" width="1008" height="84" rx="20" fill="${pal.cardBg}" stroke="${pal.border}" stroke-width="2" />
+  <rect x="54" y="55" width="214" height="50" rx="13" fill="${accent}" />
+  <circle cx="80" cy="80" r="7" fill="#FFFFFF" />
+  <text x="170" y="87" text-anchor="middle" fill="#FFFFFF" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="18" font-weight="900">CANLI GÜNDEM</text>
+  <text x="290" y="87" fill="${pal.textDark}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="20" font-weight="800">${escapeXml(liveTicker.slice(0, 56))}</text>
+  <rect x="910" y="55" width="116" height="50" rx="13" fill="${pal.accentSoft}" />
+  <text x="968" y="87" text-anchor="middle" fill="${accent}" font-family="Consolas, monospace" font-size="20" font-weight="900">0${completedCount}/05</text>
 
-  <!-- ========================================================================= -->
-  <!-- 3. MIDDLE ZONE (y=596..1280): WIDESCREEN INTERACTIVE LEARNING STAGE       -->
-  <!-- ========================================================================= -->
-  <!-- Stage Top Window Header Bar -->
-  <rect x="0" y="596" width="1080" height="40" fill="#070a08" />
-  <line x1="0" y1="596" x2="1080" y2="596" stroke="#1c2620" stroke-width="1.5" />
-  <line x1="0" y1="636" x2="1080" y2="636" stroke="#1c2620" stroke-width="1.5" />
-  <text x="34" y="622" fill="#f5f5f4" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="16" font-weight="800">üretir<tspan fill="${accent}">.</tspan> <tspan fill="#71717a" font-weight="500">• Yapay Zeka Akademisi</tspan></text>
-  <text x="1046" y="622" text-anchor="end" fill="#71717a" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="15" font-weight="500">Bağımsız eğitim serisi • uretir.com</text>
+  <!-- 3. ZONE 2 (y=138..384): OVERSIZED VIRAL HOOK & KPI COUNTER CARD -->
+  <rect x="36" y="138" width="1008" height="244" rx="24" fill="${pal.cardBg}" stroke="${pal.border}" stroke-width="2" />
+  <rect x="64" y="162" width="340" height="38" rx="10" fill="${pal.accentSoft}" />
+  <text x="82" y="187" fill="${accent}" font-family="Consolas, monospace" font-size="17" font-weight="900">${escapeXml(moduleNum)} • ${escapeXml(moduleKicker)}</text>
+  <text x="64" y="248" fill="${pal.textDark}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="42" font-weight="900" letter-spacing="-0.6">${escapeXml(hookLine1)}</text>
+  <text x="64" y="302" fill="${accent}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="42" font-weight="900" letter-spacing="-0.6">${escapeXml(hookLine2)}</text>
+  <text x="64" y="350" fill="${pal.textMuted}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="22" font-weight="600">${escapeXml(hookLine3)}</text>
 
-  <!-- Main Stage Natural Emerald Studio Backdrop (y=636..1200) -->
-  <rect x="0" y="636" width="1080" height="564" fill="url(#stageNaturalBg)" />
-  <rect x="0" y="636" width="1080" height="564" fill="url(#dinoStudioGlow)" />
+  <!-- Right Eased KPI Metric Counter Box inside Hero Card -->
+  <rect x="786" y="162" width="234" height="196" rx="20" fill="${pal.cardAlt}" stroke="${accent}" stroke-width="2.5" />
+  <text x="903" y="254" text-anchor="middle" fill="${accent}" font-family="Consolas, monospace" font-size="64" font-weight="900">${animatedKpi}${escapeXml(kpiSuffix)}</text>
+  <text x="903" y="302" text-anchor="middle" fill="${pal.textDark}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="18" font-weight="900">${escapeXml(kpiLabel)}</text>
+  <text x="903" y="332" text-anchor="middle" fill="${pal.textMuted}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="15" font-weight="700">Doğrulanan Etki</text>
 
-  <!-- Natural Depth-of-Field Geometric Bokeh Shapes Behind Üretir Dino (like @avenoxyz) -->
-  <g opacity="0.85">
-    <rect x="${630 + floatShift1}" y="${675 + floatShift2}" width="92" height="92" rx="14" transform="rotate(-14 ${676 + floatShift1} ${721 + floatShift2})" fill="${accent}" fill-opacity="0.11" />
-    <rect x="${925 - floatShift2}" y="${705 + floatShift1}" width="110" height="78" rx="14" transform="rotate(18 ${980 - floatShift2} ${744 + floatShift1})" fill="#34d399" fill-opacity="0.10" />
-    <circle cx="${665 - floatShift1}" cy="${960 + floatShift2}" r="46" fill="${accent}" fill-opacity="0.08" />
-    <rect x="${945 + floatShift1}" y="${920 - floatShift2}" width="84" height="120" rx="16" transform="rotate(-8 ${987 + floatShift1} ${980 - floatShift2})" fill="${accent}" fill-opacity="0.09" />
-  </g>
+  <!-- 4. ZONE 3 (y=400..1138): ROTATING FULL-WIDTH GRAPH MOTION TEMPLATE -->
+  ${stageContentSvg}
 
-  <!-- Studio Floor Plane (y=1112..1200) -->
-  <rect x="0" y="1112" width="1080" height="88" fill="url(#stageFloorGrad)" />
-  <line x1="0" y1="1112" x2="1080" y2="1112" stroke="${accent}" stroke-opacity="0.16" stroke-width="1.2" />
+  <!-- 5. ZONE 4 (y=1154..1616): LEFT AGENDA & ROBOT SPECTRUM + RIGHT 3D DINO COSTUME STAGE -->
+  <!-- Left Card: Active Step Takeaway + Cyber-Robot Voice Spectrum -->
+  <rect x="36" y="1154" width="540" height="462" rx="24" fill="${pal.cardBg}" stroke="${pal.border}" stroke-width="2" />
+  <rect x="64" y="1182" width="290" height="40" rx="10" fill="${pal.accentSoft}" />
+  <text x="82" y="1208" fill="${accent}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="17" font-weight="900">📡 AKTİF ADIM &amp; GÜNDEM ÖZETİ</text>
+  <text x="64" y="1264" fill="${pal.textDark}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="25" font-weight="900">${escapeXml(`${currentRow.num || "01"} • ${currentRow.label}`)}</text>
+  <text x="64" y="1306" fill="${pal.textMuted}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="18" font-weight="600">${escapeXml(wrapLines(scene.sub || "Kaydetmelik doğrulanan veri ve uygulama adımı.", 42, 1)[0])}</text>
 
-  <!-- Left Panel: Lesson Intro Card (x=34..586, y=654..790) -->
-  <rect x="34" y="654" width="552" height="136" rx="14" fill="#09130e" fill-opacity="0.94" stroke="#243b2f" stroke-width="1.5" />
-  <text x="58" y="688" fill="${accent}" font-family="Consolas, 'Courier New', monospace" font-size="15" font-weight="800" letter-spacing="1.4">${escapeXml(moduleNum)}  ■  ${escapeXml(moduleKicker)}</text>
-  <text x="58" y="734" fill="#f5f5f4" font-family="Georgia, 'Times New Roman', serif" font-size="34" font-weight="700">${escapeXml(cardTitle)}</text>
-  <text x="58" y="768" fill="#9ca3af" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="18" font-weight="500">${escapeXml(cardSub)}</text>
+  <rect x="64" y="1340" width="484" height="114" rx="16" fill="${pal.cardAlt}" stroke="${pal.border}" stroke-width="1.5" />
+  <text x="88" y="1376" fill="${accent}" font-family="Consolas, monospace" font-size="17" font-weight="900">⚡ URETIR.COM KALDIRAÇ NOTU</text>
+  <text x="88" y="1412" fill="${pal.textDark}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="20" font-weight="800">${escapeXml(scene.highlight || currentRow.newText || "10x Üretim & Doğrulanmış Veri")}</text>
+  <text x="88" y="1438" fill="${pal.textMuted}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="16" font-weight="600">Canlı araçlar ve bülten: www.uretir.com</text>
 
-  <!-- Left Panel: 5 Interactive Checklist Rows (x=34..586, y=804..1174) -->
-  ${rowElements.join("\n  ")}
+  <text x="68" y="1504" fill="${pal.textMuted}" font-family="Consolas, monospace" font-size="15" font-weight="800">🤖 CYBER-ROBOT SES FREKANS SPEKTRUMU (CANLI)</text>
+  ${eqBars.join("\n  ")}
 
-  <!-- Animated Hand / Pointer Cursor Clicking the Active Step -->
-  <g transform="translate(${cursorX}, ${cursorY}) scale(${cursorScale})">
-    ${
-      isClickingNow
-        ? `<circle cx="0" cy="0" r="22" fill="none" stroke="${accent}" stroke-width="2.5" stroke-opacity="0.85" />`
-        : ""
-    }
-    <path d="M 0,0 L 0,24 L 6,19 L 11,29 L 16,27 L 11,17 L 19,17 Z" fill="#ffffff" stroke="#090d0b" stroke-width="2.2" stroke-linejoin="round" />
-  </g>
+  <!-- Right Card: 3D Üretir Dino Mascot Stage with Rotating Costume -->
+  <rect x="594" y="1154" width="450" height="462" rx="24" fill="${pal.cardBg}" stroke="${pal.border}" stroke-width="2" />
+  <circle cx="819" cy="1390" r="190" fill="url(#dinoLightGlow)" />
+  <rect x="622" y="1178" width="394" height="44" rx="12" fill="${pal.accentSoft}" />
+  <text x="819" y="1207" text-anchor="middle" fill="${accent}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="18" font-weight="900">${escapeXml(costumeBadge)}</text>
 
-  <!-- Right Panel: 3D "Üretir Dino" Mascot Standing Naturally in the Studio (x=615..1055, y=646..1186) -->
-  <ellipse cx="${836 + dinoShiftX}" cy="1174" rx="138" ry="18" fill="#020604" fill-opacity="0.68" />
-  <ellipse cx="${836 + dinoShiftX}" cy="1174" rx="${92 + Math.round(voiceAmp * 24)}" ry="9" fill="none" stroke="${accent}" stroke-width="1.8" stroke-opacity="0.42" />
-  <g transform="translate(${622 + dinoShiftX}, ${644 + dinoBreatheY}) rotate(${dinoTilt}, 215, 270) translate(215, 520) scale(${dinoScaleX}, ${dinoScaleY}) translate(-215, -520)">
+  <ellipse cx="${819 + dinoShiftX}" cy="1584" rx="145" ry="18" fill="${pal.grid}" />
+  <ellipse cx="${819 + dinoShiftX}" cy="1584" rx="${95 + Math.round(voiceAmp * 26)}" ry="9" fill="none" stroke="${accent}" stroke-width="2.5" />
+  <g transform="translate(${624 + dinoShiftX}, ${1216 + dinoBreatheY}) rotate(${dinoTilt}, 195, 190) translate(195, 360) scale(${dinoScaleX}, ${dinoScaleY}) translate(-195, -360)">
     ${
       dinoDataUri
-        ? `<image href="${dinoDataUri}" x="0" y="0" width="430" height="545" preserveAspectRatio="xMidYMid meet" />`
+        ? `<image href="${dinoDataUri}" x="0" y="0" width="390" height="380" preserveAspectRatio="xMidYMid meet" />`
         : ""
     }
-    <!-- Subtle Smart-Watch Pulse on Dino's Wrist -->
-    <circle cx="162" cy="348" r="${watchPulse}" fill="none" stroke="${accent}" stroke-width="2.2" stroke-dasharray="8,6" stroke-opacity="0.72" />
-    <circle cx="162" cy="348" r="6" fill="${accent}" fill-opacity="0.9" />
   </g>
 
-  <!-- Stage Bottom Terminal Prompt Bar (y=1200..1238) -->
-  <rect x="0" y="1200" width="1080" height="38" fill="#080b09" />
-  <line x1="0" y1="1200" x2="1080" y2="1200" stroke="#1a261f" stroke-width="1.2" />
-  <text x="34" y="1225" fill="#71717a" font-family="Consolas, 'Courier New', monospace" font-size="16"><tspan fill="${accent}" font-weight="700">&gt;</tspan> Bölüm menüsü için <tspan fill="#d4d4d8">/</tspan> yaz</text>
-  <text x="1046" y="1225" text-anchor="end" fill="#71717a" font-family="Consolas, 'Courier New', monospace" font-size="15">[/] bölümler</text>
-
-  <!-- Stage Bottom Progress & Shortcuts Bar (y=1238..1280) -->
-  <rect x="0" y="1238" width="1080" height="42" fill="#050706" />
-  <line x1="0" y1="1238" x2="1080" y2="1238" stroke="#141e18" stroke-width="1.2" />
-  <line x1="0" y1="1280" x2="1080" y2="1280" stroke="#1c2620" stroke-width="1.5" />
-  <rect x="34" y="1250" width="14" height="14" rx="3" fill="${accent}" />
-  <text x="58" y="1264" fill="#e4e4e7" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="16" font-weight="700">${escapeXml(moduleTag)}</text>
-  ${progressBlocks.join("\n  ")}
-  <text x="438" y="1264" fill="#a1a1aa" font-family="Consolas, 'Courier New', monospace" font-size="16" font-weight="700">${completedCount}/5</text>
-  <text x="1046" y="1264" text-anchor="end" fill="#71717a" font-family="Consolas, 'Courier New', monospace" font-size="15">[M] film   [N] notlar   [S] kaynak   [R] sıfırla</text>
-
-  <!-- ========================================================================= -->
-  <!-- 4. BOTTOM ZONE (y=1280..1920): SYNCED DYNAMIC SUBTITLES ON PURE BLACK     -->
-  <!-- ========================================================================= -->
+  <!-- 6. ZONE 5 (y=1632..1882): HIGH-CONTRAST SYNCED SUBTITLE DOCK & SAVE CTA BAR -->
+  <rect x="36" y="1632" width="1008" height="168" rx="24" fill="${pal.subBg}" />
+  <rect x="62" y="1652" width="136" height="32" rx="8" fill="${accent}" />
+  <text x="130" y="1674" text-anchor="middle" fill="#FFFFFF" font-family="Consolas, monospace" font-size="15" font-weight="900">🤖 AI ROBOT</text>
   ${
     subLine2
-      ? `<text x="540" y="1464" text-anchor="middle" fill="#f5f5f4" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="45" font-weight="800" letter-spacing="-0.4">${renderHighlightedSubtitleLine(subLine1, subHighlight, accent)}</text>
-  <text x="540" y="1526" text-anchor="middle" fill="#f5f5f4" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="45" font-weight="800" letter-spacing="-0.4">${renderHighlightedSubtitleLine(subLine2, subHighlight, accent)}</text>`
-      : `<text x="540" y="1494" text-anchor="middle" fill="#f5f5f4" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="45" font-weight="800" letter-spacing="-0.4">${renderHighlightedSubtitleLine(subLine1, subHighlight, accent)}</text>`
+      ? `<text x="540" y="1708" text-anchor="middle" fill="#FFFFFF" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="38" font-weight="800">${renderHighlightedSubtitleLine(subLine1, subHighlight, pal.subAccent)}</text>
+  <text x="540" y="1762" text-anchor="middle" fill="#FFFFFF" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="38" font-weight="800">${renderHighlightedSubtitleLine(subLine2, subHighlight, pal.subAccent)}</text>`
+      : `<text x="540" y="1736" text-anchor="middle" fill="#FFFFFF" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="40" font-weight="800">${renderHighlightedSubtitleLine(subLine1, subHighlight, pal.subAccent)}</text>`
   }
 
-  <!-- Minimal Understated Brand Footer on Pure Black -->
-  <text x="540" y="1842" text-anchor="middle" fill="#3f3f46" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="20" font-weight="600" letter-spacing="0.5">uretir.com  •  Yapay Zeka ve Üretim Ekosistemi</text>
+  <!-- Bottom Save / Share / uretir.com Action Bar -->
+  <rect x="36" y="1814" width="1008" height="68" rx="18" fill="${pal.cardBg}" stroke="${pal.border}" stroke-width="2" />
+  <text x="68" y="1856" fill="${pal.textDark}" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="22" font-weight="800">📌 Lazım olur, hemen kaydet &amp; paylaş</text>
+  <rect x="748" y="1826" width="278" height="44" rx="12" fill="${accent}" />
+  <text x="887" y="1855" text-anchor="middle" fill="#FFFFFF" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="20" font-weight="900">🌐 uretir.com</text>
 </svg>`;
 }
 
@@ -1241,7 +1507,23 @@ async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path, numFrames 
   const ffmpegBin = resolveFfmpegBinary();
   const rawWavPath = outMp3Path.replace(/\.mp3$/i, ".raw.wav");
 
-  // 1. PRIMARY: Piper VITS Neural Turkish Male (tr_TR-fahrettin-medium) + FFmpeg Broadcast Baritone Mastering ("Doğal, Tok, Optimum Hız ve %100 Stabil")
+  // Cyber-Robot / Futuristic AI Narrator Vocal DSP Filter ("robot konuşuyor gibi olsun + içeriğe odaklı net telaffuz")
+  const cyberRobotVoiceFilter = [
+    "asetrate=22050*0.97",
+    "aresample=44100",
+    "atempo=1.01",
+    "highpass=f=95",
+    "aecho=0.85:0.88:14|28:0.34|0.20",
+    "flanger=delay=2.2:depth=1.6:regen=28:width=70:speed=0.9:shape=triangular:phase=25:interp=linear",
+    "equalizer=f=150:t=q:w=1.2:g=3.5",
+    "equalizer=f=2600:t=q:w=1.1:g=3.8",
+    "equalizer=f=4200:t=q:w=1.3:g=2.5",
+    "acompressor=threshold=-20dB:ratio=4.5:attack=5:release=110:makeup=3.2",
+    "extrastereo=m=1.25",
+    "alimiter=limit=0.95",
+  ].join(",");
+
+  // 1. PRIMARY: Piper VITS Neural Turkish Male (tr_TR-fahrettin-medium) + Cyber-Robot AI Mastering
   try {
     const onnxPath = await ensurePiperTurkishModel();
     if (onnxPath) {
@@ -1253,6 +1535,8 @@ async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path, numFrames 
       );
       const uvCandidates = existsSync(localUv) ? [localUv, "uv"] : ["uv"];
       let wavBuilt = false;
+      const txtInPath = rawWavPath.replace(/\.raw\.wav$/, ".in.txt");
+      await fs.writeFile(txtInPath, cleanText, "utf8");
 
       for (const uvBin of uvCandidates) {
         if (wavBuilt) break;
@@ -1271,16 +1555,17 @@ async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path, numFrames 
               "--model",
               onnxPath,
               "--length-scale",
-              "1.06",
+              "1.00",
               "--noise-scale",
-              "0.60",
+              "0.32",
               "--noise-w-scale",
-              "0.75",
+              "0.38",
               "--sentence-silence",
-              "0.42",
-              "--output_file",
+              "0.28",
+              "-i",
+              txtInPath,
+              "-f",
               rawWavPath,
-              cleanText,
             ],
             { timeout: 35_000 }
           );
@@ -1300,16 +1585,17 @@ async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path, numFrames 
                 "--model",
                 onnxPath,
                 "--length-scale",
-                "1.06",
+                "1.00",
                 "--noise-scale",
-                "0.60",
+                "0.32",
                 "--noise-w-scale",
-                "0.75",
+                "0.38",
                 "--sentence-silence",
-                "0.42",
-                "--output_file",
+                "0.28",
+                "-i",
+                txtInPath,
+                "-f",
                 rawWavPath,
-                cleanText,
               ],
               { timeout: 25_000 }
             );
@@ -1318,11 +1604,13 @@ async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path, numFrames 
         }
       }
 
+      await fs.unlink(txtInPath).catch(() => {});
+
       if (wavBuilt && existsSync(rawWavPath)) {
         const wavStats = await extractWavEnvelope(rawWavPath, numFrames);
         const envelope = wavStats?.envelope || null;
-        const durationSec = wavStats?.rawDurationSec ? wavStats.rawDurationSec / (0.97 * 0.96) : 3.6;
-        // Apply Broadcast Baritone Vocal Mastering Filter (Natural crisp articulation, warm 120Hz chest resonance, zero phase-smear)
+        const durationSec = wavStats?.rawDurationSec ? wavStats.rawDurationSec / (0.97 * 1.01) : 3.4;
+
         await execFileAsync(
           ffmpegBin,
           [
@@ -1330,7 +1618,7 @@ async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path, numFrames 
             "-i",
             rawWavPath,
             "-af",
-            "asetrate=22050*0.97,aresample=44100,atempo=0.96,highpass=f=70,equalizer=f=120:t=q:w=1.2:g=3.0,equalizer=f=300:t=q:w=1.5:g=-1.8,equalizer=f=3400:t=q:w=1.2:g=2.2,acompressor=threshold=-16dB:ratio=2.6:attack=18:release=200:makeup=2.0,alimiter=limit=0.95",
+            cyberRobotVoiceFilter,
             "-c:a",
             "libmp3lame",
             "-b:a",
@@ -1346,10 +1634,10 @@ async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path, numFrames 
       }
     }
   } catch (piperErr) {
-    console.warn("[Piper Tok Ses Uyarısı]:", piperErr?.message || piperErr);
+    console.warn("[Piper Cyber-Robot Ses Uyarısı]:", piperErr?.message || piperErr);
   }
 
-  // 2. Fallback: Try Node.js msedge-tts (Microsoft Edge Neural Turkish Voice) + Baritone Mastering
+  // 2. Fallback: Try Node.js msedge-tts + Cyber-Robot Mastering
   try {
     const { MsEdgeTTS, OUTPUT_FORMAT } = requireOpenSource("msedge-tts");
     const tts = new MsEdgeTTS();
@@ -1366,11 +1654,11 @@ async function synthesizeNaturalTurkishVoice(text, voice, outMp3Path, numFrames 
         await fs.copyFile(audioFilePath, outMp3Path);
         await fs.unlink(audioFilePath).catch(() => {});
       }
-      if (existsSync(outMp3Path)) return { ok: true, envelope: null, durationSec: 3.6 };
+      if (existsSync(outMp3Path)) return { ok: true, envelope: null, durationSec: 3.4 };
     }
   } catch {}
 
-  return { ok: false, envelope: null, durationSec: 3.5 };
+  return { ok: false, envelope: null, durationSec: 3.4 };
 }
 
 async function resolveTelegramTargets() {
@@ -1451,44 +1739,31 @@ async function sendToTelegram(videoPath, coverPngPath, slotData) {
     return false;
   }
 
-  const rawTitle = slotData.scenes?.[0]?.title || slotData.label || "Üretir AI Güncel Analiz";
-  const shortTitle = `${rawTitle.slice(0, 78)} #Shorts`;
+  // PURE COPY-PASTE SHORT INSTAGRAM SEO CAPTION (Zero internal headers, ready to copy & paste directly into Reels)
   const readyCaption =
     slotData.customCaption ||
     [
-      `📊 ${slotData.label} | Üretir`,
-      "",
-      `📌 ${slotData.scenes[0].title}`,
-      `📌 ${slotData.scenes[1]?.title || slotData.scenes[0].sub}`,
-      `📌 ${slotData.scenes[2]?.title || slotData.scenes[0].highlight}`,
-      "",
-      `🌐 Doğrulanmış veriler ve mağaza fiyat geçmişi: ${slotData.targetUrl || "https://www.uretir.com"}`,
-      `📸 Instagram: @uretirai | ▶️ YouTube: @Uretir`,
-      `#Üretir #Ekonomi #İndirim #Kampanya #FiyatAnalizi #Keşfet #ReelsTürkiye`,
+      `${slotData.scenes?.[0]?.title || "Yapay zeka ve canlı veri ile 10 kat daha hızlı üret."} 🤖📈`,
+      `📌 Lazım olur, hemen kaydet ve canlı araçlar için incele 👉 uretir.com`,
+      `#üretir #yapayzeka #üretkenlik #otomasyon #teknoloji #keşfet`,
     ].join("\n");
 
-  const caption = [
-    `📦 [STOK HAZIR — %100 İHLAL YOKTUR]`,
-    `🎬 Kategori: ${slotData.label}`,
-    `▶️ YouTube/Reels Başlığı: ${shortTitle}`,
-    `━━━━━━━━━━━━━━━━━━━━`,
-    readyCaption,
-  ].join("\n");
+  const caption = readyCaption.trim();
 
   const replyMarkup = JSON.stringify({
     inline_keyboard: [
       [
-        { text: "📦 6'lı Akademi Stok Üret", callback_data: "cat:all" },
-        { text: "01 🦖 İlk Gün 5 Adım", callback_data: "cat:haberai" },
+        { text: "📦 6'lı Viral Seri Üret", callback_data: "cat:all" },
+        { text: "01 📊 Bar Race Gündem", callback_data: "cat:haberai" },
       ],
       [
-        { text: "02 🧠 Bağlam Penceresi", callback_data: "cat:puanai" },
-        { text: "03 🎯 Prompt Mimarisi", callback_data: "cat:indirimai" },
+        { text: "02 ⚡ Eski vs AI Matris", callback_data: "cat:puanai" },
+        { text: "03 🔄 Otonom Akış Şeması", callback_data: "cat:indirimai" },
       ],
       [
-        { text: "04 🔒 Kural vs Hook", callback_data: "cat:finansai" },
-        { text: "05 ⚡ Çoklu Ajanlar", callback_data: "cat:evai" },
-        { text: "06 🛠️ Skill Mimarisi", callback_data: "cat:arabaai" },
+        { text: "04 📈 Canlı Veri & Ekonomi", callback_data: "cat:finansai" },
+        { text: "05 🤖 5 Ajanlı Ekip", callback_data: "cat:evai" },
+        { text: "06 🎯 Amatör vs Pro AI", callback_data: "cat:arabaai" },
       ],
       [
         { text: "🌐 uretir.com", url: slotData.targetUrl || "https://www.uretir.com" },
@@ -1518,7 +1793,7 @@ async function sendToTelegram(videoPath, coverPngPath, slotData) {
           });
           const json = await res.json();
           if (json.ok) {
-            console.log(`Telegram'a (@uretirbot -> ${chatId}) fotoğraflı & grafikli MP4 stok videosu gönderildi!`);
+            console.log(`Telegram'a (@uretirbot -> ${chatId}) tam ekran Graph Motion MP4 ve copy-paste IG SEO metni gönderildi!`);
             anySent = true;
             sentThisChat = true;
           } else {
@@ -1530,10 +1805,7 @@ async function sendToTelegram(videoPath, coverPngPath, slotData) {
           const imgBytes = await fs.readFile(coverPngPath);
           const form = new FormData();
           form.append("chat_id", String(chatId));
-          form.append(
-            "caption",
-            `🖼️ Kapak Görseli (${slotData.label})\n📌 Kopyalanabilir Kanal Metni:\n\n${readyCaption}`.slice(0, 1020)
-          );
+          form.append("caption", caption.slice(0, 1020));
           form.append("reply_markup", replyMarkup);
           form.append("photo", new Blob([imgBytes], { type: "image/png" }), `uretir-${slotData.slot}.png`);
           const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
@@ -1543,7 +1815,7 @@ async function sendToTelegram(videoPath, coverPngPath, slotData) {
           });
           const json = await res.json();
           if (json.ok) {
-            console.log(`Telegram'a (@uretirbot -> ${chatId}) 1080x1920 kapak görseli ve kanal metni gönderildi!`);
+            console.log(`Telegram'a (@uretirbot -> ${chatId}) 1080x1920 kapak görseli ve copy-paste IG SEO metni gönderildi!`);
             anySent = true;
             sentThisChat = true;
           } else {
@@ -1576,20 +1848,11 @@ async function publishToInstagramReels(videoPath, coverPngPath, slotData) {
   const caption =
     slotData.customCaption ||
     [
-      `📊 ${slotData.label} | Üretir`,
-      "",
-      `• ${slotData.scenes[0].title}`,
-      `• ${slotData.scenes[1]?.title || slotData.scenes[0].sub}`,
-      `• ${slotData.scenes[2]?.title || slotData.scenes[0].highlight}`,
-      "",
-      `🔗 Doğrulanmış veriler ve mağaza fiyat geçmişi için: www.uretir.com (Profildeki bağlantıya tıklayın)`,
-      `📍 İnceleme adresi: ${(slotData.targetUrl || "https://www.uretir.com").replace("https://www.", "")}`,
-      `▶️ YouTube: @Uretir | 📱 Telegram: @uretirbot`,
-      "",
-      `#Üretir #Ekonomi #İndirim #Kampanya #FiyatAnalizi #Otomotiv #Gayrimenkul #Finans #Alışveriş #Keşfet #ReelsTürkiye`,
+      `${slotData.scenes?.[0]?.title || "Yapay zeka ve canlı veri ile 10 kat daha hızlı üret."} 🤖📈`,
+      `📌 Lazım olur, hemen kaydet ve canlı araçlar için incele 👉 uretir.com`,
+      `#üretir #yapayzeka #üretkenlik #otomasyon #teknoloji #keşfet`,
     ].join("\n");
 
-  // 1. Try uv (local or GitHub Actions astral-sh/setup-uv) + cloned subzeroid/instagrapi v3.0.25
   const localUv = path.resolve(".local", "open-source-stack", "bin", process.platform === "win32" ? "uv.exe" : "uv");
   const uvCandidates = existsSync(localUv) ? [localUv, "uv"] : ["uv"];
   for (const uvBin of uvCandidates) {
@@ -1614,6 +1877,8 @@ async function publishToInstagramReels(videoPath, coverPngPath, slotData) {
           "pycryptodomex",
           "--with",
           "moviepy",
+          "--with",
+          "instagrapi",
           "scripts/instagram-reels-publisher.py",
           videoPath || "",
           coverPngPath,
@@ -1634,7 +1899,6 @@ async function publishToInstagramReels(videoPath, coverPngPath, slotData) {
     }
   }
 
-  // 2. Try direct python3/python if instagrapi is installed via pip in GitHub Actions
   for (const pyBin of ["python3", "python"]) {
     try {
       const { stdout } = await execFileAsync(
@@ -1646,12 +1910,9 @@ async function publishToInstagramReels(videoPath, coverPngPath, slotData) {
         }
       );
       if (stdout && stdout.includes("PUBLISHED_OK")) return { ok: true, stdout };
-    } catch {
-      // fallback to Node publisher
-    }
+    } catch {}
   }
 
-  // 3. Fallback: Native Node.js publisher
   try {
     const nodeRes = await publishToInstagramNode({
       videoPath,
@@ -1673,27 +1934,17 @@ async function renderAndPublishSlotData(slotData) {
   await fs.mkdir(outDir, { recursive: true });
 
   console.log(`\n======================================================`);
-  console.log(`[Üretir Yapay Zeka Akademisi • Pure Black Studio] ${slotData.label} hazırlanıyor...`);
+  console.log(`[Üretir Tam Ekran 9:16 Graph Motion & Cyber-Robot Stüdyosu] ${slotData.label} hazırlanıyor...`);
   console.log(`======================================================`);
 
   const framesDir = path.join(outDir, "frames");
   await fs.mkdir(framesDir, { recursive: true });
-
-  // Only fetch external photos if not in pure-black niche academy mode
-  if (!slotData.pureBlackMode) {
-    for (const scene of slotData.scenes) {
-      if (!scene.photoDataUri) {
-        scene.photoDataUri = await prepareScenePhotoDataUri(scene);
-      }
-    }
-  }
 
   const baseFps = 10;
   const defaultFramesPerScene = slotData.scenes.length >= 6 ? 34 : slotData.scenes.length === 1 ? 54 : 36;
   const totalScenes = slotData.scenes.length;
   let frameCounter = 0;
 
-  // Clean old frames to avoid leftover frame count mismatches
   try {
     const oldFiles = await fs.readdir(framesDir);
     for (const f of oldFiles) {
@@ -1709,16 +1960,16 @@ async function renderAndPublishSlotData(slotData) {
   const useTts = !process.argv.includes("--no-tts") && process.env.WITH_TTS !== "0" && hasNonEmptySpeech;
   const sceneEnvelopes = [];
   const sceneFrameCounts = new Array(totalScenes).fill(defaultFramesPerScene);
-  let totalAudioDurationSec = totalScenes * 3.6;
+  let totalAudioDurationSec = totalScenes * 3.5;
 
-  // 1. Synthesize Deep Baritone Turkish Voiceover FIRST & Compute Exact Per-Scene Frame Counts for 100% Subtitle/Cursor Sync
+  // 1. Synthesize Cyber-Robot AI Turkish Voiceover FIRST & Compute Exact Per-Scene Frame Counts
   if (useTts) {
     try {
       const sceneVoicePaths = [];
       let accumulatedSec = 0;
       for (let i = 0; i < slotData.scenes.length; i++) {
         const sp = path.join(outDir, `scene-voice-${i}.mp3`);
-        const padSecNum = i === slotData.scenes.length - 1 ? 0.65 : 0.38;
+        const padSecNum = i === slotData.scenes.length - 1 ? 0.55 : 0.30;
         const res = await synthesizeNaturalTurkishVoice(
           slotData.scenes[i].speech,
           slotData.voice || "tr-TR-AhmetNeural",
@@ -1728,7 +1979,7 @@ async function renderAndPublishSlotData(slotData) {
         if (res?.ok && existsSync(sp)) {
           sceneVoicePaths.push({ path: sp, padSec: padSecNum });
           sceneEnvelopes[i] = res.envelope;
-          const sceneTotalSec = (res.durationSec || 3.4) + padSecNum;
+          const sceneTotalSec = (res.durationSec || 3.2) + padSecNum;
           sceneFrameCounts[i] = Math.max(18, Math.round(sceneTotalSec * baseFps));
           accumulatedSec += sceneTotalSec;
         }
@@ -1746,7 +1997,6 @@ async function renderAndPublishSlotData(slotData) {
           concatLabels.push(`[v${i}]`);
         }
 
-        // Clean, natural broadcast voice concatenation (like @avenoxyz — no distracting synthetic chord drone!)
         const filterComplex = [
           ...padFilters,
           `${concatLabels.join("")}concat=n=${sceneVoicePaths.length}:v=0:a=1,alimiter=limit=0.95[outa]`,
@@ -1760,18 +2010,18 @@ async function renderAndPublishSlotData(slotData) {
         hasVoice = existsSync(audioPath);
       }
     } catch (mixErr) {
-      console.warn("[Tok Ses Birleştirme Uyarısı]:", mixErr?.message || mixErr);
+      console.warn("[Cyber-Robot Ses Birleştirme Uyarısı]:", mixErr?.message || mixErr);
     }
   }
 
   console.log(
-    `[2/4] [Doğal Tok Seslendirme (Piper Baritone) & Cümle Senkronu]: ${hasVoice ? "BAŞARILI" : "YEDEK MOD"}`
+    `[2/4] [Cyber-Robot Seslendirme & Tam Ekran Graph Motion Senkronu]: ${hasVoice ? "BAŞARILI" : "YEDEK MOD"}`
   );
 
-  // 2. Render Audio-Reactive Pure-Black Interactive Frames (Exact Frame Count per Spoken Step!)
-  const dinoDataUri = await getDinoMascotDataUri();
+  // 2. Render Full-Height 9:16 Light-Palette Graph Motion Frames with Rotating Dino Costumes
   for (let sIdx = 0; sIdx < totalScenes; sIdx++) {
     const scene = slotData.scenes[sIdx];
+    const dinoDataUri = await getDinoMascotDataUri(scene.costume || slotData.costume || "analyst");
     const env = sceneEnvelopes[sIdx];
     const framesForThisScene = sceneFrameCounts[sIdx] || defaultFramesPerScene;
     for (let f = 0; f < framesForThisScene; f++) {
@@ -2007,142 +2257,170 @@ async function renderAndPublishSlotData(slotData) {
 }
 
 async function runSlot(slot) {
-  const slotData = await gatherLiveSlotData(slot);
-  return renderAndPublishSlotData(slotData);
+  const categoryMap = await buildSeparateCategorySlotMap();
+  const slotToCat = {
+    "09": "haberai",
+    "12": "puanai",
+    "15": "indirimai",
+    "20": "finansai",
+  };
+  const chosenCat = categoryMap[slotToCat[slot] || "haberai"] || categoryMap.haberai;
+  return renderAndPublishSlotData({ ...chosenCat, slot });
 }
 
 /**
- * Pure-Black (#000000) Niche "Üretir Dino • Yapay Zeka Akademisi" Episodes
- * Inspired by @avenoxyz minimal black-canvas interactive AI education series.
- * Each episode teaches a core AI & productivity concept in 6 synced scenes (Intro + 5 interactive steps).
+ * Full-Screen 9:16 Light-Palette Graph Motion Viral Series ("Çok İzlenen, Çok Kaydedilen 4 Farklı Konsept + 4 Farklı Dino Kostümü + Canlı Gündem")
+ * Pulls live agenda metrics from uretir.com and rotates templates (`bento_race`, `versus_matrix`, `flow_diagram`, `radar_bento`),
+ * light studio palettes (`daylight_sage`, `sky_indigo`, `warm_sand`, `pearl_teal`, `lavender_mint`, `peach_emerald`),
+ * and 3D Üretir Dino costumes (`analyst`, `scientist`, `creator`, `founder`).
  */
 async function buildSeparateCategorySlotMap() {
+  const synced = await syncUretirPrimaryDataHub().catch(() => ({}));
+  const itemsFin = synced?.finans?.items || [];
+  const usd = itemsFin.find((i) => i.id === "USD")?.price?.toFixed(2) || "49.45";
+  const gram = Math.round(itemsFin.find((i) => i.id === "GRAM")?.price || 6623).toLocaleString("tr-TR");
+  const bist = Math.round(itemsFin.find((i) => i.id === "XU100" || i.id === "XU100.IS")?.price || 11722).toLocaleString("tr-TR");
+  const topHeadlineRaw =
+    synced?.haberArticles?.[0]?.title ||
+    "Yapay Zeka Ajanları, Otonom Sistemler ve 81 İl Canlı Ekonomi Radarı";
+  const shortLiveHeadline = wrapLines(topHeadlineRaw, 46, 1)[0];
+  const liveMarketPulse = `Dolar ${usd}₺ • Altın ${gram}₺ • BIST ${bist}`;
+
+  // EPISODE 1: BAR CHART RACE + LIVE AGENDA (`bento_race` + `daylight_sage` + `analyst` Dino blazer costume)
   const ep1Base = {
-    hookLine1: "Yapay zekaya sıfırdan",
-    hookLine2: "başlarken 5 altın adım",
-    hookLine3: "Hangisini atladın?",
+    template: "bento_race",
+    palette: "daylight_sage",
+    costume: "analyst",
+    liveTicker: `GÜNDEM: ${shortLiveHeadline}`,
+    hookLine1: "2026'da en çok zaman kazandıran",
+    hookLine2: "5 yapay zeka kaldıracı",
+    hookLine3: "Sıralama değişti — hangilerini kullanıyorsun?",
     moduleNum: "01",
-    moduleKicker: "BURADAN BAŞLA",
-    cardTitle: "İlk gün, beş karar.",
-    cardSub: "Gerisini ürettikçe öğrenirsin.",
-    moduleTag: "01 • İlk gün • üretir",
-    accent: "#c8f560",
+    moduleKicker: "CANLI GÜNDEM & BAR RACE",
+    kpiNumber: 10,
+    kpiSuffix: "x",
+    kpiLabel: "HIZ KALDIRACI",
     rows: [
-      { num: "01", label: "Model ve plan seçimi" },
-      { num: "02", label: "İzin ve sınır modu" },
-      { num: "03", label: "URETIR.md hafızası" },
-      { num: "04", label: "Bağlam (context) çubuğu" },
-      { num: "05", label: "İlk otomasyon skill'i" },
+      { num: "01", label: "Otonom Kod & Ajan Sistemleri", val: 96, newText: "10 saatlik işi 15 dakikada bitirir" },
+      { num: "02", label: "Canlı Gündem & Veri Sentezi", val: 91, newText: "81 il ve piyasa verisini anlık tarar" },
+      { num: "03", label: "Kalıcı Hafıza (URETIR.md)", val: 87, newText: "Kuralları bir kez yaz, asla unutmasın" },
+      { num: "04", label: "Tek Tıkla Skill Otomasyonu", val: 83, newText: "Tekrarlayan promptları komuta indir" },
+      { num: "05", label: "Otomatik Hook & Hata Kilidi", val: 79, newText: "Sıfır insan hatasıyla 7/24 üretim" },
     ],
   };
 
+  // EPISODE 2: ESKİ YÖNTEM VS AI SİSTEMİ (`versus_matrix` + `sky_indigo` + `scientist` Dino lab coat costume)
   const ep2Base = {
-    hookLine1: "Model seni dinlemiyor mu?",
-    hookLine2: "Hayır, bağlamı unutuyor",
-    hookLine3: "Kritik talimat nereye yazılır?",
+    template: "versus_matrix",
+    palette: "sky_indigo",
+    costume: "scientist",
+    liveTicker: liveMarketPulse,
+    hookLine1: "10 saatlik yorucu işi",
+    hookLine2: "15 dakikaya indiren matris",
+    hookLine3: "Eski manuel yöntem vs Üretir AI sistemi",
     moduleNum: "02",
-    moduleKicker: "BAĞLAM PENCERESİ",
-    cardTitle: "200K token nasıl dolar?",
-    cardSub: "Hafıza taşmadan bağlamı yönet.",
-    moduleTag: "02 • Bağlam • üretir",
-    accent: "#34d399",
-    stageBg1: "#132e26",
-    stageBg2: "#18382d",
-    stageBg3: "#091914",
+    moduleKicker: "ESKİ YÖNTEM VS AI SİSTEMİ",
+    kpiNumber: 85,
+    kpiSuffix: "%",
+    kpiLabel: "ZAMAN TASARRUFU",
     rows: [
-      { num: "01", label: "Sistem ve araç yükü" },
-      { num: "02", label: "Dosya okuma birikimi" },
-      { num: "03", label: "/compact ile özetle" },
-      { num: "04", label: "/clear ile temiz sayfa" },
-      { num: "05", label: "Kalıcı kural dosyası" },
+      { num: "01", label: "Veri ve Gündem Araştırması", val: 95, oldText: "3 Saat Sekme Tarama", newText: "3 Dakika AI Radarı", tag: "60x Hızlı" },
+      { num: "02", label: "Bağlam (Context) Yönetimi", val: 90, oldText: "Şişen Sohbet & Unutma", newText: "/compact ile Net Hafıza", tag: "%100 Odak" },
+      { num: "03", label: "Rapor ve İçerik Üretimi", val: 88, oldText: "Sıfırdan 4 Saat Yazım", newText: "Hazır Skill ile 5 Dk", tag: "48x Hızlı" },
+      { num: "04", label: "Kalite ve Hata Kontrolü", val: 85, oldText: "Gözden Kaçan Hatalar", newText: "Pre-Tool Hook Kilidi", tag: "Sıfır Hata" },
+      { num: "05", label: "Çoklu Kanal Dağıtımı", val: 92, oldText: "Tek Tek Manuel Paylaşım", newText: "7/24 Otonom Bot Akışı", tag: "Otonom" },
     ],
   };
 
+  // EPISODE 3: KAYDETMELİK OTONOM AKIŞ ŞEMASI (`flow_diagram` + `warm_sand` + `creator` Dino varsity jacket & headphones)
   const ep3Base = {
-    hookLine1: "İyi prompt yol tarif etmez",
-    hookLine2: "net bir sınır çizer",
-    hookLine3: "Nasıl değil, ne istediğini söyle",
+    template: "flow_diagram",
+    palette: "warm_sand",
+    costume: "creator",
+    liveTicker: `CANLI RADAR: ${shortLiveHeadline}`,
+    hookLine1: "Sen uyurken bile çalışan",
+    hookLine2: "5 adımlı otonom üretim sistemi",
+    hookLine3: "Bu akış şemasını mutlaka kaydet",
     moduleNum: "03",
-    moduleKicker: "PROMPT MİMARİSİ",
-    cardTitle: "Adım adım tarif etme.",
-    cardSub: "Hedefi ve sınırları net tanımla.",
-    moduleTag: "03 • Prompt • üretir",
-    accent: "#c8f560",
-    stageBg1: "#20341c",
-    stageBg2: "#263e21",
-    stageBg3: "#0f1a0d",
+    moduleKicker: "OTONOM AKIŞ ŞEMASI",
+    kpiNumber: 24,
+    kpiSuffix: "/7",
+    kpiLabel: "KESİNTİSİZ SİSTEM",
     rows: [
-      { num: "01", label: "Hedef çıktıyı tanımla" },
-      { num: "02", label: "Dokunulmaz sınırları çiz" },
-      { num: "03", label: "Örnek girdi-çıktı ver" },
-      { num: "04", label: "Önce plan iste (/plan)" },
-      { num: "05", label: "Doğrulama kriteri koy" },
+      { num: "01", label: "Canlı Gündem Girişi", val: 94, newText: "Haber, fiyat ve trend verisi toplanır" },
+      { num: "02", label: "AI Sentez & Filtreleme", val: 90, newText: "Gürültü elenir, net içgörü çıkarılır" },
+      { num: "03", label: "Görsel & Grafik Motoru", val: 88, newText: "Veriler otomatik dikey grafiğe dönüşür" },
+      { num: "04", label: "Robot Ses & Senkron", val: 86, newText: "Cümle bazlı ses ve altyazı birleşir" },
+      { num: "05", label: "Merkez: uretir.com", val: 96, newText: "Telegram ve web merkezinde yayına girer" },
     ],
   };
 
+  // EPISODE 4: CANLI EKONOMİ & VERİ OKUMA (`radar_bento` + `pearl_teal` + `founder` Dino cap & smartwatch)
   const ep4Base = {
-    hookLine1: "Hafıza dosyası rica eder",
-    hookLine2: "Hook zorla yaptırır",
-    hookLine3: "Garanti gereken işi koda bağla",
+    template: "radar_bento",
+    palette: "pearl_teal",
+    costume: "founder",
+    liveTicker: liveMarketPulse,
+    hookLine1: "Gürültüyü kapat, veriyi oku:",
+    hookLine2: "Gündemi analiz etmenin 5 kuralı",
+    hookLine3: `Canlı: Dolar ${usd} ₺ • Gram Altın ${gram} ₺`,
     moduleNum: "04",
-    moduleKicker: "OTOMASYON KİLİDİ",
-    cardTitle: "Tavsiye mi, kural mı?",
-    cardSub: "Kritik adımı şansa bırakma.",
-    moduleTag: "04 • Hook • üretir",
-    accent: "#2dd4bf",
-    stageBg1: "#112d30",
-    stageBg2: "#15383b",
-    stageBg3: "#081719",
+    moduleKicker: "CANLI VERİ & ANALİZ",
+    kpiNumber: 100,
+    kpiSuffix: "%",
+    kpiLabel: "DOĞRULANAN VERİ",
     rows: [
-      { num: "01", label: "Tavsiye: Kural dosyası" },
-      { num: "02", label: "Zorunlu: Pre-tool hook" },
-      { num: "03", label: "Otomatik stil kontrolü" },
-      { num: "04", label: "Riskli komutu engelle" },
-      { num: "05", label: "Sıfır hata üretim hattı" },
+      { num: "01", label: "360 Gün Fiyat Geçmişi", val: 95, newText: "Sahte indirimi gerçek dipten ayır" },
+      { num: "02", label: "Anlık Kur ve Altın Makası", val: 91, newText: `Gram altın ${gram} TL trendini izle` },
+      { num: "03", label: "81 İl Doğrulanmış Gündem", val: 88, newText: "Söylentiye değil resmî kaynağa bak" },
+      { num: "04", label: "Bölgesel Emsal Kıyaslama", val: 85, newText: "Konut ve araçta m²/liste farkını gör" },
+      { num: "05", label: "Tek Ekran Karar Masası", val: 94, newText: "Tüm canlı AI araçları uretir.com'da" },
     ],
   };
 
+  // EPISODE 5: 5 KİŞİLİK YAPAY ZEKA AJAN EKİBİ (`flow_diagram` + `lavender_mint` + `scientist` Dino)
   const ep5Base = {
-    hookLine1: "Tek bir ajanla uğraşma",
-    hookLine2: "alt ajanlarla 10 kat hızlan",
-    hookLine3: "Ana bağlamı tertemiz koru",
+    template: "flow_diagram",
+    palette: "lavender_mint",
+    costume: "scientist",
+    liveTicker: `AJAN MİMARİSİ: ${shortLiveHeadline}`,
+    hookLine1: "Tek başına 5 kişilik ekip gibi",
+    hookLine2: "üretmenin çoklu ajan şeması",
+    hookLine3: "Her görevi ayrı bir uzman ajana devret",
     moduleNum: "05",
-    moduleKicker: "ÇOKLU AJAN SİSTEMİ",
-    cardTitle: "Araştırmayı devret.",
-    cardSub: "Ana ekrana sadece özet gelsin.",
-    moduleTag: "05 • Ajanlar • üretir",
-    accent: "#d9f99d",
-    stageBg1: "#263018",
-    stageBg2: "#2e3a1d",
-    stageBg3: "#12180b",
+    moduleKicker: "ÇOKLU AJAN MİMARİSİ",
+    kpiNumber: 5,
+    kpiSuffix: "x",
+    kpiLabel: "UZMAN AJAN GÜCÜ",
     rows: [
-      { num: "01", label: "Araştırmacı alt ajan" },
-      { num: "02", label: "Kod inceleme ajanı" },
-      { num: "03", label: "Test doğrulama ajanı" },
-      { num: "04", label: "Temiz ana bağlam" },
-      { num: "05", label: "Paralel üretim hattı" },
+      { num: "01", label: "Araştırmacı Alt Ajan", val: 95, newText: "Yüzlerce kaynağı ayrı pencerede tarar" },
+      { num: "02", label: "Mimari Planlama Ajanı", val: 91, newText: "Kodlamadan önce /plan ile sınır çizer" },
+      { num: "03", label: "Üretici & Kodlayıcı Ajan", val: 89, newText: "Temiz bağlamda sıfırdan sistemi kurar" },
+      { num: "04", label: "Denetçi & Test Ajanı", val: 87, newText: "Çıktıyı bağımsız gözle test edip onaylar" },
+      { num: "05", label: "Ana Orkestra: uretir.com", val: 96, newText: "Sana sadece onaylamak ve büyütmek kalır" },
     ],
   };
 
+  // EPISODE 6: AMATÖR VS PROFESYONEL AI KULLANIMI (`versus_matrix` + `peach_emerald` + `creator` Dino)
   const ep6Base = {
-    hookLine1: "Aynı promptu tekrar yazma",
-    hookLine2: "Skill yap, tek tıkla üret",
-    hookLine3: "Kendi yapay zeka kütüphaneni kur",
+    template: "versus_matrix",
+    palette: "peach_emerald",
+    costume: "creator",
+    liveTicker: liveMarketPulse,
+    hookLine1: "İnsanların %95'i yapay zekayı",
+    hookLine2: "yanlış kullanıyor: İşte fark!",
+    hookLine3: "Amatör kullanıcı vs Sistem kuran üretici",
     moduleNum: "06",
-    moduleKicker: "SKILL MİMARİSİ",
-    cardTitle: "Bir kez kur, hep kullan.",
-    cardSub: "Tekrarlayan işini komuta dönüştür.",
-    moduleTag: "06 • Skill • üretir",
-    accent: "#34d399",
-    stageBg1: "#143022",
-    stageBg2: "#193c2a",
-    stageBg3: "#091811",
+    moduleKicker: "AMATÖR VS PROFESYONEL AI",
+    kpiNumber: 95,
+    kpiSuffix: "%",
+    kpiLabel: "KALİTE FARKI",
     rows: [
-      { num: "01", label: "Tekrarlayan işi seç" },
-      { num: "02", label: "SKILL.md şablonu yaz" },
-      { num: "03", label: "Örnek çıktı ekle" },
-      { num: "04", label: "Tek komutla çağır" },
-      { num: "05", label: "Sistemi sürekli büyüt" },
+      { num: "01", label: "Prompt Yazım Tarzı", val: 96, oldText: "Nasıl yapılacağını tarif eder", newText: "Hedefi ve kırmızı çizgiyi verir", tag: "Net Sınır" },
+      { num: "02", label: "Proje Hafızası", val: 92, oldText: "Her sohbette baştan anlatır", newText: "URETIR.md ile kalıcı öğretir", tag: "Kalıcı" },
+      { num: "03", label: "Tekrarlayan Görevler", val: 89, oldText: "Kopyala-yapıştır ile uğraşır", newText: "SKILL.md yapıp tek tıkla üretir", tag: "Tek Komut" },
+      { num: "04", label: "Güvenlik ve Kurallar", val: 86, oldText: "Modelin hatırlamasını umar", newText: "Pre-tool hook ile koda bağlar", tag: "%100 Kilit" },
+      { num: "05", label: "Günlük Gündem & Veri", val: 94, oldText: "Sosyal medyada kaybolur", newText: "uretir.com ile veriyi okur", tag: "Üretici" },
     ],
   };
 
@@ -2150,506 +2428,486 @@ async function buildSeparateCategorySlotMap() {
     haberai: {
       slot: "cat-haberai",
       pureBlackMode: true,
-      label: "ÜRETİR YAPAY ZEKA AKADEMİSİ · BÖLÜM 01: İLK GÜN 5 ADIM",
+      costume: "analyst",
+      label: "BÖLÜM 01 · 2026 YAPAY ZEKA KALDIRAÇ SIRALAMASI (BAR RACE)",
       targetUrl: "https://www.uretir.com",
       whatsappTargetKey: "haberai",
       customCaption: [
-        `🦖 Yapay Zekaya Sıfırdan Başlarken 5 Altın Adım — Hangisini Atladın? | Üretir Akademi`,
-        ``,
-        `01 ■ Model ve plan seçimi (Hız için Sonnet, derin mimari için Opus)`,
-        `02 ■ İzin ve sınır modu (Onaylı güvenli çalışma alanı)`,
-        `03 ■ URETIR.md hafızası (Proje kurallarını kalıcı hale getir)`,
-        `04 ■ Bağlam çubuğu (%70 dolulukta özetle ve tazele)`,
-        `05 ■ İlk otomasyon skill'i (Tekrarlayan işi tek komuta indir)`,
-        ``,
-        `🌐 Yapay zekayı anlamak ve üretmek için: www.uretir.com`,
-        `📸 Instagram: @uretirai | ▶️ YouTube: @Uretir`,
-        ``,
-        `#Üretir #YapayZeka #AIAkademi #PromptMühendisliği #Üretkenlik #Otomasyon #Teknoloji #Keşfet`,
+        `2026'da en çok zaman kazandıran 5 yapay zeka kaldıracı — sıralama değişti! 🤖📊`,
+        `📌 Lazım olur, hemen kaydet ve canlı araçlar için incele 👉 uretir.com`,
+        `#üretir #yapayzeka #üretkenlik #otomasyon #teknoloji #keşfet`,
       ].join("\n"),
       scenes: [
         {
           ...ep1Base,
           stepIndex: 0,
-          title: "Yapay Zekaya Sıfırdan Başlarken 5 Altın Adım",
-          sub: "İlk gün sadece beş kararı doğru ver.",
-          highlight: "01 • İLK GÜN BEŞ KARAR",
-          subLine1: "Yapay zekada ilk gün",
-          subLine2: "sadece beş kararı doğru ver.",
-          subHighlight: "beş kararı",
-          speech: "Yapay zekaya sıfırdan başlıyorsan, ilk gün sadece beş kararı doğru vermen yeterli.",
+          title: "2026'da En Çok Zaman Kazandıran 5 Yapay Zeka Kaldıracı",
+          sub: `Canlı Gündem: ${shortLiveHeadline}`,
+          highlight: "10X ÜRETİM KALDIRACI",
+          subLine1: "Gündemi yakala: En çok zaman",
+          subLine2: "kazandıran beş yapay zeka sistemi.",
+          subHighlight: "beş yapay zeka",
+          speech: "Gündemi yakala. İşte en çok zaman kazandıran beş yapay zeka kaldıracı.",
         },
         {
           ...ep1Base,
           stepIndex: 1,
-          title: "01 • Doğru Modeli Seç",
-          sub: "Günlük hızda Sonnet, derin mimaride Opus.",
-          highlight: "SONNET VS OPUS",
-          subLine1: "Günlük hızlı işlerde Sonnet,",
-          subLine2: "derin mimaride Opus kullan.",
-          subHighlight: "Opus kullan.",
-          speech: "Önce doğru modeli seç. Günlük hızlı üretimde Sonnet, derin mimaride Opus kullan.",
+          title: "01 • Otonom Kod ve Ajan Sistemleri (%96 Etki)",
+          sub: "On saatlik manuel işi on beş dakikada tamamlar.",
+          highlight: "%96 VERİMLİLİK LİDERİ",
+          subLine1: "Birinci sırada otonom ajanlar,",
+          subLine2: "on saatlik işi on beş dakikada çözer.",
+          subHighlight: "otonom ajanlar,",
+          speech: "Birinci sırada otonom ajanlar var. On saatlik işi on beş dakikada tamamlar.",
         },
         {
           ...ep1Base,
           stepIndex: 2,
-          title: "02 • İzin ve Sınır Modu",
-          sub: "Her adımda onay alarak güvenle ilerlesin.",
-          highlight: "GÜVENLİ İZİN MODU",
-          subLine1: "İzin modunu açık tut,",
-          subLine2: "her adımda onay alarak ilerlesin.",
-          subHighlight: "onay alarak",
-          speech: "İzin modunu açık tut ki model her kritik adımda senden onay alarak güvenle ilerlesin.",
+          title: "02 • Canlı Gündem ve Veri Sentezi (%91 Etki)",
+          sub: `Dolar ${usd} TL, Altın ${gram} TL ve 81 il radarı.`,
+          highlight: "ANLIK VERİ SENTEZİ",
+          subLine1: "İkinci sırada canlı veri sentezi,",
+          subLine2: "gündemi ve piyasayı anlık tarar.",
+          subHighlight: "canlı veri sentezi,",
+          speech: "İkinci sırada canlı veri sentezi, gündemi ve piyasayı saniyeler içinde tarar.",
         },
         {
           ...ep1Base,
           stepIndex: 3,
-          title: "03 • URETIR.md Hafızası",
-          sub: "Kurallarını bir kez yaz, seni hep tanısın.",
-          highlight: "KALICI PROJE HAFIZASI",
-          subLine1: "Kurallarını bir kez yaz,",
-          subLine2: "model her sohbette seni tanısın.",
-          subHighlight: "seni tanısın.",
-          speech: "Proje hafızası için kurallarını URETIR.md dosyasına bir kez yaz, model her sohbette seni tanısın.",
+          title: "03 • Kalıcı Proje Hafızası (%87 Etki)",
+          sub: "Kurallarını bir kez yaz, model seni her gün tanısın.",
+          highlight: "URETIR.MD HAFIZASI",
+          subLine1: "Üçüncü sırada kalıcı hafıza,",
+          subLine2: "kuralları bir kez yaz, hep hatırlasın.",
+          subHighlight: "kalıcı hafıza,",
+          speech: "Üçüncü sırada kalıcı hafıza dosyası. Kuralları bir kez yaz, model hiç unutmasın.",
         },
         {
           ...ep1Base,
           stepIndex: 4,
-          title: "04 • Bağlam (Context) Çubuğu",
-          sub: "Yüzde yetmiş dolulukta sohbeti tazele.",
-          highlight: "%70 BAĞLAM SINIRI",
-          subLine1: "Bağlam yüzde yetmişi geçince",
-          subLine2: "sohbeti özetleyip tazele.",
-          subHighlight: "yüzde yetmişi",
-          speech: "Context çubuğunu takip et. Doluluk yüzde yetmişi geçince sohbeti özetleyip tazele.",
+          title: "04 • Tek Tıkla Skill Otomasyonu (%83 Etki)",
+          sub: "Tekrarlayan iş akışlarını tek bir komuta dönüştür.",
+          highlight: "TEK KOMUT SKILL",
+          subLine1: "Dördüncü sırada skill mimarisi,",
+          subLine2: "tekrarlayan işi tek komuta indirir.",
+          subHighlight: "skill mimarisi,",
+          speech: "Dördüncü sırada skill mimarisi. Tekrarlayan işini tek bir komuta indirir.",
         },
         {
           ...ep1Base,
           stepIndex: 5,
-          title: "05 • İlk Otomasyon Skill'i",
-          sub: "Tekrarlayan işini tek komuta dönüştür.",
-          highlight: "URETIR.COM • AI AKADEMİ",
-          subLine1: "Tekrarlayan işini skill yap,",
-          subLine2: "tüm rehberler uretir.com'da.",
+          title: "05 • Otomatik Hook ve Canlı Merkez: uretir.com",
+          sub: "Bu sıralamayı kaydet, tüm araçları uretir.com'da dene.",
+          highlight: "WWW.URETIR.COM",
+          subLine1: "Bu tabloyu hemen kaydet,",
+          subLine2: "canlı araçlar uretir.com'da.",
           subHighlight: "uretir.com'da.",
-          speech: "Ve tekrarlayan işini skill yap. Tüm yapay zeka eğitimleri uretir.com adresinde.",
+          speech: "Bu tabloyu hemen kaydet. Tüm canlı yapay zeka araçları uretir.com'da.",
         },
       ],
     },
     puanai: {
       slot: "cat-puanai",
       pureBlackMode: true,
-      label: "ÜRETİR YAPAY ZEKA AKADEMİSİ · BÖLÜM 02: BAĞLAM PENCERESİ",
+      costume: "scientist",
+      label: "BÖLÜM 02 · ESKİ YÖNTEM VS ÜRETİR AI MATRİSİ",
       targetUrl: "https://www.uretir.com/ajanlar",
       whatsappTargetKey: "puanai",
       customCaption: [
-        `🦖 Model Seni Dinlemiyor Mu? Hayır, Bağlamı Unutuyor! | Üretir Akademi`,
-        ``,
-        `01 ■ Sistem ve araç yükü bağlamın ilk kısmını alır`,
-        `02 ■ Okunan her dosya 200K penceresini doldurur`,
-        `03 ■ /compact ile önemli kararları tutup özetle`,
-        `04 ■ Yeni konuya geçerken /clear ile temiz sayfa aç`,
-        `05 ■ Kritik kuralları sohbete değil, kalıcı kural dosyasına yaz`,
-        ``,
-        `🌐 Yapay zekayı anlamak ve üretmek için: www.uretir.com`,
-        `#Üretir #YapayZeka #ContextWindow #AIAkademi #Üretkenlik #Keşfet`,
+        `10 saatlik yorucu işi 15 dakikaya indiren yapay zeka karşılaştırma matrisi. ⚡🧪`,
+        `📌 Lazım olur, hemen kaydet ve sistemleri kur 👉 uretir.com`,
+        `#üretir #yapayzeka #otomasyon #üretkenlik #işakışı #keşfet`,
       ].join("\n"),
       scenes: [
         {
           ...ep2Base,
           stepIndex: 0,
-          title: "Model Seni Dinlemiyor Mu? Hayır, Bağlamı Unutuyor",
-          sub: "Kritik talimat nereye yazılır?",
-          highlight: "02 • BAĞLAM YÖNETİMİ",
-          subLine1: "Model seni dinlemiyor değil,",
-          subLine2: "dolan bağlamda kuralı unutuyor.",
-          subHighlight: "bağlamda",
-          speech: "Model seni dinlemiyor değil. Context penceresi doldukça ilk verdiğin talimatları unutuyor.",
+          title: "10 Saatlik İşi 15 Dakikaya İndiren Karşılaştırma Matrisi",
+          sub: "Eski manuel yöntem ile yeni AI kaldıracını kıyasla.",
+          highlight: "-%85 ZAMAN TASARRUFU",
+          subLine1: "On saatlik işi on beş dakikaya",
+          subLine2: "indiren karşılaştırma matrisi.",
+          subHighlight: "on beş dakikaya",
+          speech: "On saatlik yorucu işi on beş dakikaya indiren karşılaştırma matrisine yakından bak.",
         },
         {
           ...ep2Base,
           stepIndex: 1,
-          title: "01 • Sistem ve Araç Yükü",
-          sub: "Pencerenin ilk kısmı sistem araçlarına gider.",
-          highlight: "BAŞLANGIÇ YÜKÜ",
-          subLine1: "Daha ilk mesajı yazmadan",
-          subLine2: "sistem araçları yer kaplar.",
-          subHighlight: "sistem araçları",
-          speech: "Daha ilk mesajı yazmadan, sistem ve araç tanımları hafızanın bir kısmını doldurur.",
+          title: "01 • Veri Tarama: 3 Saat Yerine 3 Dakika",
+          sub: "Yirmi sekme arasında kaybolma, AI radarıyla sentezle.",
+          highlight: "60X DAHA HIZLI",
+          subLine1: "Üç saat sekme taramak yerine",
+          subLine2: "üç dakikada net veri sentezi.",
+          subHighlight: "üç dakikada",
+          speech: "Eski yöntemde üç saat süren araştırmayı, yapay zeka radarıyla üç dakikada bitir.",
         },
         {
           ...ep2Base,
           stepIndex: 2,
-          title: "02 • Dosya Okuma Birikimi",
-          sub: "Okunan her büyük dosya pencereyi şişirir.",
-          highlight: "DOSYA BİRİKİMİ",
-          subLine1: "Okunan her büyük dosya",
-          subLine2: "aktif pencereyi hızla şişirir.",
-          subHighlight: "hızla şişirir.",
-          speech: "Sohbette okuttuğun her büyük dosya, iki yüz ka token penceresini hızla şişirir.",
+          title: "02 • Bağlam Yönetimi: Şişen Sohbet Yerine /compact",
+          sub: "Yüzde yetmiş dolulukta geçmişi özetle, odağı koru.",
+          highlight: "%100 NET ODAK",
+          subLine1: "Sohbeti şişirip modeli yorma,",
+          subLine2: "compact komutuyla hafızayı tazele.",
+          subHighlight: "compact komutuyla",
+          speech: "Sohbeti şişirip modeli yorma. Compact komutuyla önemli kararları tutup özetle.",
         },
         {
           ...ep2Base,
           stepIndex: 3,
-          title: "03 • /compact ile Özetle",
-          sub: "Kararları koruyup gereksiz geçmişi sıkıştır.",
-          highlight: "/COMPACT ÖZETLEME",
-          subLine1: "Yüzde yetmişe ulaştığında",
-          subLine2: "compact ile geçmişi özetle.",
-          subHighlight: "compact ile",
-          speech: "Doluluk yüzde yetmişe ulaştığında, compact komutuyla kararları koruyup geçmişi özetle.",
+          title: "03 • Üretim: Sıfırdan Yazmak Yerine Hazır Skill",
+          sub: "Aynı promptu her gün yazma, şablonunu tek tıkla çağır.",
+          highlight: "48X ÜRETİM HIZI",
+          subLine1: "Her gün sıfırdan başlamak yerine",
+          subLine2: "hazır skill şablonuyla üret.",
+          subHighlight: "skill şablonuyla",
+          speech: "Her gün sıfırdan prompt yazmak yerine, hazır skill şablonunla saniyeler içinde üret.",
         },
         {
           ...ep2Base,
           stepIndex: 4,
-          title: "04 • /clear ile Temiz Sayfa",
-          sub: "Farklı bir göreve geçerken bağlamı sıfırla.",
-          highlight: "/CLEAR TEMİZ SAYFA",
-          subLine1: "Yeni bir göreve geçerken",
-          subLine2: "clear ile tertemiz sayfa aç.",
-          subHighlight: "tertemiz sayfa",
-          speech: "Farklı bir göreve geçerken eski sohbeti uzatma, clear komutuyla tertemiz bir sayfa aç.",
+          title: "04 • Kontrol: Gözden Kaçan Hata Yerine Hook Kilidi",
+          sub: "Pre-tool hook ile güvenlik ve kaliteyi koda bağla.",
+          highlight: "SIFIR İNSAN HATASI",
+          subLine1: "Hatayı şansa bırakma,",
+          subLine2: "pre-tool hook ile otomatik kilitle.",
+          subHighlight: "pre-tool hook",
+          speech: "Kalite kontrolü şansa bırakma. Pre-tool hook ile doğrulamayı koda bağla.",
         },
         {
           ...ep2Base,
           stepIndex: 5,
-          title: "05 • Kalıcı Kural Dosyası",
-          sub: "Kritik kuralı sohbete değil dosyaya yaz.",
-          highlight: "URETIR.COM • AI AKADEMİ",
-          subLine1: "Kritik kuralı sohbete değil,",
-          subLine2: "kalıcı dosyaya yaz: uretir.com",
-          subHighlight: "uretir.com",
-          speech: "Kritik kuralları sohbete değil, kalıcı kural dosyasına yaz. Detaylar uretir.com'da.",
+          title: "05 • Otonom Dağıtım ve Merkez: uretir.com",
+          sub: "Bu matrisi kaydet, kendi sistemini uretir.com ile kur.",
+          highlight: "WWW.URETIR.COM",
+          subLine1: "Bu karşılaştırmayı hemen kaydet,",
+          subLine2: "tüm rehberler uretir.com'da.",
+          subHighlight: "uretir.com'da.",
+          speech: "Bu karşılaştırma matrisini kaydet. Tüm sistem rehberleri uretir.com'da.",
         },
       ],
     },
     indirimai: {
       slot: "cat-indirimai",
       pureBlackMode: true,
-      label: "ÜRETİR YAPAY ZEKA AKADEMİSİ · BÖLÜM 03: PROMPT MİMARİSİ",
+      costume: "creator",
+      label: "BÖLÜM 03 · 7/24 ÇALIŞAN OTONOM SİSTEM AKIŞ ŞEMASI",
       targetUrl: "https://www.uretir.com",
       whatsappTargetKey: "indirimai",
       customCaption: [
-        `🦖 İyi Prompt Yol Tarif Etmez, Net Bir Sınır Çizer! | Üretir Akademi`,
-        ``,
-        `01 ■ Hedef çıktıyı net tanımla`,
-        `02 ■ Dokunulmaması gereken sınırları çiz`,
-        `03 ■ Somut girdi ve çıktı örneği ver`,
-        `04 ■ Kodlamadan önce /plan ile mimari iste`,
-        `05 ■ Başarı ve doğrulama kriterini belirle`,
-        ``,
-        `🌐 Yapay zekayı anlamak ve üretmek için: www.uretir.com`,
-        `#Üretir #PromptEngineering #YapayZeka #AIAkademi #Üretkenlik #Keşfet`,
+        `Sen uyurken bile çalışan 5 adımlı otonom dijital üretim mimarisi. 🔄🎧`,
+        `📌 Bu akış şemasını kaydet ve detaylar için incele 👉 uretir.com`,
+        `#üretir #yapayzeka #otomasyon #dijitalüretim #teknoloji #keşfet`,
       ].join("\n"),
       scenes: [
         {
           ...ep3Base,
           stepIndex: 0,
-          title: "İyi Prompt Yol Tarif Etmez, Net Bir Sınır Çizer",
-          sub: "Nasıl yapılacağını değil, hedefi ve sınırı söyle.",
-          highlight: "03 • PROMPT MİMARİSİ",
-          subLine1: "İyi prompt adım adım yol tarif etmez,",
-          subLine2: "hedefi ve sınırları çizer.",
-          subHighlight: "sınırları çizer.",
-          speech: "İyi bir prompt modele adım adım yol tarif etmez. Hedefi ve dokunulmaz sınırları çizer.",
+          title: "Sen Uyurken Çalışan 5 Adımlı Otonom Sistem Şeması",
+          sub: "Zamanını satma, 7/24 çalışan dijital sistem kur.",
+          highlight: "7/24 OTONOM MİMARİ",
+          subLine1: "Sen uyurken bile çalışan",
+          subLine2: "beş adımlı otonom üretim şeması.",
+          subHighlight: "otonom üretim",
+          speech: "Sen uyurken bile çalışan, beş adımlı otonom dijital üretim şemasını inceliyoruz.",
         },
         {
           ...ep3Base,
           stepIndex: 1,
-          title: "01 • Hedef Çıktıyı Tanımla",
-          sub: "Sonuçta ne görmek istediğini net söyle.",
-          highlight: "NET HEDEF ÇIKTI",
-          subLine1: "Nasıl yazacağını anlatma,",
-          subLine2: "istediğin son çıktıyı tanımla.",
-          subHighlight: "son çıktıyı",
-          speech: "Kodu nasıl yazacağını anlatma, ulaşmak istediğin son çıktıyı net olarak tanımla.",
+          title: "01 • Canlı Gündem ve Veri Girişi",
+          sub: "Sistem önce doğrulanmış haber, fiyat ve trendleri toplar.",
+          highlight: "OTOMATİK VERİ GİRİŞİ",
+          subLine1: "Birinci düğümde canlı gündem",
+          subLine2: "ve doğrulanmış veriler toplanır.",
+          subHighlight: "canlı gündem",
+          speech: "Birinci düğümde canlı gündem, piyasa ve fiyat verileri otomatik olarak toplanır.",
         },
         {
           ...ep3Base,
           stepIndex: 2,
-          title: "02 • Dokunulmaz Sınırları Çiz",
-          sub: "Değişmemesi gereken dosyaları baştan belirt.",
-          highlight: "GÜVENLİ SINIRLAR",
-          subLine1: "Değişmemesi gereken alanları",
-          subLine2: "baştan kırmızı çizgiyle belirt.",
-          subHighlight: "kırmızı çizgiyle",
-          speech: "Sistemde bozulmaması ve dokunulmaması gereken alanları baştan net şekilde belirt.",
+          title: "02 • Yapay Zeka Sentez ve Filtreleme",
+          sub: "Gürültü elenir, en yüksek değerli içgörü seçilir.",
+          highlight: "AKILLI AI FİLTRESİ",
+          subLine1: "İkinci düğümde yapay zeka",
+          subLine2: "gürültüyü eleyip özeti çıkarır.",
+          subHighlight: "gürültüyü eleyip",
+          speech: "İkinci düğümde yapay zeka gürültüyü eler ve en değerli içgörüyü çıkarır.",
         },
         {
           ...ep3Base,
           stepIndex: 3,
-          title: "03 • Örnek Girdi-Çıktı Ver",
-          sub: "Bir somut örnek yüz satır açıklamaya bedeldir.",
-          highlight: "SOMUT ÖRNEK",
-          subLine1: "Uzun açıklamalar yerine",
-          subLine2: "tek bir somut örnek göster.",
-          subHighlight: "somut örnek",
-          speech: "Uzun paragraflar yazmak yerine, beklediğin formatı gösteren tek bir somut örnek ver.",
+          title: "03 • Otomatik Grafik ve Görsel Motoru",
+          sub: "Sayılar ve adımlar tam ekran dikey grafiklere dönüşür.",
+          highlight: "GRAPH MOTION MOTORU",
+          subLine1: "Üçüncü düğümde tüm veriler",
+          subLine2: "canlı grafiklere dönüştürülür.",
+          subHighlight: "canlı grafiklere",
+          speech: "Üçüncü düğümde veriler otomatik olarak tam ekran dikey grafiklere dönüşür.",
         },
         {
           ...ep3Base,
           stepIndex: 4,
-          title: "04 • Önce Plan İste (/plan)",
-          sub: "Uygulamaya geçmeden önce mimariyi onayla.",
-          highlight: "ÖNCE PLAN ONAYI",
-          subLine1: "Doğrudan üretime geçme,",
-          subLine2: "önce plan isteyip onayla.",
-          subHighlight: "plan isteyip",
-          speech: "Büyük işlerde doğrudan üretime geçme. Önce plan iste, mimariyi gör ve onayla.",
+          title: "04 • Robot Seslendirme ve Altyazı Senkronu",
+          sub: "Her cümle milimetrik olarak grafiklerle eşleşir.",
+          highlight: "TAM SENKRON ÇIKTI",
+          subLine1: "Dördüncü düğümde robot ses",
+          subLine2: "ve dinamik altyazı birleşir.",
+          subHighlight: "robot ses",
+          speech: "Dördüncü düğümde robot seslendirme ve dinamik altyazı milimetrik olarak birleşir.",
         },
         {
           ...ep3Base,
           stepIndex: 5,
-          title: "05 • Doğrulama Kriteri Koy",
-          sub: "Model kendi çıktısını test etmeden bitirmesin.",
-          highlight: "URETIR.COM • AI AKADEMİ",
-          subLine1: "Test kriterini baştan ver,",
-          subLine2: "rehberler uretir.com'da.",
-          subHighlight: "uretir.com'da.",
-          speech: "Doğrulama kriterini baştan ver ki model işini test etsin. Rehberler uretir.com'da.",
+          title: "05 • Merkez: uretir.com Ekosistemi",
+          sub: "Bu şemayı kaydet, kendi otomasyonunu uretir.com ile kur.",
+          highlight: "WWW.URETIR.COM",
+          subLine1: "Bu akış şemasını hemen kaydet,",
+          subLine2: "merkez uretir.com adresinde.",
+          subHighlight: "uretir.com",
+          speech: "Bu akış şemasını hemen kaydet. Tüm otomasyon altyapısı uretir.com'da.",
         },
       ],
     },
     finansai: {
       slot: "cat-finansai",
       pureBlackMode: true,
-      label: "ÜRETİR YAPAY ZEKA AKADEMİSİ · BÖLÜM 04: KURAL DOSYASI VS HOOK",
-      targetUrl: "https://www.uretir.com",
+      costume: "founder",
+      label: "BÖLÜM 04 · CANLI VERİ VE EKONOMİ OKUMA KURALLARI",
+      targetUrl: "https://www.uretir.com/finans-ai",
       whatsappTargetKey: "finansai",
       customCaption: [
-        `🦖 Hafıza Dosyası Rica Eder, Hook Zorla Yaptırır! | Üretir Akademi`,
-        ``,
-        `🌐 Yapay zeka otomasyon rehberleri: www.uretir.com`,
-        `#Üretir #YapayZeka #Otomasyon #AIAkademi #Yazılım #Keşfet`,
+        `Gürültüyü kapat, veriyi oku: Gündemi ve piyasayı yapay zekayla analiz etmenin 5 altın kuralı. 📈🧭`,
+        `📌 Kaydet ve canlı piyasa/fiyat radarı için incele 👉 uretir.com`,
+        `#üretir #ekonomi #finans #yapayzeka #verianalizi #keşfet`,
       ].join("\n"),
       scenes: [
         {
           ...ep4Base,
           stepIndex: 0,
-          title: "Hafıza Dosyası Rica Eder, Hook Zorla Yaptırır",
-          sub: "Kritik kuralları şansa bırakma.",
-          highlight: "04 • OTOMASYON KİLİDİ",
-          subLine1: "Kural dosyası sadece rica eder,",
-          subLine2: "hook ise zorla yaptırır.",
-          subHighlight: "zorla yaptırır.",
-          speech: "Kural dosyası modele sadece rica eder. Hook ise kritik adımı yüzde yüz zorla yaptırır.",
+          title: "Gürültüyü Kapat, Veriyi Oku: 5 Altın Analiz Kuralı",
+          sub: liveMarketPulse,
+          highlight: "CANLI VERİ MASASI",
+          subLine1: "Gürültüyü kapat, veriyi oku:",
+          subLine2: "Gündemi analiz etmenin beş kuralı.",
+          subHighlight: "veriyi oku:",
+          speech: "Gürültüyü kapat, veriyi oku. İşte gündemi ve piyasayı analiz etmenin beş altın kuralı.",
         },
         {
           ...ep4Base,
           stepIndex: 1,
-          title: "01 • Tavsiye: Kural Dosyası",
-          sub: "Stil ve ton tercihleri için kural dosyası idealdir.",
-          highlight: "ESNEK REHBER",
-          subLine1: "Genel stil tercihlerini",
-          subLine2: "kural dosyasında tut.",
-          subHighlight: "kural dosyasında",
-          speech: "Genel yazım stili ve mimari tercihler için kural dosyası harika bir rehberdir.",
+          title: "01 • 360 Günlük Fiyat Geçmişine Bak",
+          sub: "Etikete değil, son bir yılın gerçek dip grafiğine güven.",
+          highlight: "360 GÜN FİYAT RADARI",
+          subLine1: "Sahte indirim etiketine değil,",
+          subLine2: "yıllık fiyat grafiğine bak.",
+          subHighlight: "fiyat grafiğine",
+          speech: "Birinci kural: Sahte indirim etiketine değil, üç yüz altmış günlük fiyat grafiğine bak.",
         },
         {
           ...ep4Base,
           stepIndex: 2,
-          title: "02 • Zorunlu: Pre-Tool Hook",
-          sub: "Araç çalışmadan önce devreye giren otomatik kilit.",
-          highlight: "PRE-TOOL KİLİDİ",
-          subLine1: "Kritik işlem öncesinde",
-          subLine2: "pre-tool hook devreye girer.",
-          subHighlight: "pre-tool hook",
-          speech: "Asla atlanmaması gereken adımlarda, araç çalışmadan önce devreye giren pre-tool hook kullan.",
+          title: `02 • Canlı Kur ve Altın Trendi (Altın: ${gram} TL)`,
+          sub: `Dolar ${usd} TL ve BIST ${bist} puan eğilimini birlikte oku.`,
+          highlight: `GRAM ALTIN: ${gram} TL`,
+          subLine1: "Tek bir rakama takılma,",
+          subLine2: "kur ve altın eğilimini birlikte oku.",
+          subHighlight: "birlikte oku.",
+          speech: `İkinci kural: Dolar ${usd} ve gram altın ${gram} lira trendini aylık grafikle birlikte oku.`,
         },
         {
           ...ep4Base,
           stepIndex: 3,
-          title: "03 • Otomatik Stil Kontrolü",
-          sub: "Her dosya kaydında otomatik test ve formatlama.",
-          highlight: "OTOMATİK FORMAT",
-          subLine1: "Dosya kaydedildiği anda",
-          subLine2: "otomatik kontrol çalışsın.",
-          subHighlight: "otomatik kontrol",
-          speech: "Her dosya değişikliğinden sonra otomatik format ve test kontrolünü koda bağla.",
+          title: "03 • 81 İl Doğrulanmış Kaynak Haritası",
+          sub: "Sosyal medya söylentisi yerine resmî ajans verisini seç.",
+          highlight: "81 İL DOĞRULANMIŞ VERİ",
+          subLine1: "Söylentilere vakit harcama,",
+          subLine2: "doğrulanmış kaynak haritasını izle.",
+          subHighlight: "doğrulanmış kaynak",
+          speech: "Üçüncü kural: Söylentilere vakit harcama, seksen bir il doğrulanmış kaynak haritasını izle.",
         },
         {
           ...ep4Base,
           stepIndex: 4,
-          title: "04 • Riskli Komutu Engelle",
-          sub: "Veritabanı veya üretim silme komutlarını durdur.",
-          highlight: "GÜVENLİK KALKANI",
-          subLine1: "Tehlikeli sistem komutlarını",
-          subLine2: "otomatik olarak engelle.",
-          subHighlight: "otomatik olarak",
-          speech: "Canlı sistemi bozabilecek tehlikeli komutları hook ile otomatik olarak engelle.",
+          title: "04 • Araç ve Konutta Bölgesel Emsal Kıyaslama",
+          sub: "İlan fiyatını bölge metrekare ve sıfır liste fiyatıyla çarpıştır.",
+          highlight: "EMSAL DEĞER ANALİZİ",
+          subLine1: "İlan fiyatını tek başına görme,",
+          subLine2: "bölgesel emsal ortalamasıyla kıyasla.",
+          subHighlight: "emsal ortalamasıyla",
+          speech: "Dördüncü kural: Konut ve araçta ilan fiyatını bölgesel emsal ortalamasıyla kıyasla.",
         },
         {
           ...ep4Base,
           stepIndex: 5,
-          title: "05 • Sıfır Hata Üretim Hattı",
-          sub: "Yapay zeka hızını deterministik kuralla birleştir.",
-          highlight: "URETIR.COM • AI AKADEMİ",
-          subLine1: "Hızı kuralla birleştir,",
-          subLine2: "sistemler uretir.com'da.",
+          title: "05 • Tek Merkezden Karar Ver: uretir.com",
+          sub: "Haber, Finans, İndirim, Puan, Araç ve Ev AI tek ekranda.",
+          highlight: "WWW.URETIR.COM",
+          subLine1: "Bu beş kuralı hemen kaydet,",
+          subLine2: "canlı veri merkezi uretir.com'da.",
           subHighlight: "uretir.com'da.",
-          speech: "Yapay zeka hızını kesin kurallarla birleştir. Tüm sistemler uretir.com adresinde.",
+          speech: "Bu beş kuralı kaydet. Tüm canlı veri araçları uretir.com adresinde.",
         },
       ],
     },
     evai: {
       slot: "cat-evai",
       pureBlackMode: true,
-      label: "ÜRETİR YAPAY ZEKA AKADEMİSİ · BÖLÜM 05: ÇOKLU AJAN SİSTEMİ",
+      costume: "scientist",
+      label: "BÖLÜM 05 · TEK BAŞINA 5 KİŞİLİK YAPAY ZEKA AJAN EKİBİ",
       targetUrl: "https://www.uretir.com/ajanlar",
       whatsappTargetKey: "evai",
       customCaption: [
-        `🦖 Tek Bir Ajanla Uğraşma, Alt Ajanlarla 10 Kat Hızlan! | Üretir Akademi`,
-        ``,
-        `🌐 Otonom ajan sistemleri: www.uretir.com/ajanlar`,
-        `#Üretir #AIAgents #YapayZeka #Otomasyon #Üretkenlik #Keşfet`,
+        `Tek başına 5 kişilik ekip gibi üretmenin çoklu yapay zeka ajan mimarisi. 🤖⚡`,
+        `📌 Bu sistem şemasını kaydet ve ajanları incele 👉 uretir.com`,
+        `#üretir #yapayzeka #aiagents #üretkenlik #otomasyon #keşfet`,
       ].join("\n"),
       scenes: [
         {
           ...ep5Base,
           stepIndex: 0,
-          title: "Tek Bir Ajanla Uğraşma: Alt Ajanlarla 10 Kat Hızlan",
-          sub: "Ana bağlamı kirletmeden paralel üretim yap.",
-          highlight: "05 • ÇOKLU AJANLAR",
-          subLine1: "Her işi tek ajana yaptırma,",
-          subLine2: "alt ajanlarla on kat hızlan.",
-          subHighlight: "on kat hızlan.",
-          speech: "Her işi tek bir ajana yaptırma. Görevleri subagent sistemine bölerek on kat hızlan.",
+          title: "Tek Başına 5 Kişilik Ekip Gibi Üret: Ajan Mimarisi",
+          sub: "Her işi tek pencereye yıkma, uzman alt ajanlara böl.",
+          highlight: "5 UZMAN AI AJANI",
+          subLine1: "Tek başına beş kişilik ekip gibi",
+          subLine2: "üretmenin çoklu ajan şeması.",
+          subHighlight: "beş kişilik ekip",
+          speech: "Tek başına beş kişilik bir ekip gibi üretmeni sağlayan çoklu ajan şemasını kuruyoruz.",
         },
         {
           ...ep5Base,
           stepIndex: 1,
-          title: "01 • Araştırmacı Alt Ajan",
-          sub: "Yüzlerce dosyayı ayrı bir pencerede tarasın.",
-          highlight: "ARAŞTIRMA AJANI",
-          subLine1: "Derin dosya taramasını",
-          subLine2: "araştırmacı ajana devret.",
-          subHighlight: "araştırmacı ajana",
-          speech: "Yüzlerce dosyayı tarama işini araştırmacı alt ajana devret.",
+          title: "01 • Araştırmacı Ajan (Gündem & Dosya Tarama)",
+          sub: "Yüzlerce sayfayı ayrı pencerede tarayıp sadece özeti getirir.",
+          highlight: "ARAŞTIRMACI AJAN",
+          subLine1: "İlk ajanımız araştırmacı,",
+          subLine2: "yüzlerce kaynağı arka planda tarar.",
+          subHighlight: "araştırmacı,",
+          speech: "Birinci ajan araştırmacıdır. Yüzlerce kaynağı arka planda tarayıp sadece özeti getirir.",
         },
         {
           ...ep5Base,
           stepIndex: 2,
-          title: "02 • Kod İnceleme Ajanı",
-          sub: "Yazılan kodu bağımsız bir gözle denetlesin.",
-          highlight: "DENETİM AJANI",
-          subLine1: "Üretilen çıktıyı bağımsız",
-          subLine2: "inceleme ajanına denetlet.",
-          subHighlight: "inceleme ajanına",
-          speech: "Üretilen çıktıyı, ikinci bir denetim ajanına bağımsız gözle kontrol ettir.",
+          title: "02 • Stratejist Ajan (/plan & Mimari Tasarım)",
+          sub: "Tek satır kod yazmadan önce en doğru yol haritasını çıkarır.",
+          highlight: "MİMARİ PLAN AJANI",
+          subLine1: "İkinci ajanımız stratejist,",
+          subLine2: "uygulamadan önce net mimariyi çizer.",
+          subHighlight: "stratejist,",
+          speech: "İkinci ajan stratejisttir. Üretime geçmeden önce en doğru mimari planı çizer.",
         },
         {
           ...ep5Base,
           stepIndex: 3,
-          title: "03 • Test Doğrulama Ajanı",
-          sub: "Arka planda testleri koşup sadece sonucu getirsin.",
-          highlight: "TEST AJANI",
-          subLine1: "Uzun test kayıtlarını",
-          subLine2: "alt ajan arka planda çözsün.",
-          subHighlight: "arka planda",
-          speech: "Uzun test çıktılarını ana ekrana taşıma, test ajanı arka planda doğrulama yapsın.",
+          title: "03 • Üretici Ajan (Temiz Bağlamda Hızlı İcra)",
+          sub: "Onaylanan planı sıfır dikkat dağınıklığıyla hayata geçirir.",
+          highlight: "ODAKLI ÜRETİCİ AJAN",
+          subLine1: "Üçüncü ajanımız üretici,",
+          subLine2: "temiz bağlamda hızla sistemi kurar.",
+          subHighlight: "üretici,",
+          speech: "Üçüncü ajan üreticidir. Tertemiz bir context penceresinde sistemi hızla kurar.",
         },
         {
           ...ep5Base,
           stepIndex: 4,
-          title: "04 • Temiz Ana Bağlam",
-          sub: "Ana ajan sadece temiz özetlerle karar versin.",
-          highlight: "TEMİZ ANA EKRAN",
-          subLine1: "Ana ekrana sadece",
-          subLine2: "net sonuç özeti gelsin.",
-          subHighlight: "net sonuç özeti",
-          speech: "Böylece ana context penceren hiç şişmez, ekrana sadece net sonuç özeti gelir.",
+          title: "04 • Denetçi Ajan (Bağımsız Gözle Test & Kontrol)",
+          sub: "Üretilen işi test eder, eksikleri daha yayına girmeden yakalar.",
+          highlight: "SIFIR HATA DENETÇİSİ",
+          subLine1: "Dördüncü ajanımız denetçi,",
+          subLine2: "çıktıyı bağımsız gözle test eder.",
+          subHighlight: "denetçi,",
+          speech: "Dördüncü ajan denetçidir. Üretilen çıktıyı bağımsız bir gözle test edip doğrular.",
         },
         {
           ...ep5Base,
           stepIndex: 5,
-          title: "05 • Paralel Üretim Hattı",
-          sub: "Kendi yapay zeka ekibini uretir.com ile kur.",
+          title: "05 • Ana Orkestra ve Merkez: uretir.com",
+          sub: "Bu ekip şemasını kaydet, ajan sistemlerini uretir.com'da keşfet.",
           highlight: "URETIR.COM/AJANLAR",
-          subLine1: "Kendi ajan ekibini kur,",
-          subLine2: "merkez uretir.com'da.",
+          subLine1: "Kendi ajan ekibini hemen kur,",
+          subLine2: "tüm detaylar uretir.com'da.",
           subHighlight: "uretir.com'da.",
-          speech: "Kendi yapay zeka ajan ekibini kur. Rehberler uretir.com adresinde.",
+          speech: "Bu ekip şemasını hemen kaydet. Otonom ajan sistemleri uretir.com adresinde.",
         },
       ],
     },
     arabaai: {
       slot: "cat-arabaai",
       pureBlackMode: true,
-      label: "ÜRETİR YAPAY ZEKA AKADEMİSİ · BÖLÜM 06: SKILL MİMARİSİ",
+      costume: "creator",
+      label: "BÖLÜM 06 · AMATÖR VS PROFESYONEL YAPAY ZEKA KULLANIMI",
       targetUrl: "https://www.uretir.com",
       whatsappTargetKey: "arabaai",
       customCaption: [
-        `🦖 Aynı Promptu Tekrar Yazma: Skill Yap, Tek Tıkla Üret! | Üretir Akademi`,
-        ``,
-        `🌐 Yapay zeka eğitim ve üretim altyapısı: www.uretir.com`,
-        `#Üretir #YapayZeka #SkillMimarisi #Otomasyon #Üretkenlik #Keşfet`,
+        `İnsanların %95'i yapay zekayı yanlış kullanıyor: Amatör vs Profesyonel farkı! 🎯🔥`,
+        `📌 Kaydet ve ilk %5'lik üretici dilime geç 👉 uretir.com`,
+        `#üretir #yapayzeka #promptmühendisliği #üretkenlik #teknoloji #keşfet`,
       ].join("\n"),
       scenes: [
         {
           ...ep6Base,
           stepIndex: 0,
-          title: "Aynı Promptu Tekrar Yazma: Skill Yap, Tek Tıkla Üret",
-          sub: "Kendi yapay zeka beceri kütüphaneni oluştur.",
-          highlight: "06 • SKILL MİMARİSİ",
-          subLine1: "Aynı promptu her gün yazma,",
-          subLine2: "skill yap, tek komutla üret.",
-          subHighlight: "skill yap,",
-          speech: "Her gün aynı uzun promptu tekrar yazma. Bir kez skill yap, tek komutla üret.",
+          title: "İnsanların %95'i Yapay Zekayı Yanlış Kullanıyor",
+          sub: "Amatör kullanıcı ile profesyonel üretici arasındaki 5 fark.",
+          highlight: "AMATÖR VS PROFESYONEL",
+          subLine1: "İnsanların yüzde doksan beşi",
+          subLine2: "yapay zekayı yanlış kullanıyor.",
+          subHighlight: "yüzde doksan beşi",
+          speech: "İnsanların yüzde doksan beşi yapay zekayı yanlış kullanıyor. İşte amatör ve profesyonel farkı.",
         },
         {
           ...ep6Base,
           stepIndex: 1,
-          title: "01 • Tekrarlayan İşi Seç",
-          sub: "Haftada üç kez yaptığın işi tespit et.",
-          highlight: "TEKRARLAYAN İŞ",
-          subLine1: "Sürekli tekrar ettiğin",
-          subLine2: "iş akışını tespit et.",
-          subHighlight: "iş akışını",
-          speech: "Her hafta tekrar tekrar yaptığın standart bir workflow sürecini tespit et.",
+          title: "01 • Yol Tarif Etmek vs Net Sınır Çizmek",
+          sub: "Amatör adım adım tarif eder, profesyonel hedefi ve sınırı verir.",
+          highlight: "NET HEDEF VE SINIR",
+          subLine1: "Amatör nasıl yapılacağını anlatır,",
+          subLine2: "profesyonel hedefi ve sınırı çizer.",
+          subHighlight: "sınırı çizer.",
+          speech: "Amatör modele adım adım yol tarif eder. Profesyonel ise hedefi ve dokunulmaz sınırları çizer.",
         },
         {
           ...ep6Base,
           stepIndex: 2,
-          title: "02 • SKILL.md Şablonu Yaz",
-          sub: "Adımları ve kuralları tek bir dosyada tanımla.",
-          highlight: "SKILL.MD ŞABLONU",
-          subLine1: "Kuralları ve adımları",
-          subLine2: "SKILL.md dosyasına yaz.",
-          subHighlight: "SKILL.md",
-          speech: "O işin tüm adımlarını ve kalite kurallarını SKILL.md dosyasına açıkça yaz.",
+          title: "02 • Her Gün Anlatmak vs Kalıcı Hafıza (URETIR.md)",
+          sub: "Amatör her sohbette baştan yazar, profesyonel dosyaya kaydeder.",
+          highlight: "KALICI HAFIZA DOSYASI",
+          subLine1: "Amatör her gün baştan anlatır,",
+          subLine2: "profesyonel kalıcı dosyaya yazar.",
+          subHighlight: "kalıcı dosyaya",
+          speech: "Amatör her sohbette kuralları baştan anlatır. Profesyonel ise kalıcı hafıza dosyası kullanır.",
         },
         {
           ...ep6Base,
           stepIndex: 3,
-          title: "03 • Örnek Çıktı Ekle",
-          sub: "En iyi referans çıktını klasöre ekle.",
-          highlight: "REFERANS ÇIKTI",
-          subLine1: "En beğendiğin örnek çıktıyı",
-          subLine2: "klasöre referans olarak koy.",
-          subHighlight: "referans olarak",
-          speech: "En beğendiğin örnek çıktıyı klasöre referans olarak ekle ki kalite hiç düşmesin.",
+          title: "03 • Kopyala-Yapıştır vs Tek Tıkla Skill",
+          sub: "Tekrarlayan işleri SKILL.md şablonuna dönüştürüp hızlan.",
+          highlight: "SKILL.MD KÜTÜPHANESİ",
+          subLine1: "Amatör aynı promptu tekrar yazar,",
+          subLine2: "profesyonel skill yapıp tek tıkla üretir.",
+          subHighlight: "skill yapıp",
+          speech: "Amatör aynı promptu her gün tekrar yazar. Profesyonel ise skill yapıp tek komutla üretir.",
         },
         {
           ...ep6Base,
           stepIndex: 4,
-          title: "04 • Tek Komutla Çağır",
-          sub: "Artık sadece /komut yazarak saniyeler içinde üret.",
-          highlight: "TEK KOMUT ÜRETİM",
-          subLine1: "Artık uzun açıklama yok,",
-          subLine2: "tek komutla anında çalıştır.",
-          subHighlight: "tek komutla",
-          speech: "Artık uzun açıklamalar yazmadan, tek bir komutla o işi saniyeler içinde çalıştır.",
+          title: "04 • Hatırlamasını Ummak vs Hook Kilidi",
+          sub: "Kritik kuralları pre-tool hook ile yüzde yüz zorunlu yap.",
+          highlight: "%100 OTOMATİK KİLİT",
+          subLine1: "Amatör modelin hatırlamasını umar,",
+          subLine2: "profesyonel hook ile koda bağlar.",
+          subHighlight: "hook ile",
+          speech: "Amatör modelin kuralı hatırlamasını umar. Profesyonel ise hook ile kuralı koda bağlar.",
         },
         {
           ...ep6Base,
           stepIndex: 5,
-          title: "05 • Sistemi Sürekli Büyüt",
-          sub: "Her yeni beceriyle dijital kaldıracını katla.",
-          highlight: "URETIR.COM • AI AKADEMİ",
-          subLine1: "Kendi üretim kütüphaneni kur,",
-          subLine2: "altyapı uretir.com'da.",
+          title: "05 • Tüketici Kalmak vs uretir.com ile Üretmek",
+          sub: "Bu tabloyu kaydet, üretici ekosistemine uretir.com'da katıl.",
+          highlight: "WWW.URETIR.COM",
+          subLine1: "Bu tabloyu hemen kaydet,",
+          subLine2: "üretim merkezi uretir.com'da.",
           subHighlight: "uretir.com'da.",
-          speech: "Her hafta yeni bir skill ekleyerek sistemini büyüt. Altyapı uretir.com'da.",
+          speech: "Bu tabloyu hemen kaydet ve ilk yüzde beşlik dilime geç. Merkez uretir.com.",
         },
       ],
     },

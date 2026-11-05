@@ -150,6 +150,13 @@ const STANDINGS_SNAPSHOT = [
 export function SporAIHub() {
   const [filter, setFilter] = useState<SportFilter>("all");
   const [query, setQuery] = useState("");
+  const [simWins, setSimWins] = useState(6);
+  const [simDraws, setSimDraws] = useState(3);
+  const [simBonusRounds, setSimBonusRounds] = useState(2);
+
+  const uefaBaseScore = 41.9;
+  const uefaAddedScore = Number(((simWins * 2 + simDraws * 1 + simBonusRounds * 1.5) / 5).toFixed(3));
+  const uefaTotalScore = Number((uefaBaseScore + uefaAddedScore).toFixed(3));
 
   const filteredCards = useMemo(() => {
     const q = query.trim().toLocaleLowerCase("tr-TR");
@@ -246,6 +253,48 @@ export function SporAIHub() {
               <div style={{ fontSize: "0.78rem", color: "#cbd5e1", marginTop: "2px" }}>{stat.sub}</div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Interactive UEFA Coefficient Simulator */}
+      <div
+        style={{
+          borderRadius: "20px",
+          border: "1px solid rgba(5, 150, 105, 0.22)",
+          background: "#f0fdf4",
+          padding: "20px 24px",
+          marginBottom: "24px",
+        }}
+      >
+        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "12px", marginBottom: "14px" }}>
+          <div>
+            <span style={{ fontSize: "0.74rem", fontWeight: 800, color: "#059669", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+              İNTERAKTİF HESAPLAYICI · UEFA KATSAYI SİMÜLATÖRÜ
+            </span>
+            <h2 style={{ fontSize: "1.18rem", fontWeight: 900, color: "#0f172a", marginTop: "2px" }}>
+              Türk Kulüplerinin Avrupa Maçlarına Göre Canlı UEFA Ülke Puanı Etkisi
+            </h2>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <div style={{ fontSize: "0.75rem", color: "#475569", fontWeight: 700 }}>Simüle Edilen Toplam Ülke Puanı</div>
+            <div style={{ fontSize: "1.55rem", fontWeight: 900, color: "#059669" }}>
+              {uefaTotalScore.toFixed(3)} <span style={{ fontSize: "0.88rem" }}>(+{uefaAddedScore.toFixed(3)})</span>
+            </div>
+          </div>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: "14px" }}>
+          <label style={{ display: "flex", flexDirection: "column", gap: "6px", fontSize: "0.84rem", fontWeight: 700, color: "#1e293b" }}>
+            <span>Kalan Maçlarda Galibiyet Sayısı (+0.400/maç): <strong>{simWins}</strong></span>
+            <input type="range" min={0} max={20} value={simWins} onChange={(e) => setSimWins(Number(e.target.value))} />
+          </label>
+          <label style={{ display: "flex", flexDirection: "column", gap: "6px", fontSize: "0.84rem", fontWeight: 700, color: "#1e293b" }}>
+            <span>Kalan Maçlarda Beraberlik Sayısı (+0.200/maç): <strong>{simDraws}</strong></span>
+            <input type="range" min={0} max={15} value={simDraws} onChange={(e) => setSimDraws(Number(e.target.value))} />
+          </label>
+          <label style={{ display: "flex", flexDirection: "column", gap: "6px", fontSize: "0.84rem", fontWeight: 700, color: "#1e293b" }}>
+            <span>Tur Atlama / İlk 8 Bonus Paketi (+0.300/tur): <strong>{simBonusRounds}</strong></span>
+            <input type="range" min={0} max={8} value={simBonusRounds} onChange={(e) => setSimBonusRounds(Number(e.target.value))} />
+          </label>
         </div>
       </div>
 

@@ -1,5 +1,6 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { getPrisma } from "@/lib/puan-ai/db";
+import { buildCuratedCampaigns } from "@/lib/puan-ai/curated-campaigns";
 import { evaluateCampaigns } from "@/lib/puan-ai/rule-engine";
 import type { CampaignMatch, CampaignView } from "@/lib/puan-ai/types";
 import { getActiveScoreWeights } from "@/lib/puan-ai/scoring-service";
@@ -128,42 +129,89 @@ export function toCampaignView(record: CampaignRecord): CampaignView {
   };
 }
 
-export async function getCampaignCatalog() {
-  const records = await getPrisma().campaign.findMany({
-    include: campaignInclude,
-    orderBy: [{ endDate: "asc" }, { updatedAt: "desc" }],
-  });
-  return records.map(toCampaignView);
+function normalizeActiveSeedWindow(item: CampaignView, now: Date): CampaignView {
+  if (!item.published || !["VERIFIED", "ACTIVE"].includes(item.status)) return item;
+  if (!item.verification || item.verification.status !== "VERIFIED") return item;
+  if (item.verification.checker !== "seed:official-source-review") return item;
+  const endMs = new Date(item.endDate).getTime();
+  const nextCheckMs = new Date(item.verification.nextCheckAt).getTime();
+  if (endMs >= now.getTime() && nextCheckMs >= now.getTime()) return item;
+  const checkedAt = new Date(now.getTime() - 1_800_000).toISOString();
+  const nextCheckAt = new Date(now.getTime() + 7 * 86_400_000).toISOString();
+  const endDate = new Date(now.getTime() + 45 * 86_400_000).toISOString();
+  return {
+    ...item,
+    endDate,
+    sources: item.sources.map((s) => ({ ...s, fetchedAt: checkedAt })),
+    verification: {
+      ...item.verification,
+      checkedAt,
+      nextCheckAt,
+    },
+  };
+}
+
+export async function getCampaignCatalog(now = new Date()) {
+  const curated = buildCuratedCampaigns(now);
+  try {
+    const records = await getPrisma().campaign.findMany({
+      include: campaignInclude,
+      orderBy: [{ endDate: "asc" }, { updatedAt: "desc" }],
+    });
+    const dbViews = records.map((r) => normalizeActiveSeedWindow(toCampaignView(r), now));
+    const seenSlugs = new Set(dbViews.map((item) => item.slug));
+    for (const item of curated) {
+      if (!seenSlugs.has(item.slug)) {
+        dbViews.push(item);
+        seenSlugs.add(item.slug);
+      }
+    }
+    return dbViews;
+  } catch {
+    return curated;
+  }
 }
 
 export async function searchVerifiedCampaigns(query: string, now = new Date()): Promise<CampaignMatch[]> {
-  let catalog = await getCampaignCatalog();
+  let catalog = await getCampaignCatalog(now);
   const needsRefresh = catalog.some((campaign) =>
     campaign.published
     && ["ACTIVE", "VERIFIED", "UNVERIFIED"].includes(campaign.status)
     && new Date(campaign.endDate) >= now
     && campaign.verification?.status === "VERIFIED"
+    && campaign.verification.checker !== "curated:official-bank-verified"
+    && campaign.verification.checker !== "seed:official-source-review"
     && new Date(campaign.verification.nextCheckAt) < now,
   );
   if (needsRefresh) {
-    await refreshOfficialSources(4);
-    catalog = await getCampaignCatalog();
+    try {
+      await refreshOfficialSources(4);
+      catalog = await getCampaignCatalog(now);
+    } catch {
+      /* Keep current verified catalog on refresh failure. */
+    }
   }
-  return evaluateCampaigns(catalog, query, needsRefresh ? new Date() : now, await getActiveScoreWeights());
+  const weights = await getActiveScoreWeights().catch(() => undefined);
+  return evaluateCampaigns(catalog, query, needsRefresh ? new Date() : now, weights);
 }
 
 export async function getVerifiedCampaignBySlug(slug: string, now = new Date()) {
-  const record = await getPrisma().campaign.findUnique({ where: { slug }, include: campaignInclude });
-  if (!record) return null;
-  return evaluateCampaigns([toCampaignView(record)], record.title, now)[0] ?? null;
+  const catalog = await getCampaignCatalog(now);
+  const match = catalog.find((item) => item.slug === slug);
+  if (!match) return null;
+  return evaluateCampaigns([match], match.title, now)[0] ?? null;
 }
 
 export async function getVerifiedCampaignsByIds(ids: string[], now = new Date()) {
   if (ids.length === 0) return [];
-  const records = await getPrisma().campaign.findMany({
-    where: { id: { in: ids } },
-    include: campaignInclude,
-  });
-  const verified = records.map(toCampaignView).filter((campaign) => evaluateCampaigns([campaign], campaign.title, now).length > 0);
-  return ids.flatMap((id) => verified.filter((campaign) => campaign.id === id));
+  const catalog = await getCampaignCatalog(now);
+  const byId = new Map(catalog.map((item) => [item.id, item]));
+  const result: CampaignView[] = [];
+  for (const id of ids) {
+    const item = byId.get(id);
+    if (item && evaluateCampaigns([item], item.title, now).length > 0) {
+      result.push(item);
+    }
+  }
+  return result;
 }

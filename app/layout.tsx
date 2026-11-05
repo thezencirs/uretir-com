@@ -7,7 +7,7 @@ import { AnalyticsEventBridge } from "@/components/analytics-event-bridge";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { JsonLd } from "@/components/json-ld";
-import { GoogleMonetization, GoogleSiteVerification } from "@/components/google-monetization";
+import { GoogleAnalytics, GoogleMonetization, GoogleSiteVerification } from "@/components/google-monetization";
 import { absoluteUrl, DEFAULT_DESCRIPTION, DEFAULT_TITLE, SITE_NAME, SITE_URL } from "@/lib/seo";
 
 const organizationSchema = {
@@ -65,6 +65,8 @@ const siteNavigationSchema = {
     { "@type": "SiteNavigationElement", position: 4, name: "PuanAI · Resmî Banka ve Kredi Kartı Kampanya Karşılaştırma", url: `${SITE_URL}/puan-ai` },
     { "@type": "SiteNavigationElement", position: 5, name: "ArabaAI · Sıfır Araç Liste Fiyatı ve Haritalı 2. El Kıyaslama", url: `${SITE_URL}/araba-ai` },
     { "@type": "SiteNavigationElement", position: 6, name: "EvAI · Haritalı Konut, Arsa ve Kamu İhale Taşınmaz Analizi", url: `${SITE_URL}/ev-ai` },
+    { "@type": "SiteNavigationElement", position: 7, name: "SporAI · Süper Lig xG Analizi ve UEFA Ülke Puanı Radarı", url: `${SITE_URL}/spor-ai` },
+    { "@type": "SiteNavigationElement", position: 8, name: "OyunAI · Steam MENA-USD İndirimleri, Türk Stüdyoları ve Hafıza Oyunu", url: `${SITE_URL}/oyun-ai` },
   ],
 };
 
@@ -85,6 +87,8 @@ export const metadata: Metadata = {
     "İndirimAI",
     "ArabaAI",
     "EvAI",
+    "SporAI",
+    "OyunAI",
     "81 il haber haritası",
     "Türkiye gündem haritası",
     "kredi kartı kampanyaları",
@@ -149,6 +153,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       <body>
         <GoogleSiteVerification />
         <GoogleMonetization />
+        <GoogleAnalytics />
         <Script id="theme-init" strategy="beforeInteractive">{`(() => { document.documentElement.lang = /^\\/en(?:\\/|$)/.test(location.pathname) ? "en" : "tr"; try { const saved = localStorage.getItem("uretir-theme"); const dark = saved ? saved === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; document.documentElement.classList.toggle("dark", dark); } catch {} })()`}</Script>
         <a href="#main-content" className="skip-link">
           Ana içeriğe geç

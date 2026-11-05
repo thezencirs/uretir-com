@@ -61,7 +61,7 @@ export function automotiveExplorer(data: Awaited<ReturnType<typeof getAutomotive
     source:"Kampanya kaynağı",
     url:item.sourceUrl,
     checkedAt:item.fetchedAt,
-    description:item.summary,
+    description:item.summary ?? undefined,
     imageUrl:buildExplorerVisual("araba-ai",{
       title:`${item.brand} · ${item.title}`,
       subtitle:item.summary||"Resmî Marka Satış & Finansman Kampanyası",

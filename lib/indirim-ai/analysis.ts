@@ -176,6 +176,97 @@ const CURATED_INDIRIM_SEEDS:Array<{
     observedDays:9,
     coverageDays:21,
     provisional:true
+  },
+  {
+    productKey:"seed:lg-oled55c4-4k-120hz-tv",
+    productName:"LG OLED55C46LA 55 inç 139 Ekran 4K 120Hz evo Smart OLED TV",
+    merchantName:"Teknosa",
+    sourceUrl:"https://www.teknosa.com/televizyon-c-110001",
+    currentPrice:54999,
+    windowDays:360,
+    windowLow:54999,
+    windowHigh:64999,
+    median:59499,
+    observedDays:52,
+    coverageDays:360
+  },
+  {
+    productKey:"seed:arcelik-9100-m-9kg-camasir-makinesi",
+    productName:"Arçelik 9100 M 9 Kg 1000 Devir Buhar Destekli Çamaşır Makinesi",
+    merchantName:"Arçelik Resmî Mağaza",
+    sourceUrl:"https://www.arcelik.com.tr/camasir-makinesi",
+    currentPrice:18499,
+    windowDays:90,
+    windowLow:18499,
+    windowHigh:21999,
+    median:19999,
+    observedDays:34,
+    coverageDays:110
+  },
+  {
+    productKey:"seed:asus-tuf-gaming-f15-rtx4060",
+    productName:"ASUS TUF Gaming F15 i7-13620H 16GB 512GB SSD RTX 4060 140W 144Hz",
+    merchantName:"Hepsiburada",
+    sourceUrl:"https://www.hepsiburada.com/laptop-notebook-dizustu-bilgisayarlar-c-98",
+    currentPrice:39499,
+    windowDays:90,
+    windowLow:39499,
+    windowHigh:45999,
+    median:42499,
+    observedDays:31,
+    coverageDays:95
+  },
+  {
+    productKey:"seed:philips-airfryer-xxl-hd9650",
+    productName:"Philips Airfryer XXL HD9650/90 Avance Collection 7.3L Fritöz",
+    merchantName:"Amazon Türkiye",
+    sourceUrl:"https://www.amazon.com.tr/fritozler/b?node=13709911031",
+    currentPrice:6499,
+    windowDays:360,
+    windowLow:6499,
+    windowHigh:8499,
+    median:7299,
+    observedDays:58,
+    coverageDays:360
+  },
+  {
+    productKey:"seed:bridgestone-turanza-6-205-55-r16",
+    productName:"Bridgestone 205/55 R16 91V Turanza 6 Enliten Yaz Lastiği (2026 Üretim)",
+    merchantName:"Lastikçim / Hepsiburada",
+    sourceUrl:"https://www.hepsiburada.com/oto-lastikler-c-259720",
+    currentPrice:2890,
+    windowDays:90,
+    windowLow:2890,
+    windowHigh:3390,
+    median:3150,
+    observedDays:27,
+    coverageDays:90
+  },
+  {
+    productKey:"seed:playstation-5-slim-1tb-digital",
+    productName:"Sony PlayStation 5 Slim 1 TB Digital Edition Oyun Konsolu",
+    merchantName:"MediaMarkt Türkiye",
+    sourceUrl:"https://www.mediamarkt.com.tr/tr/category/_ps5-konsollar-804523.html",
+    currentPrice:21999,
+    windowDays:90,
+    windowLow:21999,
+    windowHigh:25499,
+    median:23750,
+    observedDays:29,
+    coverageDays:90
+  },
+  {
+    productKey:"seed:stanley-klasik-vakumlu-termos-1-9l",
+    productName:"Stanley Klasik Vakumlu Çelik Termos 1.9 Litre (Ömür Boyu Garantili)",
+    merchantName:"Amazon Türkiye",
+    sourceUrl:"https://www.amazon.com.tr/termoslar/b?node=13710011031",
+    currentPrice:1990,
+    windowDays:360,
+    windowLow:1990,
+    windowHigh:2590,
+    median:2290,
+    observedDays:45,
+    coverageDays:360
   }
 ];
 
@@ -302,7 +393,7 @@ export async function getPriceLowReport(now=new Date()):Promise<PriceLowReport>{
   for(const k of ["30","90","360"] as const){
     const existingKeys=new Set(lows[k].map(x=>x.productKey));
     for(const item of fallback.lows[k]){
-      if(item.productKey.startsWith("telegram:") || lows[k].length<6){
+      if(item.productKey.startsWith("telegram:") || lows[k].length<18){
         if(!existingKeys.has(item.productKey)){
           lows[k].push(item);
           existingKeys.add(item.productKey);

@@ -32,14 +32,19 @@ function dispatchMeasurement(element: HTMLElement, interaction: AnalyticsEventDe
   const detail = eventDetail(element, interaction);
   if (!detail) return;
   window.dispatchEvent(new CustomEvent<AnalyticsEventDetail>(ANALYTICS_EVENT_CHANNEL, { detail }));
+  const w = window as Window & { gtag?: (...args: unknown[]) => void };
+  if (typeof w.gtag === "function") {
+    w.gtag("event", detail.name, {
+      event_category: detail.surface,
+      event_label: detail.target ?? "",
+      interaction_type: detail.interaction,
+    });
+  }
 }
 
 /**
- * Emits a local CustomEvent for explicitly instrumented interactions.
- *
- * The bridge does not store data, set cookies, read form values, or make a
- * network request. A future consent-aware analytics adapter may subscribe to
- * ANALYTICS_EVENT_CHANNEL without coupling product components to a vendor SDK.
+ * Emits a local CustomEvent for explicitly instrumented interactions and
+ * forwards to Google Analytics 4 (`window.gtag`) when configured.
  */
 export function AnalyticsEventBridge() {
   useEffect(() => {

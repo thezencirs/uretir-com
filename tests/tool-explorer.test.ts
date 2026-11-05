@@ -24,7 +24,7 @@ describe("public tool explorers", () => {
     expect(data.stats[1].value).toBe(1);
   });
   it("keeps insufficient history separate from period lows", () => {
-    const product = {productKey:"p1",productName:"Product",merchantName:"Store",sourceUrl:"https://example.com/product",currentPrice:100,currency:"TRY",windowDays:30,windowLow:100,windowHigh:120,median:110,dropFromHighPct:16.7,observedDays:3,coverageDays:3,fetchedAt:checkedAt,eligibleWindowDays:3};
+    const product = {productKey:"p1",productName:"Product",merchantName:"Store",sourceUrl:"https://example.com/product",imageUrl:null,currentPrice:100,currency:"TRY",windowDays:30,windowLow:100,windowHigh:120,median:110,dropFromHighPct:16.7,observedDays:3,coverageDays:3,fetchedAt:checkedAt,eligibleWindowDays:3};
     const data = discountExplorer({checkedAt,lows:{"30":[],"90":[],"360":[]},provisional:[product],productCount:1,observationCount:3});
     expect(data.items[0].category).toBe("Takip dönemi");
     expect(data.items[0].notice).toContain("yeterli geçmiş yok");

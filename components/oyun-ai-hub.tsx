@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Cpu, ExternalLink, Flame, Gamepad2, Globe, Sparkles, Tag, Trophy } from "lucide-react";
+import { ExternalLink, Gamepad2, Tag } from "lucide-react";
 import { OyunAIMemoryGame } from "@/components/oyun-ai-memory-game";
 
 type GameFilter = "all" | "indirim" | "turk-studyo" | "espor-donanim";
@@ -106,7 +106,7 @@ const GAME_CARDS: GameCardItem[] = [
     title: "1080p ve 1440p Oyunculuk İçin En İyi Fiyat/Performans Ekran Kartı ve Monitör Rehberi",
     subtitle: "RTX 4060 / RX 7700 XT Sistemlerde 1 TL Başına Alınan FPS ve 90 Günlük Fiyat Dibi",
     summary:
-      "İndirimAI mağaza verileriyle entegre çalışan oyuncu bilgisayarı, 180Hz IPS monitör ve kablosuz espor ekipmanlarında gerçek dönem dibi fırsatlar.",
+      "İndirimAI mağaza verileriyle entegre çalışan oyuncu bilgisayayarı, 180Hz IPS monitör ve kablosuz espor ekipmanlarında gerçek dönem dibi fırsatlar.",
     imageUrl: "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=900&q=80",
     currentPrice: "Dönem Dibi Takibi",
     referencePrice: "90 Günlük Grafik",
@@ -117,11 +117,24 @@ const GAME_CARDS: GameCardItem[] = [
 
 export function OyunAIHub() {
   const [filter, setFilter] = useState<GameFilter>("all");
+  const [query, setQuery] = useState("");
+  const [menaUsdPrice, setMenaUsdPrice] = useState("19.99");
+  const [globalUsdPrice, setGlobalUsdPrice] = useState("59.99");
+  const usdTryRate = 34.5;
+
+  const parsedMena = Math.max(0, Number(menaUsdPrice) || 0);
+  const parsedGlobal = Math.max(0.01, Number(globalUsdPrice) || 59.99);
+  const menaTryCost = Math.round(parsedMena * usdTryRate);
+  const menaSavingPct = Math.max(0, Math.round((1 - parsedMena / parsedGlobal) * 100));
 
   const visibleCards = useMemo(() => {
-    if (filter === "all") return GAME_CARDS;
-    return GAME_CARDS.filter((c) => c.category === filter);
-  }, [filter]);
+    const q = query.trim().toLocaleLowerCase("tr-TR");
+    return GAME_CARDS.filter((c) => {
+      if (filter !== "all" && c.category !== filter) return false;
+      if (!q) return true;
+      return `${c.title} ${c.subtitle} ${c.summary} ${c.platform}`.toLocaleLowerCase("tr-TR").includes(q);
+    });
+  }, [filter, query]);
 
   return (
     <div style={{ paddingBottom: "48px" }}>
@@ -210,42 +223,105 @@ export function OyunAIHub() {
           </div>
         </div>
 
-        {/* Filter Pills */}
+        {/* Steam MENA-USD Interactive Calculator */}
+        <div
+          style={{
+            borderRadius: "20px",
+            border: "1px solid rgba(124, 58, 237, 0.22)",
+            background: "#f5f3ff",
+            padding: "18px 22px",
+            marginBottom: "22px",
+          }}
+        >
+          <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "14px" }}>
+            <div>
+              <span style={{ fontSize: "0.74rem", fontWeight: 800, color: "#7c3aed", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                CANLI OYUN FİYAT HESAPLAYICI
+              </span>
+              <h2 style={{ fontSize: "1.12rem", fontWeight: 900, color: "#0f172a", marginTop: "2px" }}>
+                Steam MENA-USD Türkiye Fiyatı → TL Karşılığı & Küresel Avantaj Oranı
+              </h2>
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", alignItems: "center" }}>
+              <label style={{ fontSize: "0.82rem", fontWeight: 700, color: "#1e293b" }}>
+                Steam MENA ($):
+                <input
+                  type="number"
+                  min="0"
+                  step="0.5"
+                  value={menaUsdPrice}
+                  onChange={(e) => setMenaUsdPrice(e.target.value)}
+                  style={{ marginLeft: "6px", width: "86px", padding: "6px 10px", borderRadius: "10px", border: "1px solid #c4b5fd", fontWeight: 800 }}
+                />
+              </label>
+              <label style={{ fontSize: "0.82rem", fontWeight: 700, color: "#1e293b" }}>
+                ABD Küresel ($):
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={globalUsdPrice}
+                  onChange={(e) => setGlobalUsdPrice(e.target.value)}
+                  style={{ marginLeft: "6px", width: "86px", padding: "6px 10px", borderRadius: "10px", border: "1px solid #c4b5fd", fontWeight: 800 }}
+                />
+              </label>
+              <div style={{ padding: "8px 14px", borderRadius: "12px", background: "#7c3aed", color: "#ffffff", fontWeight: 800, fontSize: "0.88rem" }}>
+                ≈ {menaTryCost.toLocaleString("tr-TR")} TL · Küresele göre %{menaSavingPct} avantaj
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Filter Pills & Search */}
         <div
           id="oyun-indirim-vitrini"
-          style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "20px" }}
-          role="tablist"
-          aria-label="OyunAI kategori filtreleri"
+          style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "12px", marginBottom: "20px" }}
         >
-          {[
-            { id: "all", label: "Tüm Oyun & Donanım Kartları (6)" },
-            { id: "indirim", label: "Steam / Epic / Konsol İndirimleri" },
-            { id: "turk-studyo", label: "Türk Oyun Stüdyoları" },
-            { id: "espor-donanim", label: "Espor & Oyuncu Donanımı" },
-          ].map((tab) => {
-            const active = filter === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                onClick={() => setFilter(tab.id as GameFilter)}
-                style={{
-                  padding: "9px 16px",
-                  borderRadius: "999px",
-                  border: active ? "1px solid #7c3aed" : "1px solid rgba(15, 23, 42, 0.14)",
-                  background: active ? "#7c3aed" : "#ffffff",
-                  color: active ? "#ffffff" : "#1e293b",
-                  fontWeight: 700,
-                  fontSize: "0.86rem",
-                  cursor: "pointer",
-                }}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }} role="tablist" aria-label="OyunAI kategori filtreleri">
+            {[
+              { id: "all", label: "Tüm Oyun & Donanım Kartları (6)" },
+              { id: "indirim", label: "Steam / Epic / Konsol İndirimleri" },
+              { id: "turk-studyo", label: "Türk Oyun Stüdyoları" },
+              { id: "espor-donanim", label: "Espor & Oyuncu Donanımı" },
+            ].map((tab) => {
+              const active = filter === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setFilter(tab.id as GameFilter)}
+                  style={{
+                    padding: "9px 16px",
+                    borderRadius: "999px",
+                    border: active ? "1px solid #7c3aed" : "1px solid rgba(15, 23, 42, 0.14)",
+                    background: active ? "#7c3aed" : "#ffffff",
+                    color: active ? "#ffffff" : "#1e293b",
+                    fontWeight: 700,
+                    fontSize: "0.86rem",
+                    cursor: "pointer",
+                  }}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Steam, Epic, Game Pass, Bannerlord, RTX ara..."
+            aria-label="OyunAI kartlarında ara"
+            style={{
+              padding: "10px 16px",
+              borderRadius: "999px",
+              border: "1px solid rgba(15, 23, 42, 0.18)",
+              minWidth: "250px",
+              fontSize: "0.9rem",
+            }}
+          />
         </div>
 
         {/* Photo Preview Cards */}

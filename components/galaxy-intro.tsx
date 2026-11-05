@@ -4,13 +4,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowDown, ArrowUpRight, ChevronsDown } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { galaxyPlanets } from "./galaxy/galaxy-data";
 import type { GalaxyScene, PlanetScreen } from "./galaxy/galaxy-scene";
 import "./galaxy/galaxy-intro.css";
 
-const SEEN_KEY = "uretir-galaxy-intro-v1";
-const WHEEL_RANGE = 1800;
+const WHEEL_RANGE = 1600;
 
 type Mode = "loading" | "webgl" | "fallback";
 
@@ -25,11 +24,15 @@ export function GalaxyIntro() {
   const screensRef = useRef<Record<string, PlanetScreen>>({});
   const targetRef = useRef(0);
   const renderedRef = useRef(0);
-  const lockUntil = useRef(0);
-  const lockEnabled = useRef(false);
   const reducedRef = useRef(false);
   const activeRef = useRef<string | null>(null);
   const travelingRef = useRef(false);
+  const dragRef = useRef<{ active: boolean; x: number; y: number; moved: number }>({
+    active: false,
+    x: 0,
+    y: 0,
+    moved: 0,
+  });
 
   const [mode, setMode] = useState<Mode>("loading");
   const [hoverId, setHoverId] = useState<string | null>(null);
@@ -41,28 +44,10 @@ export function GalaxyIntro() {
   const activePlanet = galaxyPlanets.find((planet) => planet.id === activeId) ?? null;
   activeRef.current = activeId;
 
-  const markSeen = useCallback(() => {
-    try { sessionStorage.setItem(SEEN_KEY, "1"); } catch { /* storage unavailable */ }
-  }, []);
-
   const setProgress = useCallback((next: number) => {
-    const scene = sceneRef.current;
-    const prev = targetRef.current;
-    const value = Math.min(1, Math.max(0, next));
-    targetRef.current = value;
-    scene?.setTarget(value);
-    const now = performance.now();
-    if (value >= 1 && prev < 1) { lockUntil.current = now + 700; markSeen(); }
-    if (value <= 0 && prev > 0) lockUntil.current = now + 300;
-  }, [markSeen]);
-
-  const continueToSite = useCallback(() => {
-    setProgress(1);
-    const root = rootRef.current;
-    if (!root) return;
-    const top = root.getBoundingClientRect().bottom + window.scrollY - 70;
-    window.setTimeout(() => window.scrollTo({ top, behavior: reducedRef.current ? "auto" : "smooth" }), reducedRef.current ? 0 : 450);
-  }, [setProgress]);
+    targetRef.current = next;
+    sceneRef.current?.setTarget(next);
+  }, []);
 
   const travel = useCallback((id: string) => {
     if (travelingRef.current) return;
@@ -70,12 +55,11 @@ export function GalaxyIntro() {
     if (!planet) return;
     travelingRef.current = true;
     setTraveling(true);
-    markSeen();
     const go = () => router.push(planet.href);
     const scene = sceneRef.current;
     if (!scene || reducedRef.current) { go(); return; }
     scene.travelTo(id, go);
-  }, [markSeen, router]);
+  }, [router]);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -88,16 +72,15 @@ export function GalaxyIntro() {
     reducedRef.current = reduced;
     const small = window.innerWidth < 760;
     const lowCore = (navigator.hardwareConcurrency || 8) <= 4;
-    let seen = false;
-    try { seen = sessionStorage.getItem(SEEN_KEY) === "1"; } catch { /* storage unavailable */ }
-    const startDone = reduced || seen || window.location.hash.length > 1;
-    targetRef.current = startDone ? 1 : 0;
+    targetRef.current = 0;
 
     function updateFrame(info: { progress: number; planets: PlanetScreen[] }) {
       renderedRef.current = info.progress;
-      const stage = info.progress < 0.985 ? "orbit" : "done";
-      if (root!.dataset.stage !== stage) root!.dataset.stage = stage;
-      if (fillRef.current) fillRef.current.style.transform = `scaleY(${info.progress.toFixed(4)})`;
+      if (root!.dataset.stage !== "orbit") root!.dataset.stage = "orbit";
+      if (fillRef.current) {
+        const cycle = ((info.progress % 1) + 1) % 1;
+        fillRef.current.style.transform = `scaleY(${cycle.toFixed(4)})`;
+      }
       const bounds = root!.getBoundingClientRect();
       for (const planet of info.planets) {
         screensRef.current[planet.id] = planet;
@@ -137,8 +120,7 @@ export function GalaxyIntro() {
           },
         });
         sceneRef.current = scene;
-        scene.snapTo(targetRef.current);
-        lockEnabled.current = !reduced;
+        scene.snapTo(0);
         setMode("webgl");
 
         const resizeObserver = new ResizeObserver(() => scene.resize());
@@ -149,52 +131,58 @@ export function GalaxyIntro() {
         intersection.observe(root);
         document.addEventListener("visibilitychange", syncActive);
 
-        const interactive = (node: EventTarget | null) => node instanceof HTMLElement && Boolean(node.closest("a,button,input,textarea,select,[contenteditable='true']"));
-        const atTop = () => window.scrollY <= 1;
+        const interactive = (node: EventTarget | null) =>
+          node instanceof HTMLElement && Boolean(node.closest("a,button,input,textarea,select,details,[contenteditable='true']"));
 
         const onWheel = (event: WheelEvent) => {
-          if (!lockEnabled.current || event.ctrlKey || !atTop()) return;
-          const delta = event.deltaMode === 1 ? event.deltaY * 16 : event.deltaY;
+          if (event.ctrlKey) return;
+          if (event.target instanceof HTMLElement && event.target.closest(".site-header")) return;
+          event.preventDefault();
+          const raw = Math.abs(event.deltaY) >= Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
+          const delta = event.deltaMode === 1 ? raw * 16 : raw;
           if (delta === 0) return;
-          const now = performance.now();
-          const target = targetRef.current;
-          if (delta > 0) {
-            if (target < 1) { event.preventDefault(); setProgress(target + delta / WHEEL_RANGE); }
-            else if (now < lockUntil.current || renderedRef.current < 0.985) event.preventDefault();
-          } else if (target > 0) {
-            event.preventDefault();
-            if (now >= lockUntil.current) setProgress(target + delta / WHEEL_RANGE);
-          }
+          setProgress(targetRef.current + delta / WHEEL_RANGE);
         };
 
         const onKey = (event: KeyboardEvent) => {
-          if (!lockEnabled.current || !atTop() || event.altKey || event.ctrlKey || event.metaKey || interactive(event.target)) return;
-          const target = targetRef.current;
-          const down = event.key === "ArrowDown" ? 0.08 : event.key === "PageDown" || event.key === " " ? 0.25 : event.key === "End" ? 1 : 0;
-          const up = event.key === "ArrowUp" ? 0.08 : event.key === "PageUp" ? 0.25 : event.key === "Home" ? 1 : 0;
-          if (down && target < 1) { event.preventDefault(); setProgress(target + down); }
-          else if (up && target > 0 && target < 1) { event.preventDefault(); setProgress(target - up); }
-        };
-
-        let touchY = 0;
-        const onTouchStart = (event: TouchEvent) => { touchY = event.touches[0]?.clientY ?? 0; };
-        const onTouchMove = (event: TouchEvent) => {
-          if (!lockEnabled.current || !atTop()) return;
-          const y = event.touches[0]?.clientY ?? touchY;
-          const delta = touchY - y;
-          touchY = y;
-          const target = targetRef.current;
-          if ((delta > 0 && target < 1) || (delta < 0 && target > 0 && target < 1)) {
+          if (event.altKey || event.ctrlKey || event.metaKey || interactive(event.target)) return;
+          const step =
+            event.key === "ArrowDown" || event.key === "ArrowRight"
+              ? 0.08
+              : event.key === "PageDown" || event.key === " "
+                ? 0.22
+                : event.key === "ArrowUp" || event.key === "ArrowLeft"
+                  ? -0.08
+                  : event.key === "PageUp"
+                    ? -0.22
+                    : 0;
+          if (step !== 0) {
             event.preventDefault();
-            setProgress(target + delta / (window.innerHeight * 1.1));
+            setProgress(targetRef.current + step);
           }
         };
 
-        let lastScrollY = window.scrollY;
+        let touchX = 0;
+        let touchY = 0;
+        const onTouchStart = (event: TouchEvent) => {
+          touchX = event.touches[0]?.clientX ?? 0;
+          touchY = event.touches[0]?.clientY ?? 0;
+        };
+        const onTouchMove = (event: TouchEvent) => {
+          if (event.target instanceof HTMLElement && event.target.closest(".site-header,.mobile-app-nav")) return;
+          event.preventDefault();
+          const x = event.touches[0]?.clientX ?? touchX;
+          const y = event.touches[0]?.clientY ?? touchY;
+          const dx = touchX - x;
+          const dy = touchY - y;
+          touchX = x;
+          touchY = y;
+          const primary = Math.abs(dy) >= Math.abs(dx) ? dy : dx;
+          setProgress(targetRef.current + primary / (window.innerHeight * 0.95));
+        };
+
         const onScroll = () => {
-          if (lockEnabled.current && targetRef.current < 1 && window.scrollY > 1) window.scrollTo(0, 0);
-          if (lastScrollY > 1 && window.scrollY <= 1) lockUntil.current = performance.now() + 650;
-          lastScrollY = window.scrollY;
+          if (window.scrollY !== 0) window.scrollTo(0, 0);
         };
 
         window.addEventListener("wheel", onWheel, { passive: false });
@@ -214,12 +202,10 @@ export function GalaxyIntro() {
           intersection.disconnect();
           scene.dispose();
           sceneRef.current = null;
-          lockEnabled.current = false;
         };
       } catch {
         if (cancelled) return;
-        targetRef.current = 1;
-        root.dataset.stage = "done";
+        root.dataset.stage = "orbit";
         setMode("fallback");
       }
     })();
@@ -235,7 +221,32 @@ export function GalaxyIntro() {
     scene.setPointer(((event.clientX - rect.left) / rect.width) * 2 - 1, -(((event.clientY - rect.top) / rect.height) * 2 - 1), inside);
   }
 
+  function handleCanvasPointerDown(event: React.PointerEvent<HTMLElement>) {
+    if (event.pointerType === "mouse" && event.button === 0) {
+      dragRef.current = { active: true, x: event.clientX, y: event.clientY, moved: 0 };
+    }
+    pointerToScene(event, true);
+  }
+
+  function handleCanvasPointerMove(event: React.PointerEvent<HTMLElement>) {
+    pointerToScene(event, true);
+    if (dragRef.current.active && event.pointerType === "mouse") {
+      const dx = event.clientX - dragRef.current.x;
+      const dy = event.clientY - dragRef.current.y;
+      dragRef.current.x = event.clientX;
+      dragRef.current.y = event.clientY;
+      dragRef.current.moved += Math.hypot(dx, dy);
+      if (dragRef.current.moved > 4) {
+        setProgress(targetRef.current - dx / 900 + dy / 1100);
+      }
+    }
+  }
+
   function handleCanvasPointerUp(event: React.PointerEvent<HTMLElement>) {
+    const wasDragging = dragRef.current.active && dragRef.current.moved > 6;
+    dragRef.current.active = false;
+    dragRef.current.moved = 0;
+    if (wasDragging) return;
     const scene = sceneRef.current;
     if (!scene || traveling) return;
     pointerToScene(event, true);
@@ -254,13 +265,11 @@ export function GalaxyIntro() {
     travel(id);
   }
 
-  const stageHint = mode === "fallback" ? "done" : undefined;
-
   return <section
     ref={rootRef}
-    className="galaxy-intro"
+    className="galaxy-intro galaxy-intro--fullscreen"
     data-mode={mode}
-    data-stage={stageHint ?? "orbit"}
+    data-stage="orbit"
     data-hover={hoverId ? "1" : "0"}
     data-traveling={traveling ? "1" : "0"}
     aria-label="Üretir evreni: tüm araçlara giden gezegenler"
@@ -269,8 +278,13 @@ export function GalaxyIntro() {
       ref={canvasRef}
       className="galaxy-intro__canvas"
       aria-hidden="true"
-      onPointerMove={(event) => pointerToScene(event, true)}
-      onPointerLeave={(event) => { pointerToScene(event, false); setHoverId(null); }}
+      onPointerDown={handleCanvasPointerDown}
+      onPointerMove={handleCanvasPointerMove}
+      onPointerLeave={(event) => {
+        dragRef.current.active = false;
+        pointerToScene(event, false);
+        setHoverId(null);
+      }}
       onPointerUp={handleCanvasPointerUp}
     />
     <div className="galaxy-intro__vignette" aria-hidden="true" />
@@ -281,10 +295,32 @@ export function GalaxyIntro() {
       <p className="galaxy-sub">Her gezegen çalışan bir aracımız. Üzerine gel, tıkla, keşfet.</p>
     </div>
 
-    <div className="galaxy-scroll-hint galaxy-scroll-hint--orbit" aria-hidden="true"><span className="galaxy-mouse"><i /></span><span className="galaxy-pointer-only">Tekerleği çevir</span><span className="galaxy-touch-only">Kaydır</span></div>
-    <div className="galaxy-scroll-hint galaxy-scroll-hint--done" aria-hidden="true"><ChevronsDown size={18} /><span>Tam tur! Siteye devam et</span></div>
+    <div className="galaxy-scroll-hint galaxy-scroll-hint--orbit" aria-hidden="true">
+      <span className="galaxy-mouse"><i /></span>
+      <span className="galaxy-pointer-only">Tekerleği çevir · Yörüngeyi döndür</span>
+      <span className="galaxy-touch-only">Kaydır · Yörüngeyi döndür</span>
+    </div>
 
-    <button type="button" className="galaxy-skip" onClick={continueToSite}>Siteye devam <ArrowDown size={13} aria-hidden="true" /></button>
+    <div className="galaxy-dock" aria-label="Hızlı gezegen seçimi">
+      {galaxyPlanets.map((planet) => (
+        <Link
+          key={`dock-${planet.id}`}
+          href={planet.href}
+          prefetch={false}
+          className="galaxy-dock__pill"
+          data-active={activeId === planet.id ? "1" : "0"}
+          onClick={(event) => handleLabelClick(event, planet.id)}
+          onPointerEnter={() => { sceneRef.current?.setHover(planet.id); setFocusId(planet.id); }}
+          onPointerLeave={() => { sceneRef.current?.setHover(null); setFocusId(null); }}
+          onFocus={() => { sceneRef.current?.setHover(planet.id); setFocusId(planet.id); }}
+          onBlur={() => { sceneRef.current?.setHover(null); setFocusId(null); }}
+        >
+          <span className="galaxy-dock__dot" style={{ backgroundColor: planet.atmosphere }} aria-hidden="true" />
+          <span>{planet.title}</span>
+        </Link>
+      ))}
+    </div>
+
     <div className="galaxy-rail" aria-hidden="true"><span ref={fillRef} /></div>
 
     <nav className="galaxy-labels" aria-label="Üretir araçları">

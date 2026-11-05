@@ -290,15 +290,14 @@ export function GalaxyIntro() {
     <div className="galaxy-intro__vignette" aria-hidden="true" />
 
     <div className="galaxy-copy galaxy-copy--orbit">
-      <p className="galaxy-eyebrow">ÜRETİR EVRENİ · 8 YAPAY ZEKÂ ARACI</p>
-      <p className="galaxy-title"><span className="galaxy-pointer-only">Tekerleği çevir</span><span className="galaxy-touch-only">Parmağınla kaydır</span>, gezegenler dönsün.</p>
-      <p className="galaxy-sub">Her gezegen çalışan bir aracımız. Üzerine gel, tıkla, keşfet.</p>
+      <p className="galaxy-eyebrow">ÜRETİR EVRENİ · 8 OTONOM ARAÇ</p>
+      <p className="galaxy-title">İşimiz dünyayı döndürmek.</p>
+      <p className="galaxy-sub">Yörüngeye yön ver, gezegenini seç.</p>
     </div>
 
     <div className="galaxy-scroll-hint galaxy-scroll-hint--orbit" aria-hidden="true">
       <span className="galaxy-mouse"><i /></span>
-      <span className="galaxy-pointer-only">Tekerleği çevir · Yörüngeyi döndür</span>
-      <span className="galaxy-touch-only">Kaydır · Yörüngeyi döndür</span>
+      <span>İşimiz dünyayı döndürmek</span>
     </div>
 
     <div className="galaxy-dock" aria-label="Hızlı gezegen seçimi">

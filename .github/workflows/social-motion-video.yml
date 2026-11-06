@@ -1,57 +1,15 @@
-name: "Üretir Manuel 6'lı Telegram Stok Paket Üretici"
+name: "Üretir Manuel Telegram Stok Paket Üretici (DURDURULDU)"
 
 on:
   workflow_dispatch:
-    inputs:
-      telegram_chat_id:
-        description: "Telegram hedef Chat ID (opsiyonel)"
-        required: false
-        default: ""
 
 permissions:
   contents: read
 
-concurrency:
-  group: uretir-social-motion-video
-  cancel-in-progress: false
-
 jobs:
   generate-and-publish:
+    if: false
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-    env:
-      SITE_URL: https://www.uretir.com
-      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-      TELEGRAM_CHAT_ID: ${{ github.event.inputs.telegram_chat_id || secrets.TELEGRAM_CHAT_ID || '995164733' }}
-      CRON_SECRET: ${{ secrets.CRON_SECRET }}
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: "pnpm"
-
-      - name: Setup uv & Python 3.11 for Piper Neural Turkish TTS
-        uses: astral-sh/setup-uv@v4
-        with:
-          enable-cache: true
-
-      - name: Cache Piper Turkish Male Voice Model (.local/voices)
-        uses: actions/cache@v4
-        with:
-          path: .local/voices
-          key: uretir-piper-tr-fahrettin-v1
-
-      - name: Install FFmpeg & dependencies
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y ffmpeg fonts-dejavu-core
-          uv python install 3.11
-          pnpm install --frozen-lockfile
-
-      - name: Generate 6-Category Stock & Send to Telegram (@uretirbot)
-        run: |
-          node scripts/social-video-automation.mjs --separate-categories --force
+      - name: Otomasyon durduruldu
+        run: echo "Telegram (@uretirbot) video otomasyonu kullanıcı talebiyle tamamen durduruldu."

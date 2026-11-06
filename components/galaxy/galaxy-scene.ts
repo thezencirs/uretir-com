@@ -494,7 +494,7 @@ export function createGalaxyScene(options: GalaxySceneOptions): GalaxyScene {
   let forcedHover: string | null = null;
   let orbitDamp = 1;
 
-  let target = 0, current = 0, active = true, disposed = false, frame = 0, last = performance.now(), time = 0, intro = 0, idle = 0, lastProgress = 0, energy = 0;
+  let target = 0, current = 0, active = true, disposed = false, frame = 0, last = performance.now(), time = 0, intro = 0, idle = 0, lastProgress = 0;
   let travel: { id: string; t: number; done: () => void } | null = null;
   let width = 1, height = 1, aspect = 1;
   const parallax = new Vector2();
@@ -520,11 +520,9 @@ export function createGalaxyScene(options: GalaxySceneOptions): GalaxyScene {
   function update(dt: number) {
     const move = reducedMotion ? 0 : 1;
     time += dt * move;
-    current += (target - current) * (reducedMotion ? 1 : 1 - Math.exp(-dt * 4.6));
-    if (Math.abs(target - current) < 0.0001) current = target;
-    const rawEnergy = Math.min(1, Math.abs(target - current) * 3.8);
-    energy += (rawEnergy - energy) * (1 - Math.exp(-dt * 6));
-    intro = reducedMotion ? 1 : Math.min(1, intro + dt / 2.2);
+    current += (target - current) * (reducedMotion ? 1 : 1 - Math.exp(-dt * 4.2));
+    if (Math.abs(target - current) < 0.0004) current = target;
+    intro = reducedMotion ? 1 : Math.min(1, intro + dt / 2.4);
     const k = smoother(intro);
 
     const portrait = aspect < 0.95;
@@ -534,24 +532,17 @@ export function createGalaxyScene(options: GalaxySceneOptions): GalaxyScene {
     const viewMul = Math.max(1, ((12 * ringScale + 2.2) / (0.384 * aspect)) / baseDist);
     const planetScale = portrait ? 1 : Math.min(1, Math.max(0.6, ringScale * 1.25));
 
-    // The camera stays focused on the planetary system while gently banking with wheel rotation.
-    const orbitSway = Math.sin(current * Math.PI * 0.85) * 2.8 * move;
-    const orbitLift = Math.cos(current * Math.PI * 0.65) * 1.4 * move;
-    const zoomPulse = 1 - 0.055 * energy * move;
-    (portrait ? camPos.set(0, 24, 20) : camPos.set(0, 16.5, 26.5)).multiplyScalar(viewMul * zoomPulse * (1 + 0.42 * (1 - k)));
-    camPos.x += orbitSway;
-    camPos.y += 6 * (1 - k) + orbitLift;
+    // The camera stays on the planetary system; the Milky Way remains visible behind it.
+    // A short entrance glides in from slightly farther away.
+    (portrait ? camPos.set(0, 24, 20) : camPos.set(0, 17, 27)).multiplyScalar(viewMul * (1 + 0.45 * (1 - k)));
+    camPos.y += 6 * (1 - k);
     camLook.set(0, 0, 0);
 
     // Gentle pointer parallax keeps the scene alive.
     parallax.x += (((pointerInside ? pointer.x : 0) - parallax.x) * (1 - Math.exp(-dt * 2.5)));
     parallax.y += (((pointerInside ? pointer.y : 0) - parallax.y) * (1 - Math.exp(-dt * 2.5)));
-    camPos.x += parallax.x * 1.8 * move;
-    camPos.y += parallax.y * 1.0 * move;
-
-    // Deep-space Milky Way spiral slowly rotates and tilts as the user spins the wheel.
-    galaxy.rotation.y = current * 0.28 + time * 0.006;
-    galaxy.rotation.z = Math.sin(current * 0.7) * 0.045;
+    camPos.x += parallax.x * 1.6 * move;
+    camPos.y += parallax.y * 0.9 * move;
 
     if (travel) {
       travel.t = Math.min(1, travel.t + dt / 1.05);
@@ -570,32 +561,29 @@ export function createGalaxyScene(options: GalaxySceneOptions): GalaxyScene {
 
     starMaterial.uniforms.uTime.value = time;
     hazeMaterial.uniforms.uTime.value = time;
-    hazeMaterial.uniforms.uHaze.value = 0.25 + 0.07 * energy;
+    hazeMaterial.uniforms.uHaze.value = 0.24;
     background.position.copy(camera.position);
 
     const appear = smooth(0.15, 0.85, intro);
-    orbitMaterial.opacity = (0.18 + 0.14 * energy) * appear;
+    orbitMaterial.opacity = 0.16 * appear;
     sunCore.material.opacity = appear;
-    sunCorona.material.opacity = (0.38 + 0.16 * energy) * appear;
-    const coronaScale = 12 + 2.4 * energy + Math.sin(time * 1.8) * 0.35;
-    sunCorona.scale.set(coronaScale, coronaScale, 1);
+    sunCorona.material.opacity = 0.38 * appear;
 
     // Hovering a planet slows the idle drift so it is easy to click.
-    const dampTarget = (hoverId || forcedHover) ? 0.08 : 1;
+    const dampTarget = (hoverId || forcedHover) ? 0.1 : 1;
     orbitDamp += (dampTarget - orbitDamp) * (1 - Math.exp(-dt * 4));
     idle += dt * 0.012 * orbitDamp * move;
     orbitLines.forEach((line) => line.scale.set(ringScale, 1, (ringScale * zStretch) / 0.92));
 
     runtimes.forEach((rt, index) => {
       const ring = rt.data.ring;
-      // Unbounded wheel-driven orbit: turning the wheel in either direction rotates planets endlessly.
+      // The wheel drives the orbit: at progress 1 the outer ring has completed exactly one revolution.
       rt.angle = rt.data.phase + current * Math.PI * 2 * ringTurns[ring] + idle * ringTurns[ring];
       const a = ringRadii[ring] * ringScale;
       rt.group.position.set(Math.cos(rt.angle) * a, Math.sin(rt.angle * 2 + index) * 0.22, Math.sin(rt.angle) * a * zStretch);
       const reveal = smooth(0.25 + index * 0.05, 0.85 + index * 0.02, intro);
-      const hoverBoost = 1 + rt.hover * 0.16;
-      rt.group.scale.setScalar(Math.max(0.0001, planetScale * reveal * hoverBoost));
-      rt.body.rotation.y += dt * 0.14 * move + (current - lastProgress) * 3.4;
+      rt.group.scale.setScalar(Math.max(0.0001, planetScale * reveal));
+      rt.body.rotation.y += dt * 0.12 * move + (current - lastProgress) * 3;
       const wanted = (hoverId === rt.data.id || forcedHover === rt.data.id) ? 1 : 0;
       rt.hover += (wanted - rt.hover) * (1 - Math.exp(-dt * 9));
       rt.uniforms.uHover.value = rt.hover;

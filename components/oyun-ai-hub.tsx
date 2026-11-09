@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ExternalLink, Gamepad2, Tag } from "lucide-react";
+import { OyunAICircleArcade } from "@/components/oyun-ai-circle-arcade";
 import { OyunAIMemoryGame } from "@/components/oyun-ai-memory-game";
 
 type GameFilter = "all" | "indirim" | "turk-studyo" | "espor-donanim";
@@ -191,6 +192,20 @@ export function OyunAIHub() {
           </p>
 
           <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+            <a
+              href="#circle-render-arcade"
+              style={{
+                padding: "10px 18px",
+                borderRadius: "999px",
+                background: "#c8f560",
+                color: "#090d16",
+                fontWeight: 900,
+                fontSize: "0.88rem",
+                textDecoration: "none",
+              }}
+            >
+              Circle Render 5&apos;li Arcade Arena 🕹️
+            </a>
             <a
               href="#oyun-indirim-vitrini"
               style={{
@@ -454,6 +469,9 @@ export function OyunAIHub() {
           ))}
         </div>
       </section>
+
+      {/* Circle Render 5-in-1 60 FPS Arcade & Cross-Platform Arena */}
+      <OyunAICircleArcade />
 
       {/* Embedded Interactive Memory Game */}
       <div id="oyun-ai-memo">

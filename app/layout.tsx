@@ -7,6 +7,7 @@ import { AnalyticsEventBridge } from "@/components/analytics-event-bridge";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { JsonLd } from "@/components/json-ld";
+import { LiveLanguageProvider } from "@/components/live-language-provider";
 import { GoogleAnalytics, GoogleMonetization, GoogleSiteVerification } from "@/components/google-monetization";
 import { absoluteUrl, DEFAULT_DESCRIPTION, DEFAULT_TITLE, SITE_NAME, SITE_URL } from "@/lib/seo";
 
@@ -160,11 +161,13 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         </a>
         <JsonLd data={[organizationSchema, websiteSchema, siteNavigationSchema]} />
         <AnalyticsEventBridge />
-        <Header />
-        <main id="main-content" tabIndex={-1}>
-          {children}
-        </main>
-        <Footer />
+        <LiveLanguageProvider>
+          <Header />
+          <main id="main-content" tabIndex={-1}>
+            {children}
+          </main>
+          <Footer />
+        </LiveLanguageProvider>
       </body>
     </html>
   );

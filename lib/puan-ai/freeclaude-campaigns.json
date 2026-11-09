@@ -1,0 +1,111 @@
+{
+  "updatedAt": "2026-11-09T17:53:56.795Z",
+  "agent": "free-claude-code/nemotron-3.5-super-vl-120b-a12b",
+  "campaigns": [
+    {
+      "id": "fcc-bankkart-market-1500-kasim-2026",
+      "slug": "bankkart-market-alisverislerine-1500-tl-bankkart-lira",
+      "title": "Ziraat Bankkart ile Market Alışverişlerinize 1.500 TL Bankkart Lira",
+      "description": "Bankkart anlaşmalı market, bakkal, kasap, manav ve şarküteri üye işyerlerinde tek seferde yapılacak 1.500 TL ve üzeri her alışverişe 150 TL, toplam 1.500 TL Bankkart Lira.",
+      "benefitSummary": "Her 1.500 TL ve üzeri market alışverişine 150 TL, toplamda 1.500 TL Bankkart Lira",
+      "bankKey": "ziraat",
+      "categoryKey": "market",
+      "rewardType": {
+        "id": "rw-bankkart-lira",
+        "slug": "bankkart-lira",
+        "name": "Bankkart Lira",
+        "kind": "POINTS",
+        "unit": "TL değerinde puan",
+        "status": "ACTIVE"
+      },
+      "cards": [
+        {
+          "id": "card-bankkart",
+          "slug": "bankkart-kredi-karti",
+          "name": "Bankkart",
+          "network": "TROY",
+          "rewardProgram": "Bankkart Lira",
+          "active": true
+        }
+      ],
+      "minimumSpend": 1500,
+      "rewardAmount": 150,
+      "maxReward": 1500,
+      "enrollmentApp": "Bankkart Mobil",
+      "installmentCount": null,
+      "sourceUrl": "https://www.bankkart.com.tr/kampanyalar",
+      "sourceTitle": "Bankkart Market 1.500 TL Bankkart Lira Kampanyası",
+      "publisher": "Ziraat Bankkart"
+    },
+    {
+      "id": "fcc-axess-eticaret-1000-kasim-2026",
+      "slug": "akbank-axess-e-ticaret-1000-tl-chip-para",
+      "title": "Akbank Axess ile E-Ticaret ve Online Alışverişlerde 1.000 TL Chip-Para",
+      "description": "Jüzdan'dan kampanyaya katılan Axess sahiplerine seçili e-ticaret ve online pazaryeri harcamalarında 2.500 TL ve üzeri işlemlere toplam 1.000 TL'ye varan chip-para.",
+      "benefitSummary": "2.500 TL ve üzeri online alışverişlerde toplam 1.000 TL'ye varan chip-para + 3 taksit",
+      "bankKey": "akbank",
+      "categoryKey": "eticaret",
+      "rewardType": {
+        "id": "rw-chip-para",
+        "slug": "chip-para",
+        "name": "Chip-Para",
+        "kind": "POINTS",
+        "unit": "TL değerinde puan",
+        "status": "ACTIVE"
+      },
+      "cards": [
+        {
+          "id": "card-axess",
+          "slug": "axess",
+          "name": "Axess",
+          "network": "MASTERCARD",
+          "rewardProgram": "Chip-Para",
+          "active": true
+        }
+      ],
+      "minimumSpend": 2500,
+      "rewardAmount": 250,
+      "maxReward": 1000,
+      "enrollmentApp": "Jüzdan",
+      "installmentCount": 3,
+      "sourceUrl": "https://www.axess.com.tr/axess/kampanyalar",
+      "sourceTitle": "Axess Online Alışveriş Chip-Para Kampanyası",
+      "publisher": "Akbank Axess"
+    },
+    {
+      "id": "fcc-worldcard-akaryakit-600-kasim-2026",
+      "slug": "yapi-kredi-worldcard-akaryakit-600-tl-worldpuan",
+      "title": "Yapı Kredi Worldcard ile Akaryakıt ve Otogazda 600 TL Worldpuan",
+      "description": "World Mobil'den kampanyaya katılarak farklı günlerde yapılacak 1.250 TL ve üzeri 4. akaryakıt veya otogaz harcamasına 600 TL Worldpuan.",
+      "benefitSummary": "1.250 TL ve üzeri akaryakıt harcamalarında toplam 600 TL Worldpuan",
+      "bankKey": "yapiKredi",
+      "categoryKey": "akaryakit",
+      "rewardType": {
+        "id": "rw-worldpuan",
+        "slug": "worldpuan",
+        "name": "Worldpuan",
+        "kind": "POINTS",
+        "unit": "TL değerinde puan",
+        "status": "ACTIVE"
+      },
+      "cards": [
+        {
+          "id": "card-worldcard",
+          "slug": "worldcard",
+          "name": "Worldcard",
+          "network": "MASTERCARD",
+          "rewardProgram": "Worldpuan",
+          "active": true
+        }
+      ],
+      "minimumSpend": 1250,
+      "rewardAmount": 600,
+      "maxReward": 600,
+      "enrollmentApp": "World Mobil",
+      "installmentCount": null,
+      "sourceUrl": "https://www.worldcard.com.tr/kampanyalar",
+      "sourceTitle": "Worldcard Akaryakıt 600 TL Worldpuan Kampanyası",
+      "publisher": "Yapı Kredi World"
+    }
+  ]
+}

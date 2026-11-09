@@ -71,14 +71,20 @@ export async function* streamGroundedExplanation(query: string, campaigns: Campa
     return;
   }
 
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey || process.env.PUANAI_PAID_AI_ENABLED !== "true") {
-    yield deterministicAnswer(campaigns);
-    return;
-  }
+  const instructions = [
+    "Sen PuanAI'sın; kullanıcının yapacağı alışverişi, tutarı ve kullanmayı düşündüğü kartı doğal dille anlayan bir kampanya ajanısın. Türkçe, kısa ve anlaşılır yanıt ver.",
+    "Kart numarası, TC kimlik numarası, telefon veya başka kişisel bilgi isteme; kullanıcı paylaşsa bile yanıtta tekrar etme ve bunlara ihtiyacın olmadığını belirt.",
+    "Önerdiğin kampanyada enrollmentRequired true ise veya katılım koşulundan emin değilsen, puanı kazanmak için harcamadan önce bankanın mobil uygulamasından ya da resmî kampanya sayfasından kampanyaya katılması gerektiğini mutlaka söyle.",
+    "Yalnızca verilen doğrulanmış kampanya JSON'undaki bilgileri kullan.",
+    "Kampanya, puan, taksit, tarih, tutar, limit, banka, kart veya koşul uydurma.",
+    "Kesin kazancı yalnızca calculatedBenefit alanından al. Üst limit veya benefit metnini kesin kazanç sayma. Sıfır hesaplanan avantaj, koşulların doğrulanmadığı anlamına gelebilir. Tüm piyasada en iyi olduğunu iddia etme.",
+    "Kullanıcı tek bir en iyi kartı soruyor ama mağaza, kategori, tutar, kart veya taksit bağlamı vermiyorsa kazanan seçme; eksik bağlamı sor.",
+    "En iyi eşleşmeyi neden seçtiğini ve önemli katılım/istisna koşullarını açıkla.",
+    "Aşağıdaki arayüz kampanya ayrıntılarını ayrıca göstereceği için URL listesi üretme.",
+    "Belirsizlik varsa açıkça belirt ve işlemden önce resmi kaynağın kontrol edilmesini söyle.",
+    "Yanıtı finansal tavsiye gibi sunma.",
+  ].join(" ");
 
-  const client = new OpenAI({ apiKey, timeout: 20000, maxRetries: 1 });
-  const model = process.env.OPENAI_MODEL || "gpt-5.6-sol";
   const input = [
     "Kullanıcı sorusu:",
     query,
@@ -87,22 +93,87 @@ export async function* streamGroundedExplanation(query: string, campaigns: Campa
     JSON.stringify(campaigns.map(compactCampaign)),
   ].join("\n");
 
+  const nimKey = process.env.NVIDIA_NIM_API_KEY;
+  const fccEnabled = process.env.PUANAI_FREECLAUDE_ENABLED === "true" || Boolean(nimKey);
+
+  if (fccEnabled && !process.env.VITEST) {
+    try {
+      const fccUrl = process.env.PUANAI_FREECLAUDE_URL || "http://127.0.0.1:8082/v1/messages";
+      let replyText = "";
+      try {
+        const fccRes = await fetch(fccUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": "freecc",
+            "anthropic-version": "2023-06-01",
+          },
+          body: JSON.stringify({
+            model: "claude-3-5-sonnet-20241022",
+            max_tokens: 450,
+            system: instructions,
+            messages: [{ role: "user", content: input }],
+          }),
+          signal: AbortSignal.timeout(12_000),
+        });
+        if (fccRes.ok) {
+          const data = (await fccRes.json()) as { content?: Array<{ type?: string; text?: string }> };
+          replyText = data.content?.find((c) => c.type === "text")?.text?.trim() || "";
+        }
+      } catch {
+        // Fallback to direct NVIDIA NIM if local FCC daemon is unreachable
+      }
+
+      if (!replyText && nimKey) {
+        const nimRes = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${nimKey}`,
+          },
+          body: JSON.stringify({
+            model: process.env.FCC_NIM_MODEL || "nvidia/nemotron-3.5-super-vl-120b-a12b",
+            max_tokens: 1500,
+            temperature: 0.3,
+            chat_template_kwargs: { enable_thinking: false },
+            messages: [
+              { role: "system", content: instructions },
+              { role: "user", content: input },
+            ],
+          }),
+          signal: AbortSignal.timeout(14_000),
+        });
+        if (nimRes.ok) {
+          const nimData = (await nimRes.json()) as { choices?: Array<{ message?: { content?: string } }> };
+          replyText = nimData.choices?.[0]?.message?.content?.trim() || "";
+        }
+      }
+
+      if (replyText) {
+        if (!/katıl/i.test(replyText)) {
+          replyText = `${replyText}\n\n${enrollmentNote(campaigns[0])}`;
+        }
+        yield replyText;
+        return;
+      }
+    } catch {
+      // Fallback to OpenAI or deterministicAnswer
+    }
+  }
+
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey || process.env.PUANAI_PAID_AI_ENABLED !== "true") {
+    yield deterministicAnswer(campaigns);
+    return;
+  }
+
+  const client = new OpenAI({ apiKey, timeout: 20000, maxRetries: 1 });
+  const model = process.env.OPENAI_MODEL || "gpt-5.6-sol";
+
   try {
     const stream = await client.responses.create({
       model,
-      instructions: [
-        "Sen PuanAI'sın; kullanıcının yapacağı alışverişi, tutarı ve kullanmayı düşündüğü kartı doğal dille anlayan bir kampanya ajanısın. Türkçe, kısa ve anlaşılır yanıt ver.",
-        "Kart numarası, TC kimlik numarası, telefon veya başka kişisel bilgi isteme; kullanıcı paylaşsa bile yanıtta tekrar etme ve bunlara ihtiyacın olmadığını belirt.",
-        "Önerdiğin kampanyada enrollmentRequired true ise veya katılım koşulundan emin değilsen, puanı kazanmak için harcamadan önce bankanın mobil uygulamasından ya da resmî kampanya sayfasından kampanyaya katılması gerektiğini mutlaka söyle.",
-        "Yalnızca verilen doğrulanmış kampanya JSON'undaki bilgileri kullan.",
-        "Kampanya, puan, taksit, tarih, tutar, limit, banka, kart veya koşul uydurma.",
-        "Kesin kazancı yalnızca calculatedBenefit alanından al. Üst limit veya benefit metnini kesin kazanç sayma. Sıfır hesaplanan avantaj, koşulların doğrulanmadığı anlamına gelebilir. Tüm piyasada en iyi olduğunu iddia etme.",
-        "Kullanıcı tek bir en iyi kartı soruyor ama mağaza, kategori, tutar, kart veya taksit bağlamı vermiyorsa kazanan seçme; eksik bağlamı sor.",
-        "En iyi eşleşmeyi neden seçtiğini ve önemli katılım/istisna koşullarını açıkla.",
-        "Aşağıdaki arayüz kampanya ayrıntılarını ayrıca göstereceği için URL listesi üretme.",
-        "Belirsizlik varsa açıkça belirt ve işlemden önce resmi kaynağın kontrol edilmesini söyle.",
-        "Yanıtı finansal tavsiye gibi sunma.",
-      ].join(" "),
+      instructions,
       input,
       reasoning: { effort: "low" },
       text: { verbosity: "low" },

@@ -1,4 +1,8 @@
+import { createHash } from "node:crypto";
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
 import type { CampaignView } from "@/lib/puan-ai/types";
+import bundledFreeClaudeData from "./freeclaude-campaigns.json";
 
 type QuickSeed = {
   id: string;
@@ -488,13 +492,134 @@ const SEEDS: QuickSeed[] = [
   },
 ];
 
+type FreeClaudeRawCampaign = {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  benefitSummary: string;
+  bankKey: keyof typeof BANKS;
+  categoryKey: keyof typeof CATEGORIES;
+  rewardType: CampaignView["rewardType"];
+  cards: CampaignView["cards"];
+  minimumSpend: number;
+  rewardAmount: number;
+  maxReward?: number;
+  enrollmentApp?: string | null;
+  installmentCount?: number | null;
+  sourceUrl: string;
+  sourceTitle: string;
+  publisher: string;
+};
+
+export function loadFreeClaudeSeeds(): QuickSeed[] {
+  let rawList: FreeClaudeRawCampaign[] = (bundledFreeClaudeData?.campaigns as FreeClaudeRawCampaign[]) ?? [];
+  try {
+    const filePath = path.join(process.cwd(), "lib", "puan-ai", "freeclaude-campaigns.json");
+    if (existsSync(filePath)) {
+      const parsed = JSON.parse(readFileSync(filePath, "utf8"));
+      if (Array.isArray(parsed?.campaigns)) {
+        rawList = parsed.campaigns;
+      }
+    }
+  } catch {
+    // Fallback to bundled JSON
+  }
+
+  const seeds: QuickSeed[] = [];
+  for (const item of rawList) {
+    const bank = BANKS[item.bankKey] ?? BANKS.ziraat;
+    const category = CATEGORIES[item.categoryKey] ?? CATEGORIES.market;
+    const minSpend = Number(item.minimumSpend) || 1000;
+    const reward = Number(item.rewardAmount) || 100;
+    const maxReward = Number(item.maxReward) || reward;
+    const rules: QuickSeed["rules"] = [
+      {
+        kind: "MIN_SPEND",
+        operator: "GTE",
+        numericValue: minSpend,
+        textValue: null,
+        unit: "TRY",
+        description: `En az ${minSpend.toLocaleString("tr-TR")} TL uygun alışveriş yapılmalıdır.`,
+      },
+      {
+        kind: "REWARD_AMOUNT",
+        operator: "EQ",
+        numericValue: reward,
+        textValue: null,
+        unit: "TRY",
+        description: `Uygun işlemde ${reward.toLocaleString("tr-TR")} TL değerinde ödül kazanılır.`,
+      },
+      {
+        kind: "MAX_REWARD",
+        operator: "LTE",
+        numericValue: maxReward,
+        textValue: null,
+        unit: "TRY",
+        description: `Kampanya kapsamında en fazla ${maxReward.toLocaleString("tr-TR")} TL ödül kazanılabilir.`,
+      },
+    ];
+    if (item.enrollmentApp) {
+      rules.push({
+        kind: "REQUIRED_ENROLLMENT",
+        operator: "INFO",
+        numericValue: null,
+        textValue: item.enrollmentApp,
+        unit: null,
+        description: `Harcamadan önce ${item.enrollmentApp} üzerinden kampanyaya katılım sağlanmalıdır.`,
+      });
+    }
+    const fingerprint = createHash("sha256").update(`${item.id}:${item.sourceUrl}:${minSpend}:${maxReward}`).digest("hex");
+    seeds.push({
+      id: item.id,
+      slug: item.slug,
+      title: item.title,
+      description: item.description,
+      benefitSummary: item.benefitSummary,
+      bank,
+      merchant: null,
+      category,
+      rewardType: item.rewardType,
+      cards: item.cards,
+      rules,
+      tiers: [
+        {
+          minimumSpend: minSpend,
+          maximumSpend: null,
+          rewardAmount: maxReward,
+          description: `${minSpend.toLocaleString("tr-TR")} TL ve üzeri harcamaya ${maxReward.toLocaleString("tr-TR")} TL'ye varan ödül.`,
+        },
+      ],
+      installments: item.installmentCount && item.installmentCount > 1
+        ? [{ count: item.installmentCount, feeFree: true, productScope: category.name, notes: `Peşin fiyatına ${item.installmentCount} taksit.` }]
+        : [],
+      source: {
+        url: item.sourceUrl,
+        title: item.sourceTitle,
+        publisher: item.publisher,
+        fingerprint,
+      },
+    });
+  }
+  return seeds;
+}
+
 export function buildCuratedCampaigns(now = new Date()): CampaignView[] {
   const startDate = new Date(now.getTime() - 15 * 86_400_000).toISOString();
   const endDate = new Date(now.getTime() + 45 * 86_400_000).toISOString();
   const checkedAt = new Date(now.getTime() - 1_800_000).toISOString();
   const nextCheckAt = new Date(now.getTime() + 7 * 86_400_000).toISOString();
 
-  return SEEDS.map((seed) => {
+  const seenSlugs = new Set<string>();
+  const combinedSeeds: QuickSeed[] = [];
+  for (const s of [...loadFreeClaudeSeeds(), ...SEEDS]) {
+    if (!seenSlugs.has(s.slug)) {
+      seenSlugs.add(s.slug);
+      combinedSeeds.push(s);
+    }
+  }
+
+  return combinedSeeds.map((seed) => {
     const officialSourceId = `src-${seed.id}`;
     return {
       id: seed.id,

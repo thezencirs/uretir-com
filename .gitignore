@@ -12,3 +12,5 @@ generated/prisma
 .local/
 .vercel
 reports/social-media/
+
+lib/puan-ai/.freeclaude-runtime-state.json

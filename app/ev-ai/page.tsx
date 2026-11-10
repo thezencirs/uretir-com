@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ChannelToolNavigation } from "@/components/channel-tool-navigation";
 import { MarketplaceHub } from "@/components/marketplace-hub";
+import { EvRoiCalculator } from "@/components/viral-calculators";
 import { marketplaceDashboard } from "@/lib/marketplace/store";
 import { SeoExplainer } from "@/components/seo-explainer";
 import { SITE_URL } from "@/lib/seo";
@@ -42,6 +43,7 @@ export default async function Page() {
   return (
     <>
       <ChannelToolNavigation active="ev-ai" />
+      <EvRoiCalculator />
       <MarketplaceHub data={data} />
       <SeoExplainer slug="ev-ai" />
     </>

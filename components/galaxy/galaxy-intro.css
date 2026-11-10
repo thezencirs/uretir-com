@@ -1,22 +1,5 @@
-html:has(.home-galaxy-only),
-body:has(.home-galaxy-only) {
-  height: 100dvh;
-  max-height: 100dvh;
-  overflow: hidden !important;
-  overscroll-behavior: none;
-  padding-bottom: 0 !important;
-}
-
-body:has(.home-galaxy-only) > footer,
-html:has(.home-galaxy-only) footer {
-  display: none !important;
-}
-
-.home-galaxy-only {
+.home-galaxy-shell {
   width: 100%;
-  height: calc(100dvh - 89px);
-  min-height: 520px;
-  overflow: hidden;
 }
 
 .galaxy-intro {
@@ -24,8 +7,8 @@ html:has(.home-galaxy-only) footer {
   position: relative;
   isolation: isolate;
   width: 100%;
-  height: calc(100dvh - 89px) !important;
-  min-height: 520px !important;
+  height: min(76dvh, 680px) !important;
+  min-height: 480px !important;
   overflow: hidden;
   color: #f1f4e9;
   background: radial-gradient(ellipse at 50% 60%, #0c1226 0%, #04060f 55%, #02030a 100%);
@@ -43,11 +26,51 @@ html:has(.home-galaxy-only) footer {
 .galaxy-copy--orbit { top: 4.5%; }
 .galaxy-intro[data-mode="webgl"] .galaxy-copy--orbit, .galaxy-intro[data-mode="fallback"] .galaxy-copy--orbit { opacity: 1; transform: translate3d(-50%, 0, 0); }
 
-.galaxy-scroll-hint { position: absolute; z-index: 3; left: 26px; bottom: 22px; display: flex; flex-direction: row; align-items: center; gap: 10px; font-size: 10px; font-weight: 800; letter-spacing: .24em; text-transform: uppercase; color: #aab6c8; opacity: 0; transition: opacity .6s ease; pointer-events: none; }
-.galaxy-intro[data-mode="webgl"] .galaxy-scroll-hint--orbit { opacity: .9; }
-.galaxy-mouse { position: relative; width: 22px; height: 34px; border: 1.5px solid currentColor; border-radius: 12px; }
-.galaxy-mouse i { position: absolute; left: 50%; top: 7px; width: 3px; height: 7px; margin-left: -1.5px; border-radius: 2px; background: currentColor; animation: galaxy-wheel 1.6s ease-in-out infinite; }
-@keyframes galaxy-wheel { 0% { opacity: 0; transform: translateY(0); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(11px); } }
+.galaxy-controls {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  width: min(94%, 680px);
+}
+
+.galaxy-orbit-btn,
+.galaxy-jump-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform .15s ease, opacity .15s ease;
+}
+
+.galaxy-orbit-btn {
+  border: 1px solid rgba(225, 239, 228, .25);
+  background: rgba(6, 10, 20, .75);
+  color: #e2e8f0;
+  backdrop-filter: blur(8px);
+}
+
+.galaxy-jump-btn {
+  border: 1px solid var(--galaxy-accent);
+  background: var(--galaxy-accent);
+  color: #091204;
+}
+
+.galaxy-orbit-btn:hover,
+.galaxy-jump-btn:hover {
+  transform: translateY(-1px);
+}
 
 .galaxy-rail { position: absolute; z-index: 3; right: 20px; top: 50%; width: 2px; height: 120px; margin-top: -60px; background: rgba(225, 239, 228, .16); border-radius: 2px; overflow: hidden; pointer-events: none; }
 .galaxy-rail span { display: block; width: 100%; height: 100%; background: var(--galaxy-accent); transform-origin: top; transform: scaleY(0); }
@@ -76,22 +99,16 @@ html:has(.home-galaxy-only) footer {
 .galaxy-intro[data-traveling="1"] .galaxy-copy, .galaxy-intro[data-traveling="1"] .galaxy-card { opacity: 0 !important; }
 
 /* No WebGL: keep every tool reachable as a plain responsive grid. */
-.galaxy-intro[data-mode="fallback"] { height: calc(100dvh - 89px) !important; padding: 72px 0 56px; overflow-y: auto; }
-.galaxy-intro[data-mode="fallback"] .galaxy-intro__canvas, .galaxy-intro[data-mode="fallback"] .galaxy-scroll-hint, .galaxy-intro[data-mode="fallback"] .galaxy-rail, .galaxy-intro[data-mode="fallback"] .galaxy-card { display: none; }
+.galaxy-intro[data-mode="fallback"] { height: auto !important; padding: 56px 0 40px; overflow-y: visible; }
+.galaxy-intro[data-mode="fallback"] .galaxy-intro__canvas, .galaxy-intro[data-mode="fallback"] .galaxy-controls, .galaxy-intro[data-mode="fallback"] .galaxy-rail, .galaxy-intro[data-mode="fallback"] .galaxy-card { display: none; }
 .galaxy-intro[data-mode="fallback"] .galaxy-copy--orbit { position: relative; left: auto; top: auto; transform: none; margin: 0 auto 28px; opacity: 1; }
 .galaxy-intro[data-mode="fallback"] .galaxy-labels { position: relative; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; width: min(1000px, calc(100% - 32px)); margin: 0 auto; pointer-events: auto; }
 .galaxy-intro[data-mode="fallback"] .galaxy-label { position: relative; width: auto; height: auto; transform: none !important; padding: 14px; border: 1px solid rgba(225, 239, 228, .2); border-radius: 12px; background: rgba(255, 255, 255, .04); }
 .galaxy-intro[data-mode="fallback"] .galaxy-label__ring { display: none; }
 .galaxy-intro[data-mode="fallback"] .galaxy-label__text { position: static; transform: none; text-align: left; }
 
-@media (max-width: 1200px) {
-  .home-galaxy-only,
-  .galaxy-intro { height: calc(100dvh - 79px) !important; }
-}
-
 @media (max-width: 760px) {
-  .home-galaxy-only,
-  .galaxy-intro { height: calc(100svh - 78px - 66px) !important; min-height: 420px !important; }
+  .galaxy-intro { height: 480px !important; min-height: 420px !important; }
   .galaxy-copy--orbit { top: 3%; }
   .galaxy-sub { display: none; }
   .galaxy-rail { right: 10px; height: 80px; margin-top: -40px; }
@@ -99,11 +116,8 @@ html:has(.home-galaxy-only) footer {
   .galaxy-label__text { padding: 2px 6px; background: none; backdrop-filter: none; }
   .galaxy-label__text strong { font-size: 12px; }
   .galaxy-label__text small { display: none; }
+  .galaxy-orbit-btn { padding: 6px 10px; font-size: 11px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .galaxy-mouse i { animation: none; }
   .galaxy-copy, .galaxy-intro__canvas { transition: none; }
 }
-
-.galaxy-touch-only { display: none; }
-@media (hover: none) and (pointer: coarse) { .galaxy-touch-only { display: inline; } .galaxy-pointer-only { display: none; } }

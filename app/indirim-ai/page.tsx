@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ChannelToolNavigation } from "@/components/channel-tool-navigation";
 import { ToolExplorer } from "@/components/tool-explorer";
+import { IndirimDealCalculator } from "@/components/viral-calculators";
 import { getPriceLowReport } from "@/lib/indirim-ai/analysis";
 import { discountExplorer, unavailableExplorer } from "@/lib/tool-explorer-data";
 import { SeoExplainer } from "@/components/seo-explainer";
@@ -50,6 +51,7 @@ export default async function Page() {
   return (
     <>
       <ChannelToolNavigation active="indirim-ai" />
+      <IndirimDealCalculator />
       <ToolExplorer slug="indirim-ai" data={data} />
       <SeoExplainer slug="indirim-ai" />
     </>

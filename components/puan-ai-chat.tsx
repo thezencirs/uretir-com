@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { PuanAICampaignResult } from "@/components/puan-ai-campaign-result";
+import { PuanWalletCalculator } from "@/components/viral-calculators";
 import { analyticsAttributes } from "@/lib/analytics";
 import type { CampaignMatch, ChatEvent } from "@/lib/puan-ai/types";
 
@@ -173,81 +174,84 @@ export function PuanAIChat() {
     }
   }
 
-  return <div className="pa-chat-shell">
-    <aside className={`pa-history ${historyOpen ? "is-open" : ""}`}>
-      <div className="pa-history__top">
-        <Link href="/puan-ai" className="pa-wordmark"><span>P</span>PuanAI</Link>
-        <button type="button" onClick={() => setHistoryOpen(false)} className="pa-mobile-close" aria-label="Geçmişi kapat"><X size={18} /></button>
-      </div>
-      <button type="button" onClick={newConversation} className="pa-new-chat"><MessageSquarePlus size={16} /> Yeni sohbet</button>
-      <div className="pa-history__heading"><span>Sohbet geçmişi</span><Clock3 size={13} /></div>
-      <div className="pa-history__list">
-        {conversations.map((conversation) => <div key={conversation.id} className={conversation.id === conversationId ? "is-active" : ""}>
-          <button type="button" onClick={() => void openConversation(conversation.id)}>
-            <span>{conversation.title}</span><small>{conversation._count.messages} mesaj</small>
-          </button>
-          <button type="button" className="pa-history__delete" onClick={() => void deleteConversation(conversation.id)} aria-label={`${conversation.title} sohbetini sil`}><Trash2 size={13} /></button>
-        </div>)}
-        {conversations.length === 0 && <p>{historyAvailable ? "Henüz kayıtlı sohbet yok." : "Geçmiş şu anda kullanılamıyor."}</p>}
-      </div>
-      <div className="pa-history__trust"><ShieldCheck size={16} /><p><strong>Doğrulanmış veri</strong><span>Yanıtlar yalnızca güncel resmî kaynaklara dayanır.</span></p></div>
-      <Link href="/puan-ai/admin" className="pa-admin-link">Veri yönetimi <ArrowRight size={13} /></Link>
-    </aside>
-
-    {historyOpen && <button type="button" className="pa-history-backdrop" onClick={() => setHistoryOpen(false)} aria-label="Geçmişi kapat" />}
-
-    <section className="pa-chat-main" aria-label="PuanAI sohbeti">
-      <header className="pa-chat-topbar">
-        <button type="button" className="pa-history-toggle" onClick={() => setHistoryOpen(true)} aria-label="Sohbet geçmişini aç"><Menu size={19} /></button>
-        <div><span className="pa-live-dot" /> Canlı kural motoru</div>
-        <p><Check size={13} /> Kaynak zorunlu</p>
-      </header>
-
-      <div className="pa-thread" aria-live="polite">
-        <div className="pa-thread__intro">
-          <span className="pa-spark"><Sparkles size={20} /></span>
-          <p className="pa-kicker">Kampanya ajanın</p>
-          <h1>Harcamadan önce,<br /><em>PuanAI&apos;a sor.</em></h1>
-          <p>Ne alacağını, tutarı ve kartını yaz; PuanAI avantajı bulsun, puanı kazanmak için katılman gereken kampanyayı söylesin.</p>
-          <p className="pa-privacy"><ShieldCheck size={14} /> Kart numarası, hesap veya kişisel bilgi toplamıyoruz; yalnızca yazdığın alışveriş bilgisiyle kampanya eşleştiriyoruz.</p>
+  return <>
+    <PuanWalletCalculator onAskAi={(prompt) => void sendMessage(prompt)} />
+    <div className="pa-chat-shell">
+      <aside className={`pa-history ${historyOpen ? "is-open" : ""}`}>
+        <div className="pa-history__top">
+          <Link href="/puan-ai" className="pa-wordmark"><span>P</span>PuanAI</Link>
+          <button type="button" onClick={() => setHistoryOpen(false)} className="pa-mobile-close" aria-label="Geçmişi kapat"><X size={18} /></button>
         </div>
-
-        <div className="pa-messages">
-          {messages.map((message) => <div key={message.id} className={`pa-message pa-message--${message.role}`}>
-            {message.role === "assistant" && <span className="pa-avatar"><Bot size={16} /></span>}
-            <div className="pa-message__content">
-              <span>{message.role === "assistant" ? "PuanAI" : "Sen"}</span>
-              {message.pending ? <div className="pa-typing" aria-label="PuanAI düşünüyor"><i /><i /><i /></div> : <p>{message.content}</p>}
-              {message.campaigns.length > 0 && <div className="pa-message__campaigns">{message.campaigns.map((campaign) => <PuanAICampaignResult key={campaign.id} campaign={campaign} />)}</div>}
-            </div>
+        <button type="button" onClick={newConversation} className="pa-new-chat"><MessageSquarePlus size={16} /> Yeni sohbet</button>
+        <div className="pa-history__heading"><span>Sohbet geçmişi</span><Clock3 size={13} /></div>
+        <div className="pa-history__list">
+          {conversations.map((conversation) => <div key={conversation.id} className={conversation.id === conversationId ? "is-active" : ""}>
+            <button type="button" onClick={() => void openConversation(conversation.id)}>
+              <span>{conversation.title}</span><small>{conversation._count.messages} mesaj</small>
+            </button>
+            <button type="button" className="pa-history__delete" onClick={() => void deleteConversation(conversation.id)} aria-label={`${conversation.title} sohbetini sil`}><Trash2 size={13} /></button>
           </div>)}
-          <div ref={endRef} />
+          {conversations.length === 0 && <p>{historyAvailable ? "Henüz kayıtlı sohbet yok." : "Geçmiş şu anda kullanılamıyor."}</p>}
+        </div>
+        <div className="pa-history__trust"><ShieldCheck size={16} /><p><strong>Doğrulanmış veri</strong><span>Yanıtlar yalnızca güncel resmî kaynaklara dayanır.</span></p></div>
+        <Link href="/puan-ai/admin" className="pa-admin-link">Veri yönetimi <ArrowRight size={13} /></Link>
+      </aside>
+
+      {historyOpen && <button type="button" className="pa-history-backdrop" onClick={() => setHistoryOpen(false)} aria-label="Geçmişi kapat" />}
+
+      <section className="pa-chat-main" aria-label="PuanAI sohbeti">
+        <header className="pa-chat-topbar">
+          <button type="button" className="pa-history-toggle" onClick={() => setHistoryOpen(true)} aria-label="Sohbet geçmişini aç"><Menu size={19} /></button>
+          <div><span className="pa-live-dot" /> FreeClaude + Canlı Kural Motoru</div>
+          <p><Check size={13} /> Kaynak zorunlu</p>
+        </header>
+
+        <div className="pa-thread" aria-live="polite">
+          <div className="pa-thread__intro">
+            <span className="pa-spark"><Sparkles size={20} /></span>
+            <p className="pa-kicker">Kampanya ajanın</p>
+            <h1>Harcamadan önce,<br /><em>PuanAI&apos;a sor.</em></h1>
+            <p>Ne alacağını, tutarı ve kartını yaz; PuanAI avantajı bulsun, puanı kazanmak için katılman gereken kampanyayı söylesin.</p>
+            <p className="pa-privacy"><ShieldCheck size={14} /> Kart numarası, hesap veya kişisel bilgi toplamıyoruz; yalnızca yazdığın alışveriş bilgisiyle kampanya eşleştiriyoruz.</p>
+          </div>
+
+          <div className="pa-messages">
+            {messages.map((message) => <div key={message.id} className={`pa-message pa-message--${message.role}`}>
+              {message.role === "assistant" && <span className="pa-avatar"><Bot size={16} /></span>}
+              <div className="pa-message__content">
+                <span>{message.role === "assistant" ? "PuanAI" : "Sen"}</span>
+                {message.pending ? <div className="pa-typing" aria-label="PuanAI düşünüyor"><i /><i /><i /></div> : <p>{message.content}</p>}
+                {message.campaigns.length > 0 && <div className="pa-message__campaigns">{message.campaigns.map((campaign) => <PuanAICampaignResult key={campaign.id} campaign={campaign} />)}</div>}
+              </div>
+            </div>)}
+            <div ref={endRef} />
+          </div>
+
+          {messages.length === 1 && <div className="pa-suggestions" aria-label="Önerilen sorular">
+            {suggestions.map((suggestion, index) => <button key={suggestion} type="button" onClick={() => void sendMessage(suggestion)} {...analyticsAttributes({ event: "ai_intent_select", surface: "puan_ai_advisor", target: `suggestion-${index + 1}` })}><span>{suggestion}</span><ArrowRight size={14} /></button>)}
+          </div>}
         </div>
 
-        {messages.length === 1 && <div className="pa-suggestions" aria-label="Önerilen sorular">
-          {suggestions.map((suggestion, index) => <button key={suggestion} type="button" onClick={() => void sendMessage(suggestion)} {...analyticsAttributes({ event: "ai_intent_select", surface: "puan_ai_advisor", target: `suggestion-${index + 1}` })}><span>{suggestion}</span><ArrowRight size={14} /></button>)}
-        </div>}
-      </div>
-
-      <div className="pa-composer-wrap">
-        <form className="pa-composer" onSubmit={submit} {...analyticsAttributes({ event: "ai_prompt_submit", surface: "puan_ai_advisor", target: "verified-chat" })}>
-          <label htmlFor="puanai-message" className="sr-only">PuanAI&apos;a sor</label>
-          <textarea
-            ref={textareaRef}
-            id="puanai-message"
-            value={input}
-            onChange={(event) => setInput(event.target.value.slice(0, 1200))}
-            onKeyDown={handleKeyDown}
-            placeholder="Örn. Migros'ta 2.500 TL harcayacağım, Bonus kartım var."
-            rows={2}
-            disabled={streaming}
-          />
-          <button type="submit" disabled={!input.trim() || streaming} aria-label="Soruyu gönder"><Send size={17} /></button>
-        </form>
-        <p>PuanAI finansal tavsiye vermez. İşlemden önce resmî banka koşullarını kontrol et.</p>
-      </div>
-    </section>
-  </div>;
+        <div className="pa-composer-wrap">
+          <form className="pa-composer" onSubmit={submit} {...analyticsAttributes({ event: "ai_prompt_submit", surface: "puan_ai_advisor", target: "verified-chat" })}>
+            <label htmlFor="puanai-message" className="sr-only">PuanAI&apos;a sor</label>
+            <textarea
+              ref={textareaRef}
+              id="puanai-message"
+              value={input}
+              onChange={(event) => setInput(event.target.value.slice(0, 1200))}
+              onKeyDown={handleKeyDown}
+              placeholder="Örn. Migros'ta 2.500 TL harcayacağım, Bonus kartım var."
+              rows={2}
+              disabled={streaming}
+            />
+            <button type="submit" disabled={!input.trim() || streaming} aria-label="Soruyu gönder"><Send size={17} /></button>
+          </form>
+          <p>PuanAI finansal tavsiye vermez. İşlemden önce resmî banka koşullarını kontrol et.</p>
+        </div>
+      </section>
+    </div>
+  </>;
 }
 
 export function PuanAICampaignExplorer() {

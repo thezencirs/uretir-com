@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowDown, ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { galaxyPlanets } from "./galaxy/galaxy-data";
 import type { GalaxyScene, PlanetScreen } from "./galaxy/galaxy-scene";
 import "./galaxy/galaxy-intro.css";
@@ -124,69 +124,56 @@ export function GalaxyIntro() {
 
         let visible = true;
         const syncActive = () => scene.setActive(visible && !document.hidden);
-        const intersection = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; syncActive(); }, { threshold: 0.02 });
+        const intersection = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; syncActive(); }, { threshold: 0.05 });
         intersection.observe(root);
         document.addEventListener("visibilitychange", syncActive);
 
         const interactive = (node: EventTarget | null) =>
           node instanceof HTMLElement && Boolean(node.closest("a,button,input,textarea,select,[contenteditable='true']"));
 
-        const onWheel = (event: WheelEvent) => {
-          if (event.ctrlKey) return;
-          event.preventDefault();
-          const rawDelta = Math.abs(event.deltaY) >= Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
-          const delta = event.deltaMode === 1 ? rawDelta * 16 : rawDelta;
-          if (delta === 0) return;
-          setProgress(targetRef.current + delta / WHEEL_RANGE);
-        };
-
         const onKey = (event: KeyboardEvent) => {
           if (event.altKey || event.ctrlKey || event.metaKey || interactive(event.target)) return;
-          const down = event.key === "ArrowDown" || event.key === "ArrowRight" ? 0.08 : event.key === "PageDown" || event.key === " " ? 0.25 : 0;
-          const up = event.key === "ArrowUp" || event.key === "ArrowLeft" ? 0.08 : event.key === "PageUp" ? 0.25 : 0;
-          if (down) { event.preventDefault(); setProgress(targetRef.current + down); }
-          else if (up) { event.preventDefault(); setProgress(targetRef.current - up); }
+          const right = event.key === "ArrowRight" ? 0.1 : 0;
+          const left = event.key === "ArrowLeft" ? 0.1 : 0;
+          if (right) { event.preventDefault(); setProgress(targetRef.current + right); }
+          else if (left) { event.preventDefault(); setProgress(targetRef.current - left); }
         };
 
-        let touchY = 0;
+        // Gentle autonomous orbit when user isn't hovering a planet
+        const autoTimer = !reduced
+          ? window.setInterval(() => {
+              if (visible && !document.hidden && !activeRef.current && !travelingRef.current) {
+                setProgress(targetRef.current + 0.0035);
+              }
+            }, 90)
+          : null;
+
         let touchX = 0;
         let touchActive = false;
         const onTouchStart = (event: TouchEvent) => {
           if (event.touches.length !== 1) return;
-          touchY = event.touches[0].clientY;
           touchX = event.touches[0].clientX;
           touchActive = true;
         };
         const onTouchMove = (event: TouchEvent) => {
           if (!touchActive || event.touches.length !== 1) return;
-          const y = event.touches[0].clientY;
           const x = event.touches[0].clientX;
-          const dy = touchY - y;
           const dx = touchX - x;
-          touchY = y;
-          touchX = x;
-          const delta = Math.abs(dy) >= Math.abs(dx) ? dy : dx;
-          if (delta === 0) return;
-          event.preventDefault();
-          setProgress(targetRef.current + delta / (WHEEL_RANGE * 0.55));
+          if (Math.abs(dx) > 6) {
+            touchX = x;
+            setProgress(targetRef.current + dx / (WHEEL_RANGE * 0.45));
+          }
         };
         const onTouchEnd = () => { touchActive = false; };
 
-        const onScroll = () => {
-          if (window.scrollY > 0) window.scrollTo(0, 0);
-        };
-
-        window.addEventListener("wheel", onWheel, { passive: false });
         window.addEventListener("keydown", onKey, { passive: false });
-        window.addEventListener("scroll", onScroll, { passive: true });
         root.addEventListener("touchstart", onTouchStart, { passive: true });
-        root.addEventListener("touchmove", onTouchMove, { passive: false });
+        root.addEventListener("touchmove", onTouchMove, { passive: true });
         root.addEventListener("touchend", onTouchEnd, { passive: true });
 
         cleanup = () => {
-          window.removeEventListener("wheel", onWheel);
+          if (autoTimer) window.clearInterval(autoTimer);
           window.removeEventListener("keydown", onKey);
-          window.removeEventListener("scroll", onScroll);
           root.removeEventListener("touchstart", onTouchStart);
           root.removeEventListener("touchmove", onTouchMove);
           root.removeEventListener("touchend", onTouchEnd);
@@ -256,12 +243,29 @@ export function GalaxyIntro() {
     <div className="galaxy-copy galaxy-copy--orbit">
       <p className="galaxy-eyebrow">ÜRETİR EVRENİ · 8 YAPAY ZEKÂ ARACI</p>
       <p className="galaxy-title">İşimiz dünyayı döndürmek.</p>
-      <p className="galaxy-sub">Her gezegen çalışan bir aracımız. Üzerine gel, tıkla, keşfet.</p>
+      <p className="galaxy-sub">Gezegenlere tıkla veya aşağı kaydırarak canlı hesaplama merkezini kullan.</p>
     </div>
 
-    <div className="galaxy-scroll-hint galaxy-scroll-hint--orbit" aria-hidden="true">
-      <span className="galaxy-mouse"><i /></span>
-      <span>İşimiz dünyayı döndürmek</span>
+    <div className="galaxy-controls">
+      <button
+        type="button"
+        onClick={() => setProgress(targetRef.current - 0.14)}
+        className="galaxy-orbit-btn"
+        aria-label="Gezegenleri sola döndür"
+      >
+        <ChevronLeft size={15} /> Önceki Gezegen
+      </button>
+      <a href="#canli-merkez" className="galaxy-jump-btn">
+        Canlı Hesaplama &amp; Kampanya Merkezi <ArrowDown size={14} />
+      </a>
+      <button
+        type="button"
+        onClick={() => setProgress(targetRef.current + 0.14)}
+        className="galaxy-orbit-btn"
+        aria-label="Gezegenleri sağa döndür"
+      >
+        Sonraki Gezegen <ChevronRight size={15} />
+      </button>
     </div>
 
     <div className="galaxy-rail" aria-hidden="true"><span ref={fillRef} /></div>

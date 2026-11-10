@@ -43,7 +43,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: absoluteUrl("/urun-gonder"), lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: absoluteUrl("/hakkimizda"), lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: absoluteUrl("/iletisim"), lastModified: now, changeFrequency: "monthly", priority: 0.6 },
-    { url: absoluteUrl("/gizlilik-politikasi"), lastModified: now, changeFrequency: "yearly", priority: 0.3 },
+    { url: absoluteUrl("/gizlilik-politikasi"), lastModified: now, changeFrequency: "yearly", priority: 0.4 },
+    { url: absoluteUrl("/kullanim-kosullari"), lastModified: now, changeFrequency: "yearly", priority: 0.4 },
     {
       url: absoluteUrl("/en"),
       lastModified: now,

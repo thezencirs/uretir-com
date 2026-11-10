@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Calculator, CheckCircle2, CreditCard, Home, Car, ShieldCheck, Sparkles, Tag, TrendingDown } from "lucide-react";
+import { ArrowRight, CheckCircle2, CreditCard, Home, Car, Sparkles, Tag } from "lucide-react";
 
 export type WalletCardId =
   | "bonus"

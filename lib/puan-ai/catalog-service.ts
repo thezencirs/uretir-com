@@ -136,16 +136,13 @@ function normalizeActiveSeedWindow(item: CampaignView, now: Date): CampaignView 
   const endMs = new Date(item.endDate).getTime();
   const nextCheckMs = new Date(item.verification.nextCheckAt).getTime();
   if (endMs >= now.getTime() && nextCheckMs >= now.getTime()) return item;
-  const checkedAt = new Date(now.getTime() - 1_800_000).toISOString();
   const nextCheckAt = new Date(now.getTime() + 7 * 86_400_000).toISOString();
   const endDate = new Date(now.getTime() + 45 * 86_400_000).toISOString();
   return {
     ...item,
     endDate,
-    sources: item.sources.map((s) => ({ ...s, fetchedAt: checkedAt })),
     verification: {
       ...item.verification,
-      checkedAt,
       nextCheckAt,
     },
   };

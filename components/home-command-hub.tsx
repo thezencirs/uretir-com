@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ArrowUpRight, Compass, Flame, Search, ShieldCheck, Sparkles, TrendingUp } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Flame, Search, ShieldCheck, Sparkles } from "lucide-react";
 import { PuanWalletCalculator } from "@/components/viral-calculators";
 import { AdSlot } from "@/components/google-monetization";
 import { JsonLd } from "@/components/json-ld";
@@ -169,11 +169,12 @@ export function HomeCommandHub() {
             konut kira çarpanlarını, sıfır/2. el otomobil değerlemelerini ve 81 il gündemini tek merkezde hesaplayın.
           </p>
 
-          <form onSubmit={handleSearch} className="mt-6 flex flex-col gap-3 sm:flex-row" role="search">
+          <form action="/ara" method="get" onSubmit={handleSearch} className="mt-6 flex flex-col gap-3 sm:flex-row" role="search">
             <div className="relative flex-1">
               <Search size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted" />
               <input
                 type="search"
+                name="q"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Ne hesaplamak istiyorsun? (Örn: Market 2000 TL hangi kart, 100 bin TL faiz, kira çarpanı, sıfır araç...)"

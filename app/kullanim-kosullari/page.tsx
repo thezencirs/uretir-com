@@ -1,11 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SITE_URL } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Kullanım Koşulları, Yasal Uyarı ve Künye",
   description:
     "Üretir (uretir.com) kullanım koşulları, finansal ve yatırım tavsiyesi içermeme beyanı, çerez/reklam politikası ve kurumsal künye bilgileri.",
   alternates: { canonical: "/kullanim-kosullari" },
+  openGraph: {
+    title: "Kullanım Koşulları, Yasal Uyarı ve Künye — Üretir",
+    description:
+      "Üretir (uretir.com) kullanım koşulları, finansal ve yatırım tavsiyesi içermeme beyanı, çerez/reklam politikası ve kurumsal künye bilgileri.",
+    url: `${SITE_URL}/kullanim-kosullari`,
+    type: "website",
+  },
 };
 
 export default function TermsPage() {

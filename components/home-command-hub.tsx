@@ -213,7 +213,7 @@ export function HomeCommandHub() {
       <PuanWalletCalculator />
 
       {/* 3. 8 Otonom Yapay Zekâ Aracı Görünür Rehber Grid (SEO & AdSense İçin Tam Erişilebilir) */}
-      <section className="section-wrap mt-12" aria-labelledby="home-tools-heading">
+      <section id="araclar" className="section-wrap mt-12" aria-labelledby="home-tools-heading">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <span className="eyebrow text-muted">8 OTONOM YAPAY ZEKÂ ARACI</span>

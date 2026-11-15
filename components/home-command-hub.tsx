@@ -3,105 +3,39 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ArrowUpRight, Flame, Search, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Flame, Orbit, Search, ShieldCheck, Sparkles } from "lucide-react";
 import { PuanWalletCalculator } from "@/components/viral-calculators";
 import { AdSlot } from "@/components/google-monetization";
 import { JsonLd } from "@/components/json-ld";
+import { GALAXY_CLUSTERS, SUPPORT_PROGRAMS, RECRUITMENT_TRACKS } from "@/lib/tesvik-memur-data";
 
 const TRENDING_SEARCHES = [
-  { label: "💳 Market 2.000 TL Hangi Kart?", href: "/puan-ai" },
-  { label: "💰 100.000 TL Aylık Mevduat Getirisi", href: "/finans-ai" },
-  { label: "🏷️ 30 Günlük Dip Fiyat & Sahte İndirim Testi", href: "/indirim-ai" },
-  { label: "🏠 Ev Kira Çarpanı (Amortisman) Hesaplama", href: "/ev-ai" },
-  { label: "🚗 2. El Araç Değerleme & Sıfır Liste Fiyatı", href: "/araba-ai" },
-  { label: "🗺️ 81 İl Son Dakika Türkiye Haritası", href: "/haber-ai" },
-  { label: "⚽ Süper Lig xG & UEFA Ülke Puanı", href: "/spor-ai" },
-  { label: "🎮 Steam MENA-USD İndirim Radarı", href: "/oyun-ai" },
-];
-
-const CORE_TOOLS = [
-  {
-    slug: "puan-ai",
-    href: "/puan-ai",
-    badge: "BANKA & KART PUAN",
-    title: "PuanAI · Kredi Kartı Kampanya ve Taksit Asistanı",
-    desc: "Axess, Bonus, World, Maximum, Bankkart, Paraf ve CardFinans kampanyalarını harcamadan önce karşılaştırın; cüzdanınızdaki kartla maksimum puanı yakalayın.",
-    metric: "8 Banka Resmî Dizin · FreeClaude AI",
-  },
-  {
-    slug: "finans-ai",
-    href: "/finans-ai",
-    badge: "CANLI PİYASA & FAİZ",
-    title: "FinansAI · Döviz, Gram Altın, Mevduat ve BIST 100",
-    desc: "TCMB gösterge kurları, 24 ayar gram altın, Borsa İstanbul, 32 günlük mevduat faizi simülatörü ve kişisel yatırım sepeti çevirici.",
-    metric: "TCMB & BIST Kaynaklı · Canlı Sepet",
-  },
-  {
-    slug: "indirim-ai",
-    href: "/indirim-ai",
-    badge: "GERÇEK İNDİRİM RADARI",
-    title: "İndirimAI · 30/90/360 Gün Fiyat Geçmişi & Dip Fiyatlar",
-    desc: "Şişirilmiş etiket indirimlerini eleyin. Mağaza fiyat geçmişini banka kartı puanıyla birleştirerek cebinizden çıkacak gerçek dip maliyeti hesaplayın.",
-    metric: "Sahte İndirim Dedektörü · Kuponlar",
-  },
-  {
-    slug: "ev-ai",
-    href: "/ev-ai",
-    badge: "EMLAK & KAMU İHALE",
-    title: "EvAI · Konut Kira Çarpanı, m² Endeksi ve Kamu İhaleleri",
-    desc: "Satılık daire ve arsaları bölgesel m² medyanı ve kira amortisman süresiyle (yıl) test edin; resmî kamu/icra taşınmaz ilanlarını haritada inceleyin.",
-    metric: "Kira Amortisman Hesaplayıcı · Haritalı",
-  },
-  {
-    slug: "araba-ai",
-    href: "/araba-ai",
-    badge: "SIFIR & 2. EL OTOMOBİL",
-    title: "ArabaAI · Sıfır Araç Liste Fiyatları ve 2. El Değerleme",
-    desc: "BYD, Renault, Toyota, VW, Peugeot, Ford sıfır liste fiyatlarını ve 2. el araçlarda yaş, KM, boya/değişen farkına göre adil piyasa değerini hesaplayın.",
-    metric: "Ekspertiz & Pazarlık Hesaplayıcı",
-  },
-  {
-    slug: "haber-ai",
-    href: "/haber-ai",
-    badge: "81 İL GÜNDEM HARİTASI",
-    title: "HaberAI · 81 İl Kaynaklı Türkiye Gündem Haritası",
-    desc: "Türkiye'nin 81 ilindeki ekonomi, üretim, bilim ve yerel gelişmeleri birincil haber kaynağı ve zaman damgasıyla interaktif harita üzerinde takip edin.",
-    metric: "81 İl Canlı Harita · Kaynak Doğrulamalı",
-  },
-  {
-    slug: "spor-ai",
-    href: "/spor-ai",
-    badge: "FUTBOL & VERİ ANALİZİ",
-    title: "SporAI · Süper Lig xG Analizi ve UEFA Ülke Puanı",
-    desc: "Süper Lig gol beklentisi (xG) tablolarını, şampiyonluk olasılıklarını ve Türkiye'nin UEFA ülke puanı sıralamasındaki anlık durumunu inceleyin.",
-    metric: "Süper Lig xG · UEFA Katsayı Radarı",
-  },
-  {
-    slug: "oyun-ai",
-    href: "/oyun-ai",
-    badge: "OYUN & MENA-USD RADARI",
-    title: "OyunAI · Steam MENA-USD İndirimleri ve Türk Stüdyoları",
-    desc: "Steam MENA-USD bölgesel fiyat düşüşlerini, haftanın ücretsiz oyunlarını, Türk oyun stüdyolarını ve refleks/hafıza oyunlarını keşfedin.",
-    metric: "Steam Dip Fiyatlar · Türk Oyun Ekosistemi",
-  },
+  { label: "🍼 Yeni Doğum & Çocuk Yardımı (5.000 TL/Ay)", href: "/tesvik-ai/dogum-ve-cocuk-yardimi" },
+  { label: "💍 150.000 TL Faizsiz Evlilik Kredisi Şartları", href: "/tesvik-ai/evlenecek-genclere-150-bin-tl-faizsiz-evlilik-kredisi" },
+  { label: "🎯 KPSS Şartsız Kamu İşçisi & İŞKUR İUP", href: "/memur-ai/kpss-sartsiz-kamu-isci-alimi-ve-iskur-iup" },
+  { label: "🏦 En Yüksek Emekli Banka Promosyonu (20.000 TL)", href: "/memur-ai/emekli-banka-promosyonu-karsilastirma" },
+  { label: "📋 50 - 60 KPSS İle Memur Alan Kurumlar", href: "/memur-ai/dusuk-kpss-puaniyla-50-55-60-memur-alimi" },
+  { label: "🩺 Evde Bakım Maaşı & SED Gelir Kriteri Robotu", href: "/tesvik-ai" },
+  { label: "💳 Market 2.000 TL Hangi Kart Puan Verir?", href: "/puan-ai" },
+  { label: "💰 100.000 TL 32 Günlük Mevduat Getirisi", href: "/finans-ai" },
 ];
 
 const HOME_FAQ = [
   {
-    q: "Üretir (uretir.com) nedir ve verileri nereden alır?",
-    a: "Üretir; finans, banka kampanyaları, e-ticaret fiyat geçmişi, konut/otomobil değerleme ve 81 il haber gündemini birincil resmî kaynaklarla (TCMB, resmî banka kampanya sayfaları, kamu ilanları ve ajanslar) doğrulayarak sunan 8 otonom yapay zekâ aracının ortak platformudur.",
+    q: "Üretir (uretir.com) nedir ve hangi galaksi kümelerinden oluşur?",
+    a: "Üretir; 1) Yardım, Teşvik & Tasarruf (TeşvikAI, PuanAI, İndirimAI), 2) Memur, Kariyer & Kamu İlan (MemurAI, KPSS Robotu, Maaş/Promosyon), 3) Finans, Varlık & Gündem (FinansAI, EvAI, ArabaAI, HaberAI) ve 4) Teknoloji, Yapay Zekâ & Oyun (ÜretirAI, SporAI, OyunAI) olmak üzere 4 ana galakside çalışan karar ve hesaplama platformudur.",
   },
   {
-    q: "PuanAI kredi kartı kampanya hesaplaması için kart numarası ister mi?",
-    a: "Hayır. PuanAI hiçbir zaman kart numarası, T.C. kimlik numarası veya bankacılık şifresi istemez. Sadece sahip olduğunuz kart programını (Bonus, World, Maximum, Axess, Bankkart vb.) ve harcama tutarınızı seçerek hangi kampanyadan kaç TL puan kazanacağınızı görürsünüz.",
+    q: "TeşvikAI aile yardımları ve devlet desteği robotu nasıl çalışır?",
+    a: "Hane toplam gelirinizi ve kişi sayısını girdiğinizde, kişi başı gelirinizi asgari ücretin 1/3 ve 2/3 sınırlarıyla karşılaştırır; Doğum Yardımı, SED, 150.000 TL Faizsiz Evlilik Kredisi, Evde Bakım Maaşı, Fatura/Kira Desteği ve KOSGEB hibelerinden hangilerine başvurabileceğinizi resmî e-Devlet linkleriyle listeler.",
   },
   {
-    q: "İndirimAI sahte indirimleri nasıl tespit eder?",
-    a: "İndirimAI, ürünün 30, 90 ve 360 günlük fiyat gözlemlerini ve mağazalar arası medyan değerini karşılaştırır. Üstü çizili fiyat şişirilmişse uyarı verir; ayrıca PuanAI banka puanını düşerek cebinizden çıkacak net dip maliyeti hesaplar.",
+    q: "MemurAI KPSS puan robotu ve maaş/promosyon hesaplayıcı neleri kapsar?",
+    a: "Eğitim düzeyinize (Lise, Önlisans, Lisans) ve KPSS puanınıza (KPSS şartsız noter kurası, 50, 55, 60, 70+ puan) göre Cumhurbaşkanlığı Kariyer Kapısı, İŞKUR ve belediye ilanlarını eşleştirir; ayrıca 6 aylık enflasyon farkıyla yeni memur/emekli maaşını ve banka promosyonlarını hesaplar.",
   },
   {
-    q: "EvAI kira çarpanı (amortisman süresi) nasıl hesaplanır?",
-    a: "Konutun satış fiyatının yıllık toplam kira gelirine bölünmesiyle bulunur. Türkiye genelinde 14–16 yıl altı yüksek kira getirili fırsat, 20 yıl üzeri ise yüksek fiyatlı/pazarlık gerektiren konut olarak değerlendirilir.",
+    q: "PuanAI ve İndirimAI kart numarası veya kişisel şifre ister mi?",
+    a: "Hayır. Üretir üzerindeki hiçbir araç kart numarası, T.C. kimlik numarası veya e-Devlet/banka şifresi istemez. Tüm hesaplamalar tarayıcınızda şeffaf biçimde yapılır ve yalnızca resmî kurum sayfalarına yönlendirir.",
   },
 ];
 
@@ -121,14 +55,64 @@ const homeFaqSchema = {
 export function HomeCommandHub() {
   const router = useRouter();
   const [query, setQuery] = useState("");
+  const [activeCluster, setActiveCluster] = useState<string>("all");
 
   function handleSearch(e: FormEvent) {
     e.preventDefault();
     const q = query.trim().toLocaleLowerCase("tr-TR");
     if (!q) return;
-    if (q.includes("kart") || q.includes("puan") || q.includes("bonus") || q.includes("world") || q.includes("axess") || q.includes("maximum") || q.includes("bankkart") || q.includes("market") || q.includes("akaryakıt")) {
+    if (
+      q.includes("teşvik") ||
+      q.includes("tesvik") ||
+      q.includes("yardım") ||
+      q.includes("yardim") ||
+      q.includes("doğum") ||
+      q.includes("dogum") ||
+      q.includes("çocuk") ||
+      q.includes("sed") ||
+      q.includes("evlilik") ||
+      q.includes("bakım") ||
+      q.includes("kosgeb") ||
+      q.includes("hibe") ||
+      q.includes("fatura")
+    ) {
+      router.push("/tesvik-ai");
+    } else if (
+      q.includes("memur") ||
+      q.includes("kpss") ||
+      q.includes("işkur") ||
+      q.includes("iskur") ||
+      q.includes("iup") ||
+      q.includes("zabıta") ||
+      q.includes("itfaiye") ||
+      q.includes("promosyon") ||
+      q.includes("emekli") ||
+      q.includes("maaş") ||
+      q.includes("maas") ||
+      q.includes("kadro")
+    ) {
+      router.push("/memur-ai");
+    } else if (
+      q.includes("kart") ||
+      q.includes("puan") ||
+      q.includes("bonus") ||
+      q.includes("world") ||
+      q.includes("axess") ||
+      q.includes("maximum") ||
+      q.includes("bankkart") ||
+      q.includes("market") ||
+      q.includes("akaryakıt")
+    ) {
       router.push("/puan-ai");
-    } else if (q.includes("altın") || q.includes("dolar") || q.includes("euro") || q.includes("faiz") || q.includes("mevduat") || q.includes("borsa") || q.includes("bist")) {
+    } else if (
+      q.includes("altın") ||
+      q.includes("dolar") ||
+      q.includes("euro") ||
+      q.includes("faiz") ||
+      q.includes("mevduat") ||
+      q.includes("borsa") ||
+      q.includes("bist")
+    ) {
       router.push("/finans-ai");
     } else if (q.includes("indirim") || q.includes("kupon") || q.includes("fiyat") || q.includes("ucuz")) {
       router.push("/indirim-ai");
@@ -145,6 +129,11 @@ export function HomeCommandHub() {
     }
   }
 
+  const visibleClusters =
+    activeCluster === "all"
+      ? GALAXY_CLUSTERS
+      : GALAXY_CLUSTERS.filter((cluster) => cluster.id === activeCluster);
+
   return (
     <div id="canli-merkez" className="relative z-10 border-t border-white/10 bg-[var(--background)] pb-16 pt-12">
       <JsonLd data={homeFaqSchema} />
@@ -154,19 +143,20 @@ export function HomeCommandHub() {
         <div className="rounded-3xl border border-black/10 bg-white/90 p-6 shadow-lg dark:border-white/15 dark:bg-[#0c1222] md:p-10">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <span className="inline-flex items-center gap-2 rounded-full bg-[#c8f560]/25 px-3.5 py-1 text-xs font-extrabold tracking-wider text-black dark:bg-[#c8f560]/20 dark:text-[#c8f560]">
-              <Sparkles size={14} /> ÜRETİR CANLI KARAR &amp; HESAPLAMA MERKEZİ
+              <Sparkles size={14} /> ÜRETİR EVRENİ · 4 GALAKSİ &amp; 10 CANLI HESAPLAMA ARACI
             </span>
             <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted">
-              <ShieldCheck size={15} className="text-emerald-500" /> Resmî Kaynak &amp; Gerçek Zamanlı Veri Doğrulaması
+              <ShieldCheck size={15} className="text-emerald-500" /> e-Devlet, Kariyer Kapısı, TCMB &amp; Resmî Banka Kaynaklı
             </span>
           </div>
 
           <h1 id="home-command-heading" className="mt-4 font-display text-3xl font-bold tracking-tight md:text-5xl">
-            Harcamadan, yatırım yapmadan ve satın almadan önce doğrula.
+            Aile yardımlarından memur alımına, banka puanından mevduata tek karar merkezi.
           </h1>
           <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted md:text-base">
-            Türkiye&apos;nin en çok aranan kredi kartı puanlarını, mevduat/altın getirilerini, 360 günlük gerçek e-ticaret dip fiyatlarını,
-            konut kira çarpanlarını, sıfır/2. el otomobil değerlemelerini ve 81 il gündemini tek merkezde hesaplayın.
+            Hane gelirinize göre çıkan <strong>aile ve devlet yardımlarını (TeşvikAI)</strong>, KPSS puanınıza göre{" "}
+            <strong>güncel kamu/memur ilanlarını ve emekli promosyonlarını (MemurAI)</strong>, kredi kartı puanlarını,
+            32 günlük mevduat faizini ve konut/araç değerlemelerini saniyeler içinde hesaplayın.
           </p>
 
           <form action="/ara" method="get" onSubmit={handleSearch} className="mt-6 flex flex-col gap-3 sm:flex-row" role="search">
@@ -177,7 +167,7 @@ export function HomeCommandHub() {
                 name="q"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Ne hesaplamak istiyorsun? (Örn: Market 2000 TL hangi kart, 100 bin TL faiz, kira çarpanı, sıfır araç...)"
+                placeholder="Ne arıyorsun? (Örn: Doğum yardımı, 150 bin TL evlilik kredisi, KPSS şartsız memur, emekli promosyon, 100 bin TL faiz...)"
                 aria-label="Tüm Üretir yapay zekâ araçlarında ara"
                 className="w-full rounded-2xl border border-black/15 bg-transparent py-3.5 pl-11 pr-4 text-sm font-semibold focus:border-black focus:outline-none dark:border-white/20 dark:focus:border-[#c8f560]"
               />
@@ -209,55 +199,176 @@ export function HomeCommandHub() {
         </div>
       </section>
 
-      {/* 2. Doğrudan Ana Sayfada Çalışan İnteraktif Kart Cüzdanım & Puan Hesaplayıcı */}
+      {/* 2. Hızlı Giriş: TeşvikAI (Aile Yardımları) & MemurAI (Kamu İlan/Maaş) Vitrin Kartları */}
+      <section className="section-wrap mt-8" aria-label="Öne çıkan devlet desteği ve kamu kariyer robotları">
+        <div className="grid gap-5 lg:grid-cols-2">
+          <div className="flex flex-col justify-between rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-emerald-950/90 via-[#0c1424] to-[#090d16] p-6 text-white shadow-lg">
+            <div>
+              <span className="inline-block rounded-full bg-[#c8f560] px-3 py-1 text-[11px] font-extrabold text-[#090d16]">
+                1. GALAKSİ · YARDIM, TEŞVİK &amp; TASARRUF
+              </span>
+              <h2 className="mt-3 font-display text-2xl font-bold md:text-3xl">
+                TeşvikAI · Aile Yardımları ve e-Devlet Sosyal Destek Robotu
+              </h2>
+              <p className="mt-2 text-xs leading-relaxed text-slate-300 md:text-sm">
+                Hane gelirinizi ve kişi sayısını yazın; <strong>Doğum Yardımı (5.000 TL/Ay)</strong>,{" "}
+                <strong>SED Çocuk Maaşı</strong>, <strong>150.000 TL Faizsiz Evlilik Kredisi</strong>,{" "}
+                <strong>Evde Bakım Maaşı</strong> ve <strong>KOSGEB Hibeleri</strong> arasından size çıkanları görün.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-1.5">
+                {SUPPORT_PROGRAMS.slice(0, 4).map((prog) => (
+                  <Link
+                    key={prog.id}
+                    href={`/tesvik-ai/${prog.slug}`}
+                    className="rounded-lg border border-white/15 bg-white/5 px-2.5 py-1 text-[11px] font-bold text-emerald-200 transition hover:bg-white/15"
+                  >
+                    {prog.shortTitle} →
+                  </Link>
+                ))}
+              </div>
+            </div>
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/15 pt-4">
+              <span className="text-xs font-semibold text-emerald-300">Asgari Ücret 1/3 ve 2/3 Gelir Testi</span>
+              <Link
+                href="/tesvik-ai"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#c8f560] px-5 py-2.5 text-xs font-extrabold text-[#090d16] transition hover:opacity-95"
+              >
+                Aile Yardımı Robotunu Aç <ArrowRight size={14} />
+              </Link>
+            </div>
+          </div>
+
+          <div className="flex flex-col justify-between rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-950/85 via-[#0e1526] to-[#090d16] p-6 text-white shadow-lg">
+            <div>
+              <span className="inline-block rounded-full bg-amber-400 px-3 py-1 text-[11px] font-extrabold text-[#090d16]">
+                2. GALAKSİ · MEMUR, KARİYER &amp; MAAŞ
+              </span>
+              <h2 className="mt-3 font-display text-2xl font-bold md:text-3xl">
+                MemurAI · Kamu Personeli Alımı, KPSS Robotu &amp; Promosyon
+              </h2>
+              <p className="mt-2 text-xs leading-relaxed text-slate-300 md:text-sm">
+                Mezuniyetinizi ve KPSS puanınızı seçin; <strong>KPSS Şartsız Kamu İşçisi Kura İlanlarını</strong>,{" "}
+                <strong>50–60 KPSS İle Memur Alan Kurumları</strong>, <strong>Zabıta/İtfaiye Alımlarını</strong>,{" "}
+                <strong>Maaş Zammını</strong> ve <strong>Emekli Banka Promosyonlarını</strong> karşılaştırın.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-1.5">
+                {RECRUITMENT_TRACKS.slice(0, 4).map((track) => (
+                  <Link
+                    key={track.id}
+                    href={`/memur-ai/${track.slug}`}
+                    className="rounded-lg border border-white/15 bg-white/5 px-2.5 py-1 text-[11px] font-bold text-amber-200 transition hover:bg-white/15"
+                  >
+                    {track.shortTitle} →
+                  </Link>
+                ))}
+              </div>
+            </div>
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/15 pt-4">
+              <span className="text-xs font-semibold text-amber-300">Kariyer Kapısı · İŞKUR · Maaş &amp; Promosyon</span>
+              <Link
+                href="/memur-ai"
+                className="inline-flex items-center gap-2 rounded-xl bg-amber-400 px-5 py-2.5 text-xs font-extrabold text-[#090d16] transition hover:opacity-95"
+              >
+                Memur &amp; KPSS Robotunu Aç <ArrowRight size={14} />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. Doğrudan Ana Sayfada Çalışan İnteraktif Kart Cüzdanım & Puan Hesaplayıcı */}
       <PuanWalletCalculator />
 
-      {/* 3. 8 Otonom Yapay Zekâ Aracı Görünür Rehber Grid (SEO & AdSense İçin Tam Erişilebilir) */}
+      {/* 4. 4 Galaksi Kümesi & Tüm Yapay Zekâ Araçları (Tutarlı Üst Başlık Mimarisi) */}
       <section id="araclar" className="section-wrap mt-12" aria-labelledby="home-tools-heading">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <span className="eyebrow text-muted">8 OTONOM YAPAY ZEKÂ ARACI</span>
-            <h2 id="home-tools-heading" className="mt-2 font-display text-3xl font-bold tracking-tight md:text-4xl">
-              Üretir Araçları &amp; Canlı Veri Masaları
+            <span className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-muted">
+              <Orbit size={15} /> ÜRETİR EVRENİ · 4 ANA GALAKSİ KÜMESİ
+            </span>
+            <h2 id="home-tools-heading" className="mt-1 font-display text-3xl font-bold tracking-tight md:text-4xl">
+              Galaksi Kümeleri &amp; Canlı Hesaplama Masaları
             </h2>
           </div>
-          <Link href="/kesfet" className="inline-flex items-center gap-1.5 text-xs font-extrabold underline">
-            Tüm Ekosistemi ve Rehberleri Gör <ArrowUpRight size={14} />
-          </Link>
+
+          <div className="flex flex-wrap gap-2">
+            {[
+              { id: "all", label: "Tüm Evren (4 Galaksi)" },
+              { id: "yardim-tasarruf", label: "1. Yardım, Teşvik & Tasarruf" },
+              { id: "memur-kariyer", label: "2. Memur, Kariyer & Kamu" },
+              { id: "finans-gundem", label: "3. Finans, Emlak & Gündem" },
+              { id: "teknoloji-uretim", label: "4. Teknoloji, Spor & Oyun" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveCluster(tab.id)}
+                className={`rounded-full px-3.5 py-1.5 text-xs font-extrabold transition ${
+                  activeCluster === tab.id
+                    ? "bg-black text-[#c8f560] dark:bg-[#c8f560] dark:text-[#090d16]"
+                    : "border border-black/15 bg-black/[0.03] hover:bg-black/[0.07] dark:border-white/15 dark:bg-white/[0.04]"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {CORE_TOOLS.map((tool) => (
-            <Link
-              key={tool.slug}
-              href={tool.href}
-              className="group flex flex-col justify-between rounded-2xl border border-black/10 bg-white/80 p-5 transition hover:-translate-y-0.5 hover:border-black/30 hover:shadow-md dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-[#c8f560]/60"
+        <div className="mt-8 space-y-8">
+          {visibleClusters.map((cluster) => (
+            <div
+              key={cluster.id}
+              className="rounded-3xl border border-black/10 bg-white/60 p-6 dark:border-white/10 dark:bg-white/[0.02] md:p-8"
             >
-              <div>
-                <div className="flex items-center justify-between gap-2">
-                  <span className="rounded-full bg-[#c8f560]/25 px-2.5 py-0.5 text-[10px] font-extrabold tracking-wider text-black dark:bg-[#c8f560]/15 dark:text-[#c8f560]">
-                    {tool.badge}
+              <div className="flex flex-wrap items-end justify-between gap-3 border-b border-black/10 pb-4 dark:border-white/10">
+                <div>
+                  <span className="rounded-full bg-[#c8f560]/25 px-3 py-1 text-[10px] font-extrabold tracking-wider text-black dark:bg-[#c8f560]/15 dark:text-[#c8f560]">
+                    {cluster.badge}
                   </span>
-                  <ArrowUpRight size={16} className="text-muted transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  <h3 className="mt-2 font-display text-2xl font-bold">{cluster.name}</h3>
+                  <p className="mt-1 text-xs text-muted md:text-sm">{cluster.description}</p>
                 </div>
-                <h3 className="mt-3 font-display text-lg font-bold leading-snug">{tool.title}</h3>
-                <p className="mt-2 text-xs leading-relaxed text-muted">{tool.desc}</p>
               </div>
-              <div className="mt-4 flex items-center justify-between border-t border-black/10 pt-3 text-[11px] font-bold text-muted dark:border-white/10">
-                <span>{tool.metric}</span>
-                <span className="text-black dark:text-[#c8f560]">Aç →</span>
+
+              <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {cluster.tools.map((tool) => (
+                  <Link
+                    key={tool.slug}
+                    href={tool.href}
+                    className="group flex flex-col justify-between rounded-2xl border border-black/10 bg-white/90 p-5 transition hover:-translate-y-0.5 hover:border-black/30 hover:shadow-md dark:border-white/10 dark:bg-[#0c1222] dark:hover:border-[#c8f560]/60"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="rounded-full bg-black/[0.05] px-2.5 py-0.5 text-[10px] font-extrabold tracking-wider dark:bg-white/10 dark:text-[#c8f560]">
+                          {tool.badge}
+                        </span>
+                        <ArrowUpRight
+                          size={16}
+                          className="text-muted transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                        />
+                      </div>
+                      <h4 className="mt-3 font-display text-lg font-bold leading-snug">{tool.title}</h4>
+                      <p className="mt-2 text-xs leading-relaxed text-muted">{tool.desc}</p>
+                    </div>
+                    <div className="mt-4 flex items-center justify-between border-t border-black/10 pt-3 text-[11px] font-bold text-muted dark:border-white/10">
+                      <span>{tool.metric}</span>
+                      <span className="text-black dark:text-[#c8f560]">Aç →</span>
+                    </div>
+                  </Link>
+                ))}
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       </section>
 
-      {/* Google AdSense Leaderboard Slot (Aktif olduğunda otomatik render edilir) */}
+      {/* Google AdSense Leaderboard Slot */}
       <div className="section-wrap my-8">
         <AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_LEADERBOARD || "home-leaderboard"} />
       </div>
 
-      {/* 4. SEO & Google AdSense E-E-A-T Sıkça Sorulan Sorular ve Metodoloji */}
+      {/* 5. SEO & Google AdSense E-E-A-T Sıkça Sorulan Sorular ve Metodoloji */}
       <section className="section-wrap mt-10" aria-labelledby="home-faq-heading">
         <div className="rounded-2xl border border-black/10 bg-white/75 p-6 dark:border-white/10 dark:bg-white/[0.02] md:p-8">
           <div className="max-w-3xl">
@@ -266,8 +377,9 @@ export function HomeCommandHub() {
               Neden Üretir? Doğrulanmış Veri ve Tüketici Karar Rehberi
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-muted">
-              Üretir&apos;de yayımlanan hiçbir veri kaynağından bağımsız üretilmez. Her kredi kartı kampanyası, döviz/altın kuru,
-              indirim geçmişi ve taşınmaz analizi birincil resmî bağlantısıyla birlikte sunulur.
+              Üretir&apos;de yayımlanan hiçbir veri kaynağından bağımsız üretilmez. Her devlet teşviki, kamu personeli
+              ilanı, kredi kartı kampanyası, döviz/altın kuru ve taşınmaz analizi birincil resmî bağlantısıyla birlikte
+              sunulur.
             </p>
           </div>
 
@@ -285,6 +397,8 @@ export function HomeCommandHub() {
 
           <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-black/10 pt-4 text-xs text-muted dark:border-white/10">
             <div className="flex flex-wrap gap-4 font-semibold">
+              <Link href="/tesvik-ai" className="underline">TeşvikAI Aile Yardımları</Link>
+              <Link href="/memur-ai" className="underline">MemurAI Kamu İlanları</Link>
               <Link href="/hakkimizda" className="underline">Hakkımızda &amp; Yayın İlkeleri</Link>
               <Link href="/gizlilik-politikasi" className="underline">Gizlilik ve Çerez Politikası</Link>
               <Link href="/kullanim-kosullari" className="underline">Kullanım Koşulları &amp; Yasal Uyarı</Link>

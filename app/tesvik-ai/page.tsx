@@ -1,14 +1,20 @@
 import type { Metadata } from "next";
-import { ContentHubPage } from "@/components/content-hub-page";
+import { TesvikAIHub } from "@/components/tesvik-ai-hub";
 
 export const metadata: Metadata = {
-  title: "TesvikAI — Üretim teşvikleri bilgi merkezi",
-  description: "KOSGEB, TÜBİTAK ve ihracat destekleri için başvuru hazırlığı, uygunluk ve resmî kaynak rehberleri.",
+  title: "TeşvikAI — Aile Yardımları, e-Devlet Sosyal Destekler ve Devlet Teşvikleri Hesaplama",
+  description:
+    "Aile destek ödemesi, yeni doğum ve çocuk yardımı (5.000 TL), SED maaşı, 150 bin TL faizsiz evlilik kredisi, evde bakım maaşı ve KOSGEB/İŞKUR hibeleri için gelir kriteri robotu.",
   alternates: { canonical: "/tesvik-ai" },
-  robots: { index: false, follow: true },
-  openGraph: { title: "TesvikAI — Üretir", description: "Üretim teşvikleri için kaynak odaklı hazırlık merkezi.", url: "/tesvik-ai", type: "website" },
+  openGraph: {
+    title: "TeşvikAI — Aile Yardımları ve Devlet Teşvikleri Hesaplama Robotu",
+    description:
+      "Hane gelirinizi ve kişi sayısını girin; e-Devlet doğum yardımı, SED, faizsiz evlilik kredisi, evde bakım ve kira/fatura desteklerinden size uygun olanları görün.",
+    url: "/tesvik-ai",
+    type: "website",
+  },
 };
 
 export default function TesvikAIPage() {
-  return <ContentHubPage hubId="tesvik-ai" />;
+  return <TesvikAIHub />;
 }

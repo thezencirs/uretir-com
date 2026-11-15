@@ -8,6 +8,7 @@ import { isIndexableReference } from "@/lib/publication";
 import { absoluteUrl } from "@/lib/seo";
 import { hubGuides } from "@/lib/content-hubs";
 import { createHubGuideDocument } from "@/lib/hub-guide-document";
+import { RECRUITMENT_TRACKS, SUPPORT_PROGRAMS } from "@/lib/tesvik-memur-data";
 import provinces from "@/lib/haber-ai/provinces.json";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -18,6 +19,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: absoluteUrl("/"), lastModified: now, changeFrequency: "hourly", priority: 1.0 },
+    { url: absoluteUrl("/tesvik-ai"), lastModified: now, changeFrequency: "daily", priority: 0.99 },
+    { url: absoluteUrl("/memur-ai"), lastModified: now, changeFrequency: "daily", priority: 0.98 },
     { url: absoluteUrl("/haber-ai"), lastModified: now, changeFrequency: "hourly", priority: 0.98 },
     { url: absoluteUrl("/indirim-ai"), lastModified: now, changeFrequency: "hourly", priority: 0.96 },
     { url: absoluteUrl("/finans-ai"), lastModified: now, changeFrequency: "hourly", priority: 0.95 },
@@ -59,6 +62,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...(indexablePosts.length ? [{ url: absoluteUrl("/blog"), lastModified: now, changeFrequency: "daily" as const, priority: 0.88 }] : []),
     ...(indexableCompanies.length ? [{ url: absoluteUrl("/ne-uretir"), lastModified: now, changeFrequency: "weekly" as const, priority: 0.85 }] : []),
   ];
+
+  const tesvikProgramRoutes: MetadataRoute.Sitemap = SUPPORT_PROGRAMS.map((prog) => ({
+    url: absoluteUrl(`/tesvik-ai/${prog.slug}`),
+    lastModified: now,
+    changeFrequency: "daily" as const,
+    priority: 0.96,
+  }));
+
+  const memurTrackRoutes: MetadataRoute.Sitemap = RECRUITMENT_TRACKS.map((track) => ({
+    url: absoluteUrl(`/memur-ai/${track.slug}`),
+    lastModified: now,
+    changeFrequency: "daily" as const,
+    priority: 0.95,
+  }));
 
   // 81 Province News Map SEO URLs
   const provinceNewsRoutes: MetadataRoute.Sitemap = provinces.map((p) => ({
@@ -116,6 +133,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const allRoutes: MetadataRoute.Sitemap = [
     ...staticRoutes,
+    ...tesvikProgramRoutes,
+    ...memurTrackRoutes,
     ...provinceNewsRoutes,
     ...categoryRoutes,
     ...articleRoutes,

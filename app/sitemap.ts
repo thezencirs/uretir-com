@@ -9,6 +9,7 @@ import { absoluteUrl } from "@/lib/seo";
 import { hubGuides } from "@/lib/content-hubs";
 import { createHubGuideDocument } from "@/lib/hub-guide-document";
 import { RECRUITMENT_TRACKS, SUPPORT_PROGRAMS } from "@/lib/tesvik-memur-data";
+import { EMLAK_GUIDES, INSAAT_GUIDES } from "@/lib/insaat-emlak-data";
 import provinces from "@/lib/haber-ai/provinces.json";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -21,6 +22,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: absoluteUrl("/"), lastModified: now, changeFrequency: "hourly", priority: 1.0 },
     { url: absoluteUrl("/tesvik-ai"), lastModified: now, changeFrequency: "daily", priority: 0.99 },
     { url: absoluteUrl("/memur-ai"), lastModified: now, changeFrequency: "daily", priority: 0.98 },
+    { url: absoluteUrl("/insaat-ai"), lastModified: now, changeFrequency: "daily", priority: 0.98 },
+    { url: absoluteUrl("/emlak-ai"), lastModified: now, changeFrequency: "daily", priority: 0.98 },
     { url: absoluteUrl("/haber-ai"), lastModified: now, changeFrequency: "hourly", priority: 0.98 },
     { url: absoluteUrl("/indirim-ai"), lastModified: now, changeFrequency: "hourly", priority: 0.96 },
     { url: absoluteUrl("/finans-ai"), lastModified: now, changeFrequency: "hourly", priority: 0.95 },
@@ -72,6 +75,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const memurTrackRoutes: MetadataRoute.Sitemap = RECRUITMENT_TRACKS.map((track) => ({
     url: absoluteUrl(`/memur-ai/${track.slug}`),
+    lastModified: now,
+    changeFrequency: "daily" as const,
+    priority: 0.95,
+  }));
+
+  const insaatGuideRoutes: MetadataRoute.Sitemap = INSAAT_GUIDES.map((guide) => ({
+    url: absoluteUrl(`/insaat-ai/${guide.slug}`),
+    lastModified: now,
+    changeFrequency: "daily" as const,
+    priority: 0.95,
+  }));
+
+  const emlakGuideRoutes: MetadataRoute.Sitemap = EMLAK_GUIDES.map((guide) => ({
+    url: absoluteUrl(`/emlak-ai/${guide.slug}`),
     lastModified: now,
     changeFrequency: "daily" as const,
     priority: 0.95,
@@ -135,6 +152,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...staticRoutes,
     ...tesvikProgramRoutes,
     ...memurTrackRoutes,
+    ...insaatGuideRoutes,
+    ...emlakGuideRoutes,
     ...provinceNewsRoutes,
     ...categoryRoutes,
     ...articleRoutes,

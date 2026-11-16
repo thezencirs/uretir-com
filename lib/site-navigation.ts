@@ -24,12 +24,25 @@ export const siteNavigation = [
     ],
   },
   {
+    label: "Emlak & İnşaat",
+    href: "/insaat-ai",
+    description: "Müstakil ev inşaat maliyeti, arsa TAKS/KAKS, TÜFE kira zammı, tapu harcı ve kentsel dönüşüm.",
+    items: [
+      { label: "İnşaatAI · İnşaat Maliyeti & İmar", href: "/insaat-ai" },
+      { label: "EmlakAI · Kira Zammı & Tapu Harcı", href: "/emlak-ai" },
+      { label: "EvAI · Kira Çarpanı & Kamu İhale", href: "/ev-ai" },
+      { label: "Müstakil Ev Yapım Maliyeti", href: "/insaat-ai/mustakil-ev-ve-villa-insaat-maliyeti-hesaplama" },
+      { label: "Yarısı Bizden Hibe & Kredi", href: "/insaat-ai/yarisi-bizden-kentsel-donusum-hibe-ve-kredi-hesaplama" },
+      { label: "TÜFE Kira Artış Oranı", href: "/emlak-ai/tufe-kira-artis-orani-ve-kira-zammi-hesaplama" },
+      { label: "Tapu Harcı (%4) Hesaplama", href: "/emlak-ai/tapu-harci-ve-doner-sermaye-bedeli-hesaplama" },
+    ],
+  },
+  {
     label: "Finans & Gündem",
     href: "/finans-ai",
-    description: "Canlı döviz/altın, mevduat faizi, emlak kira çarpanı, otomobil ve 81 il haber haritası.",
+    description: "Canlı döviz/altın, mevduat faizi, otomobil değerleme ve 81 il haber haritası.",
     items: [
       { label: "FinansAI · Döviz, Altın & Faiz", href: "/finans-ai" },
-      { label: "EvAI · Emlak & Kira Çarpanı", href: "/ev-ai" },
       { label: "ArabaAI · Araç Değerleme", href: "/araba-ai" },
       { label: "HaberAI · 81 İl Haritası", href: "/haber-ai" },
       { label: "SporAI · Süper Lig xG & UEFA", href: "/spor-ai" },
@@ -39,24 +52,13 @@ export const siteNavigation = [
   {
     label: "Teknoloji & Evren",
     href: "/cozumler",
-    description: "ÜretirAI bilgi grafiği, Türkiye girişim ekosistemi ve tüm yapay zekâ çözümleri.",
+    description: "ÜretirAI bilgi grafiği, Türkiye girişim ekosistemi ve kurumsal kaynaklar.",
     items: [
       { label: "ÜretirAI · Bilgi Grafiği", href: "/uretir-ai" },
       { label: "Tüm AI Çözümleri", href: "/cozumler" },
       { label: "Ekosistem Haritası", href: "/ekosistem/harita" },
-      { label: "Marketplace", href: "/ekosistem/marketplace" },
-      { label: "Keşfet & Rehberler", href: "/kesfet" },
-    ],
-  },
-  {
-    label: "Kaynaklar",
-    href: "/kaynaklar",
-    description: "Topluluk, kurumsal yayın ilkeleri ve iletişim.",
-    items: [
       { label: "Topluluk", href: "/kaynaklar/topluluk" },
-      { label: "Destek", href: "/kaynaklar/destek" },
-      { label: "Hakkımızda", href: "/hakkimizda" },
-      { label: "İletişim", href: "/iletisim" },
+      { label: "Hakkımızda & İletişim", href: "/hakkimizda" },
     ],
   },
 ];

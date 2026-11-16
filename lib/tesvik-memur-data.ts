@@ -436,7 +436,7 @@ export const BANK_PROMOTIONS = [
 ];
 
 export type GalaxyCluster = {
-  id: "yardim-tasarruf" | "memur-kariyer" | "finans-gundem" | "teknoloji-uretim";
+  id: "yardim-tasarruf" | "memur-kariyer" | "emlak-insaat" | "finans-gundem" | "teknoloji-uretim";
   name: string;
   badge: string;
   tagline: string;
@@ -524,12 +524,47 @@ export const GALAXY_CLUSTERS: GalaxyCluster[] = [
     ],
   },
   {
-    id: "finans-gundem",
-    name: "3. Galaksi: Finans, Varlık & Gündem Evreni",
-    badge: "MEVDUAT FAİZİ · ALTIN/DÖVİZ · EMLAK · OTOMOBİL · 81 İL HABER",
-    tagline: "Yatırım, konut, otomobil ve Türkiye gündemini birincil verilerle doğrulayın.",
+    id: "emlak-insaat",
+    name: "3. Galaksi: Emlak, İnşaat & Kentsel Dönüşüm Evreni",
+    badge: "İNŞAAT MALİYETİ · TÜFE KİRA ZAMMI · TAPU HARCI · TOKİ & İMAR",
+    tagline: "Müstakil ev inşaat maliyeti, TAKS/KAKS imar hesabı, TÜFE kira zammı, tapu harcı ve konut kredisi.",
     description:
-      "32 günlük mevduat faiz getirisinden konut kira çarpanına (amortisman süresi), 2. el araç ekspertiz değerlemesinden 81 il canlı haber haritasına kadar tüm piyasa masaları.",
+      "Betonarme/prefabrik/çelik ev yapım bütçesinden arsa kat karşılığı hesabına, yasal TÜFE kira artış oranından %4 tapu harcına ve kamu taşınmaz ihalelerine kadar tüm yapı ve gayrimenkul araçları.",
+    accentColor: "orange",
+    tools: [
+      {
+        slug: "insaat-ai",
+        href: "/insaat-ai",
+        badge: "İNŞAAT MALİYET & İMAR",
+        title: "İnşaatAI · Müstakil Ev Maliyeti, Demir/Beton Metrajı ve TAKS/KAKS",
+        desc: "Betonarme, çelik ve prefabrik ev m² anahtar teslim maliyetini, demir tonajını, hazır beton mikser sayısını, arsa emsal hesabını ve Yarısı Bizden hibesini hesaplayın.",
+        metric: "Birim Maliyet · Demir/Beton · İmar Robotu",
+      },
+      {
+        slug: "emlak-ai",
+        href: "/emlak-ai",
+        badge: "KİRA ZAMMI & TAPU HARCI",
+        title: "EmlakAI · TÜFE Kira Artış Oranı, Tapu Harcı (%4) ve Konut Kredisi",
+        desc: "TÜİK 12 aylık TÜFE yasal kira zammını, tapu alıcı-satıcı harcını, 120 ay konut kredisi taksitini ve Milli Emlak Hazine arsası muafiyetlerini hesaplayın.",
+        metric: "TÜİK TÜFE · WebTapu Harç · Konut Kredisi",
+      },
+      {
+        slug: "ev-ai",
+        href: "/ev-ai",
+        badge: "KİRA ÇARPANI & İHALE",
+        title: "EvAI · Konut Kira Çarpanı (Amortisman Yılı) ve Kamu İhaleleri",
+        desc: "Satılık daire ve arsaları bölgesel m² medyanı ve kira amortisman süresiyle (yıl) test edin; resmî kamu/icra taşınmaz ilanlarını haritada inceleyin.",
+        metric: "Kira Amortisman Hesaplayıcı · Haritalı",
+      },
+    ],
+  },
+  {
+    id: "finans-gundem",
+    name: "4. Galaksi: Finans, Otomobil & Gündem Evreni",
+    badge: "MEVDUAT FAİZİ · ALTIN/DÖVİZ · OTOMOBİL · 81 İL HABER",
+    tagline: "Mevduat getirisi, altın/döviz, 2. el otomobil ekspertiz değerlemesi ve 81 il canlı gündem.",
+    description:
+      "32 günlük mevduat faiz getirisinden 2. el araç yaş/KM/boya ekspertiz değerlemesine ve 81 il canlı haber haritasına kadar tüm piyasa masaları.",
     accentColor: "sky",
     tools: [
       {
@@ -539,14 +574,6 @@ export const GALAXY_CLUSTERS: GalaxyCluster[] = [
         title: "FinansAI · Döviz, Gram Altın, Mevduat Faizi ve BIST 100",
         desc: "TCMB gösterge kurları, 24 ayar gram altın, Borsa İstanbul, 32 günlük net mevduat faizi simülatörü ve kişisel yatırım sepeti çevirici.",
         metric: "TCMB & BIST Kaynaklı · Faiz Robotu",
-      },
-      {
-        slug: "ev-ai",
-        href: "/ev-ai",
-        badge: "EMLAK & KAMU İHALE",
-        title: "EvAI · Konut Kira Çarpanı, m² Endeksi ve Kamu İhaleleri",
-        desc: "Satılık daire ve arsaları bölgesel m² medyanı ve kira amortisman süresiyle (yıl) test edin; resmî kamu/icra taşınmaz ilanlarını haritada inceleyin.",
-        metric: "Kira Amortisman Hesaplayıcı · Haritalı",
       },
       {
         slug: "araba-ai",
@@ -568,7 +595,7 @@ export const GALAXY_CLUSTERS: GalaxyCluster[] = [
   },
   {
     id: "teknoloji-uretim",
-    name: "4. Galaksi: Teknoloji, Yapay Zekâ & Spor/Oyun Evreni",
+    name: "5. Galaksi: Teknoloji, Yapay Zekâ & Spor/Oyun Evreni",
     badge: "ÜRETİRAİ · SPOR xG · OYUN RADARI · EKOSİSTEM",
     tagline: "Yapay zekâ bilgi grafiği, Süper Lig xG analizi ve dijital oyun ekonomisi.",
     description:

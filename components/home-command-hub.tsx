@@ -8,33 +8,34 @@ import { PuanWalletCalculator } from "@/components/viral-calculators";
 import { AdSlot } from "@/components/google-monetization";
 import { JsonLd } from "@/components/json-ld";
 import { GALAXY_CLUSTERS, SUPPORT_PROGRAMS, RECRUITMENT_TRACKS } from "@/lib/tesvik-memur-data";
+import { EMLAK_GUIDES, INSAAT_GUIDES } from "@/lib/insaat-emlak-data";
 
 const TRENDING_SEARCHES = [
   { label: "🍼 Yeni Doğum & Çocuk Yardımı (5.000 TL/Ay)", href: "/tesvik-ai/dogum-ve-cocuk-yardimi" },
-  { label: "💍 150.000 TL Faizsiz Evlilik Kredisi Şartları", href: "/tesvik-ai/evlenecek-genclere-150-bin-tl-faizsiz-evlilik-kredisi" },
+  { label: "💍 150.000 TL Faizsiz Evlilik Kredisi", href: "/tesvik-ai/evlenecek-genclere-150-bin-tl-faizsiz-evlilik-kredisi" },
   { label: "🎯 KPSS Şartsız Kamu İşçisi & İŞKUR İUP", href: "/memur-ai/kpss-sartsiz-kamu-isci-alimi-ve-iskur-iup" },
-  { label: "🏦 En Yüksek Emekli Banka Promosyonu (20.000 TL)", href: "/memur-ai/emekli-banka-promosyonu-karsilastirma" },
-  { label: "📋 50 - 60 KPSS İle Memur Alan Kurumlar", href: "/memur-ai/dusuk-kpss-puaniyla-50-55-60-memur-alimi" },
-  { label: "🩺 Evde Bakım Maaşı & SED Gelir Kriteri Robotu", href: "/tesvik-ai" },
-  { label: "💳 Market 2.000 TL Hangi Kart Puan Verir?", href: "/puan-ai" },
+  { label: "🏗️ 120 m² Müstakil Ev İnşaat Maliyeti", href: "/insaat-ai/mustakil-ev-ve-villa-insaat-maliyeti-hesaplama" },
+  { label: "🏠 TÜFE Kira Artış Oranı & Kira Zammı", href: "/emlak-ai/tufe-kira-artis-orani-ve-kira-zammi-hesaplama" },
+  { label: "📜 %4 Tapu Harcı & Döner Sermaye Hesabı", href: "/emlak-ai/tapu-harci-ve-doner-sermaye-bedeli-hesaplama" },
+  { label: "🏦 En Yüksek Emekli Banka Promosyonu", href: "/memur-ai/emekli-banka-promosyonu-karsilastirma" },
   { label: "💰 100.000 TL 32 Günlük Mevduat Getirisi", href: "/finans-ai" },
 ];
 
 const HOME_FAQ = [
   {
-    q: "Üretir (uretir.com) nedir ve hangi galaksi kümelerinden oluşur?",
-    a: "Üretir; 1) Yardım, Teşvik & Tasarruf (TeşvikAI, PuanAI, İndirimAI), 2) Memur, Kariyer & Kamu İlan (MemurAI, KPSS Robotu, Maaş/Promosyon), 3) Finans, Varlık & Gündem (FinansAI, EvAI, ArabaAI, HaberAI) ve 4) Teknoloji, Yapay Zekâ & Oyun (ÜretirAI, SporAI, OyunAI) olmak üzere 4 ana galakside çalışan karar ve hesaplama platformudur.",
+    q: "Üretir (uretir.com) nedir ve hangi 5 galaksi kümesinden oluşur?",
+    a: "Üretir; 1) Yardım, Teşvik & Tasarruf (TeşvikAI, PuanAI, İndirimAI), 2) Memur, Kariyer & Kamu İlan (MemurAI, KPSS Robotu, Maaş/Promosyon), 3) Emlak, İnşaat & Kentsel Dönüşüm (İnşaatAI, EmlakAI, EvAI), 4) Finans, Otomobil & Gündem (FinansAI, ArabaAI, HaberAI) ve 5) Teknoloji, Yapay Zekâ & Oyun (ÜretirAI, SporAI, OyunAI) olmak üzere 5 ana galakside çalışan karar ve hesaplama platformudur.",
   },
   {
-    q: "TeşvikAI aile yardımları ve devlet desteği robotu nasıl çalışır?",
-    a: "Hane toplam gelirinizi ve kişi sayısını girdiğinizde, kişi başı gelirinizi asgari ücretin 1/3 ve 2/3 sınırlarıyla karşılaştırır; Doğum Yardımı, SED, 150.000 TL Faizsiz Evlilik Kredisi, Evde Bakım Maaşı, Fatura/Kira Desteği ve KOSGEB hibelerinden hangilerine başvurabileceğinizi resmî e-Devlet linkleriyle listeler.",
+    q: "İnşaatAI ve EmlakAI hangi hesaplamaları yapar?",
+    a: "İnşaatAI; betonarme, hafif çelik ve prefabrik ev m² anahtar teslim maliyetini, gereken demir (ton) ve hazır beton (m³) miktarını, arsa TAKS/KAKS kat karşılığı daire hesabını ve Yarısı Bizden kentsel dönüşüm hibesini hesaplar. EmlakAI ise TÜİK 12 aylık TÜFE kira zammını, %4 tapu harcını ve 120 ay konut kredisi taksitini hesaplar.",
   },
   {
-    q: "MemurAI KPSS puan robotu ve maaş/promosyon hesaplayıcı neleri kapsar?",
-    a: "Eğitim düzeyinize (Lise, Önlisans, Lisans) ve KPSS puanınıza (KPSS şartsız noter kurası, 50, 55, 60, 70+ puan) göre Cumhurbaşkanlığı Kariyer Kapısı, İŞKUR ve belediye ilanlarını eşleştirir; ayrıca 6 aylık enflasyon farkıyla yeni memur/emekli maaşını ve banka promosyonlarını hesaplar.",
+    q: "TeşvikAI aile yardımları ve MemurAI KPSS robotu nasıl çalışır?",
+    a: "TeşvikAI, hane gelirinizi ve kişi sayısını asgari ücretin 1/3 ve 2/3 sınırlarıyla karşılaştırıp Doğum Yardımı, SED, 150.000 TL Evlilik Kredisi ve Evde Bakım desteklerini listeler. MemurAI ise mezuniyet ve KPSS puanınıza göre Kariyer Kapısı, İŞKUR ve belediye kamu ilanlarını eşleştirir.",
   },
   {
-    q: "PuanAI ve İndirimAI kart numarası veya kişisel şifre ister mi?",
+    q: "Üretir üzerindeki araçlar kart numarası veya kişisel şifre ister mi?",
     a: "Hayır. Üretir üzerindeki hiçbir araç kart numarası, T.C. kimlik numarası veya e-Devlet/banka şifresi istemez. Tüm hesaplamalar tarayıcınızda şeffaf biçimde yapılır ve yalnızca resmî kurum sayfalarına yönlendirir.",
   },
 ];
@@ -62,6 +63,31 @@ export function HomeCommandHub() {
     const q = query.trim().toLocaleLowerCase("tr-TR");
     if (!q) return;
     if (
+      q.includes("inşaat") ||
+      q.includes("insaat") ||
+      q.includes("maliyet") ||
+      q.includes("prefabrik") ||
+      q.includes("beton") ||
+      q.includes("demir") ||
+      q.includes("taks") ||
+      q.includes("kaks") ||
+      q.includes("emsal") ||
+      q.includes("toki") ||
+      q.includes("yarısı bizden")
+    ) {
+      router.push("/insaat-ai");
+    } else if (
+      q.includes("tapu") ||
+      q.includes("kira zammı") ||
+      q.includes("kira artış") ||
+      q.includes("tüfe") ||
+      q.includes("tufe") ||
+      q.includes("konut kredisi") ||
+      q.includes("milli emlak") ||
+      q.includes("emlak")
+    ) {
+      router.push("/emlak-ai");
+    } else if (
       q.includes("teşvik") ||
       q.includes("tesvik") ||
       q.includes("yardım") ||
@@ -143,20 +169,20 @@ export function HomeCommandHub() {
         <div className="rounded-3xl border border-black/10 bg-white/90 p-6 shadow-lg dark:border-white/15 dark:bg-[#0c1222] md:p-10">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <span className="inline-flex items-center gap-2 rounded-full bg-[#c8f560]/25 px-3.5 py-1 text-xs font-extrabold tracking-wider text-black dark:bg-[#c8f560]/20 dark:text-[#c8f560]">
-              <Sparkles size={14} /> ÜRETİR EVRENİ · 4 GALAKSİ &amp; 10 CANLI HESAPLAMA ARACI
+              <Sparkles size={14} /> ÜRETİR EVRENİ · 5 GALAKSİ &amp; 12 CANLI HESAPLAMA ARACI
             </span>
             <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted">
-              <ShieldCheck size={15} className="text-emerald-500" /> e-Devlet, Kariyer Kapısı, TCMB &amp; Resmî Banka Kaynaklı
+              <ShieldCheck size={15} className="text-emerald-500" /> e-Devlet, Kariyer Kapısı, TKGM, TOKİ &amp; TCMB Kaynaklı
             </span>
           </div>
 
           <h1 id="home-command-heading" className="mt-4 font-display text-3xl font-bold tracking-tight md:text-5xl">
-            Aile yardımlarından memur alımına, banka puanından mevduata tek karar merkezi.
+            Aile yardımı, memur alımı, inşaat/emlak maliyeti ve finans için tek karar merkezi.
           </h1>
           <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted md:text-base">
             Hane gelirinize göre çıkan <strong>aile ve devlet yardımlarını (TeşvikAI)</strong>, KPSS puanınıza göre{" "}
-            <strong>güncel kamu/memur ilanlarını ve emekli promosyonlarını (MemurAI)</strong>, kredi kartı puanlarını,
-            32 günlük mevduat faizini ve konut/araç değerlemelerini saniyeler içinde hesaplayın.
+            <strong>güncel kamu/memur ilanlarını (MemurAI)</strong>, <strong>müstakil ev inşaat maliyeti ve arsa TAKS/KAKS hesabını (İnşaatAI)</strong>,{" "}
+            <strong>TÜFE kira zammı ve tapu harcını (EmlakAI)</strong> ve banka puan/faizlerini saniyeler içinde hesaplayın.
           </p>
 
           <form action="/ara" method="get" onSubmit={handleSearch} className="mt-6 flex flex-col gap-3 sm:flex-row" role="search">
@@ -167,7 +193,7 @@ export function HomeCommandHub() {
                 name="q"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Ne arıyorsun? (Örn: Doğum yardımı, 150 bin TL evlilik kredisi, KPSS şartsız memur, emekli promosyon, 100 bin TL faiz...)"
+                placeholder="Ne hesaplamak istiyorsun? (Örn: Doğum yardımı, KPSS şartsız memur, 120 m2 ev inşaat maliyeti, TÜFE kira zammı, tapu harcı...)"
                 aria-label="Tüm Üretir yapay zekâ araçlarında ara"
                 className="w-full rounded-2xl border border-black/15 bg-transparent py-3.5 pl-11 pr-4 text-sm font-semibold focus:border-black focus:outline-none dark:border-white/20 dark:focus:border-[#c8f560]"
               />
@@ -199,8 +225,8 @@ export function HomeCommandHub() {
         </div>
       </section>
 
-      {/* 2. Hızlı Giriş: TeşvikAI (Aile Yardımları) & MemurAI (Kamu İlan/Maaş) Vitrin Kartları */}
-      <section className="section-wrap mt-8" aria-label="Öne çıkan devlet desteği ve kamu kariyer robotları">
+      {/* 2. Hızlı Giriş: 4 Büyük Trafik & Hesaplama Motoru (TeşvikAI, MemurAI, İnşaatAI, EmlakAI) */}
+      <section className="section-wrap mt-8" aria-label="Öne çıkan devlet desteği, kamu kariyer, inşaat ve emlak robotları">
         <div className="grid gap-5 lg:grid-cols-2">
           <div className="flex flex-col justify-between rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-emerald-950/90 via-[#0c1424] to-[#090d16] p-6 text-white shadow-lg">
             <div>
@@ -273,18 +299,90 @@ export function HomeCommandHub() {
               </Link>
             </div>
           </div>
+
+          <div className="flex flex-col justify-between rounded-3xl border border-orange-500/30 bg-gradient-to-br from-orange-950/90 via-[#101626] to-[#090d16] p-6 text-white shadow-lg">
+            <div>
+              <span className="inline-block rounded-full bg-orange-400 px-3 py-1 text-[11px] font-extrabold text-[#090d16]">
+                3. GALAKSİ · İNŞAAT, İMAR &amp; KENTSEL DÖNÜŞÜM
+              </span>
+              <h2 className="mt-3 font-display text-2xl font-bold md:text-3xl">
+                İnşaatAI · Müstakil Ev Maliyeti, Demir/Beton &amp; TAKS/KAKS Robotu
+              </h2>
+              <p className="mt-2 text-xs leading-relaxed text-slate-300 md:text-sm">
+                <strong>Betonarme, Çelik ve Prefabrik Ev</strong> anahtar teslim yapım bütçesini, gereken{" "}
+                <strong>demir tonajını ve hazır beton m³</strong> miktarını, <strong>arsa kat karşılığı daire paylaşımını</strong>{" "}
+                ve <strong>Yarısı Bizden 1,5 Milyon TL desteğini</strong> hesaplayın.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-1.5">
+                {INSAAT_GUIDES.slice(0, 4).map((guide) => (
+                  <Link
+                    key={guide.id}
+                    href={`/insaat-ai/${guide.slug}`}
+                    className="rounded-lg border border-white/15 bg-white/5 px-2.5 py-1 text-[11px] font-bold text-orange-200 transition hover:bg-white/15"
+                  >
+                    {guide.shortTitle} →
+                  </Link>
+                ))}
+              </div>
+            </div>
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/15 pt-4">
+              <span className="text-xs font-semibold text-orange-300">Bakanlık Birim Maliyet · TOKİ · İmar</span>
+              <Link
+                href="/insaat-ai"
+                className="inline-flex items-center gap-2 rounded-xl bg-orange-400 px-5 py-2.5 text-xs font-extrabold text-[#090d16] transition hover:opacity-95"
+              >
+                İnşaat Maliyet Robotunu Aç <ArrowRight size={14} />
+              </Link>
+            </div>
+          </div>
+
+          <div className="flex flex-col justify-between rounded-3xl border border-rose-500/30 bg-gradient-to-br from-rose-950/90 via-[#101526] to-[#090d16] p-6 text-white shadow-lg">
+            <div>
+              <span className="inline-block rounded-full bg-rose-400 px-3 py-1 text-[11px] font-extrabold text-[#090d16]">
+                3. GALAKSİ · EMLAK, KİRA ZAMMI &amp; TAPU HARCI
+              </span>
+              <h2 className="mt-3 font-display text-2xl font-bold md:text-3xl">
+                EmlakAI · TÜFE Kira Artış Oranı, Tapu Harcı (%4) &amp; Konut Kredisi
+              </h2>
+              <p className="mt-2 text-xs leading-relaxed text-slate-300 md:text-sm">
+                Konut ve iş yeri için <strong>TÜİK 12 aylık TÜFE yasal kira zammını</strong>, ev/arsa satışında{" "}
+                <strong>%2 alıcı + %2 satıcı tapu harcını</strong>, <strong>120 ay konut kredisi taksitini</strong> ve{" "}
+                <strong>Milli Emlak Hazine arsası</strong> ihalelerini inceleyin.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-1.5">
+                {EMLAK_GUIDES.slice(0, 4).map((guide) => (
+                  <Link
+                    key={guide.id}
+                    href={`/emlak-ai/${guide.slug}`}
+                    className="rounded-lg border border-white/15 bg-white/5 px-2.5 py-1 text-[11px] font-bold text-rose-200 transition hover:bg-white/15"
+                  >
+                    {guide.shortTitle} →
+                  </Link>
+                ))}
+              </div>
+            </div>
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/15 pt-4">
+              <span className="text-xs font-semibold text-rose-300">TÜİK TÜFE · WebTapu · Milli Emlak</span>
+              <Link
+                href="/emlak-ai"
+                className="inline-flex items-center gap-2 rounded-xl bg-rose-400 px-5 py-2.5 text-xs font-extrabold text-[#090d16] transition hover:opacity-95"
+              >
+                Kira &amp; Tapu Robotunu Aç <ArrowRight size={14} />
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* 3. Doğrudan Ana Sayfada Çalışan İnteraktif Kart Cüzdanım & Puan Hesaplayıcı */}
       <PuanWalletCalculator />
 
-      {/* 4. 4 Galaksi Kümesi & Tüm Yapay Zekâ Araçları (Tutarlı Üst Başlık Mimarisi) */}
+      {/* 4. 5 Galaksi Kümesi & Tüm Yapay Zekâ Araçları (Tutarlı Üst Başlık Mimarisi) */}
       <section id="araclar" className="section-wrap mt-12" aria-labelledby="home-tools-heading">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <span className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-muted">
-              <Orbit size={15} /> ÜRETİR EVRENİ · 4 ANA GALAKSİ KÜMESİ
+              <Orbit size={15} /> ÜRETİR EVRENİ · 5 ANA GALAKSİ KÜMESİ
             </span>
             <h2 id="home-tools-heading" className="mt-1 font-display text-3xl font-bold tracking-tight md:text-4xl">
               Galaksi Kümeleri &amp; Canlı Hesaplama Masaları
@@ -293,11 +391,12 @@ export function HomeCommandHub() {
 
           <div className="flex flex-wrap gap-2">
             {[
-              { id: "all", label: "Tüm Evren (4 Galaksi)" },
-              { id: "yardim-tasarruf", label: "1. Yardım, Teşvik & Tasarruf" },
-              { id: "memur-kariyer", label: "2. Memur, Kariyer & Kamu" },
-              { id: "finans-gundem", label: "3. Finans, Emlak & Gündem" },
-              { id: "teknoloji-uretim", label: "4. Teknoloji, Spor & Oyun" },
+              { id: "all", label: "Tüm Evren (5 Galaksi)" },
+              { id: "yardim-tasarruf", label: "1. Yardım & Tasarruf" },
+              { id: "memur-kariyer", label: "2. Memur & Kariyer" },
+              { id: "emlak-insaat", label: "3. Emlak & İnşaat" },
+              { id: "finans-gundem", label: "4. Finans & Gündem" },
+              { id: "teknoloji-uretim", label: "5. Teknoloji & Oyun" },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -378,8 +477,8 @@ export function HomeCommandHub() {
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-muted">
               Üretir&apos;de yayımlanan hiçbir veri kaynağından bağımsız üretilmez. Her devlet teşviki, kamu personeli
-              ilanı, kredi kartı kampanyası, döviz/altın kuru ve taşınmaz analizi birincil resmî bağlantısıyla birlikte
-              sunulur.
+              ilanı, inşaat birim maliyeti, kira/tapu hesabı, kredi kartı kampanyası ve döviz/altın kuru birincil resmî
+              bağlantısıyla birlikte sunulur.
             </p>
           </div>
 
@@ -399,10 +498,11 @@ export function HomeCommandHub() {
             <div className="flex flex-wrap gap-4 font-semibold">
               <Link href="/tesvik-ai" className="underline">TeşvikAI Aile Yardımları</Link>
               <Link href="/memur-ai" className="underline">MemurAI Kamu İlanları</Link>
-              <Link href="/hakkimizda" className="underline">Hakkımızda &amp; Yayın İlkeleri</Link>
-              <Link href="/gizlilik-politikasi" className="underline">Gizlilik ve Çerez Politikası</Link>
-              <Link href="/kullanim-kosullari" className="underline">Kullanım Koşulları &amp; Yasal Uyarı</Link>
-              <Link href="/iletisim" className="underline">İletişim &amp; Reklam</Link>
+              <Link href="/insaat-ai" className="underline">İnşaatAI Maliyet &amp; İmar</Link>
+              <Link href="/emlak-ai" className="underline">EmlakAI Kira &amp; Tapu</Link>
+              <Link href="/hakkimizda" className="underline">Hakkımızda</Link>
+              <Link href="/gizlilik-politikasi" className="underline">Gizlilik Politikası</Link>
+              <Link href="/kullanim-kosullari" className="underline">Kullanım Koşulları</Link>
             </div>
             <span>Türkiye üretir, gençler yetişir.</span>
           </div>

@@ -26,8 +26,58 @@ const statePath = path.join(dataDir, "channel-state.json");
 const panelToken = process.env.PANEL_TOKEN || "";
 const port = Number(process.env.PORT || 3217);
 const runOnce = process.env.RUN_ONCE === "1";
+const forcePublish = process.env.FORCE_PUBLISH === "1";
 const tgBotToken = process.env.TELEGRAM_BOT_TOKEN || "";
 const tgChatId = process.env.TELEGRAM_CHAT_ID || "995164733";
+const ghToken = process.env.GITHUB_TOKEN || "";
+const ghRepo = process.env.GITHUB_REPOSITORY || "thezencirs/uretir-com";
+const ghRunId = process.env.GITHUB_RUN_ID || "";
+let qrWaitTimeout = null;
+
+async function publishLiveTelemetry(payload) {
+  if (!ghToken || !ghRepo) return;
+  const branch = "wa-qr-live";
+  const filePath = "qr-live.json";
+  const headers = {
+    Authorization: `Bearer ${ghToken}`,
+    Accept: "application/vnd.github+json",
+    "Content-Type": "application/json",
+    "User-Agent": "Uretir-WhatsApp-Publisher/3.0",
+  };
+  try {
+    const refRes = await fetch(`https://api.github.com/repos/${ghRepo}/git/ref/heads/${branch}`, { headers });
+    if (refRes.status === 404) {
+      const mainRes = await fetch(`https://api.github.com/repos/${ghRepo}/git/ref/heads/main`, { headers });
+      if (mainRes.ok) {
+        const mainData = await mainRes.json();
+        await fetch(`https://api.github.com/repos/${ghRepo}/git/refs`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ ref: `refs/heads/${branch}`, sha: mainData.object.sha }),
+        });
+      }
+    }
+    let existingSha = undefined;
+    const fileRes = await fetch(`https://api.github.com/repos/${ghRepo}/contents/${filePath}?ref=${branch}`, { headers });
+    if (fileRes.ok) {
+      const fileData = await fileRes.json();
+      existingSha = fileData.sha;
+    }
+    const bodyObj = {
+      message: `chore(wa-telemetry): ${payload.status || "update"} [skip ci]`,
+      content: Buffer.from(JSON.stringify({ runId: ghRunId, updatedAt: new Date().toISOString(), ...payload }, null, 2)).toString("base64"),
+      branch,
+      ...(existingSha ? { sha: existingSha } : {}),
+    };
+    await fetch(`https://api.github.com/repos/${ghRepo}/contents/${filePath}`, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(bodyObj),
+    });
+  } catch (err) {
+    console.warn("Telemetry sync uyarısı:", err?.message || err);
+  }
+}
 
 function resolveBrowserExecutable() {
   if (process.env.PUPPETEER_EXECUTABLE_PATH && existsSync(process.env.PUPPETEER_EXECUTABLE_PATH)) {
@@ -266,7 +316,9 @@ client.on("qr", async (value) => {
   }
 });
 client.on("authenticated", () => {
+  if (qrWaitTimeout) { clearTimeout(qrWaitTimeout); qrWaitTimeout = null; }
   qrImage = "";
+  publishLiveTelemetry({ status: "authenticated", message: "WhatsApp oturumu doğrulandı." }).catch(() => {});
   connectionStatus = "Oturum doğrulandı; kanallar hazırlanıyor";
   console.log("WhatsApp oturumu doğrulandı.");
   const checkHydrated = async (attempt = 0) => {
@@ -309,12 +361,14 @@ client.on("disconnected", (reason) => {
   setTimeout(() => process.exit(1), 1000);
 });
 client.on("ready", async () => {
+  if (qrWaitTimeout) { clearTimeout(qrWaitTimeout); qrWaitTimeout = null; }
   ready = true;
   qrImage = "";
   connectionStatus = "Bağlandı. Altı Üretir kanalı fotoğraflı ve grafikli otomatik yayın modunda.";
-  console.log(`Hazır. ${targets.map((target) => target.name).join(", ")} için ${runOnce ? "tek seferlik" : "sürekli"} kontrol başlıyor.`);
+  console.log(`Hazır. ${targets.map((target) => target.name).join(", ")} için ${runOnce ? "tek seferlik" : "sürekli"} kontrol başlıyor (force=${forcePublish}).`);
   await new Promise((resolve) => setTimeout(resolve, 3500));
-  await poll();
+  await poll(forcePublish);
+  await publishLiveTelemetry({ status: "completed", targets: targetStatus });
   if (runOnce) {
     await new Promise((resolve) => setTimeout(resolve, 2500));
     await client.destroy();
@@ -834,10 +888,17 @@ async function publishQueue(target, channel, state, force = false) {
   const own = state[target.key] || {},
     sentFingerprints = Array.isArray(own.sentFingerprints) ? own.sentFingerprints : [],
     seen = new Set(sentFingerprints);
-  const unseen = force
+  let unseen = force
     ? items.filter((item) => item?.body)
     : items.filter((item) => item?.fingerprint && item?.body && !seen.has(item.fingerprint));
-  if (!unseen.length) return { sent: false, status: "daha önce gönderilmemiş yeni içerik yok" };
+  let wrappedQueue = false;
+  if (!unseen.length) {
+    const recentTwo = new Set(sentFingerprints.slice(-2));
+    unseen = items.filter((item) => item?.body && !recentTwo.has(item.fingerprint));
+    if (!unseen.length) unseen = items.filter((item) => item?.body);
+    wrappedQueue = true;
+  }
+  if (!unseen.length) return { sent: false, status: "yayınlanabilir içerik bulunamadı" };
   const groupOf = (item) => item.bank || item.brand || item.source || item.city || "";
   const selected = unseen.find((item) => groupOf(item) !== own.lastGroup && item.category !== own.lastCategory) || unseen[0];
   const messageId = await sendMessage(channel, selected.body, target, selected),
@@ -885,6 +946,22 @@ async function poll(forceRequest = false) {
   }
 }
 
+async function clearChromiumLocks(dir) {
+  try {
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const full = path.join(dir, entry.name);
+      if (entry.name.startsWith("Singleton") || entry.name === "lockfile") {
+        await fs.rm(full, { recursive: true, force: true }).catch(() => {});
+      } else if (entry.isDirectory()) {
+        await clearChromiumLocks(full);
+      }
+    }
+  } catch {}
+}
+
 await fs.mkdir(dataDir, { recursive: true });
+await clearChromiumLocks(dataDir);
+await publishLiveTelemetry({ status: "initializing", message: "WhatsApp istemcisi başlatılıyor..." });
 client.initialize();
 

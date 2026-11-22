@@ -62,7 +62,8 @@ jobs:
               -out /tmp/whatsapp-state.tar.gz \
               -pass env:WA_STATE_KEY
             tar -xzf /tmp/whatsapp-state.tar.gz -C whatsapp-bot
-            echo "Encrypted WhatsApp session restored."
+            find whatsapp-bot/data \( -name "Singleton*" -o -name "lockfile" -o -name "*.lock" \) -exec rm -rf {} + 2>/dev/null || true
+            echo "Encrypted WhatsApp session restored and singleton locks cleared."
           else
             echo "No prior session found. A QR code will be printed below; scan it once from WhatsApp > Linked devices."
           fi
@@ -106,6 +107,7 @@ jobs:
           test -n "$WA_STATE_KEY"
           if [ -d whatsapp-bot/data ]; then
             find whatsapp-bot/data -type d \( -name Cache -o -name "Code Cache" -o -name GPUCache \) -prune -exec rm -rf {} + 2>/dev/null || true
+            find whatsapp-bot/data \( -name "Singleton*" -o -name "lockfile" -o -name "*.lock" \) -exec rm -rf {} + 2>/dev/null || true
             tar -czf /tmp/whatsapp-state.tar.gz -C whatsapp-bot data
             openssl enc -aes-256-cbc -salt -pbkdf2 \
               -in /tmp/whatsapp-state.tar.gz \

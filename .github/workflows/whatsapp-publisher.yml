@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: "7,37 * * * *"
   workflow_dispatch:
+    inputs:
+      force_publish:
+        description: "Zaman penceresi beklemeden 6 kanala anında yayın gönder"
+        required: false
+        default: "1"
   workflow_run:
     workflows: ["Production smoke checks"]
     types: [completed]
@@ -14,7 +19,7 @@ on:
       - "whatsapp-bot/package.json"
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: whatsapp-six-channel-publisher
@@ -35,8 +40,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: whatsapp-bot/package-lock.json
 
       - name: Restore encrypted WhatsApp session cache
         id: restore-wa
@@ -54,28 +57,46 @@ jobs:
           test -n "$WA_STATE_KEY"
           mkdir -p whatsapp-bot/data
           if [ -s whatsapp-bot/.autonomous-state.enc ]; then
-            openssl enc -d -aes-256-cbc -pbkdf2               -in whatsapp-bot/.autonomous-state.enc               -out /tmp/whatsapp-state.tar.gz               -pass env:WA_STATE_KEY
+            openssl enc -d -aes-256-cbc -pbkdf2 \
+              -in whatsapp-bot/.autonomous-state.enc \
+              -out /tmp/whatsapp-state.tar.gz \
+              -pass env:WA_STATE_KEY
             tar -xzf /tmp/whatsapp-state.tar.gz -C whatsapp-bot
             echo "Encrypted WhatsApp session restored."
           else
             echo "No prior session found. A QR code will be printed below; scan it once from WhatsApp > Linked devices."
           fi
 
-      - name: Install publisher dependencies
+      - name: Install publisher dependencies (including sharp for visual cards)
         working-directory: whatsapp-bot
-        run: npm install --omit=dev
+        run: npm install --no-package-lock --omit=dev
 
       - name: Publish one autonomous cycle
         working-directory: whatsapp-bot
         env:
           RUN_ONCE: "1"
+          FORCE_PUBLISH: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && '1' || '0' }}
           BOT_DATA_DIR: "./data"
           SITE_URL: "https://www.uretir.com"
           POLL_MINUTES: "10"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
         run: |
           export PUPPETEER_EXECUTABLE_PATH="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
           test -n "$PUPPETEER_EXECUTABLE_PATH"
           npm start
+
+      - name: Upload QR & Channel Cards Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: whatsapp-publisher-state-${{ github.run_id }}
+          path: |
+            reports/social-media/whatsapp-qr.png
+            reports/social-media/whatsapp-cards/*.png
+          if-no-files-found: ignore
+          retention-days: 3
 
       - name: Encrypt updated session and delivery state
         if: always()
@@ -86,7 +107,10 @@ jobs:
           if [ -d whatsapp-bot/data ]; then
             find whatsapp-bot/data -type d \( -name Cache -o -name "Code Cache" -o -name GPUCache \) -prune -exec rm -rf {} + 2>/dev/null || true
             tar -czf /tmp/whatsapp-state.tar.gz -C whatsapp-bot data
-            openssl enc -aes-256-cbc -salt -pbkdf2               -in /tmp/whatsapp-state.tar.gz               -out whatsapp-bot/.autonomous-state.enc               -pass env:WA_STATE_KEY
+            openssl enc -aes-256-cbc -salt -pbkdf2 \
+              -in /tmp/whatsapp-state.tar.gz \
+              -out whatsapp-bot/.autonomous-state.enc \
+              -pass env:WA_STATE_KEY
           fi
 
       - name: Save encrypted WhatsApp session cache

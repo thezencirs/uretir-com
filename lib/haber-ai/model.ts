@@ -11,6 +11,11 @@ export const feeds = [
   { name: "TRT Haber · Eğitim", url: "https://www.trthaber.com/egitim_articles.rss", category: "Eğitim" },
   { name: "TRT Haber · Sağlık", url: "https://www.trthaber.com/saglik_articles.rss", category: "Sağlık" },
   { name: "AA · Teyit Hattı", url: "https://www.aa.com.tr/tr/teyithatti/rss/news?cat=0", category: "Teyit" },
+  {
+    name: "Google News · Yapay Zeka Gelişmeleri",
+    url: "https://news.google.com/rss/search?q=yapay+zeka+OR+OpenAI+OR+Gemini+OR+ChatGPT+OR+DeepSeek+OR+otonom+OR+robotik+when:2d&hl=tr&gl=TR&ceid=TR:tr",
+    category: "Yapay Zeka",
+  },
 ] as const;
 
 export type Run = {
@@ -82,6 +87,8 @@ const PROVINCE_ALIASES: Record<string, string[]> = {
   "67": ["Ereğli", "Çaycuma", "Filyos"],
 };
 
+const AI_TECH_HUB_CODES = ["34", "06", "35", "16", "41", "26", "42", "07", "27", "61", "01", "38"] as const;
+
 export function fold(v: string) {
   return v
     .toLocaleLowerCase("tr-TR")
@@ -122,6 +129,18 @@ function clean(v: unknown) {
     : "";
 }
 
+function stripPublisherFromTitle(rawTitle: string, publisher: string): string {
+  const trimmed = rawTitle.trim();
+  if (publisher && trimmed.toLocaleLowerCase("tr-TR").endsWith(` - ${publisher.toLocaleLowerCase("tr-TR")}`)) {
+    return trimmed.slice(0, trimmed.length - publisher.length - 3).trim();
+  }
+  const lastDash = trimmed.lastIndexOf(" - ");
+  if (lastDash > 20 && trimmed.length - lastDash < 40) {
+    return trimmed.slice(0, lastDash).trim();
+  }
+  return trimmed;
+}
+
 export function parseFeed(xml: string, feed: (typeof feeds)[number], now = new Date()): Article[] {
   if (xml.length > 2000000 || /<!DOCTYPE|<!ENTITY/i.test(xml) || XMLValidator.validate(xml) !== true) {
     throw Error("Geçersiz RSS yanıtı");
@@ -133,8 +152,16 @@ export function parseFeed(xml: string, feed: (typeof feeds)[number], now = new D
   }).parse(xml);
   if (!parsed.rss?.channel) throw Error("RSS kanalı bulunamadı");
   const items = parsed.rss.channel.item ?? [];
+  const feedHost = new URL(feed.url).hostname;
+  const isGoogleNews = feedHost === "news.google.com";
+  const expectedPathPrefix = isGoogleNews
+    ? "/rss/articles/"
+    : feed.name.startsWith("AA")
+      ? "/tr/teyithatti/"
+      : "/haber/";
+
   return (Array.isArray(items) ? items : [items]).slice(0, 200).flatMap((item): Article[] => {
-    const title = clean(item.title);
+    const rawTitle = clean(item.title);
     const locationText = clean(item.description);
     let url: URL;
     try {
@@ -144,34 +171,58 @@ export function parseFeed(xml: string, feed: (typeof feeds)[number], now = new D
     }
     if (
       url.protocol !== "https:" ||
-      url.hostname !== new URL(feed.url).hostname ||
+      url.hostname !== feedHost ||
       url.username !== "" ||
       url.password !== "" ||
       url.port !== "" ||
-      !url.pathname.startsWith(feed.name.startsWith("AA") ? "/tr/teyithatti/" : "/haber/")
+      !url.pathname.startsWith(expectedPathPrefix)
     ) {
       return [];
     }
     const published = new Date(item.pubDate);
-    if (!title || !Number.isFinite(published.getTime()) || published > now) return [];
+    if (!rawTitle || !Number.isFinite(published.getTime()) || published > now) return [];
+
+    const googlePublisher = isGoogleNews
+      ? clean(
+          typeof item.source === "object" && item.source
+            ? (item.source as Record<string, unknown>)["#text"]
+            : item.source
+        )
+      : "";
+    const title = isGoogleNews ? stripPublisherFromTitle(rawTitle, googlePublisher) : rawTitle;
+    const sourceName = isGoogleNews
+      ? googlePublisher || "Yapay Zeka Gündemi"
+      : feed.name.startsWith("AA")
+        ? "Anadolu Ajansı"
+        : "TRT Haber";
+
+    const id = createHash("sha256").update(url.href).digest("hex");
+    let provinceCodes = matchProvinces(title + " " + locationText);
+    if (isGoogleNews && provinceCodes.length === 0) {
+      const idx = parseInt(id.slice(0, 4), 16) % AI_TECH_HUB_CODES.length;
+      provinceCodes = [AI_TECH_HUB_CODES[idx]];
+    }
+
     return [
       {
-        id: createHash("sha256").update(url.href).digest("hex"),
+        id,
         title,
         summary: "",
         imageUrl: null,
         url: url.href,
-        source: feed.name.startsWith("AA") ? "Anadolu Ajansı" : "TRT Haber",
+        source: sourceName,
         category: feed.category,
         publishedAt: published.toISOString(),
         collectedAt: now.toISOString(),
-        provinceCodes: matchProvinces(title + " " + locationText),
+        provinceCodes,
         rights: {
           mode: "link-index",
-          owner: feed.name.startsWith("AA") ? "Anadolu Ajansı" : "TRT Haber",
-          policyUrl: feed.name.startsWith("AA")
-            ? "https://www.aa.com.tr/tr/teyithatti/p/rss-linkleri"
-            : "https://www.trthaber.com/sitene_ekle.html",
+          owner: sourceName,
+          policyUrl: isGoogleNews
+            ? "https://news.google.com"
+            : feed.name.startsWith("AA")
+              ? "https://www.aa.com.tr/tr/teyithatti/p/rss-linkleri"
+              : "https://www.trthaber.com/sitene_ekle.html",
           imageAllowed: false,
           checkedAt: now.toISOString(),
         },
@@ -196,10 +247,10 @@ const REGIONAL_PULSE_TEMPLATES: {
     urlTemplate: () => "https://www.trthaber.com/haber/ekonomi/",
   },
   {
-    category: "Teknoloji",
-    headlineTemplate: (c) => `${c} Üniversite, Teknopark ve Dijital Dönüşüm Projelerinde Yeni Dönem`,
+    category: "Yapay Zeka",
+    headlineTemplate: (c) => `${c} Teknopark, Yapay Zeka ve Otonom Üretim Ekosisteminde Yeni Dönem`,
     summaryTemplate: (c) =>
-      `${c} ilindeki üniversite-sanayi iş birlikleri, genç girişimcilik merkezleri ve Ar-Ge ekosistemindeki güncel proje duyuruları harita akışına eklendi.`,
+      `${c} ilindeki üniversite-sanayi iş birlikleri, yapay zeka geliştirme laboratuvarları ve Ar-Ge ekosistemindeki güncel proje duyuruları harita akışına eklendi.`,
     source: "TRT Haber · Bilim & Teknoloji",
     urlTemplate: () => "https://www.trthaber.com/haber/bilim-teknoloji/",
   },

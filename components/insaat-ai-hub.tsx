@@ -16,6 +16,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { AdSlot } from "@/components/google-monetization";
+import { LiveSectorNews } from "@/components/live-sector-news";
 import { JsonLd } from "@/components/json-ld";
 import { INSAAT_GUIDES } from "@/lib/insaat-emlak-data";
 
@@ -488,6 +489,17 @@ export function InsaatAIHub() {
           ))}
         </div>
       </section>
+
+      <div className="section-wrap mt-10">
+        <LiveSectorNews
+          defaultSector="insaat-ai"
+          showTabs={false}
+          title="Canlı TOKİ, Kentsel Dönüşüm & İnşaat Sektörü Gelişmeleri"
+          subtitle="Yarısı Bizden kampanyası, TOKİ sosyal konut kuraları ve inşaat malzeme endeksi canlı haber akışı."
+          limit={6}
+          sectionId="insaat-live-news"
+        />
+      </div>
 
       {/* Google AdSense Orta Reklam Yuvası */}
       <div className="section-wrap my-8">

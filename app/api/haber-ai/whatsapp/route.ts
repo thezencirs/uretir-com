@@ -1,71 +1,177 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
-import { newsPool } from "@/lib/haber-ai/store";
+import { getNewsSnapshot, newsPool } from "@/lib/haber-ai/store";
 import { buildBulletin, whatsappChannel } from "@/lib/haber-ai/bulletin";
 import { newsDay } from "@/lib/haber-ai/dates";
 import type { Article } from "@/lib/haber-ai/model";
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-const json = (body: unknown, status = 200) => NextResponse.json(body, { status, headers: { "Cache-Control": "no-store" } });
-function authorized(r: NextRequest) { return [process.env.CRON_SECRET,process.env.WHATSAPP_BOT_SECRET].some(token=>Boolean(token && r.headers.get("authorization") === `Bearer ${token}`)); }
+
+const json = (body: unknown, status = 200) =>
+  NextResponse.json(body, { status, headers: { "Cache-Control": "no-store" } });
+
+function authorized(r: NextRequest) {
+  return [process.env.CRON_SECRET, process.env.WHATSAPP_BOT_SECRET].some((token) =>
+    Boolean(token && r.headers.get("authorization") === `Bearer ${token}`)
+  );
+}
+
 const selection = `SELECT a.id,a.payload FROM haber_articles a WHERE a.published_at <= NOW() AND (a.published_at AT TIME ZONE 'Europe/Istanbul')::date = (NOW() AT TIME ZONE 'Europe/Istanbul')::date AND COALESCE(a.payload->>'hidden','false') <> 'true' AND jsonb_array_length(a.payload->'provinceCodes') > 0 AND NOT EXISTS (SELECT 1 FROM haber_deliveries d WHERE d.article_id=a.id) ORDER BY a.published_at DESC LIMIT 5`;
-const delay=(ms:number)=>new Promise(resolve=>setTimeout(resolve,ms));
-async function readBulletinRows(){
- let last:unknown;
- for(let attempt=0;attempt<3;attempt++){
-  const p=newsPool();
-  try{return await p.query<{id:string;payload:Article}>(selection);}
-  catch(error){last=error;}
-  finally{await p.end().catch(()=>undefined);}
-  await delay(200*(attempt+1));
- }
- throw last;
-}
-export async function GET(request: NextRequest) {
- if (!authorized(request)) return json({error:"Yetkisiz erişim."},401);
- try {
-  const r=await readBulletinRows();
-  const articles=r.rows.map(a=>a.payload);
-  const body=buildBulletin(articles,newsDay());
-  const lead=articles[0];
-  const cardParams=new URLSearchParams({
-   tool:"haber-ai",
-   format:"png",
-   title:(lead?.title||"81 İl Doğrulanmış Gündem Bülteni").slice(0,80),
-   subtitle:`HaberAI · ${articles.length||5} Doğrulanmış Haber & İl Haritası Özeti`,
-   price:`${articles.length||5} Manşet`,
-   badge:"HABERAI · 81 İL GÜNDEM RADARI",
-   s1l:"Kapsam",
-   s1v:"81 İl Haritalı",
-   s2l:"Doğrulama",
-   s2v:"Çoklu Resmî Kaynak",
-  });
-  return json({channel:whatsappChannel,body,image_url:`https://www.uretir.com/api/visual-card?${cardParams.toString()}`,count:r.rowCount});
- }
- catch { return json({error:"Bülten okunamadı."},503); }
-}
-export async function POST(request: NextRequest) {
- if (!authorized(request)) return json({error:"Yetkisiz erişim."},401);
- let input;
- try { const text=await request.text(); if(text.length>2000)return json({error:"İstek çok büyük."},413); input=JSON.parse(text); } catch {return json({error:"Geçersiz istek."},400);}
- if(!input || !["claim","ack"].includes(input.action))return json({error:"Geçersiz işlem."},400);
- const p=newsPool(); const c=await p.connect();
- try {
-  if(input.action==="ack") {
-   if(!/^[a-f0-9-]{36}$/.test(input.claimId??"")||typeof input.messageId!=="string"||!input.messageId||input.messageId.length>500)return json({error:"Gönderim kimliği gerekli."},400);
-   const r=await c.query("UPDATE haber_deliveries SET status='sent',message_id=$2,sent_at=NOW() WHERE claim_id=$1 AND status='sending' RETURNING article_id",[input.claimId,input.messageId]);
-   return json({sent:r.rowCount});
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function readBulletinRows() {
+  let last: unknown;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const p = newsPool();
+    try {
+      return await p.query<{ id: string; payload: Article }>(selection);
+    } catch (error) {
+      last = error;
+    } finally {
+      await p.end().catch(() => undefined);
+    }
+    await delay(200 * (attempt + 1));
   }
-  await c.query("BEGIN");
-  await c.query("SELECT pg_advisory_xact_lock(81071002)");
-  const pending=await c.query("SELECT 1 FROM haber_deliveries WHERE status='sending' LIMIT 1");
-  if(pending.rowCount){await c.query("ROLLBACK");return json({error:"Önceki gönderimin sonucu doğrulanmalı."},409);}
-  const r=await c.query<{id:string;payload:Article}>(selection);
-  if(!r.rowCount){await c.query("COMMIT");return json({bulletin:null});}
-  const claimId=randomUUID();
-  await c.query("INSERT INTO haber_deliveries(article_id,claim_id) SELECT unnest($1::text[]),$2::uuid",[r.rows.map(a=>a.id),claimId]);
-  const body=buildBulletin(r.rows.map(a=>a.payload),newsDay());
-  await c.query("COMMIT");
-  return json({bulletin:{claimId,body,channel_url:whatsappChannel}});
- } catch {await c.query("ROLLBACK").catch(()=>undefined);return json({error:"Bülten işlemi başarısız."},503);} finally {c.release();await p.end();}
+  throw last;
+}
+
+export async function GET(request: NextRequest) {
+  if (!authorized(request)) return json({ error: "Yetkisiz erişim." }, 401);
+  try {
+    let articles: Article[] = [];
+    try {
+      const r = await readBulletinRows();
+      articles = r.rows.map((a) => a.payload);
+    } catch {
+      articles = [];
+    }
+
+    const snapshot = await getNewsSnapshot(false);
+    const today = newsDay();
+    const aiArticles = snapshot.articles
+      .filter((a) => !a.hidden && a.category === "Yapay Zeka" && newsDay(a.publishedAt) === today)
+      .slice(0, 3);
+
+    if (articles.length < 3) {
+      const fallbackCity = snapshot.articles
+        .filter((a) => !a.hidden && a.provinceCodes.length > 0 && newsDay(a.publishedAt) === today)
+        .slice(0, 5);
+      const seen = new Set(articles.map((a) => a.id));
+      for (const item of fallbackCity) {
+        if (!seen.has(item.id)) {
+          articles.push(item);
+          seen.add(item.id);
+        }
+        if (articles.length >= 5) break;
+      }
+    }
+
+    for (const aiItem of aiArticles.slice(0, 2)) {
+      if (!articles.some((a) => a.id === aiItem.id)) {
+        articles.unshift(aiItem);
+      }
+    }
+
+    let body = buildBulletin(articles.slice(0, 6), today);
+    if (aiArticles.length > 0 && body && !body.includes("🤖 *YAPAY ZEKA")) {
+      const aiBlock = [
+        "🤖 *YAPAY ZEKA & TEKNOLOJİ GELİŞMELERİ:*",
+        ...aiArticles.slice(0, 2).map((a) => `• *${a.title}* (${a.source})\n  ${a.url}`),
+      ].join("\n");
+      body = `${body}\n\n${aiBlock}`;
+    }
+
+    const slot = Math.floor(Date.now() / (2 * 3600_000));
+    const fingerprint = createHash("sha256")
+      .update(`${today}:${slot}:${articles.map((a) => a.id).join(",")}`)
+      .digest("hex")
+      .slice(0, 24);
+
+    const lead = aiArticles[0] || articles[0];
+    const cardParams = new URLSearchParams({
+      tool: "haber-ai",
+      format: "png",
+      title: (lead?.title || "81 İl & Yapay Zeka Gündem Bülteni").slice(0, 80),
+      subtitle: `HaberAI · Yapay Zeka Gelişmeleri & 81 İl Doğrulanmış Gündem Özeti`,
+      price: `${articles.length || 5} Manşet`,
+      badge: "HABERAI · YAPAY ZEKA & 81 İL RADARI",
+      s1l: "Kapsam",
+      s1v: "Yapay Zeka + 81 İl",
+      s2l: "Doğrulama",
+      s2v: "Canlı Ajans & AI Akışı",
+    });
+
+    return json({
+      channel: whatsappChannel,
+      channel_url: whatsappChannel,
+      fingerprint,
+      body,
+      image_url: `https://www.uretir.com/api/visual-card?${cardParams.toString()}`,
+      count: articles.length,
+    });
+  } catch {
+    return json({ error: "Bülten okunamadı." }, 503);
+  }
+}
+
+export async function POST(request: NextRequest) {
+  if (!authorized(request)) return json({ error: "Yetkisiz erişim." }, 401);
+  let input;
+  try {
+    const text = await request.text();
+    if (text.length > 2000) return json({ error: "İstek çok büyük." }, 413);
+    input = JSON.parse(text);
+  } catch {
+    return json({ error: "Geçersiz istek." }, 400);
+  }
+  if (!input || !["claim", "ack"].includes(input.action)) return json({ error: "Geçersiz işlem." }, 400);
+  const p = newsPool();
+  const c = await p.connect();
+  try {
+    if (input.action === "ack") {
+      if (
+        !/^[a-f0-9-]{36}$/.test(input.claimId ?? "") ||
+        typeof input.messageId !== "string" ||
+        !input.messageId ||
+        input.messageId.length > 500
+      )
+        return json({ error: "Gönderim kimliği gerekli." }, 400);
+      const r = await c.query(
+        "UPDATE haber_deliveries SET status='sent',message_id=$2,sent_at=NOW() WHERE claim_id=$1 AND status='sending' RETURNING article_id",
+        [input.claimId, input.messageId]
+      );
+      return json({ sent: r.rowCount });
+    }
+    await c.query("BEGIN");
+    await c.query("SELECT pg_advisory_xact_lock(81071002)");
+    const pending = await c.query("SELECT 1 FROM haber_deliveries WHERE status='sending' LIMIT 1");
+    if (pending.rowCount) {
+      await c.query("ROLLBACK");
+      return json({ error: "Önceki gönderimin sonucu doğrulanmalı." }, 409);
+    }
+    const r = await c.query<{ id: string; payload: Article }>(selection);
+    if (!r.rowCount) {
+      await c.query("COMMIT");
+      return json({ bulletin: null });
+    }
+    const claimId = randomUUID();
+    await c.query("INSERT INTO haber_deliveries(article_id,claim_id) SELECT unnest($1::text[]),$2::uuid", [
+      r.rows.map((a) => a.id),
+      claimId,
+    ]);
+    const body = buildBulletin(
+      r.rows.map((a) => a.payload),
+      newsDay()
+    );
+    await c.query("COMMIT");
+    return json({ bulletin: { claimId, body, channel_url: whatsappChannel } });
+  } catch {
+    await c.query("ROLLBACK").catch(() => undefined);
+    return json({ error: "Bülten işlemi başarısız." }, 503);
+  } finally {
+    c.release();
+    await p.end();
+  }
 }

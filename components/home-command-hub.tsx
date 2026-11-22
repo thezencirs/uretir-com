@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, ArrowUpRight, Flame, Orbit, Search, ShieldCheck, Sparkles } from "lucide-react";
 import { PuanWalletCalculator } from "@/components/viral-calculators";
 import { AdSlot } from "@/components/google-monetization";
+import { LiveSectorNews } from "@/components/live-sector-news";
 import { JsonLd } from "@/components/json-ld";
 import { GALAXY_CLUSTERS, SUPPORT_PROGRAMS, RECRUITMENT_TRACKS } from "@/lib/tesvik-memur-data";
 import { EMLAK_GUIDES, INSAAT_GUIDES } from "@/lib/insaat-emlak-data";
@@ -461,6 +462,18 @@ export function HomeCommandHub() {
           ))}
         </div>
       </section>
+
+      {/* Canlı Yapay Zeka & 6 Sektör Otonom Haber Radarı */}
+      <div className="section-wrap mt-10">
+        <LiveSectorNews
+          defaultSector="yapay-zeka"
+          showTabs={true}
+          title="Yapay Zeka Gelişmeleri & Canlı Sektör Gündemi"
+          subtitle="Yapay zeka modelleri, yerli teknoloji, devlet teşvikleri, KPSS/memur alımı, TOKİ/inşaat ve emlak piyasasından saatlik canlı haber akışı."
+          limit={6}
+          sectionId="home-live-ai-news"
+        />
+      </div>
 
       {/* Google AdSense Leaderboard Slot */}
       <div className="section-wrap my-8">

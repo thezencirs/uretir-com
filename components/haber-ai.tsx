@@ -50,7 +50,7 @@ const REGIONS: { key: string; label: string; codes: string[] }[] = [
   },
 ];
 
-const CATEGORIES = ["", "Gündem", "Ekonomi", "Teknoloji", "Eğitim", "Yaşam", "Sağlık", "Teyit"] as const;
+const CATEGORIES = ["", "Yapay Zeka", "Gündem", "Ekonomi", "Teknoloji", "Eğitim", "Yaşam", "Sağlık", "Teyit"] as const;
 
 function buildHaberCardImage(a: Article) {
   if (a.imageUrl && a.rights?.imageAllowed) return a.imageUrl;

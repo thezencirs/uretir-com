@@ -15,6 +15,7 @@ import {
   Users,
 } from "lucide-react";
 import { AdSlot } from "@/components/google-monetization";
+import { LiveSectorNews } from "@/components/live-sector-news";
 import { JsonLd } from "@/components/json-ld";
 import {
   ONE_THIRD_THRESHOLD,
@@ -404,6 +405,17 @@ export function TesvikAIHub() {
           ))}
         </div>
       </section>
+
+      <div className="section-wrap mt-10">
+        <LiveSectorNews
+          defaultSector="tesvik-ai"
+          showTabs={false}
+          title="Canlı Aile Yardımı, KOSGEB & Sosyal Destek Duyuruları"
+          subtitle="Aile Bakanlığı, e-Devlet, KOSGEB ve İŞKUR kaynaklı saatlik güncellenen sosyal yardım ve hibe haberleri."
+          limit={6}
+          sectionId="tesvik-live-news"
+        />
+      </div>
 
       {/* Google AdSense Orta Reklam Yuvası */}
       <div className="section-wrap my-8">

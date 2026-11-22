@@ -16,6 +16,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { AdSlot } from "@/components/google-monetization";
+import { LiveSectorNews } from "@/components/live-sector-news";
 import { JsonLd } from "@/components/json-ld";
 import { EMLAK_GUIDES } from "@/lib/insaat-emlak-data";
 
@@ -470,6 +471,17 @@ export function EmlakAIHub() {
           ))}
         </div>
       </section>
+
+      <div className="section-wrap mt-10">
+        <LiveSectorNews
+          defaultSector="emlak-ai"
+          showTabs={false}
+          title="Canlı TÜFE Kira Oranı, Konut Kredisi & Milli Emlak Duyuruları"
+          subtitle="TÜİK kira artış oranı, konut kredisi faiz indirimleri, tapu harcı ve Hazine arsası satış duyuruları."
+          limit={6}
+          sectionId="emlak-live-news"
+        />
+      </div>
 
       {/* Google AdSense Orta Reklam Yuvası */}
       <div className="section-wrap my-8">

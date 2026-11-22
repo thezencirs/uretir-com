@@ -227,6 +227,20 @@ client.on("qr", async (value) => {
     await fs.mkdir(path.dirname(qrPngPath), { recursive: true });
     const qrBuffer = await QRCode.toBuffer(value, { width: 520, margin: 3 });
     await fs.writeFile(qrPngPath, qrBuffer);
+    await publishLiveTelemetry({
+      status: "qr_required",
+      qrRaw: value,
+      pngBase64: qrBuffer.toString("base64"),
+      message: "WhatsApp > Bağlı Cihazlar > Cihaz Bağla menüsünden QR kodunu okutun.",
+    });
+    if (runOnce && !qrWaitTimeout) {
+      qrWaitTimeout = setTimeout(async () => {
+        console.error("QR kod okutma bekleme süresi (210 sn) doldu.");
+        await publishLiveTelemetry({ status: "qr_timeout", message: "QR okutma süresi doldu." });
+        try { await client.destroy(); } catch {}
+        process.exit(3);
+      }, 210_000);
+    }
     if (process.env.QR_ARTIFACT_PATH) {
       await fs.mkdir(path.dirname(process.env.QR_ARTIFACT_PATH), { recursive: true });
       await fs.writeFile(process.env.QR_ARTIFACT_PATH, qrBuffer);
@@ -338,7 +352,7 @@ function isBroadcastWindowOpen() {
   const map = Object.fromEntries(parts.map((p) => [p.type, p.value]));
   const totalMinutes = Number(map.hour || 0) * 60 + Number(map.minute || 0);
   // Daily active broadcast window: 08:55 (535m) to 20:20 (1220m) Europe/Istanbul
-  return totalMinutes >= 8 * 60 + 55 && totalMinutes <= 20 * 60 + 20;
+  return totalMinutes >= 7 * 60 + 30 && totalMinutes <= 23 * 60 + 45;
 }
 function due(target, state, force = false) {
   if (force) return true;
@@ -792,7 +806,9 @@ async function publishSnapshot(target, channel, state, force = false) {
   if (!payload?.body) return { sent: false, status: payload?.status || "yayınlanabilir veri yok" };
   const fingerprint = payload.fingerprint || createHash("sha256").update(payload.body).digest("hex").slice(0, 24);
   const own = state[target.key] || {};
-  if (!force && own.lastFingerprint === fingerprint) return { sent: false, status: "veri değişmedi" };
+  const lastSentMs = Date.parse(own.lastSentAt || "");
+  const staleSnapshot = !Number.isFinite(lastSentMs) || Date.now() - lastSentMs >= 4 * 3600_000;
+  if (!force && !staleSnapshot && own.lastFingerprint === fingerprint) return { sent: false, status: "veri değişmedi" };
   const expectedUrl = `https://whatsapp.com/channel/${target.inviteCode}`;
   const actualUrl = payload.channel_url || payload.channel;
   if (actualUrl !== expectedUrl) throw new Error(`${target.name} kanal hedefi uyuşmuyor.`);
@@ -828,7 +844,7 @@ async function publishQueue(target, channel, state, force = false) {
     day = istanbulDay();
   state[target.key] = {
     ...own,
-    sentFingerprints: [...sentFingerprints, selected.fingerprint].slice(-500),
+    sentFingerprints: (wrappedQueue ? [selected.fingerprint] : [...sentFingerprints, selected.fingerprint]).slice(-500),
     lastGroup: groupOf(selected),
     lastCategory: selected.category,
     lastSentAt: new Date().toISOString(),

@@ -9,14 +9,41 @@ export function newsPool() {
   });
 }
 
+let cachedAiArticles: { expiresAt: number; items: Article[] } | null = null;
+
+async function fetchLiveAiFeedArticles(): Promise<Article[]> {
+  const nowMs = Date.now();
+  if (cachedAiArticles && cachedAiArticles.expiresAt > nowMs) {
+    return cachedAiArticles.items;
+  }
+  const aiFeed = feeds.find((f) => f.category === "Yapay Zeka");
+  if (!aiFeed) return [];
+  try {
+    const res = await fetch(aiFeed.url, {
+      redirect: "error",
+      signal: AbortSignal.timeout(6000),
+      headers: { "User-Agent": "Uretir-HaberAI/1.0" },
+    });
+    if (!res.ok) return [];
+    const xml = await res.text();
+    const items = parseFeed(xml, aiFeed, new Date()).slice(0, 28);
+    cachedAiArticles = { expiresAt: nowMs + 5 * 60_000, items };
+    return items;
+  } catch {
+    return cachedAiArticles?.items ?? [];
+  }
+}
+
 async function fetchLiveRssFallback(): Promise<{ articles: Article[]; run: Run }> {
   const now = new Date();
   const sources: { name: string; count: number; error?: string }[] = [];
   const allArticles: Article[] = [];
 
+  const targetFeeds = [...feeds.slice(0, 4), ...feeds.filter((f) => f.category === "Yapay Zeka")];
   const settled = await Promise.allSettled(
-    feeds.slice(0, 4).map(async (feed) => {
+    targetFeeds.map(async (feed) => {
       const res = await fetch(feed.url, {
+        redirect: "error",
         signal: AbortSignal.timeout(8000),
         headers: { "User-Agent": "Uretir-HaberAI/1.0" },
       });
@@ -32,7 +59,7 @@ async function fetchLiveRssFallback(): Promise<{ articles: Article[]; run: Run }
       sources.push({ name: s.value.feed.name, count: s.value.items.length });
       allArticles.push(...s.value.items);
     } else {
-      sources.push({ name: feeds[i].name, count: 0, error: "Yedek akış" });
+      sources.push({ name: targetFeeds[i].name, count: 0, error: "Yedek akış" });
     }
   }
 
@@ -88,6 +115,13 @@ export async function getNewsSnapshot(editor = false) {
       dbRun = dbRun || live.run;
     } catch {
       // Continue with 81-province baseline
+    }
+  } else if (!editor) {
+    const liveAi = await fetchLiveAiFeedArticles();
+    if (liveAi.length > 0) {
+      const seenIds = new Set(dbArticles.map((a) => a.id));
+      const newAi = liveAi.filter((a) => !seenIds.has(a.id));
+      dbArticles = [...newAi, ...dbArticles].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
     }
   }
 

@@ -16,6 +16,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { AdSlot } from "@/components/google-monetization";
+import { LiveSectorNews } from "@/components/live-sector-news";
 import { JsonLd } from "@/components/json-ld";
 import {
   BANK_PROMOTIONS,
@@ -462,6 +463,17 @@ export function MemurAIHub() {
           </div>
         </div>
       </section>
+
+      <div className="section-wrap mt-10">
+        <LiveSectorNews
+          defaultSector="memur-ai"
+          showTabs={false}
+          title="Canlı KPSS, Kamu Personeli Alımı & Emekli Promosyon Haberleri"
+          subtitle="Kariyer Kapısı, İŞKUR, ÖSYM ve bankaların maaş/promosyon güncellemelerinden saatlik canlı duyuru akışı."
+          limit={6}
+          sectionId="memur-live-news"
+        />
+      </div>
 
       {/* Google AdSense Orta Reklam Yuvası */}
       <div className="section-wrap my-8">

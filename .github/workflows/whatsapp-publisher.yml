@@ -9,6 +9,10 @@ on:
         description: "Zaman penceresi beklemeden 6 kanala anında yayın gönder"
         required: false
         default: "1"
+      reset_auth:
+        description: "Eski bozuk IndexedDB oturum anahtarlarını sıfırla ve temiz QR üret"
+        required: false
+        default: "0"
   workflow_run:
     workflows: ["Production smoke checks"]
     types: [completed]
@@ -63,6 +67,10 @@ jobs:
               -pass env:WA_STATE_KEY
             tar -xzf /tmp/whatsapp-state.tar.gz -C whatsapp-bot
             find whatsapp-bot/data \( -name "Singleton*" -o -name "lockfile" -o -name "*.lock" \) -exec rm -rf {} + 2>/dev/null || true
+            if [ "${{ inputs.reset_auth }}" = "1" ]; then
+              rm -rf whatsapp-bot/data/auth
+              echo "Old LocalAuth directory wiped for clean QR pairing."
+            fi
             echo "Encrypted WhatsApp session restored and singleton locks cleared."
           else
             echo "No prior session found. A QR code will be printed below; scan it once from WhatsApp > Linked devices."

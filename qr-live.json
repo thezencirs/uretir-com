@@ -1,6 +1,6 @@
 {
-  "runId": "45086189417",
-  "updatedAt": "2026-11-23T00:06:01.109Z",
-  "status": "qr_timeout",
-  "message": "QR okutma süresi doldu."
+  "runId": "45087080620",
+  "updatedAt": "2026-11-23T00:09:41.004Z",
+  "status": "initializing",
+  "message": "WhatsApp istemcisi başlatılıyor..."
 }

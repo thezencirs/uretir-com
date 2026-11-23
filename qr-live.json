@@ -1,6 +1,13 @@
 {
   "runId": "45088136584",
-  "updatedAt": "2026-11-23T00:21:08.346Z",
-  "status": "authenticated",
-  "message": "WhatsApp oturumu doğrulandı."
+  "updatedAt": "2026-11-23T00:21:43.245Z",
+  "status": "completed",
+  "targets": {
+    "haberai": "fotoğraflı özet gönderildi · 23.11.2026 03:21:18",
+    "finansai": "fotoğraflı özet gönderildi · 23.11.2026 03:21:21",
+    "puanai": "fotoğraflı içerik gönderildi · 23.11.2026 03:21:29",
+    "indirimai": "fotoğraflı özet gönderildi · 23.11.2026 03:21:33",
+    "arabaai": "fotoğraflı içerik gönderildi · 23.11.2026 03:21:38",
+    "evai": "fotoğraflı içerik gönderildi · 23.11.2026 03:21:42"
+  }
 }

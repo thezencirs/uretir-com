@@ -1,6 +1,6 @@
 {
   "runId": "45163162637",
-  "updatedAt": "2026-11-23T11:13:29.806Z",
-  "status": "initializing",
-  "message": "WhatsApp istemcisi başlatılıyor..."
+  "updatedAt": "2026-11-23T11:13:43.328Z",
+  "status": "authenticated",
+  "message": "WhatsApp oturumu doğrulandı."
 }

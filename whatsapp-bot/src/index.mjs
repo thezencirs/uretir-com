@@ -714,10 +714,51 @@ async function generateMagazineCardPngBuffer(target, body, item = {}) {
   return sharp(Buffer.from(svg)).png({ compressionLevel: 6 }).toBuffer();
 }
 
+function buildDailyAgendaFooter(targetKey) {
+  const nowStr = new Date().toLocaleDateString("tr-TR", { timeZone: "Europe/Istanbul", day: "numeric", month: "long", year: "numeric" });
+  const crossHooks = {
+    haberai: [
+      "🤖 *Canlı Yapay Zeka Gelişmeleri:* https://www.uretir.com/gelismeler",
+      "🎯 *MemurAI · KPSS & Kamu İşçisi İlanları:* https://www.uretir.com/memur-ai",
+    ],
+    finansai: [
+      "🍼 *TeşvikAI · Doğum Yardımı & 150.000 TL Evlilik Kredisi:* https://www.uretir.com/tesvik-ai",
+      "🏦 *Memur & Emekli Maaş Zammı + Promosyon:* https://www.uretir.com/memur-ai",
+    ],
+    puanai: [
+      "🏦 *En Yüksek Emekli Banka Promosyonu Tablosu:* https://www.uretir.com/memur-ai/emekli-banka-promosyonu-karsilastirma",
+      "🍼 *e-Devlet Aile Destek & Hibe Sorgulama:* https://www.uretir.com/tesvik-ai",
+    ],
+    indirimai: [
+      "💳 *PuanAI · Kart Puan & Nakit İade Hesapla:* https://www.uretir.com/puan-ai",
+      "🍼 *TeşvikAI · Kış Fatura & Aile Destekleri:* https://www.uretir.com/tesvik-ai",
+    ],
+    arabaai: [
+      "📊 *FinansAI · Canlı Döviz, Altın & Faiz:* https://www.uretir.com/finans-ai",
+      "💳 *PuanAI · Akaryakıt & MTV Kart Kampanyaları:* https://www.uretir.com/puan-ai",
+    ],
+    evai: [
+      "🏗️ *İnşaatAI · 120 m² Ev İnşaat Maliyeti & Yarısı Bizden:* https://www.uretir.com/insaat-ai",
+      "🏠 *EmlakAI · TÜFE Kira Zammı & %4 Tapu Harcı Robotu:* https://www.uretir.com/emlak-ai",
+    ],
+  };
+  const lines = crossHooks[targetKey] || crossHooks.haberai;
+  return [
+    "",
+    `📅 *${nowStr} Günün Çok Aranan Hesaplama Araçları:*`,
+    ...lines,
+    "🔔 *Fırsatları kaçırmamak için sağ üstten kanal bildirim zilini açın ve bu özeti arkadaşlarınıza iletin.*",
+  ].join("\n");
+}
+
 function enrichBodyText(target, rawBody, item = {}) {
   const text = String(rawBody || "").trim();
   if (!text) return text;
-  if (text.includes("Türkiye Üretir, Gençler Yetişir")) return text;
+  const agendaFooter = buildDailyAgendaFooter(target.key);
+  if (text.includes("Günün Çok Aranan Hesaplama Araçları")) return text;
+  if (text.includes("Türkiye Üretir, Gençler Yetişir")) {
+    return text + "\n" + agendaFooter;
+  }
 
   const lines = text.split("\n");
   if (target.key === "evai") {

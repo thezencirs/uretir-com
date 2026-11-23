@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { AdSlot } from "@/components/google-monetization";
 import { LiveSectorNews } from "@/components/live-sector-news";
+import { WhatsAppGrowthBanner } from "@/components/whatsapp-growth-banner";
 import { JsonLd } from "@/components/json-ld";
 import {
   ONE_THIRD_THRESHOLD,
@@ -405,6 +406,16 @@ export function TesvikAIHub() {
           ))}
         </div>
       </section>
+
+      <div className="section-wrap mt-10">
+        <WhatsAppGrowthBanner
+          toolSlug="tesvik-ai"
+          customHeading="e-Devlet Aile Yardımı Yatış Günleri ve Yeni Hibe Çağrıları Cebinize Gelsin"
+          customSubheading="Doğum yardımı, 150.000 TL faizsiz evlilik kredisi, SED, evde bakım maaşı ve doğalgaz desteği ödeme takvimini kaçırmamak için WhatsApp kanalımıza katılın."
+          pagePath="/tesvik-ai"
+          sectionId="tesvik-ai-wa-banner"
+        />
+      </div>
 
       <div className="section-wrap mt-10">
         <LiveSectorNews

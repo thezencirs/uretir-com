@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { AdSlot } from "@/components/google-monetization";
 import { LiveSectorNews } from "@/components/live-sector-news";
+import { WhatsAppGrowthBanner } from "@/components/whatsapp-growth-banner";
 import { JsonLd } from "@/components/json-ld";
 import { EMLAK_GUIDES } from "@/lib/insaat-emlak-data";
 
@@ -471,6 +472,16 @@ export function EmlakAIHub() {
           ))}
         </div>
       </section>
+
+      <div className="section-wrap mt-10">
+        <WhatsAppGrowthBanner
+          toolSlug="emlak-ai"
+          customHeading="Aylık TÜİK TÜFE Kira Artış Oranı, Konut Kredisi İndirimleri ve Milli Emlak Arsaları Cebinizde"
+          customSubheading="Her ayın 3'ünde açıklanan yasal kira zam oranı, WebTapu harç rehberi ve Hazine arsası satış duyurularını WhatsApp kanalımızdan takip edin."
+          pagePath="/emlak-ai"
+          sectionId="emlak-ai-wa-banner"
+        />
+      </div>
 
       <div className="section-wrap mt-10">
         <LiveSectorNews

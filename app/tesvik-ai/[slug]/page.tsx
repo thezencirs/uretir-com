@@ -5,6 +5,7 @@ import { ArrowLeft, CheckCircle2, ExternalLink, HandCoins, ShieldCheck } from "l
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { AdSlot } from "@/components/google-monetization";
 import { JsonLd } from "@/components/json-ld";
+import { WhatsAppGrowthBanner } from "@/components/whatsapp-growth-banner";
 import { SUPPORT_PROGRAMS, getSupportProgramBySlug } from "@/lib/tesvik-memur-data";
 
 type PageProps = { params: Promise<{ slug: string }> };
@@ -151,6 +152,17 @@ export default async function TesvikProgramDetailPage({ params }: PageProps) {
             </section>
           </div>
         </article>
+
+        <div className="mt-8">
+          <WhatsAppGrowthBanner
+            toolSlug="tesvik-ai"
+            customHeading={`${program.shortTitle} Duyuru ve Başvuru Takvimini WhatsApp'tan Takip Edin`}
+            customSubheading={`${program.summary} Yeni başvuru tarihleri açıklandığında bildirim almak için resmî WhatsApp kanalımıza katılın veya bu rehberi arkadaşınıza gönderin.`}
+            shareSummary={`📌 *${program.title}*\n${program.summary}`}
+            pagePath={`/tesvik-ai/${program.slug}`}
+            sectionId={`wa-subpage-${program.slug}`}
+          />
+        </div>
 
         {/* Diğer Aile Yardımları İç Link Ağı */}
         <section className="mt-10" aria-labelledby="other-supports-heading">

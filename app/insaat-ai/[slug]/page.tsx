@@ -5,6 +5,7 @@ import { ArrowLeft, CheckCircle2, ExternalLink, HardHat, ShieldCheck } from "luc
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { AdSlot } from "@/components/google-monetization";
 import { JsonLd } from "@/components/json-ld";
+import { WhatsAppGrowthBanner } from "@/components/whatsapp-growth-banner";
 import { INSAAT_GUIDES, getInsaatGuideBySlug } from "@/lib/insaat-emlak-data";
 
 type PageProps = { params: Promise<{ slug: string }> };
@@ -150,6 +151,17 @@ export default async function InsaatGuideDetailPage({ params }: PageProps) {
             </section>
           </div>
         </article>
+
+        <div className="mt-8">
+          <WhatsAppGrowthBanner
+            toolSlug="insaat-ai"
+            customHeading={`${guide.shortTitle} Duyuru ve Başvuru Takvimini WhatsApp'tan Takip Edin`}
+            customSubheading={`${guide.summary} Yeni başvuru tarihleri açıklandığında bildirim almak için resmî WhatsApp kanalımıza katılın veya bu rehberi arkadaşınıza gönderin.`}
+            shareSummary={`📌 *${guide.title}*\n${guide.summary}`}
+            pagePath={`/insaat-ai/${guide.slug}`}
+            sectionId={`wa-subpage-${guide.slug}`}
+          />
+        </div>
 
         <section className="mt-10" aria-labelledby="other-insaat-heading">
           <h2 id="other-insaat-heading" className="font-display text-2xl font-bold">

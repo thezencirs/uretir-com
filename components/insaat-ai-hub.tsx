@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { AdSlot } from "@/components/google-monetization";
 import { LiveSectorNews } from "@/components/live-sector-news";
+import { WhatsAppGrowthBanner } from "@/components/whatsapp-growth-banner";
 import { JsonLd } from "@/components/json-ld";
 import { INSAAT_GUIDES } from "@/lib/insaat-emlak-data";
 
@@ -489,6 +490,16 @@ export function InsaatAIHub() {
           ))}
         </div>
       </section>
+
+      <div className="section-wrap mt-10">
+        <WhatsAppGrowthBanner
+          toolSlug="insaat-ai"
+          customHeading="TOKİ Sosyal Konut Kuraları, Yarısı Bizden Hibesi ve Şantiye Demir/Beton Fiyatlarını Takip Edin"
+          customSubheading="Müstakil ev m² inşaat maliyetleri, Kentsel Dönüşüm Başkanlığı hibe duyuruları ve kamu taşınmaz ihaleleri EvAI & İnşaat WhatsApp kanalında."
+          pagePath="/insaat-ai"
+          sectionId="insaat-ai-wa-banner"
+        />
+      </div>
 
       <div className="section-wrap mt-10">
         <LiveSectorNews

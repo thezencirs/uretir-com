@@ -7,6 +7,7 @@ import { ArrowRight, ArrowUpRight, Flame, Orbit, Search, ShieldCheck, Sparkles }
 import { PuanWalletCalculator } from "@/components/viral-calculators";
 import { AdSlot } from "@/components/google-monetization";
 import { LiveSectorNews } from "@/components/live-sector-news";
+import { DailyAgendaCommandBar, WhatsAppGrowthBanner } from "@/components/whatsapp-growth-banner";
 import { JsonLd } from "@/components/json-ld";
 import { GALAXY_CLUSTERS, SUPPORT_PROGRAMS, RECRUITMENT_TRACKS } from "@/lib/tesvik-memur-data";
 import { EMLAK_GUIDES, INSAAT_GUIDES } from "@/lib/insaat-emlak-data";
@@ -463,6 +464,11 @@ export function HomeCommandHub() {
         </div>
       </section>
 
+      {/* Tarihe & Gündeme Göre Otomatik Vaziyet Alan Günlük Gündem Masası */}
+      <div className="section-wrap mt-10">
+        <DailyAgendaCommandBar />
+      </div>
+
       {/* Canlı Yapay Zeka & 6 Sektör Otonom Haber Radarı */}
       <div className="section-wrap mt-10">
         <LiveSectorNews
@@ -478,6 +484,16 @@ export function HomeCommandHub() {
       {/* Google AdSense Leaderboard Slot */}
       <div className="section-wrap my-8">
         <AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_LEADERBOARD || "home-leaderboard"} />
+      </div>
+
+      <div className="section-wrap mt-10">
+        <WhatsAppGrowthBanner
+          toolSlug="haber-ai"
+          customHeading="Üretir 6 Resmî WhatsApp Kanal Ağına Katılın · Gündemi ve Fırsatları Kaçırmayın"
+          customSubheading="Yapay zeka gelişmeleri, devlet teşvikleri, KPSS/memur alımları, TOKİ/inşaat maliyeti, kira/tapu hesabı, banka puanları ve 360 gün dip fiyatları cebinize gelsin."
+          pagePath="/"
+          sectionId="home-wa-growth-banner"
+        />
       </div>
 
       {/* 5. SEO & Google AdSense E-E-A-T Sıkça Sorulan Sorular ve Metodoloji */}

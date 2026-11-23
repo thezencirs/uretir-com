@@ -5,6 +5,7 @@ import { ArrowLeft, Briefcase, CheckCircle2, ExternalLink, ShieldCheck } from "l
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { AdSlot } from "@/components/google-monetization";
 import { JsonLd } from "@/components/json-ld";
+import { WhatsAppGrowthBanner } from "@/components/whatsapp-growth-banner";
 import { RECRUITMENT_TRACKS, getRecruitmentTrackBySlug } from "@/lib/tesvik-memur-data";
 
 type PageProps = { params: Promise<{ slug: string }> };
@@ -155,6 +156,17 @@ export default async function MemurTrackDetailPage({ params }: PageProps) {
             </section>
           </div>
         </article>
+
+        <div className="mt-8">
+          <WhatsAppGrowthBanner
+            toolSlug="memur-ai"
+            customHeading={`${track.shortTitle} Duyuru ve Başvuru Takvimini WhatsApp'tan Takip Edin`}
+            customSubheading={`${track.summary} Yeni başvuru tarihleri açıklandığında bildirim almak için resmî WhatsApp kanalımıza katılın veya bu rehberi arkadaşınıza gönderin.`}
+            shareSummary={`📌 *${track.title}*\n${track.summary}`}
+            pagePath={`/memur-ai/${track.slug}`}
+            sectionId={`wa-subpage-${track.slug}`}
+          />
+        </div>
 
         {/* Diğer Kamu Alım Rehberleri */}
         <section className="mt-10" aria-labelledby="other-tracks-heading">

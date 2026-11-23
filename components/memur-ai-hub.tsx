@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { AdSlot } from "@/components/google-monetization";
 import { LiveSectorNews } from "@/components/live-sector-news";
+import { WhatsAppGrowthBanner } from "@/components/whatsapp-growth-banner";
 import { JsonLd } from "@/components/json-ld";
 import {
   BANK_PROMOTIONS,
@@ -463,6 +464,16 @@ export function MemurAIHub() {
           </div>
         </div>
       </section>
+
+      <div className="section-wrap mt-10">
+        <WhatsAppGrowthBanner
+          toolSlug="memur-ai"
+          customHeading="KPSS Şartsız İŞKUR İlanları, Memur Alımı ve En Yüksek Banka Promosyonlarını Kaçırmayın"
+          customSubheading="Kariyer Kapısı, belediye zabıta/itfaiye alımları, 14 günlük maaş farkı ve 24.000 TL üzeri emekli promosyon güncellemeleri anında WhatsApp kanalında."
+          pagePath="/memur-ai"
+          sectionId="memur-ai-wa-banner"
+        />
+      </div>
 
       <div className="section-wrap mt-10">
         <LiveSectorNews

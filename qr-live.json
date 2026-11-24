@@ -1,13 +1,6 @@
 {
-  "runId": "45283928791",
-  "updatedAt": "2026-11-23T22:54:19.348Z",
-  "status": "completed",
-  "targets": {
-    "haberai": "hata: HaberAI kanalında owner/admin yetkisi doğrulanamadı (bilinmiyor).",
-    "finansai": "hata: FinansAI kanalında owner/admin yetkisi doğrulanamadı (bilinmiyor).",
-    "puanai": "hata: PuanAI kanalında owner/admin yetkisi doğrulanamadı (bilinmiyor).",
-    "indirimai": "hata: İndirimAI kanalında owner/admin yetkisi doğrulanamadı (bilinmiyor).",
-    "arabaai": "hata: ArabaAI kanalında owner/admin yetkisi doğrulanamadı (bilinmiyor).",
-    "evai": "hata: EvAI kanalında owner/admin yetkisi doğrulanamadı (bilinmiyor)."
-  }
+  "runId": "45343940546",
+  "updatedAt": "2026-11-24T06:54:51.395Z",
+  "status": "initializing",
+  "message": "WhatsApp istemcisi başlatılıyor..."
 }

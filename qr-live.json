@@ -1,6 +1,13 @@
 {
   "runId": "45909748902",
-  "updatedAt": "2026-11-26T23:15:01.720Z",
-  "status": "authenticated",
-  "message": "WhatsApp oturumu doğrulandı."
+  "updatedAt": "2026-11-26T23:15:05.494Z",
+  "status": "completed",
+  "targets": {
+    "haberai": "hata: HaberAI kanalında owner/admin yetkisi doğrulanamadı (bilinmiyor).",
+    "finansai": "hata: FinansAI kanalında owner/admin yetkisi doğrulanamadı (bilinmiyor).",
+    "puanai": "hata: PuanAI kanalında owner/admin yetkisi doğrulanamadı (bilinmiyor).",
+    "indirimai": "hata: İndirimAI kanalında owner/admin yetkisi doğrulanamadı (bilinmiyor).",
+    "arabaai": "hata: ArabaAI kanalında owner/admin yetkisi doğrulanamadı (bilinmiyor).",
+    "evai": "hata: EvAI kanalında owner/admin yetkisi doğrulanamadı (bilinmiyor)."
+  }
 }

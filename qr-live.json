@@ -1,13 +1,6 @@
 {
-  "runId": "45754487801",
-  "updatedAt": "2026-11-26T04:20:12.596Z",
-  "status": "completed",
-  "targets": {
-    "haberai": "bugünkü yayınlar tamamlandı · yarın 09:00 planında · 26.11.2026 07:20:12",
-    "finansai": "bugünkü yayınlar tamamlandı · yarın 09:00 planında · 26.11.2026 07:20:12",
-    "puanai": "bugünkü yayınlar tamamlandı · yarın 09:00 planında · 26.11.2026 07:20:12",
-    "indirimai": "bugünkü yayınlar tamamlandı · yarın 09:00 planında · 26.11.2026 07:20:12",
-    "arabaai": "bugünkü yayınlar tamamlandı · yarın 09:00 planında · 26.11.2026 07:20:12",
-    "evai": "bugünkü yayınlar tamamlandı · yarın 09:00 planında · 26.11.2026 07:20:12"
-  }
+  "runId": "45838013042",
+  "updatedAt": "2026-11-26T14:20:46.787Z",
+  "status": "initializing",
+  "message": "WhatsApp istemcisi başlatılıyor..."
 }
